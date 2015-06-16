@@ -12,6 +12,7 @@ golden: FORCE
 tutorial: doc/tutorial/tutorial.md
 	@echo "Build Tutorial"
 	pandoc --from markdown+pandoc_title_block --to html --toc \
+           --self-contained \
            --output doc/tutorial/tutorial.html \
            --number-sections doc/tutorial/tutorial.md
 
