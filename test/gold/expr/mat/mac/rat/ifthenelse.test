@@ -1,0 +1,9 @@
+feivel
+<<<
+[:[>rat]: if #t then [[Macro(rat; 1)]] else [[Macro(rat; 2)]] :]
+[:[>rat]: if #f then [[Macro(rat; 1)]] else [[Macro(rat; 2)]] :]
+>>>
+[[1]]
+[[2]]
+>>>= 0
+

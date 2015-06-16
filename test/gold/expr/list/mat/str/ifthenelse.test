@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{[str]}: if #t then {[["foo"]]} else {} :]
+[:{[str]}: if #f then {} else {[["foo"]]} :]
+>>>
+{[[foo]]}
+{[[foo]]}
+>>>= 0
+

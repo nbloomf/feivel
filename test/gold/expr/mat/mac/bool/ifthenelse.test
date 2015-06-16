@@ -1,0 +1,9 @@
+feivel
+<<<
+[:[>bool]: if #t then [[Macro(bool; #t)]] else [[Macro(bool; #f)]] :]
+[:[>bool]: if #f then [[Macro(bool; #t)]] else [[Macro(bool; #f)]] :]
+>>>
+[[#t]]
+[[#f]]
+>>>= 0
+

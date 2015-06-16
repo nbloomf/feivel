@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{str}: Sort({"c";"b";"a"}) :]
+[:{str}: Sort({"ab"; "aac"; "a"}) :]
+>>>
+{a;b;c}
+{a;aac;ab}
+>>>= 0
+

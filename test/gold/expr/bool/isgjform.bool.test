@@ -1,0 +1,7 @@
+feivel
+<<<
+[:bool: IsGJForm(bool; [[#t;#f];[#f;#t]]) :]
+>>>
+#t
+>>>= 0
+

@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >rat @f := Macro(rat; @t + 5; rat @t := 1)]#
+[:rat: Eval(rat; @f) :]
+[:rat: Eval(rat; @f; rat @t := 4) :]
+>>>
+6
+9
+>>>= 0
+

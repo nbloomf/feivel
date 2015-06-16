@@ -1,0 +1,7 @@
+feivel
+<<<
+[:{>bool}: Reverse({Macro(bool; #f); Macro(bool; #t)}) :]
+>>>
+{#t;#f}
+>>>= 0
+

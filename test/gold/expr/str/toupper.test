@@ -1,0 +1,9 @@
+feivel
+<<<
+[:str: ToUpper("foo") :]
+[define str @s := "mung"]#
+[:str: ToUpper(@s) :]
+>>>
+FOO
+MUNG
+>>>= 0

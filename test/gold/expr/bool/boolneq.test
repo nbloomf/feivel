@@ -1,0 +1,13 @@
+feivel
+<<<
+[:bool: NotEqual(bool; #t; #t) :]
+[:bool: NotEqual(bool; #t; #f) :]
+[:bool: NotEqual(bool; #f; #t) :]
+[:bool: NotEqual(bool; #f; #f) :]
+>>>
+#f
+#t
+#t
+#f
+>>>= 0
+

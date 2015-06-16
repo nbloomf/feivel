@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >str @f := Macro(str; @x ++ "bar"; str @x := "foo")]#
+@f
+[:str: Eval(str; @f; str @x := "mung") :]
+>>>
+foobar
+mungbar
+>>>= 0
+

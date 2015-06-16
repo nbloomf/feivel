@@ -1,0 +1,12 @@
+feivel
+<<<
+[:bool: LEq(rat; 5/3; 2/3) :]
+[define rat @k := 4/3]#
+[:bool: LEq(rat; @k; 7/3) :]
+[:bool: LEq(rat; 2/3; 2/3) :]
+>>>
+#f
+#t
+#t
+>>>= 0
+

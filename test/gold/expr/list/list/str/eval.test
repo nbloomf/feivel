@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >{{str}} @f := Macro({{str}}; @t ++ {}; {{str}} @t := {})]#
+[:{{str}}: Eval({{str}}; @f) :]
+[:{{str}}: Eval({{str}}; @f; {{str}} @t := {{}}) :]
+>>>
+{}
+{{}}
+>>>= 0
+

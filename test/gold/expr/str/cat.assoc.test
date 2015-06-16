@@ -1,0 +1,7 @@
+feivel
+<<<
+[:str: "foo" ++ "bar" ++ "baz" :]
+>>>
+foobarbaz
+>>>= 0
+

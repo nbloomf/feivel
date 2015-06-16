@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{{str}}: Build(@x ++ {"s"}; {str} @x <- {{"a"};{"b"}}) :]
+[:{{str}}: Build(@x; {str} @x <- {{"ab"};{"aab"};{"ba"}}; IsEmpty(str; @x)) :]
+>>>
+{{a;s};{b;s}}
+{}
+>>>= 0
+

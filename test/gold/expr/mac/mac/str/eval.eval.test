@@ -1,0 +1,12 @@
+feivel
+<<<
+[define >>>str @f := Macro(>>str; Macro(>str; Macro(str; Eval(str;@t) ++ Eval(str;@s)); >str @s := Macro(str; "bar")); >str @t := Macro(str; "foo"))]#
+[:>>str: Eval(>>str; @f) :]
+[:>>str: Eval(>>str; @f; >str @t := Macro(str; "baz")) :]
+[:>str: Eval(>str; Eval(>>str; @f); >str @s := Macro(str; "mung")) :]
+>>>
+foobar
+bazbar
+foomung
+>>>= 0
+

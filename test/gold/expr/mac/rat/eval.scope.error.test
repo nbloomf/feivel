@@ -1,0 +1,6 @@
+feivel
+<<<
+[:>rat: Macro(rat; @x; int @y := 1) :]
+[define rat @x := 1]
+>>>= !0
+

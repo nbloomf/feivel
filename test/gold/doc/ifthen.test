@@ -1,0 +1,10 @@
+feivel
+<<<
+[if Equal(int; 2; 3)
+  then [foo]
+  else [bar]
+endif]
+>>>
+bar
+>>>= 0
+

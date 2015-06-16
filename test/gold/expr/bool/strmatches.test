@@ -1,0 +1,13 @@
+feivel
+<<<
+[:bool: Matches("color"; "colou?r") :]
+[:bool: Matches("colour"; "colou?r") :]
+[:bool: Matches("gray"; "gr(a|e)y") :]
+[:bool: Matches("quuux"; "qu*x") :]
+>>>
+#t
+#t
+#t
+#t
+>>>= 0
+

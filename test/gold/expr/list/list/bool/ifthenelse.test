@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{{bool}}: if #t then {{#t}} else {} :]
+[:{{bool}}: if #f then {} else {{#f}} :]
+>>>
+{{#t}}
+{{#f}}
+>>>= 0
+

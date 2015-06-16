@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>>int: Macro(>int; @x; >int @x := Macro(int; 1)) :]
+>>>
+1
+>>>= 0
+

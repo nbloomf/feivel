@@ -1,0 +1,8 @@
+feivel
+<<<
+[define {>int} @x := {Macro(int; 1); Macro(int; 2)}]#
+@x
+>>>
+{1;2}
+>>>= 0
+

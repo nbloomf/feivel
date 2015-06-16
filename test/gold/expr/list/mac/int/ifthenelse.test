@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>int}: if #t then {Macro(int; 1)} else {} :]
+[:{>int}: if #f then {} else {Macro(int; 1)} :]
+>>>
+{1}
+{1}
+>>>= 0
+

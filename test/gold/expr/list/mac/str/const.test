@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>str}: {Macro(str; "foo");Macro(str; "bar")} :]
+[:{>str}: {} :]
+>>>
+{foo;bar}
+{}
+>>>= 0
+

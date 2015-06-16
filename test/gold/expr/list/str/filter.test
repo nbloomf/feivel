@@ -1,0 +1,6 @@
+feivel
+<<<
+[:{str}: Filter(@i; Equal(str; @i; "foo"); {"foo";"bar";"baz"}) :]
+>>>
+{foo}
+>>>= 0

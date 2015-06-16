@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>int: Eval(>int; Rand({Macro(>int; @x; >int @x := Macro(int; 2)); Macro(>int; @x; >int @x := Macro(int; 3))}); >int @x := Macro(int; 1)) :]
+>>>
+1
+>>>= 0
+

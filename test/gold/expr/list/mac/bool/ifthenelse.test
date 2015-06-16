@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>bool}: if #t then {Macro(bool; #t)} else {} :]
+[:{>bool}: if #f then {} else {Macro(bool; #t)} :]
+>>>
+{#t}
+{#t}
+>>>= 0
+

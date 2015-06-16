@@ -1,0 +1,12 @@
+feivel
+<<<
+[define >>>bool @f := Macro(>>bool; Macro(>bool; Macro(bool; Eval(bool;@t) || Eval(bool;@s)); >bool @s := Macro(bool; #f)); >bool @t := Macro(bool; #t))]#
+[:>>bool: Eval(>>bool; @f) :]
+[:>>bool: Eval(>>bool; @f; >bool @t := Macro(bool; #f)) :]
+[:>bool: Eval(>bool; Eval(>>bool; @f); >bool @s := Macro(bool; #f)) :]
+>>>
+#t
+#f
+#t
+>>>= 0
+

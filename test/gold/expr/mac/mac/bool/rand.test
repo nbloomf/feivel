@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>>bool: Rand({Macro(>bool; Macro(bool; #t)); Macro(>bool; Macro(bool; #t))}) :]
+>>>
+#t
+>>>= 0
+

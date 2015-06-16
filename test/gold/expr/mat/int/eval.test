@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >[int] @f := Macro([int]; @t hcat []; [int] @t := [])]#
+[:[int]: Eval([int]; @f) :]
+[:[int]: Eval([int]; @f; [int] @t := [[1]]) :]
+>>>
+[]
+[[1]]
+>>>= 0
+

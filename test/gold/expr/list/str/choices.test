@@ -1,0 +1,6 @@
+feivel
+<<<
+[:{{str}}: Choices(2; {"foo";"foo";"foo"}) :]
+>>>
+{{foo;foo};{foo;foo};{foo;foo}}
+>>>= 0

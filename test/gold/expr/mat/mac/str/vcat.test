@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>str]: [[Macro(str; "a")]] vcat [[Macro(str; "b")]] :]
+>>>
+[[a];[b]]
+>>>= 0
+

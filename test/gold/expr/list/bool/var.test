@@ -1,0 +1,8 @@
+feivel
+<<<
+[define {bool} @x := {#t;#f}]#
+@x
+>>>
+{#t;#f}
+>>>= 0
+

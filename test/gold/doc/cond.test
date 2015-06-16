@@ -1,0 +1,11 @@
+feivel
+<<<
+[cond case (#f) [a] case (#t) [b] endcond]
+[cond case (#f) [a] case (#f) [b] endcond]
+[cond case (#f) [a] case (#f) [b] default [c] endcond]
+>>>
+b
+
+c
+>>>= 0
+

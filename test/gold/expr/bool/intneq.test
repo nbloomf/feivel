@@ -1,0 +1,10 @@
+feivel
+<<<
+[:bool: NotEqual(int;2;3) :]
+[define int @k := 5]#
+[:bool: NotEqual(int;@k;5) :]
+>>>
+#t
+#f
+>>>= 0
+

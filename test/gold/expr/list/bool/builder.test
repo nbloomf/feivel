@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{bool}: Build(~@x; bool @x <- {#t;#f}) :]
+[:{bool}: Build(@x; bool @x <- {#t;#f}; (@x)) :]
+>>>
+{#f;#t}
+{#t}
+>>>= 0
+

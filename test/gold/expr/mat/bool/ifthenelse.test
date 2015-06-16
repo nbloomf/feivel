@@ -1,0 +1,9 @@
+feivel
+<<<
+[:[bool]: if #t then [[#t]] else [[#f]] :]
+[:[bool]: if #f then [[#t]] else [[#f]] :]
+>>>
+[[#t]]
+[[#f]]
+>>>= 0
+

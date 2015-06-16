@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>>str: Macro(>str; @x; >str @x := Macro(str; "foo")) :]
+>>>
+foo
+>>>= 0
+

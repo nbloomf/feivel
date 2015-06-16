@@ -1,0 +1,7 @@
+feivel
+<<<
+[:{>str}: Reverse({Macro(str; "a"); Macro(str; "b")}) :]
+>>>
+{b;a}
+>>>= 0
+

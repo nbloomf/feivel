@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>[rat]: AtIdx(AtIdx([[[[Macro([rat]; [])]];[[Macro([rat]; [])];[Macro([rat]; [[1]])]]];[[[Macro([rat]; []);Macro([rat]; [])]];[[Macro([rat]; [])]]]]; 1; 2); 2; 1) :]
+>>>
+[[1]]
+>>>= 0
+

@@ -1,0 +1,7 @@
+feivel
+<<<
+[:{>bool}: Shuffle({Macro(bool; #f); Macro(bool; #f); Macro(bool; #f)}) :]
+>>>
+{#f;#f;#f}
+>>>= 0
+

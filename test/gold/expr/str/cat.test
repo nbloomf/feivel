@@ -1,0 +1,9 @@
+feivel
+<<<
+[:str: "foo" ++ "bar" :]
+[define str @qux := "mung"]#
+[:str: "foo" ++ @qux ++ "bar" :]
+>>>
+foobar
+foomungbar
+>>>= 0

@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{{bool}}: Build(@x ++ {#f}; {bool} @x <- {{#t};{#f}}) :]
+[:{{bool}}: Build(@x; {bool} @x <- {{#t};{#t};{#f}}; IsEmpty(bool; @x)) :]
+>>>
+{{#t;#f};{#f;#f}}
+{}
+>>>= 0
+

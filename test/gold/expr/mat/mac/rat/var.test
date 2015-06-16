@@ -1,0 +1,8 @@
+feivel
+<<<
+[define [>rat] @m := [[Macro(rat; 1);Macro(rat; 2)];[Macro(rat; 3);Macro(rat; 4)]]]#
+@m
+>>>
+[[1;2];[3;4]]
+>>>= 0
+

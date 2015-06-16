@@ -1,0 +1,2 @@
+[define int @k := Uniform(1;6)]#
+You rolled a @k!

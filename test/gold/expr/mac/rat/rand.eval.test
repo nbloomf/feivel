@@ -1,0 +1,7 @@
+feivel
+<<<
+[:rat: Eval(rat; Rand({Macro(rat; @x; rat @x := 1); Macro(rat; @x; rat @x := 2)}); rat @x := 0) :]
+>>>
+0
+>>>= 0
+

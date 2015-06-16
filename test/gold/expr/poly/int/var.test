@@ -1,0 +1,8 @@
+feivel
+<<<
+[define ^int @k := Poly(1.x; 1.y)]#
+@k
+>>>
+Poly(1.y;1.x)
+>>>= 0
+

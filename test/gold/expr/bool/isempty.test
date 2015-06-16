@@ -1,0 +1,9 @@
+feivel
+<<<
+[:bool: IsEmpty(int; {1;2}) :]
+[:bool: IsEmpty(int; {}) :]
+>>>
+#f
+#t
+>>>= 0
+

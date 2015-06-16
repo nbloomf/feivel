@@ -1,0 +1,6 @@
+feivel
+<<<
+[:>[str]: Macro([str]; @x; [str] @y := []) :]
+[define [str] @x := []]
+>>>= !0
+

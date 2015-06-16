@@ -1,0 +1,11 @@
+feivel
+<<<
+[:bool: IsSquareFree(24) :]
+[:bool: IsSquareFree(30) :]
+[:bool: IsSquareFree(-5) :]
+>>>
+#f
+#t
+#t
+>>>= 0
+

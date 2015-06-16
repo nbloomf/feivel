@@ -1,0 +1,12 @@
+feivel
+<<<
+[:bool: LT(rat; 5/3; 2/3) :]
+[define rat @k := 4/3]#
+[:bool: LT(rat; @k; 7/3) :]
+[:bool: LT(rat; 2/3; 2/3) :]
+>>>
+#f
+#t
+#f
+>>>= 0
+

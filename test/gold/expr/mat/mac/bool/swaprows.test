@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>bool]: SwapRows([[Macro(bool; #t);Macro(bool; #f)];[Macro(bool; #t);Macro(bool; #f)]]; 1; 2) :]
+>>>
+[[#t;#f];[#t;#f]]
+>>>= 0
+

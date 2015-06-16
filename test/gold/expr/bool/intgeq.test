@@ -1,0 +1,12 @@
+feivel
+<<<
+[:bool: GEq(int; 5; 2) :]
+[define int @k := 4]#
+[:bool: GEq(int; @k; 7) :]
+[:bool: GEq(int; 2; 2) :]
+>>>
+#t
+#f
+#t
+>>>= 0
+

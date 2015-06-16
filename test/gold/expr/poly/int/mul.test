@@ -1,0 +1,6 @@
+feivel
+<<<
+[:^int: Poly(1.x) * Poly(1.x^2) :]
+>>>
+Poly(1.x^3)
+>>>= 0

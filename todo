@@ -1,0 +1,46 @@
+Feature Ideas
+-------------
+* Bool: Make 'divides' a prefix function (maybe? for consistency)
+* Doc: alt statement with optional integer weights
+* Doc: else on for loops for empty lists [for str @s in LIST say [BLAH] else [BLUH] endfor]
+* Doc: ``for'' for matrices?
+* Doc: for: explicit integer index key (from 1)? [for str @s in LIST index @i say [BLAH] endfor]
+* Doc: for: "sepby" for stuff between items
+* Format: awk
+* Format: csv
+* Format: gnu recutils
+* Format: JSON
+* Format: RFC822
+* General: ability to see random seed and set seed at CL
+* General: First-class templates (doc type) - this is already mostly done, just not explicitly
+* General: implicit "control fields" for record number etc.
+* General: make special chars []#@ redefinable
+* General: namespacing (qualified import?)
+* General: optional default values for keys: e.g. Either(@foo, bar)
+* General: prompt statement (maybe? could be fun)
+* General: read preferences from a config file (.feivel?)
+* General: stack trace on error
+* General: template/data library list, rather than file
+* General: gui repl for expressions only?
+* General: special keys which update after every lookup? e.g. a variable which autoincrements
+* Integer: hex, binary, octal constants
+* Integer: bezout
+* List: derange
+* List: map, fold
+* Matrix: determinant
+* Matrix: extract row/col as matrix or list
+* Matrix: insert row/column
+* Matrix: shuffle rows/columns/entries
+* Matrix: submatrix by row/col indices
+* Matrix: Smith normal form (uses bezout)
+* Polynomial: evaluation, degree, division algorithm, gcd, bezout, content
+* Rational: more Cauchy sequences (pi, e, trig functions)
+* String: Cast (parse) to int, rat
+* String: escaped unicode characters
+* String: strformat (latex/html/ascii) -- in progress
+* String: words/lines/splitat
+* Tests: Golden tests for rational, boolean polynomials
+* Type: cyclotomic numbers
+* Type: pairs? (constructor)
+* Type: permutation (constructor)
+* Type: trees (constructor)

@@ -1,0 +1,10 @@
+feivel
+<<<
+[:bool: NotEqual(rat; 2/3; 3/3) :]
+[define rat @k := 5/3]#
+[:bool: NotEqual(rat; @k; 5/3) :]
+>>>
+#t
+#f
+>>>= 0
+

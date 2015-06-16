@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>{str}: AtPos({Macro({str}; {});Macro({str}; {"foo"});Macro({str}; {})}; 2) :]
+>>>
+{foo}
+>>>= 0
+

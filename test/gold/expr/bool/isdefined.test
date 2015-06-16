@@ -1,0 +1,7 @@
+feivel
+<<<
+[define int @k := 2]#
+[:bool: IsDefined(@k) :]
+>>>
+#t
+>>>= 0

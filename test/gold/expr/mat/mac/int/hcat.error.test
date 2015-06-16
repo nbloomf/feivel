@@ -1,0 +1,5 @@
+feivel
+<<<
+[:[>int]: [[Macro(int; 1)]] hcat [[Macro(int; 1)];[Macro(int; 1)]] :]
+>>>= !0
+

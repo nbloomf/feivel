@@ -1,0 +1,7 @@
+feivel
+<<<
+[:{>int}: {Macro(int; 1)} ++ {Macro(int; 2)} :]
+>>>
+{1;2}
+>>>= 0
+

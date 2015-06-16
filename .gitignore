@@ -1,0 +1,12 @@
+# Haskell
+dist
+.hpc
+*.tix
+
+# Linux backup files
+*~
+
+# Generated documents
+doc/tutorial/*.html
+doc/examples/*/*.txt
+doc/vis.dot

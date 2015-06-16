@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>bool}: {Macro(bool; #t);Macro(bool; #f)} :]
+[:{>bool}: {} :]
+>>>
+{#t;#f}
+{}
+>>>= 0
+

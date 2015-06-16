@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>bool: AtPos(AtPos({{Macro(bool; #f);Macro(bool; #f)};{Macro(bool; #f);Macro(bool; #f);Macro(bool; #f)};{Macro(bool; #f);Macro(bool; #t)}}; 3); 2) :]
+>>>
+#t
+>>>= 0
+

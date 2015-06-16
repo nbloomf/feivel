@@ -1,0 +1,9 @@
+feivel
+<<<
+[for int @i in {1;2;3} say [@i] endfor]
+[for int @i in {} say [@i] endfor]
+>>>
+123
+
+>>>= 0
+

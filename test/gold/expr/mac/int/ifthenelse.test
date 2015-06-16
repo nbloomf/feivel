@@ -1,0 +1,9 @@
+feivel
+<<<
+[:>int: if #t then Macro(int; 1) else Macro(int; 2) :]
+[:>int: if #f then Macro(int; 1) else Macro(int; 2) :]
+>>>
+1
+2
+>>>= 0
+

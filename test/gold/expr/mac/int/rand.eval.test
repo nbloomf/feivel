@@ -1,0 +1,7 @@
+feivel
+<<<
+[:int: Eval(int; Rand({Macro(int; @x; int @x := 1); Macro(int; @x; int @x := 2)}); int @x := 0) :]
+>>>
+0
+>>>= 0
+

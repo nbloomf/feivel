@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>[str]: Rand({Macro([str]; [["foo"]]); Macro([str]; [["foo"]])}) :]
+>>>
+[[foo]]
+>>>= 0
+

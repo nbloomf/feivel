@@ -1,0 +1,8 @@
+feivel
+<<<
+[define >[bool] @f := Macro([bool]; [[#t]])]#
+@f
+>>>
+[[#t]]
+>>>= 0
+

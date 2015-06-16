@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >[bool] @f := Macro([bool]; @t hcat []; [bool] @t := [])]#
+[:[bool]: Eval([bool]; @f) :]
+[:[bool]: Eval([bool]; @f; [bool] @t := [[#t]]) :]
+>>>
+[]
+[[#t]]
+>>>= 0
+

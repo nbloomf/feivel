@@ -1,0 +1,11 @@
+feivel
+<<<
+[:bool: Equal(str; "foo"; "foo") :]
+[:bool: Equal(str; "a" ++ "b"; "ab") :]
+[:bool: Equal(str; "foo"; "bar") :]
+>>>
+#t
+#t
+#f
+>>>= 0
+

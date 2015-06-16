@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>int}: Build(Macro(int; Eval(int; @x) + 5); >int @x <- {Macro(int; 0); Macro(int; 1)}) :]
+[:{>int}: Build(@x; >int @x <- {Macro(int; 1); Macro(int; 2); Macro(int; 3)}; Equal(int; Eval(int;@x); 1)) :]
+>>>
+{5;6}
+{1}
+>>>= 0
+

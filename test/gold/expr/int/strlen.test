@@ -1,0 +1,7 @@
+feivel
+<<<
+[:int: StrLen("foo") :]
+>>>
+3
+>>>= 0
+

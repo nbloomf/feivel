@@ -1,0 +1,8 @@
+feivel: version history
+
+0.1.0 - TBA
+===========
+* Basic REPL
+* New types
+  * atomic: int, str, bool, rat
+  * constructors: list, matrix, macro, polynomial

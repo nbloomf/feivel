@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>bool]: Transpose([[Macro(bool; #t);Macro(bool; #f)];[Macro(bool; #t);Macro(bool; #f)]]) :]
+>>>
+[[#t;#t];[#f;#f]]
+>>>= 0
+

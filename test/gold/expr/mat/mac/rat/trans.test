@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>rat]: Transpose([[Macro(rat; 1);Macro(rat; 2)];[Macro(rat; 3);Macro(rat; 4)]]) :]
+>>>
+[[1;3];[2;4]]
+>>>= 0
+

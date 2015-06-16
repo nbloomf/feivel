@@ -1,0 +1,10 @@
+feivel
+<<<
+[:str: "foo" :]
+[define str @s := "bar"]#
+@s
+>>>
+foo
+bar
+>>>= 0
+

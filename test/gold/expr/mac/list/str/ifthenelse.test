@@ -1,0 +1,9 @@
+feivel
+<<<
+[:>{str}: if #t then Macro({str}; {"foo"}) else Macro({str}; {"bar"}) :]
+[:>{str}: if #f then Macro({str}; {"foo"}) else Macro({str}; {"bar"}) :]
+>>>
+{foo}
+{bar}
+>>>= 0
+

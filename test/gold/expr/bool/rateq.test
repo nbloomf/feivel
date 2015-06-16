@@ -1,0 +1,10 @@
+feivel
+<<<
+[:bool: Equal(rat; 1/2; 2/3) :]
+[define rat @k := 1/2]#
+[:bool: Equal(rat; @k; 1/2) :]
+>>>
+#f
+#t
+>>>= 0
+

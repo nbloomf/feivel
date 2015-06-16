@@ -1,0 +1,7 @@
+feivel
+<<<
+[:^int: neg Poly(1.x) :]
+>>>
+Poly(-1.x)
+>>>= 0
+

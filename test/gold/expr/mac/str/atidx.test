@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>str: AtIdx([[Macro(str; "");Macro(str; "")];[Macro(str; "foo");Macro(str; "")]]; 2; 1) :]
+>>>
+foo
+>>>= 0
+

@@ -1,0 +1,9 @@
+feivel
+<<<
+[:bool: Elem(int; 1; {1;2;3}) :]
+[:bool: Elem(int; 1; {4;5}) :]
+>>>
+#t
+#f
+>>>= 0
+

@@ -1,0 +1,9 @@
+feivel
+<<<
+[let int @k := 5 in [@k] endlet]
+[:bool: IsDefined(@k) :]
+>>>
+5
+#f
+>>>= 0
+

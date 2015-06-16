@@ -1,0 +1,7 @@
+feivel
+<<<
+[:^int: AtIdx([[Null;Null];[Poly(1.x);Null]]; 2; 1) :]
+>>>
+Poly(1.x)
+>>>= 0
+

@@ -1,0 +1,12 @@
+feivel
+<<<
+[:bool: LT(int; 5; 2) :]
+[define int @k := 4]#
+[:bool: LT(int; @k; 7) :]
+[:bool: LT(int; 2; 2) :]
+>>>
+#f
+#t
+#f
+>>>= 0
+

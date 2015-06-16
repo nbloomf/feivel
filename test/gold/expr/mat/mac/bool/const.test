@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>bool]: [[Macro(bool; #t);Macro(bool; #f)];[Macro(bool; #t);Macro(bool; #f)]] :]
+>>>
+[[#t;#f];[#t;#f]]
+>>>= 0
+

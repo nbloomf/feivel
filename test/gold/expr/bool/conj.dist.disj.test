@@ -1,0 +1,21 @@
+feivel
+<<<
+[:bool: #t && (#t || #t) :] [:bool: (#t && #t) || (#t && #t) :]
+[:bool: #t && (#t || #f) :] [:bool: (#t && #t) || (#t && #f) :]
+[:bool: #t && (#f || #t) :] [:bool: (#t && #f) || (#t && #t) :]
+[:bool: #t && (#f || #f) :] [:bool: (#t && #f) || (#t && #f) :]
+[:bool: #f && (#t || #t) :] [:bool: (#f && #t) || (#f && #t) :]
+[:bool: #f && (#t || #f) :] [:bool: (#f && #t) || (#f && #f) :]
+[:bool: #f && (#f || #t) :] [:bool: (#f && #f) || (#f && #t) :]
+[:bool: #f && (#f || #f) :] [:bool: (#f && #f) || (#f && #f) :]
+>>>
+#t #t
+#t #t
+#t #t
+#f #f
+#f #f
+#f #f
+#f #f
+#f #f
+>>>= 0
+

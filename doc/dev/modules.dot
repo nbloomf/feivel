@@ -1,0 +1,91 @@
+digraph G {
+size="6,4";
+ratio="fill";
+subgraph cluster_0 {
+label="Feivel";
+color="#ccffcc";
+style="filled";
+u30[label="Error"];
+u17[label="Store"];
+u16[label="Type"];
+u15[label="Expr"];
+u8[label="Key"];
+u7[label="Format"];
+u6[label="EvalM"];
+u5[label="Main"];
+u4[label="Parse"];
+u3[label="LaTeX"];
+u2[label="Eval"];
+u1[label="Locus"];
+u0[label="Lib"];
+subgraph cluster_1 {
+label="Lib";
+color="#99ff99";
+style="filled";
+u29[label="Monad"];
+u28[label="Matrix"];
+u27[label="Rat"];
+u26[label="String"];
+u25[label="AlgErr"];
+u24[label="Either"];
+u23[label="Ring"];
+u22[label="List"];
+u21[label="Canon"];
+u20[label="Pair"];
+u19[label="Polynomial"];
+u18[label="Bool"];
+
+}
+subgraph cluster_2 {
+label="Parse";
+color="#99ff99";
+style="filled";
+u14[label="Store"];
+u13[label="Type"];
+u12[label="Expr"];
+u11[label="Util"];
+u10[label="Key"];
+u9[label="ParseM"];
+
+}
+
+}
+u0 -> u18;
+u0 -> u19;
+u0 -> u22;
+u0 -> u26;
+u0 -> u27;
+u0 -> u28;
+u2 -> u3;
+u2 -> u6;
+u3 -> u0;
+u4 -> u14;
+u5 -> u2;
+u6 -> u4;
+u9 -> u30;
+u10 -> u13;
+u11 -> u13;
+u12 -> u10;
+u12 -> u11;
+u13 -> u9;
+u14 -> u12;
+u15 -> u0;
+u15 -> u16;
+u15 -> u17;
+u17 -> u1;
+u17 -> u7;
+u17 -> u8;
+u19 -> u20;
+u19 -> u21;
+u19 -> u23;
+u19 -> u24;
+u19 -> u29;
+u23 -> u25;
+u27 -> u21;
+u27 -> u23;
+u28 -> u23;
+u28 -> u29;
+u30 -> u15;
+
+}
+

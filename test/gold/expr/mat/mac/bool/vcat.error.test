@@ -1,0 +1,5 @@
+feivel
+<<<
+[:[>bool]: [[Macro(bool; #t)]] vcat [[Macro(bool; #t);Macro(bool; #t)]] :]
+>>>= !0
+

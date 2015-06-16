@@ -1,0 +1,9 @@
+feivel
+<<<
+[:str: if #t then "foo" else "bar" :]
+[:str: if #f then "foo" else "bar" :]
+>>>
+foo
+bar
+>>>= 0
+

@@ -1,0 +1,8 @@
+feivel
+<<<
+[define [bool] @m := [[#t;#f;#t];[#f;#t;#f];[#t;#f;#t]]]#
+[:bool: Equal([bool]; GJFactor(@m) * @m; GJForm(@m)) :]
+>>>
+#t
+>>>= 0
+

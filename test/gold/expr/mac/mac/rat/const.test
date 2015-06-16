@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>>rat: Macro(>rat; @x; >rat @x := Macro(rat; 1)) :]
+>>>
+1
+>>>= 0
+

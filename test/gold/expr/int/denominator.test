@@ -1,0 +1,9 @@
+feivel
+<<<
+[:int: Denominator(2/3) :]
+[:int: Denominator(2/4) :]
+>>>
+3
+2
+>>>= 0
+

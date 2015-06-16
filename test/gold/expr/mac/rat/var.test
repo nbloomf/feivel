@@ -1,0 +1,8 @@
+feivel
+<<<
+[define >rat @f := Macro(rat; 1)]#
+@f
+>>>
+1
+>>>= 0
+

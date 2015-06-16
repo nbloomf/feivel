@@ -1,0 +1,8 @@
+feivel
+<<<
+[define >[int] @f := Macro([int]; [[1]])]#
+@f
+>>>
+[[1]]
+>>>= 0
+

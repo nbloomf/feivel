@@ -1,0 +1,6 @@
+feivel
+<<<
+[:{bool}: Filter(@i; Equal(bool; @i; #t); {#t;#f;#f}) :]
+>>>
+{#t}
+>>>= 0

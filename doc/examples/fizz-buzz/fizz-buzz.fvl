@@ -1,0 +1,6 @@
+[for int @i in Range(1;100) say [[cond
+  case (Divides(15; @i)) [fizz-buzz]
+  case (Divides(3;  @i)) [fizz]
+  case (Divides(5;  @i)) [buzz]
+  default [@i]
+] ] endfor]

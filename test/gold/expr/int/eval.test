@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >int @f := Macro(int; @t + 5; int @t := 1)]#
+[:int: Eval(int; @f) :]
+[:int: Eval(int; @f; int @t := 4) :]
+>>>
+6
+9
+>>>= 0
+

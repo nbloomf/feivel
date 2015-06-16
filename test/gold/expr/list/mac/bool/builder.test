@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>bool}: Build(Macro(bool; Eval(bool; @x) && #t); >bool @x <- {Macro(bool; #f); Macro(bool; #t)}) :]
+[:{>bool}: Build(@x; >bool @x <- {Macro(bool; #t); Macro(bool; #f); Macro(bool; #t)}; Equal(bool; Eval(bool;@x); #t)) :]
+>>>
+{#f;#t}
+{#t;#t}
+>>>= 0
+

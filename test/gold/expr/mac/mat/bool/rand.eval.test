@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[bool]: Eval([bool]; Rand({Macro([bool]; @x; [bool] @x := []); Macro([bool]; @x; [bool] @x := [])}); [bool] @x := [[#t]]) :]
+>>>
+[[#t]]
+>>>= 0
+

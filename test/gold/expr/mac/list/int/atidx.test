@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>{int}: AtIdx([[Macro({int}; {});Macro({int}; {})];[Macro({int}; {1});Macro({int}; {})]]; 2; 1) :]
+>>>
+{1}
+>>>= 0
+

@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>str]: [[Macro(str; "a");Macro(str; "b")];[Macro(str; "c");Macro(str; "d")]] :]
+>>>
+[[a;b];[c;d]]
+>>>= 0
+

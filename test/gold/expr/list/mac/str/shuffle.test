@@ -1,0 +1,7 @@
+feivel
+<<<
+[:{>str}: Shuffle({Macro(str; "a"); Macro(str; "a"); Macro(str; "a")}) :]
+>>>
+{a;a;a}
+>>>= 0
+

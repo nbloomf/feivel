@@ -1,0 +1,6 @@
+feivel
+<<<
+[:>int: Macro(int; @x; int @y := 1) :]
+[define int @x := 1]
+>>>= !0
+

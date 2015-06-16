@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>rat]: SwapCols([[Macro(rat; 1);Macro(rat; 2)];[Macro(rat; 3);Macro(rat; 4)]]; 1; 2) :]
+>>>
+[[2;1];[4;3]]
+>>>= 0
+

@@ -1,0 +1,9 @@
+feivel
+<<<
+[:bool: Divides(5; 10) :]
+[:bool: Divides(2; 71) :]
+>>>
+#t
+#f
+>>>= 0
+

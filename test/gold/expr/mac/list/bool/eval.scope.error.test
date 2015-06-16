@@ -1,0 +1,6 @@
+feivel
+<<<
+[:>{bool}: Macro({bool}; @x; {bool} @y := {}) :]
+[define {bool} @x := {}]
+>>>= !0
+

@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>bool]: SwapCols([[Macro(bool; #t);Macro(bool; #f)];[Macro(bool; #t);Macro(bool; #f)]]; 1; 2) :]
+>>>
+[[#f;#t];[#f;#t]]
+>>>= 0
+

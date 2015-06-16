@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>{int}: AtIdx(AtPos({[[Macro({int}; {});Macro({int}; {})];[Macro({int}; {});Macro({int}; {})]]; [[Macro({int}; {});Macro({int}; {1})];[Macro({int}; {});Macro({int}; {})]]}; 2); 1; 2) :]
+>>>
+{1}
+>>>= 0
+

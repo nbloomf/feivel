@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>str: Eval(>str; Rand({Macro(>str; @x; >str @x := Macro(str; "a")); Macro(>str; @x; >str @x := Macro(str; "b"))}); >str @x := Macro(str; "foo")) :]
+>>>
+foo
+>>>= 0
+

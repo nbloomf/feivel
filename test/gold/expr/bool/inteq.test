@@ -1,0 +1,10 @@
+feivel
+<<<
+[:bool: Equal(int;1;2) :]
+[define int @k := 2]#
+[:bool: Equal(int;@k;2) :]
+>>>
+#f
+#t
+>>>= 0
+

@@ -1,0 +1,13 @@
+feivel
+<<<
+[:bool: Equal(bool; #t; #t) :]
+[:bool: Equal(bool; #t; #f) :]
+[:bool: Equal(bool; #f; #t) :]
+[:bool: Equal(bool; #f; #f) :]
+>>>
+#t
+#f
+#f
+#t
+>>>= 0
+

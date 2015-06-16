@@ -1,0 +1,7 @@
+feivel
+<<<
+[select int @i from {1;1;1} in [@i] endselect]
+>>>
+1
+>>>= 0
+

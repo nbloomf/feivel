@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>[int]: AtPos(AtPos({{Macro([int]; []);Macro([int]; [])};{Macro([int]; []);Macro([int]; []);Macro([int]; [])};{Macro([int]; []);Macro([int]; [[1]])}}; 3); 2) :]
+>>>
+[[1]]
+>>>= 0
+

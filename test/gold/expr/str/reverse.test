@@ -1,0 +1,10 @@
+feivel
+<<<
+[:str: Reverse("foobar") :]
+[define str @x := "bung"]#
+[:str: Reverse(@x) :]
+>>>
+raboof
+gnub
+>>>= 0
+

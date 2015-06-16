@@ -1,0 +1,8 @@
+feivel
+<<<
+[define str @k := "foo"]#
+@k
+>>>
+foo
+>>>= 0
+

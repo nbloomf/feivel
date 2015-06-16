@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >{>rat} @f := Macro({>rat}; @t ++ {}; {>rat} @t := {})]#
+[:{>rat}: Eval({>rat}; @f) :]
+[:{>rat}: Eval({>rat}; @f; {>rat} @t := {Macro(rat; 0)}) :]
+>>>
+{}
+{0}
+>>>= 0
+

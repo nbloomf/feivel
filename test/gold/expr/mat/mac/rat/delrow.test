@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>rat]: DelRow([[Macro(rat; 1);Macro(rat; 2)];[Macro(rat; 3);Macro(rat; 4)]]; 2) :]
+>>>
+[[1;2]]
+>>>= 0
+

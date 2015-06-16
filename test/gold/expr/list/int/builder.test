@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{int}: Build(@x + 1; int @x <- {1;2}) :]
+[:{int}: Build(@x; int @x <- {1;2;3}; Equal(int; @x mod 2; 0)) :]
+>>>
+{2;3}
+{2}
+>>>= 0
+

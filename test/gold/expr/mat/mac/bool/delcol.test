@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>bool]: DelCol([[Macro(bool; #t);Macro(bool; #f)];[Macro(bool; #t);Macro(bool; #f)]]; 2) :]
+>>>
+[[#t];[#t]]
+>>>= 0
+

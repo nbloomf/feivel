@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>str]: SwapRows([[Macro(str; "a");Macro(str; "b")];[Macro(str; "c");Macro(str; "d")]]; 1; 2) :]
+>>>
+[[c;d];[a;b]]
+>>>= 0
+

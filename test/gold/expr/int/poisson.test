@@ -1,0 +1,7 @@
+feivel
+<<<
+[:bool: GEq(int; Poisson(5); 0) :]
+>>>
+#t
+>>>= 0
+

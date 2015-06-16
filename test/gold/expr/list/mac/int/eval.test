@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >{>int} @f := Macro({>int}; @t ++ {}; {>int} @t := {})]#
+[:{>int}: Eval({>int}; @f) :]
+[:{>int}: Eval({>int}; @f; {>int} @t := {Macro(int; 0)}) :]
+>>>
+{}
+{0}
+>>>= 0
+

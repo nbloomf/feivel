@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[str]: Eval([str]; Rand({Macro([str]; @x; [str] @x := []); Macro([str]; @x; [str] @x := [])}); [str] @x := [["foo"]]) :]
+>>>
+[[foo]]
+>>>= 0
+

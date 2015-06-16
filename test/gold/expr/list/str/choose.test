@@ -1,0 +1,6 @@
+feivel
+<<<
+[:{str}: Choose(2; {"foo";"foo";"foo"}) :]
+>>>
+{foo;foo}
+>>>= 0

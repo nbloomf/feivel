@@ -1,0 +1,11 @@
+feivel
+<<<
+[:str: Strip("foobar"; "foo") :]
+[:str: Strip("munged"; "mungbean") :]
+[:str: Strip("baz"; "") :]
+>>>
+bar
+ed
+baz
+>>>= 0
+

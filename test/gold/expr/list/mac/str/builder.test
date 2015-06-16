@@ -1,0 +1,9 @@
+feivel
+<<<
+[:{>str}: Build(Macro(str; Eval(str; @x) ++ "s"); >str @x <- {Macro(str; "a"); Macro(str; "b")}) :]
+[:{>str}: Build(@x; >str @x <- {Macro(str; "ab"); Macro(str; "aab"); Macro(str; "ba")}; Matches(Eval(str;@x); "a+b")) :]
+>>>
+{as;bs}
+{ab;aab}
+>>>= 0
+

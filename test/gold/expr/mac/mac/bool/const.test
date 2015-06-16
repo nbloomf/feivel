@@ -1,0 +1,7 @@
+feivel
+<<<
+[:>>bool: Macro(>bool; @x; >bool @x := Macro(bool; #t)) :]
+>>>
+#t
+>>>= 0
+

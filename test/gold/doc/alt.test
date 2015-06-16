@@ -1,0 +1,8 @@
+feivel
+<<<
+[alt opt [foo] endalt]
+[alt opt [bar]]
+>>>
+foo
+bar
+>>>= 0

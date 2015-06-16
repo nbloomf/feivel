@@ -1,0 +1,7 @@
+feivel
+<<<
+[:[>str]: DelCol([[Macro(str; "a");Macro(str; "b")];[Macro(str; "c");Macro(str; "d")]]; 2) :]
+>>>
+[[a];[c]]
+>>>= 0
+

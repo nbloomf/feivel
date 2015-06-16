@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >[>str] @f := Macro([>str]; @t hcat []; [>str] @t := [])]#
+[:[>str]: Eval([>str]; @f) :]
+[:[>str]: Eval([>str]; @f; [>str] @t := [[Macro(str; "a")]]) :]
+>>>
+[]
+[[a]]
+>>>= 0
+

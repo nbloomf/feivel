@@ -1,0 +1,26 @@
+Name:           feivel
+Version:        0.1.0
+Cabal-Version:  >= 1.2
+License:        GPL
+Copyright:      (c) 2015 Nathan Bloomfield
+Author:         Nathan Bloomfield
+Synopsis:       A simple template processor.
+Stability:      Experimental
+Build-Type:     Simple
+
+Executable feivel
+  main-is:        Feivel/Main.hs
+  hs-source-dirs: src/
+  ghc-options:    -main-is Feivel.Main -rtsopts -Wall
+  build-depends:  base, parsec, containers, regex-posix,
+                  random-fu, rvar, random-extras,
+                  transformers, mtl, random, directory,
+                  monadlist, primes
+
+Test-Suite feivel-test
+  type:           exitcode-stdio-1.0
+  main-is:        Tests/Main.hs
+  hs-source-dirs: test/, src/
+  ghc-options:    -main-is Tests.Main -fforce-recomp
+  build-depends:  base, QuickCheck, quickcheck-instances,
+                  test-framework, test-framework-quickcheck2
