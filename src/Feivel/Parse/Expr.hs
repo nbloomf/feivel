@@ -138,6 +138,13 @@ pPair b p = do
 {- :Doc -}
 {--------}
 
+pBrackDoc :: ParseM (Expr, Type)
+pBrackDoc = do
+  _ <- try $ char '['
+  (d,_) <- pDoc
+  _ <- char ']'
+  return (DocE d, DD)
+
 pDoc :: ParseM (Doc, Type)
 pDoc = choice $ map pAtLocus
   [ eof >> return (Empty, DD)
@@ -148,6 +155,7 @@ pDoc = choice $ map pAtLocus
       , many1 (noneOf "#@[]") >>= \x -> return (DocText x, DD)
       , pVarExpr NakedKey DD
       , pEscaped
+      , pEval
       , pDefine
       , pPull
       , pScope
@@ -166,6 +174,19 @@ pDoc = choice $ map pAtLocus
     return (Cat $ map fst xs, DD)
   ]
   where
+    pEval = do
+      try (char '[' >> keyword "eval")
+      (e,_) <- pTypedMacExpr DD
+      vals <- option [] pVals
+      _ <- option 'x' (try (keyword "endeval") >> char ']')
+      return (DocMacro vals e, DD)
+        where
+          pVals = do
+            _ <- try $ keyword "("
+            vs <- sepBy pTypeKeyExpr (keyword ";")
+            keyword ")"
+            return vs
+
     pEscaped = do
       x <- choice (zipWith pEsc "#@[]_.-~n" "#@[]_.- \n") <?> "escaped character"
       return (Escaped x, DD)
@@ -927,7 +948,7 @@ pTypedMatExpr :: Type -> ParseM (MatExpr, Type)
 pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm (pMatConst' typ) (pTypedMatExpr typ) "matrix expression"
-      [ pVarExpr MatVar (MatOf XX)
+      [ pVarExpr MatVar (MatOf typ)
 
       , pAtPos (MatOf typ) MatAtPos
       , pAtIdx (MatOf typ) MatAtIdx
@@ -1068,7 +1089,7 @@ pTypedPolyExpr :: Type -> ParseM (PolyExpr, Type)
 pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyConst' typ) (pTypedPolyExpr typ) "polynomial expression"
-      [ pVarExpr PolyVar (PolyOver XX)
+      [ pVarExpr PolyVar (PolyOver typ)
 
       , pAtPos (PolyOver typ) PolyAtPos
       , pAtIdx (PolyOver typ) PolyAtIdx
@@ -1135,7 +1156,7 @@ pMacConst' typ = do
   keyword "("
   t <- pType
   keyword ";"
-  (body,_) <- pTypedExpr t
+  (body,_) <- if t == DD then pBrackDoc else pTypedExpr t
   vals <- option [] $ many (keyword ";" >> pTypeKeyExpr)
   keyword ")"
   end <- getPosition
@@ -1152,7 +1173,7 @@ pTypedMacExpr :: Type -> ParseM (MacExpr, Type)
 pTypedMacExpr typ = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm (pMacConst' typ) pMacExpr "macro expression"
-      [ pVarExpr MacVar (MacTo XX)
+      [ pVarExpr MacVar (MacTo typ)
 
       , pAtPos (MacTo typ) MacAtPos
       , pAtIdx (MacTo typ) MacAtIdx
