@@ -11,7 +11,6 @@ Feature Ideas
 * Format: JSON
 * Format: RFC822
 * General: ability to see random seed and set seed at CL
-* General: First-class templates (doc type) - this is already mostly done, just not explicitly
 * General: implicit "control fields" for record number etc.
 * General: make special chars []#@ redefinable
 * General: namespacing (qualified import?)
