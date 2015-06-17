@@ -1,0 +1,27 @@
+In this example we demonstrate how to define and use template macros.
+
+The type of a feivel template is "doc"; defining a doc macro is similar to defining macros of other types, *except* that the body of the macro must be wrapped in square brackets.
+
+For example...
+[define >doc @d := Macro(doc; [@i potato]; int @i := 1)]#
+...we just defined a doc macro.
+
+We can evaluate a doc macro with the default context by writing its key as usual.
+@d
+
+Evaluating a doc macro explicitly is different from evaluating macros of other types: rather than using the Eval function, we use the eval statement.
+
+For example:
+[eval @d]
+[eval @d (int @i := 2)]
+[eval @d (int @i := 3)]
+
+When defining a doc macro, the stuff inside the square brackets can be any valid combination of template syntax. Here is a larger example.
+
+[define >doc @foo := Macro(doc; [#
+This is a doc macro consisting of several lines,
+... nested statements ([shuffle [a] [b] [c] endshuffle])...
+... and whatever. [:int: 2^10 :]
+])]#
+
+@foo

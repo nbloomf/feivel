@@ -1,0 +1,11 @@
+feivel
+<<<
+[define >doc @d := Macro(doc; [wut @a]; int @a := 2)]#
+@d
+[eval @d (int @a := 3)]
+yay
+>>>
+wut 2
+wut 3
+yay
+>>>= 0
