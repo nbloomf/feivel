@@ -165,6 +165,14 @@ Usage: `[let TYP KEY := EXPR in [TEMP] endlet]`
 `define` and `let` are both used to bind a value to a new key in the store; the only difference is the scope of the resulting binding. The scope of `define` is the remainder of the current template file, while the scope of `let` is the subtemplate TEMP.
 
 
+`scope`
+-------
+
+Usage: `[scope [TEMP] endscope]`
+
+`scope` allows us to limit the scope of store changes.
+
+
 `if`/`cond`
 -----------
 
