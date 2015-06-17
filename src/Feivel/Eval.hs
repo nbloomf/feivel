@@ -1181,13 +1181,7 @@ instance Eval Doc where
       MatE  x -> eval x >>= toGlyph >>= foo
       PolyE x -> eval x >>= toGlyph >>= foo
 
-  eval (DocMacro vals mac :@ loc) = do
-    old      <- getState
-    (def, e) <- eval mac >>= getVal :: EvalM (Store Expr, Expr)
-    ctx      <- toStateT loc vals
-    f        <- evalWith e (ctx `mergeState` (def `mergeState` old))
-    result   <- eval f >>= getVal
-    return result
+  eval (DocMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (Scope body :@ _) = do
     --pushTrace "scope" loc

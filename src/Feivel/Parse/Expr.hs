@@ -178,7 +178,7 @@ pDoc = choice $ map pAtLocus
       try (char '[' >> keyword "eval")
       (e,_) <- pTypedMacExpr DD
       vals <- option [] pVals
-      _ <- option 'x' (try (keyword "endeval") >> char ']')
+      _ <- option () (try (keyword "endeval")) >> char ']'
       return (DocMacro vals e, DD)
         where
           pVals = do
