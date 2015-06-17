@@ -1,6 +1,5 @@
 Feature Ideas
 -------------
-* Bool: Make 'divides' a prefix function (maybe? for consistency)
 * Doc: alt statement with optional integer weights
 * Doc: else on for loops for empty lists [for str @s in LIST say [BLAH] else [BLUH] endfor]
 * Doc: ``for'' for matrices?
