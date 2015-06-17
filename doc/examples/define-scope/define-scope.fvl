@@ -1,0 +1,35 @@
+===
+This example illustrates the use of "let" and "scope" to limit the scope of a
+key definition.
+
+The "define" keyword binds a new key to a value, and this binding is in force
+for the remainder of the "current" template- either the current file or until
+the end of the current scope.
+
+For example...
+[define int @a := 2]#
+...we just defined a new key, #@a = @a#.
+
+
+[scope [#
+(Begin scope)
+We just entered a new scope. Of course we still have #@a = @a#.
+
+Next...
+[define int @b := 3]#
+...inside this scope, we will define a new key #@b.
+
+Note that #@b [if IsDefined(@b) then [*is*] else [*is not*] endif] defined here, and #@b = @b#.
+Now we exit this scope.
+(End scope)
+] endscope]
+
+We are back at the top level of this template.
+
+We still have #@a = @a#.
+But #@b [if IsDefined(@b) then [is] else [is not] endif] defined here.
+
+In particular...
+[define int @b := 5]#
+...we can give #@b a "new" definition here: #@b = @b#. This isn't really a new
+definition since the "old" definition of #@b was only visible inside the scope.
