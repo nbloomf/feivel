@@ -217,6 +217,14 @@ Usage: `[select TYP KEY from LIST in [TEMP] endselect]`
 `select` chooses a "random" element of LIST to bind to KEY in TEMP. Do not depend on this ramdomness for anything important.
 
 
+`eval`
+------
+
+Usage: `[eval MAC (TYP KEY := EXPR; ...) endeval]`
+
+`eval` is used to evaluate template macros.
+
+
 
 Expressions
 ===========
