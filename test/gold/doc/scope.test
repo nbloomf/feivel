@@ -1,0 +1,11 @@
+feivel
+<<<
+[scope [#
+ [define int @a := 1]#
+ [:bool: IsDefined(@a) :]#
+] endscope]
+[:bool: IsDefined(@a) :]
+>>>
+#t
+#f
+>>>= 0
