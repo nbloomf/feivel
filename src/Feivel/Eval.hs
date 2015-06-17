@@ -1191,7 +1191,8 @@ instance Eval Doc where
 
   eval (Scope body :@ _) = do
     --pushTrace "scope" loc
-    result <- eval body
+    current <- getState
+    result <- evalWith body current
     --popTrace
     return result
 

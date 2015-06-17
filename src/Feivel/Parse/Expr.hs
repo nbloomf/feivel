@@ -194,6 +194,7 @@ pDoc = choice $ map pAtLocus
       try (char '[' >> keyword "scope")
       (x,_) <- pTightBrack pDoc
       option () (try (keyword "endscope"))
+      _ <- whitespace >> char ']'
       return (Scope x, DD)
 
     pNakedExpr = do
