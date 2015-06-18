@@ -23,7 +23,7 @@ module Feivel.Parse.ParseM (
   pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat,
 
   -- Fences
-  pParens, pBrack, pBrace, pTightBrack,
+  pParens, pBrack, pBrace,
 
   -- Lists
   pBraceList, pBrackList
@@ -162,13 +162,6 @@ pBrace p = do
   try $ char '{' >> spaces
   x <- p
   char '}' >> spaces
-  return x
-
-pTightBrack :: ParseM a -> ParseM a
-pTightBrack p = do
-  _ <- try $ char '['
-  x <- p
-  char ']' >> spaces
   return x
 
 

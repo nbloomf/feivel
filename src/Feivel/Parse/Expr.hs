@@ -34,7 +34,7 @@ import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 
-import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP)
+import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst)
 
 import Text.Parsec.Expr
 import Text.ParserCombinators.Parsec hiding (try)
@@ -57,11 +57,6 @@ import Text.Parsec.Prim (try)
 {--------------}
 {- :Utilities -}
 {--------------}
-
-mapFst :: (a -> b) -> (a,c) -> (b,c)
-mapFst f (x,y) = (f x, y)
-
-
 
 -- Terms in Expression Grammars
 pTerm :: ParseM (a, Type) -> ParseM (AtLocus a, Type) -> String -> [ParseM (a, Type)] -> ParseM (AtLocus a, Type)
@@ -160,16 +155,24 @@ pTypedArgPair fun pA pB con typ = do
 
 
 
-
 {--------}
 {- :Doc -}
 {--------}
 
-pBrackDoc :: ParseM (Expr, Type)
+pBrackDoc :: ParseM (Doc, Type)
 pBrackDoc = do
   _ <- try $ char '['
   (d,_) <- pDoc
   _ <- char ']'
+  whitespace
+  return (d, DD)
+
+pBrackDocE :: ParseM (Expr, Type)
+pBrackDocE = do
+  _ <- try $ char '['
+  (d,_) <- pDoc
+  _ <- char ']'
+  whitespace
   return (DocE d, DD)
 
 pDoc :: ParseM (Doc, Type)
@@ -240,7 +243,7 @@ pDoc = choice $ map pAtLocus
 
     pScope = do
       try (char '[' >> keyword "scope")
-      (x,_) <- pTightBrack pDoc
+      (x,_) <- pBrackDoc
       option () (try (keyword "endscope"))
       _ <- whitespace >> char ']'
       return (Scope x, DD)
@@ -253,7 +256,7 @@ pDoc = choice $ map pAtLocus
 
     pShuffle = do
       try (char '[' >> keyword "shuffle")
-      xs <- many (pTightBrack pDoc)
+      xs <- many pBrackDoc
       option () (try $ keyword "endshuffle")
       _ <- whitespace >> char ']'
       return (Shuffle $ map fst xs, DD)
@@ -261,8 +264,8 @@ pDoc = choice $ map pAtLocus
     pIfThenElse = do
       try (char '[' >> keyword "if")
       (test,_) <- pBoolExpr
-      (true,_) <- keyword "then" >> pTightBrack pDoc
-      (false,_) <- keyword "else" >> pTightBrack pDoc
+      (true,_) <- keyword "then" >> pBrackDoc
+      (false,_) <- keyword "else" >> pBrackDoc
       option () (try (keyword "endif"))
       _ <- whitespace >> char ']'
       return (IfThenElse test true false, DD)
@@ -270,14 +273,14 @@ pDoc = choice $ map pAtLocus
     pCond = do
       try (char '[' >> keyword "cond")
       cases <- many pCondCase
-      (auto,_) <- option (Empty :@ NullLocus, DD) (try (keyword "default") >> pTightBrack pDoc)
+      (auto,_) <- option (Empty :@ NullLocus, DD) (try (keyword "default") >> pBrackDoc)
       option () (try (keyword "endcond"))
       _ <- whitespace >> char ']'
       return (Cond cases auto, DD)
       where
         pCondCase = do
           (s,_) <- try (keyword "case") >> pBoolExpr
-          (t,_) <- pTightBrack pDoc
+          (t,_) <- pBrackDoc
           return (s,t)
 
     pFor = do
@@ -285,9 +288,9 @@ pDoc = choice $ map pAtLocus
       typ <- pType
       spaces
       (k,_) <- pKey
-      (r,_) <- keyword "in" >> pTypedListExpr typ
-      (t,_) <- keyword "say" >> pTightBrack pDoc
-      b <- option Nothing $ (try (keyword "sepby")) >> pTightBrack pDoc >>= (return . Just . fst)
+      (r,_) <- keyword "in"  >> pTypedListExpr typ
+      (t,_) <- keyword "say" >> pBrackDoc
+      b <- option Nothing $ (try (keyword "sepby")) >> pBrackDoc >>= (return . Just . fst)
       option () (try (keyword "endfor"))
       _ <- whitespace >> char ']'
       return (ForSay k r t b, DD)
@@ -299,7 +302,7 @@ pDoc = choice $ map pAtLocus
       _ <- whitespace >> char ']'
       return (Alt opts, DD)
       where
-        pAltOpt = try (keyword "opt") >> pTightBrack pDoc >>= return . fst
+        pAltOpt = try (keyword "opt") >> pBrackDoc >>= return . fst
 
     pBail = do
       try (char '[' >> keyword "bail")
@@ -311,7 +314,7 @@ pDoc = choice $ map pAtLocus
     pLetIn = do
       try (char '[' >> keyword "let")
       (_,k,e) <- pTypeKeyExpr
-      (body,_) <- keyword "in" >> pTightBrack pDoc
+      (body,_) <- keyword "in" >> pBrackDoc
       option () (try (keyword "endlet"))
       _ <- whitespace >> char ']'
       return (LetIn k e body, DD)
@@ -321,7 +324,7 @@ pDoc = choice $ map pAtLocus
       ty <- pType
       (k,_) <- spaced pKey
       (r,_) <- keyword "from" >> pTypedListExpr ty
-      (t,_) <- keyword "in" >> pTightBrack pDoc
+      (t,_) <- keyword "in"   >> pBrackDoc
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t, DD)
@@ -372,6 +375,8 @@ pDoc = choice $ map pAtLocus
       char '~'
       return Empty
 -}
+
+
 
 {---------}
 {- :Expr -}
@@ -1076,7 +1081,7 @@ pMacConst' typ = do
   keyword "("
   t <- pType
   keyword ";"
-  (body,_) <- if t == DD then pBrackDoc else pTypedExpr t
+  (body,_) <- if t == DD then pBrackDocE else pTypedExpr t
   vals <- option [] $ many (keyword ";" >> pTypeKeyExpr)
   keyword ")"
   end <- getPosition
