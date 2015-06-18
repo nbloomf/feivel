@@ -200,6 +200,7 @@ pDoc = choice $ map pAtLocus
       , pSelect
       , pInput
       , pQuit
+      , pNote
       ]
     return (Cat $ map fst xs, DD)
   ]
@@ -340,6 +341,14 @@ pDoc = choice $ map pAtLocus
       _ <- spaces >> char ']'
       reportParseErr NullLocus Quit
 
+    pNote = do
+      try (char '[' >> keyword "~")
+      _ <- many $ choice [ try (noneOf ['\\', '~'])
+                         , try (string "\\~") >> return '~'
+                         , try (string "\\") >> return '\\']
+      _ <- keyword "~" >> char ']'
+      return (Empty, DD)
+
 
 
 {-
@@ -366,14 +375,6 @@ pDoc = choice $ map pAtLocus
              (try (keyword "as") >> pDataFormat >>= (return . Just))
       end <- getPosition
       return $ Splice (locus start end) t d f
-
-
-    pNote :: Parser Doc
-    pNote = do
-      try (char '~')
-      many $ choice [try (noneOf ['\\', '~']), try (string "\\~") >> return '~', try (string "\\") >> return '\\']
-      char '~'
-      return Empty
 -}
 
 
