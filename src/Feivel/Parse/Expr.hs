@@ -132,6 +132,33 @@ pPair b p = do
   a <- p
   return (a,b)
 
+{- Type-dependent expressions -}
+
+pTypedArg :: String -> (Type -> ParseM (a, Type)) -> (a -> t) -> (Type -> u) -> ParseM (t,u)
+pTypedArg fun pA con typ = do
+  try $ keyword fun
+  keyword "("
+  t <- pType
+  keyword ";"
+  (a,_) <- pA t
+  keyword ")"
+  return (con a, typ t)
+
+pTypedArgPair
+ :: String -> (Type -> ParseM (a, Type)) -> (Type -> ParseM (b,Type))
+     -> (a -> b -> t) -> (Type -> u) -> ParseM (t, u)
+pTypedArgPair fun pA pB con typ = do
+  try $ keyword fun
+  keyword "("
+  t <- pType
+  keyword ";"
+  (a,_) <- pA t
+  keyword ";"
+  (b,_) <- pB t
+  keyword ")"
+  return $ (con a b, typ t)
+
+
 
 
 {--------}
@@ -449,7 +476,7 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
     
       , pFun2 "Decimal" pRatExpr pIntExpr StrDecimal SS
     
-      , pTabulate
+      , pTypedArg "Tab" pTypedMatExpr StrTab (const SS)
 
       , pStrFormat
       ]
@@ -464,15 +491,6 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
           (e,_) <- pTypedExpr t
           keyword ")"
           return (StrFormat f e, SS)
-
-        pTabulate = do
-          try $ keyword "Tab"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (m,_) <- pTypedMatExpr t
-          keyword ")"
-          return (StrTab m, SS)
 
     strOpTable =
       [ [Infix (opParser2 Concat "++") AssocLeft
@@ -582,118 +600,23 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
 
       , pFun1 "Rand" (pTypedListExpr BB) BoolRand BB
 
-      , pElem
-      , pIsEmpty -- pFun1 "IsEmpty" pListExpr ListIsEmpty BB
+      , pTypedArgPair "Elem" pTypedExpr pTypedListExpr ListElem (const BB)
+      , pTypedArg "IsEmpty" pTypedListExpr ListIsEmpty (const BB)
 
       , pFun1 "IsRow" pMatExpr MatIsRow BB
       , pFun1 "IsCol" pMatExpr MatIsCol BB
-      , pMatIsGJForm
+      , pTypedArg "IsGJForm" pTypedMatExpr MatIsGJForm (const BB)
 
-      , pEqual
-      , pNotEqual
-      , pLessThan
-      , pLessEq
-      , pGreaterThan
-      , pGreaterEq
+      , pTypedArgPair "Equal"    pTypedExpr pTypedExpr BoolEq  (const BB)
+      , pTypedArgPair "NotEqual" pTypedExpr pTypedExpr BoolNEq (const BB)
+      , pTypedArgPair "LT"       pTypedExpr pTypedExpr BoolLT  (const BB)
+      , pTypedArgPair "LEq"      pTypedExpr pTypedExpr BoolLEq (const BB)
+      , pTypedArgPair "GT"       pTypedExpr pTypedExpr BoolGT  (const BB)
+      , pTypedArgPair "GEq"      pTypedExpr pTypedExpr BoolGEq (const BB)
 
       , pFun2 "Matches" pStrExpr (pPair SS pString) Matches BB
       , pFun2 "Divides" pIntExpr pIntExpr IntDiv BB
       ]
-      where
-        pElem = do
-          try $ keyword "Elem"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (x,_) <- pTypedExpr t
-          keyword ";"
-          (xs,_) <- pTypedListExpr t
-          keyword ")"
-          return (ListElem x xs, BB)
-
-        pIsEmpty = do
-          try $ keyword "IsEmpty"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (l,_) <- pTypedListExpr t
-          keyword ")"
-          return (ListIsEmpty l, BB)
-
-        pMatIsGJForm = do
-          try $ keyword "IsGJForm"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (m,_) <- pTypedMatExpr t
-          keyword ")"
-          return (MatIsGJForm m, BB)
-
-        pEqual = do
-          try $ keyword "Equal"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolEq a b, BB)
-
-        pNotEqual = do
-          try $ keyword "NotEqual"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolNEq a b, BB)
-
-        pLessThan = do
-          try $ keyword "LT"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolLT a b, BB)
-
-        pLessEq = do
-          try $ keyword "LEq"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolLEq a b, BB)
-
-        pGreaterThan = do
-          try $ keyword "GT"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolGT a b, BB)
-
-        pGreaterEq = do
-          try $ keyword "GEq"
-          keyword "("
-          t <- pType
-          keyword ";"
-          (a,_) <- pTypedExpr t
-          keyword ";"
-          (b,_) <- pTypedExpr t
-          keyword ")"
-          return $ (BoolGEq a b, BB)
 
     boolOpTable =
       [ [ Prefix (opParser1 Neg "~")
