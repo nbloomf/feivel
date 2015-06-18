@@ -350,9 +350,6 @@ pDoc = choice $ map pAtLocus
 {- :Expr -}
 {---------}
 
-pExpr :: ParseM (Expr, Type)
-pExpr = pTypedExpr XX
-
 pTypedExpr :: Type -> ParseM (Expr, Type)
 pTypedExpr DD = pDoc      >>= return . mapFst DocE
 pTypedExpr SS = pStrExpr  >>= return . mapFst StrE
