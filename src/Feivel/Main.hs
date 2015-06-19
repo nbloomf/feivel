@@ -189,7 +189,7 @@ options =
 
 
 version :: String
-version = "feivel-0.0.1"
+version = "feivel-0.1.0"
 
 repl :: IO ()
 repl = runRepl emptyStore
