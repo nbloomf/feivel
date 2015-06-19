@@ -10,7 +10,7 @@ Feivel is in an extremely experimental state. It is missing lots of desired feat
 
 ## Installation
 
-Currently Feivel can only be built from source. See the "Development" section for info.
+Currently the only way to install Feivel is by building it from source. See the "Development" section for info.
 
 
 
