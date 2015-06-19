@@ -9,4 +9,6 @@ dist
 # Generated documents
 doc/tutorial/*.html
 doc/examples/*/*.txt
+doc/examples/*/*.tex
+doc/examples/*/*.pdf
 doc/vis.dot

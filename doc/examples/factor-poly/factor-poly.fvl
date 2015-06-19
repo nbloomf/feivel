@@ -1,0 +1,55 @@
+\documentclass{article}
+
+\begin{document}
+
+In this example, we will construct a worksheet of 10 basic quadratic polynomial factorization problems with small integer roots. In my experience, the best way to do this is to work "backwards"; start with the kind of answer we want and think carefully about the skills needed to get there.
+
+
+Rather than starting with 10 polynomials, let's start with 10 pairs of roots. We can represent these in feivel as a list of lists of integers. Let's say each root is an integer between -6 and 6, not including 0 (since allowing 0 as a root yields a fundamentally different kind of problem).
+\begin{center}
+\verb|define {int} #@roots := Range(-6;6) \\ {0}|
+\end{center}
+
+[define {int} @roots := Range(-6;6) \\ {0}]#
+
+
+Next we can choose all pairs $(a,b)$ of possible roots such that $a+b \neq 0$, so we don't end up with a difference of squares (that's a different problem). We can also force $a < b$ to avoid getting duplicates. (Here we are using list builder notation, similar to set builder notation.)
+\begin{center}
+\verb|define {{int}} #@pairs := Build({#@a;#@b}; int #@a <- #@roots;|
+\verb|int #@b <- #@roots; NotEqual(int; #@a+#@b; 0); LT(int; #@a; #@b))|
+\end{center}
+
+[define {{int}} @pairs := Build({@a;@b}; int @a <- @roots; int @b <- @roots; NotEqual(int; @a+@b; 0); LT(int; @a; @b))]#
+
+
+Finally, we choose 10 pairs at random.
+\begin{center}
+\verb|define {{int}} #@xss := Choose(10; #@pairs)|
+\end{center}
+
+[define {{int}} @xss := Choose(10; @pairs)]#
+
+
+Now we will iterate through this list of pairs, formatting a polynomial problem for each one.
+
+\begin{enumerate}
+[for {int} @cs in @xss say [#
+  % Extract the roots from each pair
+  [define int @a := AtPos(@cs; 1)]#
+  [define int @b := AtPos(@cs; 2)]#
+
+  % Define our polynomial (x-a)(x-b) and format it nicely
+  [define ^int @p := Poly(1.x^2; neg (@a + @b).x^1; (@a * @b).1)]#
+  [define str @prob := Format(^int; latex; @p)]#
+
+  % Define the solution and format it nicely
+  [define ^int @h := Poly(1.x^1; neg @a . 1)]#
+  [define ^int @k := Poly(1.x^1; neg @b . 1)]#
+  [define str @soln := "(" ++ Format(^int; latex; @h) ++ ")(" ++ Format(^int; latex; @k) ++ ")"]#
+
+  % Display the problem
+  \item $@prob = @soln$
+] endfor]#
+\end{enumerate}
+
+\end{document}
