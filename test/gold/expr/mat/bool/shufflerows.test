@@ -1,0 +1,6 @@
+feivel
+<<<
+[:[bool]: ShuffleRows([[#t;#f];[#t;#f]]) :]
+>>>
+[[#t;#f];[#t;#f]]
+>>>= 0

@@ -23,7 +23,7 @@ module Feivel.Lib.Matrix (
 
   -- Construct
   mRowMajorFromList, mFromRowList, mRowFromList, mColFromList, mSingleton,
-  mFromMap, mConst, mFromMapM, mToRowList,
+  mFromMap, mConst, mFromMapM, mToRowList, mRowsOf, mColsOf,
 
   mEntryOf, mIsNull, mIsSquare,
 

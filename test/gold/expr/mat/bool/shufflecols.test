@@ -1,0 +1,6 @@
+feivel
+<<<
+[:[bool]: ShuffleCols([[#t;#t];[#f;#f]]) :]
+>>>
+[[#t;#t];[#f;#f]]
+>>>= 0

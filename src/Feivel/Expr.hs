@@ -463,6 +463,10 @@ data MatExprLeaf
   | MatDelRow   MatExpr IntExpr
   | MatDelCol   MatExpr IntExpr
 
+  -- Randomness
+  | MatShuffleRows MatExpr
+  | MatShuffleCols MatExpr
+
   -- Factorizations
   | MatGJForm   MatExpr
   | MatGJFactor MatExpr

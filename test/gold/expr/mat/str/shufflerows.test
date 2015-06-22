@@ -1,0 +1,6 @@
+feivel
+<<<
+[:[str]: ShuffleRows([["foo";"bar"];["foo";"bar"]]) :]
+>>>
+[[foo;bar];[foo;bar]]
+>>>= 0

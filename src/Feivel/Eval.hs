@@ -892,6 +892,32 @@ instance Eval MatExpr where
           Right y -> return $ inject loc y
       _ -> reportErr loc $ NumericMatrixExpected t
 
+  eval (MatShuffleRows m :@ loc) = do
+    t <- typeOf m
+    x <- eval m >>= getVal :: EvalM (Matrix Expr)
+    case mRowsOf x of
+      Left err -> reportErr loc err
+      Right rs -> do
+        ts <- shuffleEvalM rs
+        case mVCats ts of
+          Left err -> reportErr loc err
+          Right n -> case t of
+            MatOf u -> return $ MatConst u n :@ loc
+            _ -> reportErr loc $ MatrixExpected t
+
+  eval (MatShuffleCols m :@ loc) = do
+    t <- typeOf m
+    x <- eval m >>= getVal :: EvalM (Matrix Expr)
+    case mColsOf x of
+      Left err -> reportErr loc err
+      Right rs -> do
+        ts <- shuffleEvalM rs
+        case mHCats ts of
+          Left err -> reportErr loc err
+          Right n -> case t of
+            MatOf u -> return $ MatConst u n :@ loc
+            _ -> reportErr loc $ MatrixExpected t
+
   eval (MatHCat a b :@ loc) = do
     t <- unifyTypesOf loc a b
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
@@ -1707,6 +1733,9 @@ instance Typed MatExpr where
   typeOf (MatAddCol m _ _ _ :@ _) = typeOf m
   typeOf (MatDelRow m _ :@ _) = typeOf m
   typeOf (MatDelCol m _ :@ _) = typeOf m
+
+  typeOf (MatShuffleRows m :@ _) = typeOf m
+  typeOf (MatShuffleCols m :@ _) = typeOf m
 
   typeOf (MatGJForm   m :@ _) = typeOf m
   typeOf (MatGJFactor m :@ _) = typeOf m

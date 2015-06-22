@@ -28,7 +28,7 @@ Feature Ideas
 * Matrix: determinant
 * Matrix: extract row/col as matrix or list
 * Matrix: insert row/column
-* Matrix: shuffle rows/columns/entries
+* Matrix: shuffle entries
 * Matrix: submatrix by row/col indices
 * Matrix: Smith normal form (uses bezout)
 * Polynomial: evaluation, degree, division algorithm, gcd, bezout, content

@@ -1,0 +1,6 @@
+feivel
+<<<
+[:[str]: ShuffleCols([["foo";"foo"];["bar";"bar"]]) :]
+>>>
+[[foo;foo];[bar;bar]]
+>>>= 0
