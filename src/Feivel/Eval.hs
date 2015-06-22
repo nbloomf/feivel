@@ -867,44 +867,38 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatShuffleRows m :@ loc) = do
-    t  <- typeOf m
+    u  <- expectMatrix loc m
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mRowsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mVCats ts
-    case t of
-      MatOf u -> return $ MatConst u n :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u n :@ loc
 
   eval (MatShuffleCols m :@ loc) = do
-    t  <- typeOf m
+    u  <- expectMatrix loc m
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mHCats ts
-    case t of
-      MatOf u -> return $ MatConst u n :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u n :@ loc
 
   eval (MatHCat a b :@ loc) = do
     t <- unifyTypesOf loc a b
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
-    case mHCat m n of
-      Left err -> reportErr loc err
-      Right x -> case t of
-        MatOf u -> return $ MatConst u x :@ loc
-        _ -> reportErr loc $ MatrixExpected t
+    x <- tryEvalM loc $ mHCat m n
+    case t of
+      MatOf u -> return $ MatConst u x :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatVCat a b :@ loc) = do
     t <- unifyTypesOf loc a b
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
-    case mVCat m n of
-      Left err -> reportErr loc err
-      Right x -> case t of
-        MatOf u -> return $ MatConst u x :@ loc
-        _ -> reportErr loc $ MatrixExpected t
+    x <- tryEvalM loc $ mVCat m n
+    case t of
+      MatOf u -> return $ MatConst u x :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatAdd a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -928,12 +922,10 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatTrans a :@ loc) = do
-    t <- typeOf a
+    u <- expectMatrix loc a
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
-    case t of
-      MatOf u -> return $ MatConst u p :@ loc
-      _ -> reportErr loc $ MatrixExpected t 
+    return $ MatConst u p :@ loc
 
   eval (MatMul a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -965,24 +957,20 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatSwapRows m a b :@ loc) = do
-    t <- typeOf m
+    u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     j <- eval b >>= getVal :: EvalM Integer
     p <- tryEvalM loc $ mSwapRows i j n
-    case t of
-      MatOf u -> return $ MatConst u p :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u p :@ loc
 
   eval (MatSwapCols m a b :@ loc) = do
-    t <- typeOf m
+    u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     j <- eval b >>= getVal :: EvalM Integer
     p <- tryEvalM loc $ mSwapCols i j n
-    case t of
-      MatOf u -> return $ MatConst u p :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u p :@ loc
 
   eval (MatScaleRow m a h :@ loc) = do
     t <- typeOf m
@@ -1432,6 +1420,13 @@ expectType loc t x = do
   if t == u
     then return u
     else reportErr loc $ TypeMismatch t u
+
+expectMatrix :: (Typed a) => Locus -> a -> EvalM Type
+expectMatrix loc x = do
+  u <- typeOf x
+  case u of
+    MatOf t -> return t
+    _ -> reportErr loc $ MatrixExpected u
 
 sameType :: (Typed a, Typed b) => Locus -> a -> b -> EvalM Type
 sameType loc a b = do
