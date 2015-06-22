@@ -118,6 +118,14 @@ eMacro vals mac loc = do
   (def, e) <- evalWith mac (ctx `mergeState` old) >>= getVal :: EvalM (Store Expr, Expr)
   evalWith e (ctx `mergeState` (def `mergeState` old)) >>= eval >>= getVal
 
+eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
+  => c -> a -> b -> Locus -> EvalM d
+eAtIdx m h k loc = do
+  i <- eval h >>= getVal
+  j <- eval k >>= getVal
+  p <- eval m >>= getVal
+  tryEvalM loc $ mEntryOf (i,j) p
+
 
 
 {-----------------}
@@ -579,11 +587,7 @@ instance Eval ListExpr where
   eval (ListAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
 
-  eval (ListAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix ListExpr)
-    tryEvalM loc $ mEntryOf (i,j) p
+  eval (ListAtIdx m h k :@ loc) = eAtIdx m h k loc
 
   eval (ListMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -766,11 +770,7 @@ instance Eval MatExpr where
   eval (MatAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
 
-  eval (MatAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix MatExpr)
-    tryEvalM loc $ mEntryOf (i,j) p
+  eval (MatAtIdx m h k :@ loc) = eAtIdx m h k loc
 
   eval (MatMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -1337,11 +1337,7 @@ instance Eval PolyExpr where
   eval (PolyAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
-  eval (PolyAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix PolyExpr)
-    tryEvalM loc $ mEntryOf (i,j) p
+  eval (PolyAtIdx m h k :@ loc) = eAtIdx m h k loc
 
   eval (PolyMacro vals mac :@ loc) = eMacro vals mac loc
 
