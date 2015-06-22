@@ -21,6 +21,7 @@
 
 module Feivel.EvalM (
   EvalM, runEvalM, runE, attempt, attemptWith, attemptWith', attemptsWith, testEvalM,
+  tryEvalM,
 
   -- IO and Parsing
   readAndParseDoc, readAndParseStates, parseDoc,
@@ -118,6 +119,10 @@ testEvalM expr = do
   case result of
     Left err -> putStrLn $ show err
     Right d  -> putStrLn $ show d
+
+tryEvalM :: (PromoteError err) => Locus -> Either err a -> EvalM a
+tryEvalM loc (Left err) = reportErr loc err
+tryEvalM loc (Right a)  = return a
 
 
 

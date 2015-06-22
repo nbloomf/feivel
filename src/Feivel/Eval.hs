@@ -136,9 +136,8 @@ instance Eval IntExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix Integer)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return $ IntConst x :@ loc
+    x <- tryEvalM loc $ mEntryOf (i,j) p
+    return $ IntConst x :@ loc
 
   eval (IntIfThenElse b t f :@ _) = eIfThenElse b t f
 
@@ -170,15 +169,13 @@ instance Eval IntExpr where
 
   eval (MatNumRows m :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mNumRows n of
-      Left err -> reportErr loc err
-      Right k -> return $ IntConst k :@ loc
+    k <- tryEvalM loc $ mNumRows n
+    return $ IntConst k :@ loc
 
   eval (MatNumCols m :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mNumCols n of
-      Left err -> reportErr loc err
-      Right k -> return $ IntConst k :@ loc
+    k <- tryEvalM loc $ mNumCols n
+    return $ IntConst k :@ loc
 
   eval (IntRand ls :@ loc) = do
     xs <- eval ls >>= getVal
@@ -231,9 +228,8 @@ instance Eval StrExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix String)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return $ StrConst x :@ loc
+    x <- tryEvalM loc $ mEntryOf (i,j) p
+    return $ StrConst x :@ loc
 
   eval (StrIfThenElse b t f :@ _) = eIfThenElse b t f
 
@@ -310,9 +306,8 @@ instance Eval BoolExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix Bool)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return $ BoolConst x :@ loc
+    x <- tryEvalM loc $ mEntryOf (i,j) p
+    return $ BoolConst x :@ loc
 
   eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
 
@@ -424,29 +419,25 @@ instance Eval BoolExpr where
 
   eval (MatIsRow m :@ loc) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mIsRow p of
-      Left err -> reportErr loc err
-      Right q  -> return $ BoolConst q :@ loc
+    q <- tryEvalM loc $ mIsRow p
+    return $ BoolConst q :@ loc
 
   eval (MatIsCol m :@ loc) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mIsCol p of
-      Left err -> reportErr loc err
-      Right q  -> return $ BoolConst q :@ loc
+    q <- tryEvalM loc $ mIsCol p
+    return $ BoolConst q :@ loc
 
   eval (MatIsGJForm m :@ loc) = do
     t <- typeOf m
     case t of
       MatOf QQ -> do
         p <- eval m >>= getVal :: EvalM (Matrix Rat)
-        case mIsGaussJordanForm p of
-          Left err -> reportErr loc err
-          Right q  -> return $ BoolConst q :@ loc
+        q <- tryEvalM loc $ mIsGaussJordanForm p
+        return $ BoolConst q :@ loc
       MatOf BB -> do
         p <- eval m >>= getVal :: EvalM (Matrix Bool)
-        case mIsGaussJordanForm p of
-          Left err -> reportErr loc err
-          Right q  -> return $ BoolConst q :@ loc
+        q <- tryEvalM loc $ mIsGaussJordanForm p
+        return $ BoolConst q :@ loc
       _ -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
@@ -480,9 +471,8 @@ instance Eval RatExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix Rat)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return $ RatConst x :@ loc
+    x <- tryEvalM loc $ mEntryOf (i,j) p
+    return $ RatConst x :@ loc
 
   eval (RatCast expr :@ loc) = do
     n <- eval expr >>= getVal :: EvalM Integer
@@ -521,14 +511,12 @@ instance Eval RatExpr where
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
-        case rIntMeanT (0:/:1) xs of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
+        return $ RatConst m :@ loc
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
-        case rMeanT (0:/:1) xs of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ rMeanT (0:/:1) xs
+        return $ RatConst m :@ loc
       u -> reportErr loc $ NumericListExpected u
 
   {- Mean Deviation -}
@@ -537,14 +525,12 @@ instance Eval RatExpr where
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
-        case rIntMeanDevT (0:/:1) xs of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
+        return $ RatConst m :@ loc
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
-        case rMeanDevT (0:/:1) xs of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ rMeanDevT (0:/:1) xs
+        return $ RatConst m :@ loc
       u -> reportErr loc $ NumericListExpected u
 
   {- Standard Deviation -}
@@ -554,14 +540,12 @@ instance Eval RatExpr where
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
-        case ratIntStdDev xs k of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ ratIntStdDev xs k
+        return $ RatConst m :@ loc
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
-        case ratStdDev xs k of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ ratStdDev xs k
+        return $ RatConst m :@ loc
       u -> reportErr loc $ NumericListExpected u
 
   {- Z-Score -}
@@ -572,14 +556,12 @@ instance Eval RatExpr where
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
-        case ratIntZScore y xs k of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ ratIntZScore y xs k
+        return $ RatConst m :@ loc
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
-        case ratZScore y xs k of
-          Right m -> return $ RatConst m :@ loc
-          Left err -> reportErr loc err
+        m  <- tryEvalM loc $ ratZScore y xs k
+        return $ RatConst m :@ loc
       u -> reportErr loc $ NumericListExpected u
 
 
@@ -601,9 +583,7 @@ instance Eval ListExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix ListExpr)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return x
+    tryEvalM loc $ mEntryOf (i,j) p
 
   eval (ListMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -762,9 +742,7 @@ instance Eval MacExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix MacExpr)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return x
+    tryEvalM loc $ mEntryOf (i,j) p
 
   eval (MacMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -792,9 +770,7 @@ instance Eval MatExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix MatExpr)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return x
+    tryEvalM loc $ mEntryOf (i,j) p
 
   eval (MatMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -812,15 +788,15 @@ instance Eval MatExpr where
   eval (MatId t n :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
     case t of
-      ZZ -> case mEIdT (0::Integer) k of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
-      QQ -> case mEIdT (0:/:1) k of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
-      BB -> case mEIdT False k of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
+      ZZ -> do
+        x <- tryEvalM loc $ mEIdT (0::Integer) k
+        return $ inject loc x
+      QQ -> do
+        x <- tryEvalM loc $ mEIdT (0:/:1) k
+        return $ inject loc x
+      BB -> do
+        x <- tryEvalM loc $ mEIdT False k
+        return $ inject loc x
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatSwapE t n h k :@ loc) = do
@@ -828,15 +804,15 @@ instance Eval MatExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     case t of
-      ZZ -> case mESwapT (0::Integer) m i j of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
-      QQ -> case mESwapT (0:/:1) m i j of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
-      BB -> case mESwapT (False) m i j of
-        Left err -> reportErr loc err
-        Right x -> return $ inject loc x
+      ZZ -> do
+        x <- tryEvalM loc $ mESwapT (0::Integer) m i j
+        return $ inject loc x
+      QQ -> do
+        x <- tryEvalM loc $ mESwapT (0:/:1) m i j
+        return $ inject loc x
+      BB -> do
+        x <- tryEvalM loc $ mESwapT (False) m i j
+        return $ inject loc x
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatScaleE t n h x :@ loc) = do
@@ -845,19 +821,16 @@ instance Eval MatExpr where
     case t of
       ZZ -> do
         w <- eval x >>= getVal :: EvalM Integer
-        case mEScaleT (0::Integer) m k w of
-          Left err -> reportErr loc err
-          Right y -> return $ inject loc y
+        y <- tryEvalM loc $ mEScaleT (0::Integer) m k w
+        return $ inject loc y
       QQ -> do
         w <- eval x >>= getVal :: EvalM Rat
-        case mEScaleT (0:/:1) m k w of
-          Left err -> reportErr loc err
-          Right y -> return $ inject loc y
+        y <- tryEvalM loc $ mEScaleT (0:/:1) m k w
+        return $ inject loc y
       BB -> do
         w <- eval x >>= getVal :: EvalM Bool
-        case mEScaleT (False) m k w of
-          Left err -> reportErr loc err
-          Right y -> return $ inject loc y
+        y <- tryEvalM loc $ mEScaleT (False) m k w
+        return $ inject loc y
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatAddE t n h k x :@ loc) = do
@@ -893,30 +866,24 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatShuffleRows m :@ loc) = do
-    t <- typeOf m
-    x <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mRowsOf x of
-      Left err -> reportErr loc err
-      Right rs -> do
-        ts <- shuffleEvalM rs
-        case mVCats ts of
-          Left err -> reportErr loc err
-          Right n -> case t of
-            MatOf u -> return $ MatConst u n :@ loc
-            _ -> reportErr loc $ MatrixExpected t
+    t  <- typeOf m
+    x  <- eval m >>= getVal :: EvalM (Matrix Expr)
+    rs <- tryEvalM loc $ mRowsOf x
+    ts <- shuffleEvalM rs
+    n  <- tryEvalM loc $ mVCats ts
+    case t of
+      MatOf u -> return $ MatConst u n :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatShuffleCols m :@ loc) = do
-    t <- typeOf m
-    x <- eval m >>= getVal :: EvalM (Matrix Expr)
-    case mColsOf x of
-      Left err -> reportErr loc err
-      Right rs -> do
-        ts <- shuffleEvalM rs
-        case mHCats ts of
-          Left err -> reportErr loc err
-          Right n -> case t of
-            MatOf u -> return $ MatConst u n :@ loc
-            _ -> reportErr loc $ MatrixExpected t
+    t  <- typeOf m
+    x  <- eval m >>= getVal :: EvalM (Matrix Expr)
+    rs <- tryEvalM loc $ mColsOf x
+    ts <- shuffleEvalM rs
+    n  <- tryEvalM loc $ mHCats ts
+    case t of
+      MatOf u -> return $ MatConst u n :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatHCat a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -962,11 +929,10 @@ instance Eval MatExpr where
   eval (MatTrans a :@ loc) = do
     t <- typeOf a
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
-    case mTranspose m of
-      Left err -> reportErr loc err
-      Right p -> case t of
-          MatOf u -> return $ MatConst u p :@ loc
-          _ -> reportErr loc $ MatrixExpected t 
+    p <- tryEvalM loc $ mTranspose m
+    case t of
+      MatOf u -> return $ MatConst u p :@ loc
+      _ -> reportErr loc $ MatrixExpected t 
 
   eval (MatMul a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -985,19 +951,16 @@ instance Eval MatExpr where
     case t of
       MatOf ZZ -> do
         q <- eval m >>= getVal :: EvalM (Matrix Integer)
-        case rPosPow q k of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ rPosPow q k
+        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
       MatOf QQ -> do
         q <- eval m >>= getVal :: EvalM (Matrix Rat)
-        case rPosPow q k of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ rPosPow q k
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       MatOf BB -> do
         q <- eval m >>= getVal :: EvalM (Matrix Bool)
-        case rPosPow q k of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ rPosPow q k
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatSwapRows m a b :@ loc) = do
@@ -1005,22 +968,20 @@ instance Eval MatExpr where
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     j <- eval b >>= getVal :: EvalM Integer
-    case mSwapRows i j n of
-      Right p -> case t of
-        MatOf u -> return $ MatConst u p :@ loc
-        _ -> reportErr loc $ MatrixExpected t
-      Left err -> reportErr loc err
+    p <- tryEvalM loc $ mSwapRows i j n
+    case t of
+      MatOf u -> return $ MatConst u p :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatSwapCols m a b :@ loc) = do
     t <- typeOf m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     j <- eval b >>= getVal :: EvalM Integer
-    case mSwapCols i j n of
-      Right p -> case t of
-        MatOf u -> return $ MatConst u p :@ loc
-        _ -> reportErr loc $ MatrixExpected t
-      Left err -> reportErr loc err
+    p <- tryEvalM loc $ mSwapCols i j n
+    case t of
+      MatOf u -> return $ MatConst u p :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatScaleRow m a h :@ loc) = do
     t <- typeOf m
@@ -1030,21 +991,18 @@ instance Eval MatExpr where
       Right (MatOf ZZ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
-        case mScaleRow r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleRow r i n
+        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
-        case mScaleRow r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleRow r i n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
-        case mScaleRow r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleRow r i n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1056,21 +1014,18 @@ instance Eval MatExpr where
       Right (MatOf ZZ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
-        case mScaleCol r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleCol r i n
+        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
-        case mScaleCol r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleCol r i n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
-        case mScaleCol r i n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mScaleCol r i n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1083,21 +1038,18 @@ instance Eval MatExpr where
       Right (MatOf ZZ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
-        case mAddRow r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddRow r i j n
+        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
-        case mAddRow r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddRow r i j n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
-        case mAddRow r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddRow r i j n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1110,21 +1062,18 @@ instance Eval MatExpr where
       Right (MatOf ZZ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
-        case mAddCol r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddCol r i j n
+        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
-        case mAddCol r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddCol r i j n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
-        case mAddCol r i j n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mAddCol r i j n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1132,35 +1081,31 @@ instance Eval MatExpr where
     t <- typeOf m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
-    case mDelRow n i of
-      Right p -> case t of
-        MatOf u -> return $ MatConst u p :@ loc
-        _ -> reportErr loc $ MatrixExpected t
-      Left err -> reportErr loc err
+    p <- tryEvalM loc $ mDelRow n i
+    case t of
+      MatOf u -> return $ MatConst u p :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatDelCol m a :@ loc) = do
     t <- typeOf m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
-    case mDelCol n i of
-      Right p -> case t of
-        MatOf u -> return $ MatConst u p :@ loc
-        _ -> reportErr loc $ MatrixExpected t
-      Left err -> reportErr loc err
+    p <- tryEvalM loc $ mDelCol n i
+    case t of
+      MatOf u -> return $ MatConst u p :@ loc
+      _ -> reportErr loc $ MatrixExpected t
 
   eval (MatGJForm m :@ loc) = do
     t <- typeOf m
     case t of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
-        case mGJForm n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mGJForm n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       MatOf BB -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
-        case mGJForm n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mGJForm n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       _ -> reportErr loc $ FieldMatrixExpected t
 
   eval (MatGJFactor m :@ loc) = do
@@ -1168,14 +1113,12 @@ instance Eval MatExpr where
     case t of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
-        case mGJFactor n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mGJFactor n
+        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
       MatOf BB -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
-        case mGJFactor n of
-          Left err -> reportErr loc err
-          Right p -> return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+        p <- tryEvalM loc $ mGJFactor n
+        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       _ -> reportErr loc $ FieldMatrixExpected t
 
 
@@ -1398,9 +1341,7 @@ instance Eval PolyExpr where
     i <- eval h >>= getVal :: EvalM Integer
     j <- eval k >>= getVal :: EvalM Integer
     p <- eval m >>= getVal :: EvalM (Matrix PolyExpr)
-    case (i,j) `mEntryOf` p of
-      Left err -> reportErr loc err
-      Right x -> return x
+    tryEvalM loc $ mEntryOf (i,j) p
 
   eval (PolyMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -2345,9 +2286,8 @@ lift1
   ) => Locus -> (a -> Either err b) -> x -> EvalM y
 lift1 loc f x = do
   a <- eval x >>= getVal
-  case f a of
-    Left err -> reportErr loc err
-    Right b  -> return $ inject loc b
+  b <- tryEvalM loc $ f a
+  return $ inject loc b
 
 
 lift2
@@ -2359,9 +2299,8 @@ lift2
 lift2 loc f x y = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
-  case f a b of
-    Left err -> reportErr loc err
-    Right c  -> return $ inject loc c
+  c <- tryEvalM loc $ f a b
+  return $ inject loc c
 
 
 {- Saved for future use
