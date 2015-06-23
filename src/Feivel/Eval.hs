@@ -1119,6 +1119,20 @@ instance Eval MatExpr where
         return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
       _ -> reportErr loc $ FieldMatrixExpected t
 
+  eval (MatGetRow k m :@ loc) = do
+    u <- expectMatrix loc m
+    i <- eval k >>= getVal :: EvalM Integer
+    n <- eval m >>= getVal :: EvalM (Matrix Expr)
+    r <- tryEvalM loc $ mRowOf i n
+    return (MatConst u r :@ loc)
+
+  eval (MatGetCol k m :@ loc) = do
+    u <- expectMatrix loc m
+    i <- eval k >>= getVal :: EvalM Integer
+    n <- eval m >>= getVal :: EvalM (Matrix Expr)
+    c <- tryEvalM loc $ mColOf i n
+    return (MatConst u c :@ loc)
+
 
 
 {-------------}
@@ -1689,6 +1703,9 @@ instance Typed MatExpr where
 
   typeOf (MatGJForm   m :@ _) = typeOf m
   typeOf (MatGJFactor m :@ _) = typeOf m
+
+  typeOf (MatGetRow _ m :@ _) = typeOf m
+  typeOf (MatGetCol _ m :@ _) = typeOf m
 
   typeOf (MatRand ms :@ loc) = do
     t <- typeOf ms

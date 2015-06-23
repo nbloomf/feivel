@@ -465,6 +465,9 @@ data MatExprLeaf
   | MatDelRow   MatExpr IntExpr
   | MatDelCol   MatExpr IntExpr
 
+  | MatGetRow   IntExpr MatExpr
+  | MatGetCol   IntExpr MatExpr
+
   -- Randomness
   | MatShuffleRows MatExpr
   | MatShuffleCols MatExpr

@@ -409,6 +409,10 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
     Infix matrix concatenation
 
+- `GetRow(INT; MAT)`, `GetCol(INT; MAT)`
+
+    Extract the row or column matrix at index INT (counting from 1).
+
 
 `^t`: Polynomials
 -----------------
