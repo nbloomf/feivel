@@ -20,7 +20,8 @@ module Feivel.Parse.Expr (
   pDoc,
 
   pTypedConst,
-    pStrConst, pIntConst, pBoolConst, pRatConst, pListConst, pMatConst, pPolyConst
+    pStrConst, pIntConst, pBoolConst, pRatConst,
+    pListLiteral, pMatLiteral, pPolyLiteral
 ) where
 
 import Feivel.Expr
@@ -737,13 +738,16 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
 {- :ListExpr -}
 {-------------}
 
-pListConst :: Type -> ParseM (ListExpr, Type)
-pListConst typ = pAtLocus $ pListConst' typ
+pListLiteral :: Type -> ParseM (ListExpr, Type)
+pListLiteral typ = pAtLocus $ pListLiteralOf typ pTypedExpr
 
-pListConst' :: Type -> ParseM (ListExprLeaf, Type)
-pListConst' typ = do
+pListConst :: Type -> ParseM (ListExpr, Type)
+pListConst typ = pAtLocus $ pListLiteralOf typ pTypedConst
+
+pListLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (ListExprLeaf, Type)
+pListLiteralOf typ p = do
     start <- getPosition
-    xs <- pBraceList (pTypedExpr typ)
+    xs <- pBraceList (p typ)
     end <- getPosition
     case map snd xs of
       [] -> return (ListConst typ [], ListOf typ)
@@ -757,7 +761,7 @@ pListExpr = pTypedListExpr XX
 pTypedListExpr :: Type -> ParseM (ListExpr, Type)
 pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
   where
-    pListTerm = pTerm (pListConst' typ) (pTypedListExpr typ) "list expression"
+    pListTerm = pTerm (pListLiteralOf typ pTypedExpr) (pTypedListExpr typ) "list expression"
       [ pVarExpr ListVar (ListOf typ)
 
       , pMacroExpr ListMacro
@@ -852,11 +856,14 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
 {- :MatExpr -}
 {------------}
 
-pMatConst :: Type -> ParseM (MatExpr, Type)
-pMatConst typ = pAtLocus $ pMatConst' typ
+pMatLiteral :: Type -> ParseM (MatExpr, Type)
+pMatLiteral typ = pAtLocus $ pMatLiteralOf typ pTypedExpr
 
-pMatConst' :: Type -> ParseM (MatExprLeaf, Type)
-pMatConst' typ = do
+pMatConst :: Type -> ParseM (MatExpr, Type)
+pMatConst typ = pAtLocus $ pMatLiteralOf typ pTypedConst
+
+pMatLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (MatExprLeaf, Type)
+pMatLiteralOf typ p = do
   start <- getPosition
   xss <- pBrackList (pBrackList (pTypedExpr typ))
   end <- getPosition
@@ -876,7 +883,7 @@ pMatExpr = pTypedMatExpr XX
 pTypedMatExpr :: Type -> ParseM (MatExpr, Type)
 pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
   where
-    pMatTerm = pTerm (pMatConst' typ) (pTypedMatExpr typ) "matrix expression"
+    pMatTerm = pTerm (pMatLiteralOf typ pTypedExpr) (pTypedMatExpr typ) "matrix expression"
       [ pVarExpr MatVar (MatOf typ)
 
       , pAtPos (MatOf typ) MatAtPos
@@ -984,14 +991,17 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
 {- :PolyExpr -}
 {-------------}
 
-pPolyConst :: Type -> ParseM (PolyExpr, Type)
-pPolyConst typ = pAtLocus $ pPolyConst' typ
+pPolyLiteral :: Type -> ParseM (PolyExpr, Type)
+pPolyLiteral typ = pAtLocus $ pPolyLiteralOf typ pTypedExpr
 
-pPolyConst' :: Type -> ParseM (PolyExprLeaf, Type)
-pPolyConst' typ = do
+pPolyConst :: Type -> ParseM (PolyExpr, Type)
+pPolyConst typ = pAtLocus $ pPolyLiteralOf typ pTypedConst
+
+pPolyLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (PolyExprLeaf, Type)
+pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("
-  ts <- sepBy1 (pPolyTerm $ pTypedExpr typ) (try $ char ';')
+  ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
   keyword ")"
   return (PolyConst typ (fromListP $ map foo ts), PolyOver typ)
   where
@@ -1023,7 +1033,7 @@ pPolyExpr = pTypedPolyExpr XX
 pTypedPolyExpr :: Type -> ParseM (PolyExpr, Type)
 pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
-    pPolyTerm = pTerm (pPolyConst' typ) (pTypedPolyExpr typ) "polynomial expression"
+    pPolyTerm = pTerm (pPolyLiteralOf typ pTypedExpr) (pTypedPolyExpr typ) "polynomial expression"
       [ pVarExpr PolyVar (PolyOver typ)
 
       , pAtPos (PolyOver typ) PolyAtPos
