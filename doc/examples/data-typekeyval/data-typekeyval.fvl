@@ -1,0 +1,20 @@
+In this example, we pull data from an external store.
+
+We can pull data from an external source before processing a template; this is equivalent to prefixing the template with a bunch of define commands. As of version 0.1.0 there is one way to do this: by storing records in a custom textual format called TypeKeyVal. (N.B.: future versions may allow importing data from other formats.)
+
+A TypeKeyVal-formatted file is a list of records, with one record per line. Each record consists of one or more fields. Each field has the form :type:key:val; where type is a feivel type signature, key is a valid feivel key, and val is a constant expression of the appropriate type.
+
+@a
+@p
+@b
+@as
+
+To process a template against imported data, use the -d flag. For instance, to process the template temp.fvl with data in data.txt, invoke feivel as follows.
+
+feivel -t temp.fvl -d data.txt
+
+There are two ways to handle the output of processing a template in this way. By default, feivel evaluates the template against each record one at a time and concatenates the results to stdout. The other option is to write the output of each template+record process to a file, with filenames suffixed by numbers. To do this, use the -o flag as follows.
+
+feivel -t temp.fvl -d data.text -o out.txt
+
+The argument of -o is the output filenames; feivel will write these with a number before the dot (if present) or at the end of the name (if not).
