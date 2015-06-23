@@ -110,6 +110,7 @@ instance Show REPLErr where
   show Quit = "Bye!"
 
 
+
 {------------}
 {- :RandErr -}
 {------------}
@@ -129,6 +130,7 @@ instance Show RandErr where
 
   show (NonpositiveParameter x) =
     "The parameter whose value is " ++ show x ++ " should be positive."
+
 
 
 {---------}

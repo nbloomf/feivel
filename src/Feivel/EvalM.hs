@@ -126,7 +126,6 @@ tryEvalM loc (Right a)  = return a
 
 
 
-
 {-------}
 {- :IO -}
 {-------}
@@ -243,6 +242,7 @@ observeIntegerPoisson loc lambda = do
   if lambda <= 0
     then reportErr loc $ NonpositiveParameter lambda
     else lift $ lift $ integralPoisson lambda
+
 
 
 {----------}

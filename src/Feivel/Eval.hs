@@ -468,7 +468,7 @@ instance Eval BoolExpr where
 {-----------------}
 
 instance Eval RatExpr where
-  eval (RatConst p :@ loc) = return $ RatConst p :@ loc -- lift1 loc (ratRed) p
+  eval (RatConst p :@ loc) = return $ RatConst p :@ loc
 
   eval (RatVar key :@ loc) = lookupKey loc key >>= get >>= eval
 
@@ -719,7 +719,6 @@ instance Eval ListExpr where
           return x
     zs <- filterM foo ys
     return (ListConst t zs :@ loc)
-
 
 
 
@@ -1067,22 +1066,18 @@ instance Eval MatExpr where
       Left err -> reportErr loc err
 
   eval (MatDelRow m a :@ loc) = do
-    t <- typeOf m
+    u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     p <- tryEvalM loc $ mDelRow n i
-    case t of
-      MatOf u -> return $ MatConst u p :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u p :@ loc
 
   eval (MatDelCol m a :@ loc) = do
-    t <- typeOf m
+    u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal :: EvalM Integer
     p <- tryEvalM loc $ mDelCol n i
-    case t of
-      MatOf u -> return $ MatConst u p :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u p :@ loc
 
   eval (MatGJForm m :@ loc) = do
     t <- typeOf m

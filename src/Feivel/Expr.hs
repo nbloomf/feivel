@@ -156,9 +156,9 @@ instance ToExpr PolyExpr where toExpr = PolyE
 instance ToExpr MacExpr  where toExpr = MacE
 
 -- Not a fan of "no locus" here
-instance ToExpr Integer where toExpr k = IntE $ IntConst k :@ NullLocus
-instance ToExpr Rat     where toExpr r = RatE $ RatConst r :@ NullLocus
-instance ToExpr String  where toExpr s = StrE $ StrConst s :@ NullLocus
+instance ToExpr Integer where toExpr k = IntE  $ IntConst k :@ NullLocus
+instance ToExpr Rat     where toExpr r = RatE  $ RatConst r :@ NullLocus
+instance ToExpr String  where toExpr s = StrE  $ StrConst s :@ NullLocus
 instance ToExpr Bool    where toExpr b = BoolE $ BoolConst b :@ NullLocus
 
 
@@ -206,8 +206,6 @@ data StrExprLeaf
   | StrFormat Format Expr
   | StrTypeOf Expr
   deriving (Eq, Show)
-
-
 
 
 
