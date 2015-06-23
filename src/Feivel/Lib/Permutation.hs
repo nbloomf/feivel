@@ -16,44 +16,44 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib.AlgErr where
+module Feivel.Lib.Permutation where
 
-data AlgErr
-  = RingoidOK
-  | RingoidAddErr String
-  | RingoidMulErr String
-  | RingoidNegErr String
+import Feivel.Lib.AlgErr
 
-  | RingoidDivideByZeroErr String
-  | RingoidNotInvertibleErr String
-  | RingoidNegativeExponentErr Integer
-  | RingoidZeroExponentErr
+import Control.Monad (foldM)
+import qualified Data.Map as Map
 
-  | RingoidEmptyListErr String
-  | RingoidSingletonListErr String
+type Perm a = Map.Map a a
 
-  | EvenRootOfNegative String
+toPairs :: (Eq a, Ord a) => Perm a -> [(a,a)]
+toPairs = Map.toList
 
-  | MatCoefErr String
+movedBy :: (Eq a, Ord a) => Perm a -> [a]
+movedBy = Map.keys
 
-  | PolyDivErr String
-  | PolyNotConstant String
+idPerm :: (Eq a, Ord a) => Perm a
+idPerm = Map.fromList []
 
-  -- Structural Errors
-  | NullMatrix String
-  | InvalidIndex String -- Index Dim
-  | InvalidRowIndex String -- Integer Dim
-  | InvalidColIndex String -- Integer Dim
-  | DimMismatch String -- Dim Dim
-  | EmptyMatrixList
+fromCycle :: (Eq a, Ord a) => [a] -> Either AlgErr (Perm a)
+fromCycle [] = Right $ Map.fromList []
+fromCycle as
+  | uniq as   = Right $ Map.fromList $ zip as (tail as ++ [head as])
+  | otherwise = Left NotACycle
 
-  -- Arithmetic Errors
-  | NegativeExponent
-  | NonSquareMatrix
-  | ZeroMatrix
-  | EmptyMatrixProduct
-  | NonInvertibleMatrix
+disjoint :: (Eq a) => [a] -> [a] -> Bool
+disjoint [] _ = True
+disjoint (x:xs) ys = (not $ elem x ys) && (disjoint xs ys)
 
-  | NotACycle
-  | NotDisjoint
-  deriving (Eq, Show)
+unionDisjoint :: (Eq a, Ord a) => Perm a -> Perm a -> Either AlgErr (Perm a)
+unionDisjoint p q
+  | disjoint (movedBy p) (movedBy q) = Right $ Map.union p q
+  | otherwise = Left NotDisjoint
+
+fromCycles :: (Eq a, Ord a) => [[a]] -> Either AlgErr (Perm a)
+fromCycles xss = do
+  os <- sequence $ map fromCycle xss
+  foldM unionDisjoint idPerm os
+
+uniq :: (Eq a) => [a] -> Bool
+uniq [] = True
+uniq (a:as) = if a`elem`as then False else uniq as

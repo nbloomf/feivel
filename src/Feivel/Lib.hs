@@ -24,7 +24,8 @@ module Feivel.Lib (
   module Feivel.Lib.List,
   module Feivel.Lib.Matrix,
   module Feivel.Lib.Polynomial,
-  module Feivel.Lib.Pair
+  module Feivel.Lib.Pair,
+  module Feivel.Lib.Permutation
 ) where
 
 import Feivel.Lib.Ring
@@ -35,3 +36,4 @@ import Feivel.Lib.List
 import Feivel.Lib.Matrix
 import Feivel.Lib.Polynomial
 import Feivel.Lib.Pair
+import Feivel.Lib.Permutation
