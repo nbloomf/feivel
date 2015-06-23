@@ -440,6 +440,8 @@ data MatExprLeaf
 
   | MatIfThenElse BoolExpr MatExpr MatExpr
 
+  | MatBuilder Type Expr Key ListExpr Key ListExpr
+
   -- Special Values
   | MatId     Type IntExpr
   | MatSwapE  Type IntExpr IntExpr IntExpr

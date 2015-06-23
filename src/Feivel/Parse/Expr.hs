@@ -89,12 +89,8 @@ pConst p h t = do
 
 pVarExpr :: (Key -> a) -> Type -> ParseM (a,Type)
 pVarExpr h t = do
-  start <- getPosition
-  (k,u) <- pKey
-  end   <- getPosition
-  case unify t u of
-    Left err -> reportParseErr (locus start end) err
-    Right w -> return (h k, w)
+  (k,_) <- pKey
+  return (h k, t)
 
 pAtPos :: Type -> (ListExpr -> IntExpr -> b) -> ParseM (b, Type) 
 pAtPos typ fun = pFun2 "AtPos" (pTypedListExpr typ) pIntExpr fun typ
@@ -865,7 +861,7 @@ pMatConst typ = pAtLocus $ pMatLiteralOf typ pTypedConst
 pMatLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (MatExprLeaf, Type)
 pMatLiteralOf typ p = do
   start <- getPosition
-  xss <- pBrackList (pBrackList (pTypedExpr typ))
+  xss <- pBrackList (pBrackList (p typ))
   end <- getPosition
   case concatMap (map snd) xss of
     [] -> case mFromRowList [] of
@@ -902,6 +898,8 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
 
       , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) MatGetRow (MatOf typ)
       , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) MatGetCol (MatOf typ)
+
+      , pMatBuilder
 
       , pMatId
       , pMatSwapE
@@ -972,6 +970,25 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
         pMatGJForm   = pFun1T "GJForm"   (pTypedMatExpr typ) MatGJForm
         pMatGJFactor = pFun1T "GJFactor" (pTypedMatExpr typ) MatGJFactor
 
+        pMatBuilder = do
+          try $ keyword "Build"
+          keyword "("
+          (e,_) <- pTypedExpr typ
+          keyword ";"
+          tr <- pType
+          whitespace
+          (kr,_) <- pKey
+          keyword "<-"
+          (lr,_) <- pTypedListExpr tr
+          keyword ";"
+          tc <- pType
+          whitespace
+          (kc,_) <- pKey
+          keyword "<-"
+          (lc,_) <- pTypedListExpr tc
+          keyword ")"
+          return (MatBuilder typ e kr lr kc lc, MatOf typ)
+
     
     matOpTable =
       [ [ Prefix (opParser1 MatNeg "-")
@@ -1008,8 +1025,8 @@ pPolyLiteralOf typ p = do
     foo ((a,_),c) = (a,c)
 
     pPolyTerm :: ParseM a -> ParseM (a, Monomial)
-    pPolyTerm p = do
-      c <- p
+    pPolyTerm q = do
+      c <- q
       x <- option identityM $ try (keyword ".") >> (pIdMon <|> pMonomial)
       return (c,x)
     

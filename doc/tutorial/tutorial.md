@@ -413,6 +413,10 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
     Extract the row or column matrix at index INT (counting from 1).
 
+- `Build(EXPR; TYP KEY <- LIST; TYP KEY <- LIST)`
+
+    Matrix builder notation. The first list argument ranges over the rows of the matrix, and the second over the columns; the entries are given by EXPR. For example, `Build(@i ^ @j; int @i <- {2;3}; int @j <- {1;2;3})` gives the matrix `[[2;4;8];[3;9;27]]`.
+
 
 `^t`: Polynomials
 -----------------

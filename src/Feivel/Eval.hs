@@ -1133,6 +1133,18 @@ instance Eval MatExpr where
     c <- tryEvalM loc $ mColOf i n
     return (MatConst u c :@ loc)
 
+  eval (MatBuilder typ e kr lr kc lc :@ loc) = do
+    st <- getState
+    rs <- eval lr >>= getVal :: EvalM [Expr]
+    cs <- eval lc >>= getVal :: EvalM [Expr]
+    es <- sequence [sequence [foo st r c | c <- cs] | r <- rs]
+    m  <- tryEvalM loc $ mFromRowList es
+    return (MatConst typ m :@ loc)
+      where
+        foo st r c = do
+          st' <- addKeyToStore kr r loc st >>= addKeyToStore kc c loc
+          evalWith e st' >>= getVal
+
 
 
 {-------------}
@@ -1483,8 +1495,6 @@ instance Typed Expr where
 {------------------}
 
 instance Typed IntExpr where
-  typeOf (IntVar key :@ loc) =
-    lookupKey loc key >>= expectType loc ZZ
   typeOf _ = return ZZ
 
 
@@ -1494,8 +1504,6 @@ instance Typed IntExpr where
 {------------------}
 
 instance Typed StrExpr where
-  typeOf (StrVar key :@ loc) =
-    lookupKey loc key >>= expectType loc SS
   typeOf _ = return SS
 
 
@@ -1505,8 +1513,6 @@ instance Typed StrExpr where
 {-------------------}
 
 instance Typed BoolExpr where
-  typeOf (BoolVar key :@ loc) =
-    lookupKey loc key >>= expectType loc BB
   typeOf _ = return BB
 
 
@@ -1516,8 +1522,6 @@ instance Typed BoolExpr where
 {------------------}
 
 instance Typed RatExpr where
-  typeOf (RatVar key :@ loc) =
-    lookupKey loc key >>= expectType loc QQ
   typeOf _ = return QQ
 
 
@@ -1712,6 +1716,8 @@ instance Typed MatExpr where
     case t of
       ListOf (MatOf u) -> return $ MatOf u
       _ -> reportErr loc $ MatrixListExpected t
+
+  typeOf (MatBuilder typ _ _ _ _ _ :@ _) = return (MatOf typ)
 
 
 
