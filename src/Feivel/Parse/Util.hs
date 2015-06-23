@@ -16,7 +16,13 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Parse.Util where
+module Feivel.Parse.Util (
+  keyword, whitespace, spaced,
+
+  pTuple2, pTuple4,
+
+  pFun1, pFun2, pFun3, pFun4, pFun1T, pFun2T, pFun3T, pFun4T
+) where
 
 import Feivel.Type
 import Feivel.Parse.Type

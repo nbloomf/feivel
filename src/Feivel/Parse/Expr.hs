@@ -905,17 +905,20 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
       , pMatSwapE
       , pMatScaleE
       , pMatAddE
-      , pMatPow
-      , pMatSwapRows
-      , pMatSwapCols
-      , pMatScaleRow
-      , pMatScaleCol
-      , pMatAddRow
-      , pMatAddCol
-      , pMatDelRow
-      , pMatDelCol
-      , pMatGJForm
-      , pMatGJFactor
+
+      , pFun2T "Pow" (pTypedMatExpr typ) pIntExpr MatPow
+
+      , pFun3T "SwapRows" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapRows
+      , pFun3T "SwapCols" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapCols
+      , pFun3T "ScaleRow" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleRow
+      , pFun3T "ScaleCol" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleCol
+      , pFun4T "AddRow"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddRow
+      , pFun4T "AddCol"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddCol
+      , pFun2T "DelRow"   (pTypedMatExpr typ) pIntExpr MatDelRow
+      , pFun2T "DelCol"   (pTypedMatExpr typ) pIntExpr MatDelCol
+
+      , pFun1T "GJForm"   (pTypedMatExpr typ) MatGJForm
+      , pFun1T "GJFactor" (pTypedMatExpr typ) MatGJFactor
       ]
       where
         pMatId = do
@@ -955,20 +958,6 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
           (e,_) <- pTypedExpr t
           keyword ")"
           return (MatAddE t n i j e, MatOf t)
-    
-        pMatPow = pFun2T "Pow" (pTypedMatExpr typ) pIntExpr MatPow
-    
-        pMatSwapRows = pFun3T "SwapRows" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapRows
-        pMatSwapCols = pFun3T "SwapCols" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapCols
-        pMatScaleRow = pFun3T "ScaleRow" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleRow
-        pMatScaleCol = pFun3T "ScaleCol" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleCol
-        pMatAddRow   = pFun4T "AddRow"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddRow
-        pMatAddCol   = pFun4T "AddCol"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddCol
-        pMatDelRow   = pFun2T "DelRow"   (pTypedMatExpr typ) pIntExpr MatDelRow
-        pMatDelCol   = pFun2T "DelCol"   (pTypedMatExpr typ) pIntExpr MatDelCol
-
-        pMatGJForm   = pFun1T "GJForm"   (pTypedMatExpr typ) MatGJForm
-        pMatGJFactor = pFun1T "GJFactor" (pTypedMatExpr typ) MatGJFactor
 
         pMatBuilder = do
           try $ keyword "Build"
@@ -988,7 +977,6 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
           (lc,_) <- pTypedListExpr tc
           keyword ")"
           return (MatBuilder typ e kr lr kc lc, MatOf typ)
-
     
     matOpTable =
       [ [ Prefix (opParser1 MatNeg "-")
