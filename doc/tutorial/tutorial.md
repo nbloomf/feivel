@@ -389,6 +389,10 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
 
     List builder notation. Constructs a list of all expressions of the form `EXPR`, where `EXPR` may contain keys which are bound inside `BIND`, and where each `BOOL` expression must evaluate to `#t`. An example is worth a thousand words: `Build(@a ++ @b; str @a <- {"a";"b"}; str @b <- {"cd";"ccd";"d"}; Matches(@b; "c.d"))` returns `{accd;bccd}`
 
+- `GetRow(INT; MAT)`, `GetCol(INT; MAT)`
+
+    Extract a row or column from the given matrix. INT is the index (counting from 1) of the desired row/column.
+
 
 `[t]`: Matrices
 ---------------

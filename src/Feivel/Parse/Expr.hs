@@ -774,6 +774,9 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
       , pFun1 "Unique"  (pTypedListExpr typ) ListUniq    (ListOf typ)
       , pFun1 "Shuffle" (pTypedListExpr typ) ListShuffle (ListOf typ)
 
+      , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) ListMatRow (ListOf typ)
+      , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) ListMatCol (ListOf typ)
+
       , pListRange
       , pListBuilder
       , pFun2 "Choose" pIntExpr (pTypedListExpr typ) ListChoose (ListOf typ)

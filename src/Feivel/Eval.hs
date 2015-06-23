@@ -720,6 +720,20 @@ instance Eval ListExpr where
     zs <- filterM foo ys
     return (ListConst t zs :@ loc)
 
+  eval (ListMatRow k m :@ loc) = do
+    u  <- expectMatrix loc m
+    i  <- eval k >>= getVal :: EvalM Integer
+    n  <- eval m >>= getVal :: EvalM (Matrix Expr)
+    as <- tryEvalM loc $ mListRowOf i n
+    return (ListConst u as :@ loc)
+
+  eval (ListMatCol k m :@ loc) = do
+    u  <- expectMatrix loc m
+    i  <- eval k >>= getVal :: EvalM Integer
+    n  <- eval m >>= getVal :: EvalM (Matrix Expr)
+    as <- tryEvalM loc $ mListColOf i n
+    return (ListConst u as :@ loc)
+
 
 
 {-----------------}
@@ -1557,6 +1571,14 @@ instance Typed ListExpr where
     return $ ListOf t
 
   typeOf (ListFilter _ _ xs :@ _) = typeOf xs
+
+  typeOf (ListMatRow _ m :@ loc) = do
+    u <- expectMatrix loc m
+    return (ListOf u)
+
+  typeOf (ListMatCol _ m :@ loc) = do
+    u <- expectMatrix loc m
+    return (ListOf u)
 
 
 

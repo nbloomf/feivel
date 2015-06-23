@@ -406,6 +406,10 @@ data ListExprLeaf
 
   | ListRand ListExpr
 
+  -- Matrices
+  | ListMatRow IntExpr MatExpr
+  | ListMatCol IntExpr MatExpr
+
   -- Random
   | ListShuffle ListExpr
   | ListChoose  IntExpr  ListExpr

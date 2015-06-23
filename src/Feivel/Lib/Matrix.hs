@@ -25,6 +25,8 @@ module Feivel.Lib.Matrix (
   mRowMajorFromList, mFromRowList, mRowFromList, mColFromList, mSingleton,
   mFromMap, mConst, mFromMapM, mToRowList, mRowsOf, mColsOf,
 
+  mListRowOf, mListColOf,
+
   mEntryOf, mIsNull, mIsSquare,
 
   mNumRows, mNumCols,

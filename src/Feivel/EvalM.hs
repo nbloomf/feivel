@@ -122,7 +122,7 @@ testEvalM expr = do
 
 tryEvalM :: (PromoteError err) => Locus -> Either err a -> EvalM a
 tryEvalM loc (Left err) = reportErr loc err
-tryEvalM loc (Right a)  = return a
+tryEvalM _   (Right a)  = return a
 
 
 

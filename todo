@@ -26,7 +26,7 @@ Feature Ideas
 * List: derange
 * List: map, fold
 * Matrix: determinant
-* Matrix: extract row/col as matrix or list
+* Matrix: extract row/col matrix
 * Matrix: insert row/column
 * Matrix: shuffle entries
 * Matrix: submatrix by row/col indices
