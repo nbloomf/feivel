@@ -137,6 +137,10 @@ data TypeErr
   | PolynomialListExpected Type
   | PolynomialMatrixExpected Type
 
+  | PermutationExpected Type
+  | PermutationListExpected Type
+  | PermutationMatrixExpected Type
+
   | TypeUnificationError  Type Type
   deriving Eq
 
@@ -204,6 +208,16 @@ instance Show TypeErr where
 
   show (PolynomialMatrixExpected t) =
     "A matrix of polynomials was expected, but this expression has type " ++ show t ++ "."
+
+
+  show (PermutationExpected t) =
+    "A permutation was expected, but this expression has type " ++ show t ++ "."
+
+  show (PermutationListExpected t) =
+    "A list of permutations was expected, but this expression has type " ++ show t ++ "."
+
+  show (PermutationMatrixExpected t) =
+    "A matrix of permutations was expected, but this expression has type " ++ show t ++ "."
 
 
   show (TypeUnificationError a b) =

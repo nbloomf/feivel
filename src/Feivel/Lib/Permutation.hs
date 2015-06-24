@@ -25,46 +25,93 @@ import Feivel.Lib.AlgErr
 import Feivel.Lib.Canon
 
 import Control.Monad (foldM)
-import Data.List (minimumBy, inits, tails, group, sortBy, sort, union)
-import qualified Data.Map as Map
+import Data.List (lookup, minimumBy, inits, tails, group, sortBy, sort, union, intersperse)
 
-type Perm a = Map.Map a a
 
-toPairs :: (Eq a, Ord a) => Perm a -> [(a,a)]
-toPairs = Map.toList
+{------------}
+{- :Helpers -}
+{------------}
 
-movedBy :: (Eq a, Ord a) => Perm a -> [a]
-movedBy = Map.keys
+-- Returns true iff input has no duplicates
+uniq :: (Eq a) => [a] -> Bool
+uniq [] = True
+uniq (a:as) = if a`elem`as then False else uniq as
 
-idPerm :: (Eq a, Ord a) => Perm a
-idPerm = Map.fromList []
-
-fromCycle :: (Eq a, Ord a) => [a] -> Either AlgErr (Perm a)
-fromCycle [] = Right $ Map.fromList []
-fromCycle as
-  | uniq as   = Right $ Map.fromList $ zip as (tail as ++ [head as])
-  | otherwise = Left NotACycle
+dedupe :: (Eq a) => [a] -> [a]
+dedupe [] = []
+dedupe (a:as) = a : (filter (/= a) as)
 
 disjoint :: (Eq a) => [a] -> [a] -> Bool
 disjoint [] _ = True
 disjoint (x:xs) ys = (not $ elem x ys) && (disjoint xs ys)
 
-unionDisjoint :: (Eq a, Ord a) => Perm a -> Perm a -> Either AlgErr (Perm a)
+removeFirstFrom :: (Eq a) => a -> [a] -> [a]
+removeFirstFrom _ [] = []
+removeFirstFrom a (b:bs) = if b==a then bs else b:(removeFirstFrom a bs)
+
+removeFirstsFrom :: (Eq a) => [a] -> [a] -> [a]
+removeFirstsFrom as bs = foldr removeFirstFrom bs as
+
+contains :: (Eq a) => [a] -> [a] -> Bool
+contains as bs = null $ removeFirstsFrom as bs
+
+isPermutationOf :: (Eq a) => [a] -> [a] -> Bool
+isPermutationOf as bs = (as `contains` bs) && (bs `contains` as)
+
+
+
+{---------}
+{- :Perm -}
+{---------}
+
+data Perm a = Perm {unPerm :: [(a,a)]} deriving (Eq, Show)
+
+isValid :: (Eq a) => Perm a -> Bool
+isValid (Perm []) = True
+isValid (Perm ps) = uniq as && (as `isPermutationOf` bs)
+  where
+    as = map fst ps
+    bs = map snd ps
+
+instance (Eq a) => Canon (Perm a) where
+  canon (Perm ps) = Perm $ filter (\(a,b) -> a /= b) ps
+
+movedBy :: (Eq a) => Perm a -> [a]
+movedBy = map fst . unPerm . canon
+
+
+
+{--------------}
+{- :Construct -}
+{--------------}
+
+idPerm :: (Eq a) => Perm a
+idPerm = Perm []
+
+fromCycle :: (Eq a) => [a] -> Either AlgErr (Perm a)
+fromCycle [] = Right (Perm [])
+fromCycle as
+  | uniq as   = Right $ Perm $ zip as (tail as ++ [head as])
+  | otherwise = Left NotACycle
+
+unionDisjoint :: (Eq a) => Perm a -> Perm a -> Either AlgErr (Perm a)
 unionDisjoint p q
-  | disjoint (movedBy p) (movedBy q) = Right $ Map.union p q
+  | disjoint (movedBy p) (movedBy q) = Right $ Perm (unPerm p ++ unPerm q)
   | otherwise = Left NotDisjoint
 
-fromCycles :: (Eq a, Ord a) => [[a]] -> Either AlgErr (Perm a)
+fromCycles :: (Eq a) => [[a]] -> Either AlgErr (Perm a)
 fromCycles xss = do
   os <- sequence $ map fromCycle xss
   foldM unionDisjoint idPerm os
 
-uniq :: (Eq a) => [a] -> Bool
-uniq [] = True
-uniq (a:as) = if a`elem`as then False else uniq as
 
-image :: (Eq a, Ord a) => Perm a -> a -> a
-image p a = case Map.lookup a p of
+
+{----------}
+{- :Query -}
+{----------}
+
+image :: (Eq a) => Perm a -> a -> a
+image (Perm ps) a = case lookup a ps of
   Just b  -> b
   Nothing -> a
 
@@ -88,14 +135,38 @@ shape p = reverse $ sort $ map len $ cycles p
 order :: (Eq a, Ord a) => Perm a -> Integer
 order p = foldr lcm 1 (shape p)
 
-instance (Eq a, Ord a) => Canon (Perm a) where
-  canon = Map.fromList . filter foo . Map.toList
-    where
-      foo (a,b) = a /= b
 
-inverse :: (Eq a, Ord a) => Perm a -> Perm a
-inverse = Map.fromList . map (\(a,b) -> (b,a)) . Map.toList
 
-compose :: (Eq a, Ord a) => Perm a -> Perm a -> Perm a
-compose p q = canon $ Map.fromList
+{- :View -}
+
+showPerm :: Perm String -> String
+showPerm p = concatMap foo $ cycles p
+  where foo as = "(" ++ (concat $ intersperse " " as) ++ ")"
+
+
+
+{---------------}
+{- :Operations -}
+{---------------}
+
+inverse :: (Eq a) => Perm a -> Perm a
+inverse = Perm . map (\(a,b) -> (b,a)) . unPerm
+
+compose :: (Eq a) => Perm a -> Perm a -> Perm a
+compose p q = canon $ Perm
   [(i, image p (image q i)) | i <- union (movedBy p) (movedBy q)]
+
+
+
+{- :Monadish -}
+
+mapPerm :: (a -> b) -> Perm a -> Perm b
+mapPerm f (Perm ps) = Perm [(f a, f b) | (a, b) <- ps]
+
+seqPerm :: (Monad m, Functor m) => Perm (m a) -> m (Perm a)
+seqPerm (Perm ps) = fmap Perm $ sequence $ map foo ps
+  where
+    foo (x,y) = do
+      a <- x
+      b <- y
+      return (a,b)

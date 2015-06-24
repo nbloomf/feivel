@@ -31,16 +31,19 @@ module Feivel.Eval (
 {-    :Eval:IntExpr    :Eval:StrExpr     :Eval:BoolExpr    -}
 {-    :Eval:RatExpr    :Eval:ListExpr    :Eval:MacExpr     -}
 {-    :Eval:MatExpr    :Eval:Doc         :Eval:PolyExpr    -}
+{-    :Eval:PermExpr                                       -}
 {-                                                         -}
 {-  :Typed             :Typed:Expr                         -}
 {-    :Typed:IntExpr   :Typed:StrExpr    :Typed:BoolExpr   -}
 {-    :Typed:RatExpr   :Typed:ListExpr   :Typed:MacExpr    -}
 {-    :Typed:MatExpr   :Typed:Doc        :Typed:PolyExpr   -}
+{-    :Typed:PermExpr                                      -}
 {-                                                         -}
 {-  :Get                                                   -}
 {-    :Get:IntExpr     :Get:StrExpr      :Get:BoolExpr     -}
 {-    :Get:RatExpr     :Get:ListExpr     :Get:MacExpr      -}
 {-    :Get:MatExpr     :Get:Doc          :Get:PolyExpr     -}
+{-    :Get:PermExpr                                        -}
 {-                                                         -}
 {-  :Glyph                                                 -}
 {-  :Inject                                                -}
@@ -97,6 +100,7 @@ instance Eval Expr where
   eval (MacE  x) = fmap toExpr $ eval x
   eval (MatE  x) = fmap toExpr $ eval x
   eval (PolyE x) = fmap toExpr $ eval x
+  eval (PermE x) = fmap toExpr $ eval x
 
 
 
@@ -1173,6 +1177,7 @@ instance Eval Doc where
       MacE  x -> eval x >>= toGlyph >>= foo
       MatE  x -> eval x >>= toGlyph >>= foo
       PolyE x -> eval x >>= toGlyph >>= foo
+      PermE x -> eval x >>= toGlyph >>= foo
 
   eval (DocMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -1202,6 +1207,7 @@ instance Eval Doc where
     MacE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
     DocE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
     PolyE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    PermE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
 
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
@@ -1433,6 +1439,37 @@ instance Eval PolyExpr where
 
 
 
+{------------------}
+{- :Eval:PermExpr -}
+{------------------}
+
+instance Eval PermExpr where
+  eval (PermConst t p :@ loc) = do
+    q <- seqPerm $ mapPerm eval p
+    return $ PermConst t q :@ loc
+
+  eval (PermVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+
+  eval (PermAtPos a t :@ loc) = lift2 loc (foo) a t
+    where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
+
+  eval (PermAtIdx m h k :@ loc) = eAtIdx m h k loc
+
+  eval (PermMacro vals mac :@ loc) = eMacro vals mac loc
+
+  eval (PermIfThenElse b t f :@ _) = eIfThenElse b t f
+
+  eval (PermRand ls :@ loc) = do
+    t  <- typeOf ls
+    xs <- eval ls >>= getVal :: EvalM [Expr]
+    r  <- randomElementEvalM xs
+    s  <- eval r >>= getVal :: EvalM PermExpr
+    case t of
+      ListOf (PermOf _) -> return s
+      _ -> reportErr loc $ ListExpected t
+
+
+
 {----------}
 {- :Typed -}
 {----------}
@@ -1487,6 +1524,7 @@ instance Typed Expr where
   typeOf (DocE  x) = typeOf x
   typeOf (MatE  x) = typeOf x
   typeOf (PolyE x) = typeOf x
+  typeOf (PermE x) = typeOf x
 
 
 
@@ -1779,6 +1817,49 @@ instance Typed PolyExpr where
 
 
 
+{-------------------}
+{- :Typed:PermExpr -}
+{-------------------}
+
+instance Typed PermExpr where
+  typeOf (PermVar key :@ loc) = do
+    expr <- lookupKey loc key
+    t <- typeOf expr
+    case t of
+      PermOf x -> return $ PermOf x
+      u -> reportErr loc $ PermutationExpected u
+
+  typeOf (PermMacro _ x :@ _) = typeOf x
+
+  typeOf (PermConst t _ :@ _) = return $ PermOf t
+
+  typeOf (PermAtPos m _ :@ loc) = do
+    t <- typeOf m
+    case t of
+      MatOf (PermOf u) -> return $ PermOf u
+      _ -> reportErr loc $ PermutationListExpected t
+
+  typeOf (PermAtIdx m _ _ :@ loc) = do
+    t <- typeOf m
+    case t of
+      ListOf (PermOf u) -> return $ PermOf u
+      _ -> reportErr loc $ PermutationMatrixExpected t
+
+  typeOf (PermIfThenElse _ t f :@ loc) = do
+    a <- typeOf t
+    b <- typeOf f
+    case unify a b of
+      Right u -> return u
+      Left err -> reportErr loc err
+
+  typeOf (PermRand xs :@ loc) = do
+    t <- typeOf xs
+    case t of
+      ListOf (PermOf u) -> return $ PermOf u
+      _ -> reportErr loc $ PermutationListExpected t
+
+
+
 {--------}
 {- :Get -}
 {--------}
@@ -1979,6 +2060,11 @@ instance Get [PolyExpr] where
     x <- eval expr >>= get :: EvalM [Expr]
     sequence $ fmap get x
 
+instance Get [PermExpr] where
+  get expr = do
+    x <- eval expr >>= get :: EvalM [Expr]
+    sequence $ fmap get x
+
 
 
 {----------------}
@@ -2071,6 +2157,11 @@ instance Get (Matrix PolyExpr) where
     x <- eval expr >>= get :: EvalM (Matrix Expr)
     mSeq $ fmap get x
 
+instance Get (Matrix PermExpr) where
+  get expr = do
+    x <- eval expr >>= get :: EvalM (Matrix Expr)
+    mSeq $ fmap get x
+
 instance Get (Matrix (Poly Integer)) where
   get expr = do
     x <- eval expr >>= get :: EvalM (Matrix Expr)
@@ -2140,6 +2231,30 @@ instance Get (Poly Bool) where
     polySeq $ fmap get x
 
 
+{-----------------}
+{- :Get:PermExpr -}
+{-----------------}
+
+instance Get PermExpr where
+  get expr = do
+    x <- eval expr
+    case x of
+      PermE m -> return m
+      v -> do
+        t <- typeOf v
+        reportErr (locusOf v) $ PermutationExpected t
+
+instance Get (Perm Expr) where
+  get expr = do
+    x <- eval expr
+    case x of
+      PermE (PermConst _ m :@ _) -> return m
+      PermE v -> reportErr (locusOf v) UnevaluatedExpression
+      v -> do
+        t <- typeOf v
+        reportErr (locusOf v) $ PermutationExpected t
+
+
 
 {----------}
 {- :Glyph -}
@@ -2160,6 +2275,7 @@ instance Glyph Expr where
     MatE  x -> toGlyph x
     DocE  x -> toGlyph x
     PolyE x -> toGlyph x
+    PermE x -> toGlyph x
 
 instance Glyph IntExpr where
   toGlyph expr = do
@@ -2214,6 +2330,12 @@ instance Glyph PolyExpr where
     p <- eval expr >>= getVal :: EvalM (Poly Expr)
     q <- polySeq $ mapCoef toGlyph p
     return $ showStrP q
+
+instance Glyph PermExpr where
+  toGlyph expr = do
+    p <- eval expr >>= getVal :: EvalM (Perm Expr)
+    q <- seqPerm $ mapPerm toGlyph p
+    return $ showPerm q
 
 instance Glyph Doc where
   toGlyph expr = do

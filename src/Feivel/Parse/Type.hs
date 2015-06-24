@@ -35,6 +35,7 @@ pType = choice
   , pTypeMac
   , pTypeMat
   , pTypePoly
+  , pTypePerm
   ] <?> "type signature"
 
 pTypeL :: ParseM Type
@@ -55,6 +56,12 @@ pTypePoly = do
   _ <- try $ char '^'
   t <- pType
   return $ PolyOver t
+
+pTypePerm :: ParseM Type
+pTypePerm = do
+  _ <- try $ char '$'
+  t <- pType
+  return $ PermOf t
 
 pTypeMat :: ParseM Type
 pTypeMat = do

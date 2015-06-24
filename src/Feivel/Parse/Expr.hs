@@ -391,6 +391,7 @@ pTypedExpr QQ = pRatExpr  >>= return . mapFst RatE
 pTypedExpr (ListOf   t) = pTypedListExpr t >>= return . mapFst ListE
 pTypedExpr (MatOf    t) = pTypedMatExpr  t >>= return . mapFst MatE
 pTypedExpr (MacTo    t) = pTypedMacExpr  t >>= return . mapFst MacE
+pTypedExpr (PermOf   t) = pTypedPermExpr t >>= return . mapFst PermE
 pTypedExpr (PolyOver t) = pTypedPolyExpr t >>= return . mapFst PolyE
 
 pTypedExpr XX = choice
@@ -438,6 +439,7 @@ pTypedConst QQ = pRatConst  >>= return . mapFst RatE
 pTypedConst (ListOf   t) = pListConst t >>= return . mapFst ListE
 pTypedConst (MatOf    t) = pMatConst  t >>= return . mapFst MatE
 pTypedConst (PolyOver t) = pPolyConst t >>= return . mapFst PolyE
+pTypedConst (PermOf   t) = pPermConst t >>= return . mapFst PermE
 pTypedConst (MacTo    t) = pMacConst  t >>= return . mapFst MacE
 
 pTypedConst _ = error "pTypedConst"
@@ -1097,7 +1099,12 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
 {- :PermExpr -}
 {-------------}
 
-{-
+pPermLiteral :: Type -> ParseM (PermExpr, Type)
+pPermLiteral typ = pAtLocus $ pPermLiteralOf typ pTypedExpr
+
+pPermConst :: Type -> ParseM (PermExpr, Type)
+pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
+
 pPermLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (PermExprLeaf, Type)
 pPermLiteralOf typ p = do
   start <- getPosition
@@ -1115,7 +1122,29 @@ pPermLiteralOf typ p = do
         xs <- sepBy1 (p typ) (try $ keyword ";")
         keyword ")"
         return $ map fst xs
--}
+
+pTypedPermExpr :: Type -> ParseM (PermExpr, Type)
+pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
+  where
+    pPermTerm = pTerm (pPermLiteralOf typ pTypedExpr) (pTypedPermExpr typ) "permutation expression"
+      [ pVarExpr PermVar (PermOf typ)
+
+      , pAtPos (PermOf typ) PermAtPos
+      , pAtIdx (PermOf typ) PermAtIdx
+
+      , pMacroExpr PermMacro
+
+      , pIfThenElseExpr (pTypedPermExpr typ) PermIfThenElse (PermOf typ)
+
+      , pFun1 "Rand" (pTypedListExpr (PermOf typ)) PermRand (PermOf typ)
+      ]
+
+    permOpTable =
+      [ [ Prefix (opParser1 PermInvert "inv")
+        ]
+      , [ Infix (opParser2 PermCompose "o") AssocLeft
+        ]
+      ]
 
 
 
