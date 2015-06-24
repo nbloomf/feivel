@@ -16,9 +16,13 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Lib.Permutation where
 
 import Feivel.Lib.AlgErr
+import Feivel.Lib.Canon
 
 import Control.Monad (foldM)
 import Data.List (minimumBy, inits, tails, group, sortBy, sort, union)
@@ -84,11 +88,14 @@ shape p = reverse $ sort $ map len $ cycles p
 order :: (Eq a, Ord a) => Perm a -> Integer
 order p = foldr lcm 1 (shape p)
 
+instance (Eq a, Ord a) => Canon (Perm a) where
+  canon = Map.fromList . filter foo . Map.toList
+    where
+      foo (a,b) = a /= b
+
 inverse :: (Eq a, Ord a) => Perm a -> Perm a
 inverse = Map.fromList . map (\(a,b) -> (b,a)) . Map.toList
 
 compose :: (Eq a, Ord a) => Perm a -> Perm a -> Perm a
-compose p q = Map.fromList $ filter foo
+compose p q = canon $ Map.fromList
   [(i, image p (image q i)) | i <- union (movedBy p) (movedBy q)]
-  where
-    foo (a,b) = a /= b

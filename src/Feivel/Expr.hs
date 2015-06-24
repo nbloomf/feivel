@@ -33,6 +33,7 @@ module Feivel.Expr (
   ListExpr, ListExprLeaf(..), ListGuard(..),
   MatExpr, MatExprLeaf(..),
   PolyExpr, PolyExprLeaf(..),
+  PermExpr, PermExprLeaf(..),
   MacExpr, MacExprLeaf(..),
 
   -- Errors
@@ -58,6 +59,7 @@ import Feivel.Store
 {-     :ListExpr -}
 {-     :MatExpr  -}
 {-     :PolyExpr -}
+{-     :PermExpr -}
 {-     :MacExpr  -}
 {-  :ExprErr     -}
 {-----------------}
@@ -124,6 +126,7 @@ data Expr
  | ListE  ListExpr
  | MatE   MatExpr
  | PolyE  PolyExpr
+ | PermE  PermExpr
  | MacE   MacExpr
  deriving (Eq, Show)
 
@@ -136,6 +139,7 @@ instance HasLocus Expr where
   locusOf (ListE x) = locusOf x
   locusOf (MatE  x) = locusOf x
   locusOf (PolyE x) = locusOf x
+  locusOf (PermE x) = locusOf x
   locusOf (MacE  x) = locusOf x
 
 
@@ -153,6 +157,7 @@ instance ToExpr RatExpr  where toExpr = RatE
 instance ToExpr ListExpr where toExpr = ListE
 instance ToExpr MatExpr  where toExpr = MatE
 instance ToExpr PolyExpr where toExpr = PolyE
+instance ToExpr PermExpr where toExpr = PermE
 instance ToExpr MacExpr  where toExpr = MacE
 
 -- Not a fan of "no locus" here
@@ -509,6 +514,30 @@ data PolyExprLeaf
 
   | PolyFromRoots Variable ListExpr
   | PolyEvalPoly  PolyExpr [(Variable, PolyExpr)]
+  deriving (Eq, Show)
+
+
+
+{-------------}
+{- :PermExpr -}
+{-------------}
+
+type PermExpr = AtLocus PermExprLeaf
+
+data PermExprLeaf
+  = PermConst Type (Perm Expr)
+  | PermVar   Key
+
+  | PermMacro [(Type, Key, Expr)] MacExpr
+  | PermAtPos ListExpr IntExpr
+  | PermAtIdx MatExpr  IntExpr IntExpr
+
+  | PermRand ListExpr
+
+  | PermIfThenElse BoolExpr PermExpr PermExpr
+
+  | PermCompose PermExpr PermExpr
+  | PermInvert  PermExpr
   deriving (Eq, Show)
 
 

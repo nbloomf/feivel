@@ -35,7 +35,7 @@ import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 
-import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst)
+import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles)
 
 import Text.Parsec.Expr
 import Text.ParserCombinators.Parsec hiding (try)
@@ -52,6 +52,7 @@ import Text.Parsec.Prim (try)
 {-  :ListExpr -}
 {-  :MatExpr  -}
 {-  :PolyExpr -}
+{-  :PermExpr -}
 {-  :MacExpr  -}
 {--------------}
 
@@ -1089,6 +1090,32 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
         , Infix (opParser2 PolySub "-") AssocLeft
         ]
       ]
+
+
+
+{-------------}
+{- :PermExpr -}
+{-------------}
+
+{-
+pPermLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (PermExprLeaf, Type)
+pPermLiteralOf typ p = do
+  start <- getPosition
+  try $ keyword "Perm"
+  keyword "("
+  ts <- sepBy1 pCycle whitespace
+  keyword ")"
+  end <- getPosition
+  case fromCycles ts of
+    Right q -> return (PermConst typ q, PermOf typ)
+    Left err -> reportParseErr (locus start end) err
+    where
+      pCycle = do
+        try $ keyword "("
+        xs <- sepBy1 (p typ) (try $ keyword ";")
+        keyword ")"
+        return $ map fst xs
+-}
 
 
 

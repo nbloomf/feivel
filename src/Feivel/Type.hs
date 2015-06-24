@@ -45,6 +45,7 @@ data Type
   | ListOf   Type -- List
   | MatOf    Type -- Matrix
   | PolyOver Type -- Polynomial
+  | PermOf   Type -- Permutation
 
   | MacTo  Type -- Macro
   deriving Eq
@@ -72,6 +73,10 @@ unify (PolyOver a) (PolyOver b) = do
   t <- unify a b
   return (PolyOver t)
 
+unify (PermOf a) (PermOf b) = do
+  t <- unify a b
+  return (PermOf t)
+
 unify (MacTo a) (MacTo b) = do
   t <- unify a b
   return (MacTo t)
@@ -96,6 +101,7 @@ instance Show Type where
   show (ListOf   t) = "{" ++ show t ++ "}"
   show (MatOf    t) = "[" ++ show t ++ "]"
   show (PolyOver t) = "^" ++ show t
+  show (PermOf   t) = "$" ++ show t
 
   show (MacTo    t) = ">" ++ show t
 
