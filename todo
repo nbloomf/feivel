@@ -39,5 +39,4 @@ Feature Ideas
 * Tests: Golden tests for rational, boolean polynomials
 * Type: cyclotomic numbers
 * Type: pairs? (constructor)
-* Type: permutation (constructor)
 * Type: trees (constructor)
