@@ -1468,6 +1468,25 @@ instance Eval PermExpr where
       ListOf (PermOf _) -> return s
       _ -> reportErr loc $ ListExpected t
 
+  eval (PermCompose p q :@ loc) = do
+    t <- unifyTypesOf loc p q
+    case t of
+      PermOf ZZ -> do
+        a <- eval p >>= getVal :: EvalM (Perm Integer)
+        b <- eval q >>= getVal :: EvalM (Perm Integer)
+        let c = compose a b
+        let s = mapPerm toExpr c
+        return (PermConst ZZ s :@ loc)
+
+  eval (PermInvert p :@ loc) = do
+    t <- typeOf p
+    case t of
+      PermOf ZZ -> do
+        a <- eval p >>= getVal :: EvalM (Perm Integer)
+        let c = inverse a
+        let s = mapPerm toExpr c
+        return (PermConst ZZ s :@ loc)
+
 
 
 {----------}
@@ -1857,6 +1876,10 @@ instance Typed PermExpr where
     case t of
       ListOf (PermOf u) -> return $ PermOf u
       _ -> reportErr loc $ PermutationListExpected t
+
+  typeOf (PermCompose p q :@ loc) = sameType loc p q
+
+  typeOf (PermInvert p :@ _) = typeOf p
 
 
 
@@ -2254,6 +2277,11 @@ instance Get (Perm Expr) where
         t <- typeOf v
         reportErr (locusOf v) $ PermutationExpected t
 
+instance Get (Perm Integer) where
+  get expr = do
+    x <- eval expr >>= get :: EvalM (Perm Expr)
+    seqPerm $ mapPerm get x
+
 
 
 {----------}
@@ -2423,6 +2451,12 @@ instance Inject (Poly Rat) PolyExpr where
 
 instance Inject (Poly Bool) PolyExpr where
   inject loc x = (PolyConst BB $ fmap toExpr x) :@ loc
+
+
+{- :PermExpr -}
+
+instance Inject (Perm Integer) PermExpr where
+  inject loc x = (PermConst ZZ $ mapPerm toExpr x) :@ loc
 
 
 instance Inject String Doc where

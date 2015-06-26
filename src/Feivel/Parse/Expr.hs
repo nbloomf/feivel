@@ -21,7 +21,7 @@ module Feivel.Parse.Expr (
 
   pTypedConst,
     pStrConst, pIntConst, pBoolConst, pRatConst,
-    pListLiteral, pMatLiteral, pPolyLiteral
+    pListLiteral, pMatLiteral, pPolyLiteral, pPermLiteral
 ) where
 
 import Feivel.Expr
@@ -1100,7 +1100,7 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
 {-------------}
 
 pPermLiteral :: Type -> ParseM (PermExpr, Type)
-pPermLiteral typ = pAtLocus $ pPermLiteralOf typ pTypedExpr
+pPermLiteral typ = pAtLocus $ pPermLiteralOf typ pTypedConst
 
 pPermConst :: Type -> ParseM (PermExpr, Type)
 pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
@@ -1108,19 +1108,16 @@ pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
 pPermLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (PermExprLeaf, Type)
 pPermLiteralOf typ p = do
   start <- getPosition
-  try $ keyword "Perm"
-  keyword "("
-  ts <- sepBy1 pCycle whitespace
-  keyword ")"
+  ts <- many1 pCycle
   end <- getPosition
   case fromCycles ts of
     Right q -> return (PermConst typ q, PermOf typ)
     Left err -> reportParseErr (locus start end) err
     where
       pCycle = do
-        try $ keyword "("
-        xs <- sepBy1 (p typ) (try $ keyword ";")
-        keyword ")"
+        _ <- try $ char '('
+        xs <- sepBy1 (p typ) whitespace
+        _ <- char ')'
         return $ map fst xs
 
 pTypedPermExpr :: Type -> ParseM (PermExpr, Type)
