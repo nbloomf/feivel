@@ -140,8 +140,12 @@ order p = foldr lcm 1 (shape p)
 {- :View -}
 
 showPerm :: Perm String -> String
-showPerm p = concatMap foo $ cycles p
-  where foo as = "(" ++ (concat $ intersperse " " as) ++ ")"
+showPerm p = bar $ concatMap foo $ cycles p
+  where
+    foo as = "(" ++ (concat $ intersperse " " as) ++ ")"
+
+    bar [] = "1"
+    bar s  = s
 
 
 
