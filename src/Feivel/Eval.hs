@@ -300,6 +300,11 @@ instance Eval StrExpr where
         return $ StrConst (latex x) :@ loc
       _ -> error "StrFormat LaTeX"
 
+  eval (StrIntCast n :@ loc) = do
+    a <- eval n >>= getVal :: EvalM IntExpr
+    s <- toGlyph a
+    return $ StrConst s :@ loc
+
 
 
 {------------------}
@@ -1437,6 +1442,20 @@ instance Eval PolyExpr where
         lift2 loc (rPowT (constP False)) a b
       _ -> reportErr loc $ NumericPolynomialExpected t
 
+  eval (PolyFromRoots x cs :@ loc) = do
+    t <- typeOf cs
+    case t of
+      ListOf ZZ -> do
+        as <- eval cs >>= getVal :: EvalM [Integer]
+        p  <- tryEvalM loc $ fromRootsP x as
+        let q = fmap toExpr p
+        return (PolyConst ZZ q :@ loc)
+      ListOf QQ -> do
+        as <- eval cs >>= getVal :: EvalM [Rat]
+        p  <- tryEvalM loc $ fromRootsP x as
+        let q = fmap toExpr p
+        return (PolyConst QQ q :@ loc)
+
 
 
 {------------------}
@@ -1833,6 +1852,12 @@ instance Typed PolyExpr where
     case t of
       ListOf (PolyOver u) -> return $ PolyOver u
       _ -> reportErr loc $ PolynomialListExpected t
+
+  typeOf (PolyFromRoots _ cs :@ loc) = do
+    t <- typeOf cs
+    case t of
+      ListOf u -> return (PolyOver u)
+      _ -> reportErr loc $ ListExpected t
 
 
 

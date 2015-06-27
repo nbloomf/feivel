@@ -210,6 +210,9 @@ data StrExprLeaf
   -- General
   | StrFormat Format Expr
   | StrTypeOf Expr
+
+  -- Casting
+  | StrIntCast IntExpr
   deriving (Eq, Show)
 
 

@@ -475,6 +475,8 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
       , pFun1 "Rot13"   pStrExpr Rot13   SS
 
       , pFun1 "Rand"    (pTypedListExpr SS) StrRand SS
+
+      , pFun1 "int" pIntExpr StrIntCast SS
     
       , pFun1 "Hex"    pIntExpr StrHex SS
       , pFun1 "Roman"  pIntExpr StrRoman SS

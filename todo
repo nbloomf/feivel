@@ -25,12 +25,16 @@ Feature Ideas
 * Integer: bezout
 * List: derange
 * List: map, fold
+* List: Shuffle list by permutation
 * Matrix: determinant
 * Matrix: insert row/column
 * Matrix: shuffle entries
 * Matrix: submatrix by row/col indices
 * Matrix: Smith normal form (uses bezout)
+* Matrix: Shuffle rows/cols by permutation
+* Matrix: Build permutation matrix
 * Polynomial: evaluation, degree, division algorithm, gcd, bezout, content
+* Permutation: Choose random permutation (of Sn? of a list?)
 * Rational: more Cauchy sequences (pi, e, trig functions)
 * String: Cast (parse) to int, rat
 * String: escaped unicode characters
