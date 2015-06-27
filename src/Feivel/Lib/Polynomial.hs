@@ -72,11 +72,14 @@ instance Canon Monomial where
   canon = Map.fromList . filter (\(_,k) -> k /= Nat 0) . toListM
 
 showM :: String -> Monomial -> String
-showM sep m = concat $ intersperse sep $ map foo $ toListM $ canon m
+showM sep m = bar $ concat $ intersperse sep $ map foo $ toListM $ canon m
   where
     foo (Var x, Nat k)
       | k == 1 = x
       | otherwise = x ++ "^" ++ show k
+
+    bar "" = "1"
+    bar s  = s
 
 
 {- Construct -}

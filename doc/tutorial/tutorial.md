@@ -143,7 +143,7 @@ The repl should print `#t` back. Here we have used another command: [:square col
 
 Types in `feivel` come in two flavors:
 
-1. *atomic* types, which represent concrete data. As of 0.1.0 there are 4 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), and `rat` (arbitrary precision rationals).
+1. *atomic* types, which represent concrete data. As of 0.1.0 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), and `$int` (permutations of integers).
 2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.1.0 there are 4 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), and `>typ` (macros of `typ`).
 
 Constructors can be nested, so that (for instance) `[{int}]` represents the set of matrices whose entries are lists of integers. Macros are the strangest of these; they are like functions (but not quite) and allow us to wrap a complicated expression with parameters into a single value. An expression of type `>int` can be *evaluated* to *yield* a value of type `int`. Macros can also be nested, as we'll see later, so for instance an expression of type `>>int` is a macro that yields a macro that yields an integer, and an expression of type `[>rat]` is a matrix of macros that yield rationals. In that sense macros are "first-class" values. Why? Why not? :)
@@ -423,7 +423,21 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
 A polynomial is a partial map over a set of string-like expressions called monomials. Maps over numeric types have a richer arithmetic, but we can still deal with polynomials over e.g. strings. (Why? Why not?) To make parsing simpler, the syntax for defining polynomials is a little awkward. For example, the polynomial x^2 + 2x + 1 is denoted `Poly(1.x^2; 2.x; 1.1)`.
 
-(N.B.: I will defer this part of the documentation for now as it will probably be out of date soon. Consider polynomials to be experimental for now.)
+- `FromRoots(VAR; LIST)`
+
+    Given a variable `x` and a list `{a1; a2; ...; an}` of roots, build the polynomial `(x-a1)(x-a2)...(x-an)`.
+
+- `EvalPoly(POLY; VAR <- POLY; ...)`
+
+
+`$t`: Permutations
+------------------
+
+A permutation of a list is a rearrangement of the items in it; specifically, a one-to-one and onto mapping on the set of indexed items in the list. It turns out that permutations have interesting structure. In feivel, these are denoted using cycle notation, such as `(1 2 3)(4 5)`.
+
+- `o` and `inv`
+
+    Composition and inversion of permutations. Note that composition is right to left, and inversion is a prefix operator.
 
 
 `>t`: Macros
