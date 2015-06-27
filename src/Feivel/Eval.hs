@@ -1456,6 +1456,18 @@ instance Eval PolyExpr where
         let q = fmap toExpr p
         return (PolyConst QQ q :@ loc)
 
+  eval (PolyEvalPoly p qs :@ loc) = do
+    t <- typeOf p
+    case t of
+      PolyOver ZZ -> do
+        a <- eval p >>= getVal :: EvalM (Poly Integer)
+        let foo (x,h) = do
+              b <- eval h >>= getVal :: EvalM (Poly Integer)
+              return (x,b)
+        ks <- sequence $ map foo qs
+        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
+        return (PolyConst ZZ (fmap toExpr c) :@ loc)
+
 
 
 {------------------}
@@ -1858,6 +1870,8 @@ instance Typed PolyExpr where
     case t of
       ListOf u -> return (PolyOver u)
       _ -> reportErr loc $ ListExpected t
+
+  typeOf (PolyEvalPoly p _ :@ _) = typeOf p
 
 
 
