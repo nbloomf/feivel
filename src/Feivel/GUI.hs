@@ -1,4 +1,4 @@
-module Feivel.GUI where
+module Feivel.GUI (gui) where
 
 import Feivel.Store
 import Feivel.Expr
@@ -21,8 +21,8 @@ import Control.Monad.IO.Class
 {- :EventHandlers   -}
 {--------------------}
 
-main :: IO ()
-main = do
+gui :: IO ()
+gui = do
   interaction <- newIORef []
 
   initGUI

@@ -15,7 +15,7 @@ Executable feivel
   build-depends:  base, parsec, containers, regex-posix,
                   random-fu, rvar, random-extras,
                   transformers, mtl, random, directory,
-                  monadlist, primes
+                  monadlist, primes, gtk
 
 Test-Suite feivel-test
   type:           exitcode-stdio-1.0

@@ -24,6 +24,7 @@ import Feivel.EvalM
 import Feivel.Format
 import Feivel.Store (emptyStore)
 import Feivel.Error
+import Feivel.GUI
 
 import System.IO
 import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
@@ -62,7 +63,7 @@ main = do
 
 
   _ <- if (replFlag opts) == True
-        then repl
+        then gui >> exitWith ExitSuccess
         else return ()
 
 
@@ -191,25 +192,3 @@ options =
 version :: String
 version = "feivel-0.1.0"
 
-repl :: IO ()
-repl = runRepl emptyStore
-  where
-    runRepl store = do
-      str <- getLine
-      (res,_) <- runEvalM emptyStore $ parseDoc "" str
-      case res of
-        Left (Goof _ (ErrREPL Quit)) -> do
-          putStrLn "> bye!"
-          exitWith ExitSuccess
-        Left err -> do
-          putStrLn (show err)
-          runRepl store
-        Right t -> do
-          (txt, store') <- runEvalM store $ evalToText t
-          case txt of
-            Left err -> do
-              putStrLn (show err)
-              runRepl store
-            Right x -> do
-              putStrLn $ (if x=="" then "(ok)" else x) ++ "\n"
-              runRepl store'
