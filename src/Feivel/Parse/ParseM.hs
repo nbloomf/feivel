@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.ParseM (
-  ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt,
+  ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt, stringParseM,
 
   -- Constants
   pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat,
@@ -44,6 +44,8 @@ import Control.Monad.Trans.Class (lift)
 
 type ParseM = ParsecT String () (Either Goof)
 
+stringParseM :: ParseM a -> String -> Either Goof a
+stringParseM p str = runParseM p "" str
 
 runParseM :: ParseM a -> String -> String -> Either Goof a
 runParseM p name str = case runParserT p () name str of

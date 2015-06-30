@@ -1455,6 +1455,7 @@ instance Eval PolyExpr where
         p  <- tryEvalM loc $ fromRootsP x as
         let q = fmap toExpr p
         return (PolyConst QQ q :@ loc)
+      _ -> reportErr loc $ NumericListExpected t
 
   eval (PolyEvalPoly p qs :@ loc) = do
     t <- typeOf p
@@ -1467,6 +1468,7 @@ instance Eval PolyExpr where
         ks <- sequence $ map foo qs
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
         return (PolyConst ZZ (fmap toExpr c) :@ loc)
+      _ -> reportErr loc $ NumericPolynomialExpected t
 
 
 
@@ -1508,6 +1510,7 @@ instance Eval PermExpr where
         let c = compose a b
         let s = mapPerm toExpr c
         return (PermConst ZZ s :@ loc)
+      _ -> reportErr loc $ PolynomialExpected t
 
   eval (PermInvert p :@ loc) = do
     t <- typeOf p
@@ -1517,6 +1520,7 @@ instance Eval PermExpr where
         let c = inverse a
         let s = mapPerm toExpr c
         return (PermConst ZZ s :@ loc)
+      _ -> reportErr loc $ PolynomialExpected t
 
 
 

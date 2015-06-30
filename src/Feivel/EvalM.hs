@@ -146,6 +146,9 @@ parseWith p path str = case runParseM p path str of
 parseDoc :: String -> String -> EvalM Doc
 parseDoc = parseWith pDoc
 
+parseStringDoc :: String -> EvalM Doc
+parseStringDoc str = parseWith pDoc "" str
+
 readAndParseDoc :: FilePath -> EvalM Doc
 readAndParseDoc path = do
   file <- if path == "" then liftIO getContents else readPath path
