@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.Expr (
-  pDoc,
+  pDoc, pREPL,
 
   pTypedConst,
     pStrConst, pIntConst, pBoolConst, pRatConst,
@@ -172,6 +172,24 @@ pBrackDocE = do
   _ <- char ']'
   whitespace
   return (DocE d, DD)
+
+pREPL :: ParseM (Doc, Type)
+pREPL = choice $ map pAtLocus
+  [ pDefineREPL
+  , pNakedExprREPL
+  , pVarExpr NakedKey DD
+  ]
+  where
+    pDefineREPL = do
+      try $ keyword "define"
+      (t,k,v) <- pTypeKeyExpr
+      return (Define t k v (Empty :@ NullLocus), DD)
+
+    pNakedExprREPL = do
+      --try (char '[' >> keyword ":")
+      (x,_) <- try pTypedNakedExpr
+      return (NakedExpr x, DD)
+
 
 pDoc :: ParseM (Doc, Type)
 pDoc = choice $ map pAtLocus

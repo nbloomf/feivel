@@ -70,6 +70,7 @@ gui = do
   outputView   <- textViewNewWithBuffer outputBuf
   widgetModifyFont outputView (Just fontDesc)
   textViewSetWrapMode outputView WrapChar
+  textViewSetEditable outputView False
   outputScroll <- scrolledWindowNew Nothing Nothing
   scrolledWindowSetPolicy outputScroll PolicyNever PolicyAlways
   set outputScroll [scrolledWindowShadowType := ShadowEtchedIn]
@@ -138,12 +139,15 @@ gui = do
   let evalAction = do
         x <- readIORef interaction
         input <- textViewGetValue inputView
-        c@((Step _ output _):_) <- evalString x input
-        set inputBuf  [textBufferText := ""]
-        set outputBuf [textBufferText := history c]
-        writeIORef interaction c
-        scrollOutput
-        return ()
+        if input == ""
+          then return ()
+          else do
+            c@((Step _ output _):_) <- evalString x input
+            set inputBuf  [textBufferText := ""]
+            set outputBuf [textBufferText := history c]
+            writeIORef interaction c
+            scrollOutput
+            return ()
 
   evalButton `on` buttonPressEvent $ do
     liftIO evalAction 
@@ -151,7 +155,7 @@ gui = do
 
   mainWindow `on` keyPressEvent $ tryEvent $ do
     [Control] <- eventModifier
-    "e"       <- eventKeyName
+    "Return"  <- eventKeyName
     liftIO evalAction
 
 
@@ -252,7 +256,7 @@ evalString context@(s:_) input = do
 
 parseAndEvalIO :: Store Expr -> String -> IO (String, Store Expr)
 parseAndEvalIO st input = do
-  case runParseM pDoc "" input of
+  case runParseM pREPL "" input of
     Left goof -> return (show goof, st)
     Right (x,_) -> do
       (y, stNew) <- runEvalM st (evalToText x)
