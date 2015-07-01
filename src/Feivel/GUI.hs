@@ -1,3 +1,21 @@
+{---------------------------------------------------------------------}
+{- Copyright 2015 Nathan Bloomfield                                  -}
+{-                                                                   -}
+{- This file is part of Feivel.                                      -}
+{-                                                                   -}
+{- Feivel is free software: you can redistribute it and/or modify    -}
+{- it under the terms of the GNU General Public License version 3,   -}
+{- as published by the Free Software Foundation.                     -}
+{-                                                                   -}
+{- Feivel is distributed in the hope that it will be useful, but     -}
+{- WITHOUT ANY WARRANTY; without even the implied warranty of        -}
+{- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the      -}
+{- GNU General Public License for more details.                      -}
+{-                                                                   -}
+{- You should have received a copy of the GNU General Public License -}
+{- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
+{---------------------------------------------------------------------}
+
 module Feivel.GUI (gui) where
 
 import Feivel.Store
@@ -8,7 +26,6 @@ import Feivel.Parse
 
 import Data.IORef
 import Graphics.UI.Gtk
-import Graphics.UI.Gtk.Builder
 import Control.Monad.IO.Class
 
 
@@ -23,6 +40,7 @@ import Control.Monad.IO.Class
 
 gui :: IO ()
 gui = do
+  -- GUI State
   interaction <- newIORef []
 
   initGUI
