@@ -41,6 +41,7 @@ data AlgErr
 
   -- Structural Errors
   | NullMatrix String
+  | MalformedMatrix
   | InvalidIndex String -- Index Dim
   | InvalidRowIndex String -- Integer Dim
   | InvalidColIndex String -- Integer Dim

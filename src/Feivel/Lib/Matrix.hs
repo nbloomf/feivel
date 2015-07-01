@@ -111,7 +111,7 @@ mRowMajorFromList r c as
         then do
           let bds = ((1,1), (fromIntegral r, fromIntegral c))
           return $ Matrix $ array bds $ zip (range bds) as
-        else Left undefined
+        else Left MalformedMatrix
   where
     enoughElts _ [] = True
     enoughElts n (_:xs)
@@ -120,10 +120,17 @@ mRowMajorFromList r c as
 
 mFromRowList :: [[a]] -> Either AlgErr (Matrix a)
 mFromRowList [] = return Null
-mFromRowList xss = do
-  let r = genericLength xss
-  let c = genericLength (head xss)
-  mRowMajorFromList r c (concat xss)
+mFromRowList xss 
+  | sameLength xss = do
+      let r = genericLength xss
+      let c = genericLength (head xss)
+      mRowMajorFromList r c (concat xss)
+  | otherwise = Left MalformedMatrix
+
+sameLength :: [[a]] -> Bool
+sameLength [] = True
+sameLength xs = (maximum ks) == (minimum ks)
+  where ks = map length xs
 
 mRowFromList :: [a] -> Either AlgErr (Matrix a)
 mRowFromList as = mRowMajorFromList 1 (genericLength as) as
