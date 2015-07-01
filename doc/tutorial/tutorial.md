@@ -16,9 +16,9 @@ Feivel is an extremely simple template processing language. The primary audience
 First Steps
 -----------
 
-The user interface of `feivel` is command-line only. You will need to be comfortable editing plain text and running basic commands from a shell prompt.
+The simplest way to use `feivel` is from the command line. You will need to be comfortable editing plain text and running basic commands from a shell prompt.
 
-To use `feivel`, we prepare a specially formatted text file called a *template*, and then *process* this template from the command line.
+To use `feivel`, we prepare a specially formatted text file called a *template*, and then *process* this template.
 
 For example, here is a very simple template. (We will use the convention that lines starting with `>>>` delineate the contents of a text file.) Try typing or pasting this text into a file called `ex01.fvl`.
 
@@ -70,25 +70,25 @@ An important design goal for the `feivel` language is to be simple and unsurpris
 Running `feivel`
 -----------------
 
-There are two ways to use `feivel`: as a unix-style *filter* (for producing documents) and as an interactive *repl environment* (as a calculator).
+There are two ways to use `feivel`: as a unix-style *filter* (for producing documents) and as an interactive graphical *interpreter* (as a calculator).
 
 To use `feivel` as a filter, we can simply put it in a pipeline or call it with the `-t` flag set. The examples from the introduction use filter mode.
 
-To use `feivel` as an interactive environment, run it with the `--repl` flag set. For example, try calling the following command.
+To use `feivel` as an interpreter, run it with the `--repl` flag set. This will launch a graphical window. For example, try calling the following command.
 
-    > feivel --repl
+    > feivel --repl &
 
-Then type this:
+The interpreter window has a text entry box toward the bottom where we enter commands, and a scrolling text area above where our interaction is recorded. Type this into the command entry box:
 
-    > [:int: 2^30 :]
+    > int: 2^30
 
-and you should then see this:
+and then click the `Eval` button (or press Ctrl-Enter). You should then see this in the interaction history box:
 
+    > (1) int: 2^30
+    >
     > 1073741824
 
-This is a read-evaluate-print loop, wherein we can essentially process a template one line at a time. This is an effective way to try out bits of syntax on the fly. To exit the REPL, say `[quit]`.
-
-(N.B.: The REPL is extremely simple. At the moment (0.1.0) lines cannot even be edited, there is no command history, etc.. I have some ideas about making it much more useful in a future version.)
+This is a read-evaluate-print loop, wherein we can essentially process a simplified template one line at a time. This is an effective way to try out bits of syntax on the fly. To exit the REPL, close the window.
 
 
 
@@ -488,3 +488,10 @@ This time we see the same number repeated. This is because `@i` was only evaluat
     > @j @j @j @j
 
 The difference between evaluating at definition time and invocation time may allow some interesting uses, such as the "die roll" example here -- `@f` is effectively a d10.
+
+
+
+The Interpreter
+===============
+
+The `feivel` interpreter understands a simplified subset of the full template language: we can use `define` statements as well as naked expressions and naked keys. Also, in the interpreter we do not need enclosing square brackets and colons, as are used in templates.
