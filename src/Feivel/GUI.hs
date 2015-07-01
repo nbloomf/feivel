@@ -46,13 +46,6 @@ gui = do
   initGUI
 
 
-  {- :Helpers -}
-  let makeMonospaced widget = postGUIAsync $ do
-        fd <- widgetGetPangoContext widget >>= contextGetFontDescription
-        fontDescriptionSetFamily fd "Monospace"
-        widgetModifyFont widget (Just fd)
-
-
   {- :MenuBar -}
   clearMenuItem <- menuItemNewWithMnemonic "_Clear Interaction"
   saveMenuItem  <- menuItemNewWithMnemonic "_Save Interaction"
@@ -74,9 +67,18 @@ gui = do
   viewMenuItem <- menuItemNewWithMnemonic "_View"
   menuItemSetSubmenu viewMenuItem viewMenu
 
+  aboutMenuItem <- menuItemNewWithLabel "About"
+
+  helpMenu <- menuNew
+  menuShellAppend helpMenu aboutMenuItem
+
+  helpMenuItem <- menuItemNewWithMnemonic "_Help"
+  menuItemSetSubmenu helpMenuItem helpMenu
+
   menuBar <- menuBarNew
   menuShellAppend menuBar fileMenuItem
   menuShellAppend menuBar viewMenuItem
+  menuShellAppend menuBar helpMenuItem
 
 
   {- :InteractionPane -}
