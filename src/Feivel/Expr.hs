@@ -167,10 +167,11 @@ instance ToExpr PermExpr  where toExpr = PermE
 instance ToExpr MacExpr   where toExpr = MacE
 
 -- Not a fan of "no locus" here
-instance ToExpr Integer where toExpr k = IntE  $ IntConst k :@ NullLocus
-instance ToExpr Rat     where toExpr r = RatE  $ RatConst r :@ NullLocus
-instance ToExpr String  where toExpr s = StrE  $ StrConst s :@ NullLocus
-instance ToExpr Bool    where toExpr b = BoolE $ BoolConst b :@ NullLocus
+instance ToExpr Integer  where toExpr k = IntE   $ IntConst k :@ NullLocus
+instance ToExpr Rat      where toExpr r = RatE   $ RatConst r :@ NullLocus
+instance ToExpr String   where toExpr s = StrE   $ StrConst s :@ NullLocus
+instance ToExpr Bool     where toExpr b = BoolE  $ BoolConst b :@ NullLocus
+instance ToExpr ZZModulo where toExpr a = ZZModE $ ZZModConst a :@ NullLocus
 
 
 

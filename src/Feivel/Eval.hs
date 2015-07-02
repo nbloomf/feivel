@@ -887,6 +887,11 @@ instance Eval MatExpr where
         case mEAddT (constP (0:/:1)) m (i,j) w of
           Left err -> reportErr loc err
           Right y -> return $ inject loc y
+      ZZMod n -> do
+        w <- eval x >>= getVal :: EvalM ZZModulo
+        case mEAddT (0`zzmod`n) m (i,j) w of
+          Left err -> reportErr loc err
+          Right y -> return $ inject loc y
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatShuffleRows m :@ loc) = do
@@ -934,14 +939,17 @@ instance Eval MatExpr where
         lift2 loc (rAddT (mCell False)) a b
       MatOf (PolyOver ZZ) ->
         lift2 loc (rAddT (mCell $ constP (0::Integer))) a b
+      MatOf (ZZMod n) ->
+        lift2 loc (rAddT (mCell (0`zzmod`n))) a b
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatNeg a :@ loc) = do
     t <- typeOf a
     case t of
-      MatOf ZZ -> lift1 loc (rNegT (mCell (0::Integer))) a
-      MatOf QQ -> lift1 loc (rNegT (mCell (0:/:1))) a
-      MatOf BB -> lift1 loc (rNegT (mCell False)) a
+      MatOf ZZ        -> lift1 loc (rNegT (mCell (0::Integer))) a
+      MatOf QQ        -> lift1 loc (rNegT (mCell (0:/:1))) a
+      MatOf BB        -> lift1 loc (rNegT (mCell False)) a
+      MatOf (ZZMod n) -> lift1 loc (rNegT (mCell (0`zzmod`n))) a
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatTrans a :@ loc) = do
@@ -959,6 +967,8 @@ instance Eval MatExpr where
         lift2 loc (rMulT (mCell (0:/:1))) a b
       MatOf BB ->
         lift2 loc (rMulT (mCell False)) a b
+      MatOf (ZZMod n) ->
+        lift2 loc (rMulT (mCell (0`zzmod`n))) a b
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatPow m n :@ loc) = do
@@ -2582,6 +2592,15 @@ instance Inject [Rat] ListExpr where
 
 instance Inject (Matrix Integer) MatExpr where
   inject loc x = (MatConst ZZ $ fmap toExpr x) :@ loc
+
+instance Inject (Matrix ZZModulo) MatExpr where
+  inject loc x = (MatConst (ZZMod n) $ fmap toExpr x) :@ loc
+    where
+      as = toListM x
+      n = case as of
+        [] -> 0
+        ((ZZModulo _ m):_) -> m
+      
 
 instance Inject (Matrix Rat) MatExpr where
   inject loc x = (MatConst QQ $ fmap toExpr x) :@ loc
