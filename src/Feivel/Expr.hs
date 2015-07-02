@@ -383,6 +383,33 @@ data RatExprLeaf
 
 
 
+{---------------}
+{- :ZZModExpr -}
+{---------------}
+
+type ZZModExpr = AtLocus ZZModExprLeaf
+
+data ZZModExprLeaf
+  = ZZModConst Rat
+  | ZZModVar   Key
+  | ZZModCast  IntExpr
+
+  | ZZModMacro [(Type, Key, Expr)] MacExpr
+  | ZZModAtPos ListExpr IntExpr
+  | ZZModAtIdx MatExpr  IntExpr IntExpr
+
+  | ZZModIfThenElse BoolExpr ZZModExpr ZZModExpr
+ 
+  -- Arithmetic
+  | ZZModNeg   ZZModExpr
+ 
+  | ZZModAdd   ZZModExpr ZZModExpr
+  | ZZModSub   ZZModExpr ZZModExpr
+  | ZZModMult  ZZModExpr ZZModExpr
+  deriving (Eq, Show)
+
+
+
 {-------------}
 {- :ListExpr -}
 {-------------}

@@ -52,7 +52,7 @@ module Feivel.Lib.Ring (
     rGCDT, rLCMT, rGCDsT, rLCMsT,
 
   BDoid,
-    rBezouts,
+    rBezout, rBezouts,
 
   UFDoid,
     rFactor, rRad, rIsSquare, rIsSqFree, rSqPart, rSqFreePart,
