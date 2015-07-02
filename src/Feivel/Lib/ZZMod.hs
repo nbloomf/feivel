@@ -31,6 +31,9 @@ a `zzmod` n = ZZModulo b m
     m = abs n
     b = ((a `rem` m) + m) `rem` m
 
+showZZMod :: ZZModulo -> String
+showZZMod (ZZModulo a n) = show a ++ " mod " ++ show n
+
 instance Eq ZZModulo where
   (ZZModulo a n) == (ZZModulo b m)
     = n == m && ((a-b) `rem` n == 0)
@@ -75,5 +78,5 @@ instance URingoid ZZModulo where
         (h,_) <- rBezout a n
         return (h `zzmod` n)
 
-  rLOneOf (ZZModulo a n) = Right $ ZZModulo 1 n
-  rROneOf (ZZModulo a n) = Right $ ZZModulo 1 n
+  rLOneOf (ZZModulo _ n) = Right $ ZZModulo 1 n
+  rROneOf (ZZModulo _ n) = Right $ ZZModulo 1 n

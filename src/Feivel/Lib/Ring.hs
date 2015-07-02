@@ -41,7 +41,7 @@ module Feivel.Lib.Ring (
   URingoid,
     rOne, rIsOne, rUProd, rInjInt, rChoose, rInv, rDiv, rPosPow, rPow, rMean, rIsUnit, rLOneOf, rROneOf,
 
-    rDivT, rUProdT, rChooseT, rPowT, rMeanT, rIntMeanT, rMeanDevT, rIntMeanDevT,
+    rDivT, rUProdT, rChooseT, rPowT, rMeanT, rIntMeanT, rMeanDevT, rIntMeanDevT, rInvT,
 
   URingoidAssoc,
     rAssoc,
@@ -327,6 +327,9 @@ rIntMeanDev ks = do
   ts <- sequence $ map rInjInt ks
   rMeanDev ts
 
+
+rInvT :: (Ringoid t, URingoid t, CRingoid t) => t -> t -> Either AlgErr t
+rInvT _ = rInv
 
 rDivT :: (Ringoid t, URingoid t, CRingoid t) => t -> t -> t -> Either AlgErr t
 rDivT _ = rDiv

@@ -624,12 +624,15 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
       , pAtIdx (ZZMod n) ZZModAtIdx
     
       , pIfThenElseExpr (pZZModExpr n) ZZModIfThenElse (ZZMod n)
+
+      , pFun1 "int" pIntExpr (ZZModCast n) (ZZMod n)
       ]
 
     zzModOpTable =
       [ [ Infix (opParser2 ZZModMult "*") AssocLeft
         ]
       , [ Prefix (opParser1 ZZModNeg "neg")
+        , Prefix (opParser1 ZZModInv "inv")
         ]
       , [ Infix (opParser2 ZZModAdd "+") AssocLeft
         , Infix (opParser2 ZZModSub "-") AssocLeft

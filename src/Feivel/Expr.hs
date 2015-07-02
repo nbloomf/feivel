@@ -398,7 +398,7 @@ type ZZModExpr = AtLocus ZZModExprLeaf
 data ZZModExprLeaf
   = ZZModConst ZZModulo
   | ZZModVar   Key
-  | ZZModCast  IntExpr
+  | ZZModCast  Integer IntExpr
 
   | ZZModMacro [(Type, Key, Expr)] MacExpr
   | ZZModAtPos ListExpr IntExpr
@@ -408,6 +408,7 @@ data ZZModExprLeaf
  
   -- Arithmetic
   | ZZModNeg   ZZModExpr
+  | ZZModInv   ZZModExpr
  
   | ZZModAdd   ZZModExpr ZZModExpr
   | ZZModSub   ZZModExpr ZZModExpr

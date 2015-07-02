@@ -91,16 +91,17 @@ instance Eval Rat     where eval = return
 {--------------}
 
 instance Eval Expr where
-  eval (DocE  x) = fmap toExpr $ eval x
-  eval (StrE  x) = fmap toExpr $ eval x
-  eval (IntE  x) = fmap toExpr $ eval x
-  eval (BoolE x) = fmap toExpr $ eval x
-  eval (RatE  x) = fmap toExpr $ eval x
-  eval (ListE x) = fmap toExpr $ eval x
-  eval (MacE  x) = fmap toExpr $ eval x
-  eval (MatE  x) = fmap toExpr $ eval x
-  eval (PolyE x) = fmap toExpr $ eval x
-  eval (PermE x) = fmap toExpr $ eval x
+  eval (DocE   x) = fmap toExpr $ eval x
+  eval (StrE   x) = fmap toExpr $ eval x
+  eval (IntE   x) = fmap toExpr $ eval x
+  eval (BoolE  x) = fmap toExpr $ eval x
+  eval (RatE   x) = fmap toExpr $ eval x
+  eval (ListE  x) = fmap toExpr $ eval x
+  eval (MacE   x) = fmap toExpr $ eval x
+  eval (MatE   x) = fmap toExpr $ eval x
+  eval (PolyE  x) = fmap toExpr $ eval x
+  eval (PermE  x) = fmap toExpr $ eval x
+  eval (ZZModE x) = fmap toExpr $ eval x
 
 
 
@@ -1173,16 +1174,17 @@ instance Eval Doc where
     expr <- lookupKey loc k
     let foo s = return (DocText s :@ loc)
     case expr of
-      DocE  x -> eval x
-      IntE  x -> eval x >>= toGlyph >>= foo
-      StrE  x -> eval x >>= toGlyph >>= foo
-      BoolE x -> eval x >>= toGlyph >>= foo
-      RatE  x -> eval x >>= toGlyph >>= foo
-      ListE x -> eval x >>= toGlyph >>= foo
-      MacE  x -> eval x >>= toGlyph >>= foo
-      MatE  x -> eval x >>= toGlyph >>= foo
-      PolyE x -> eval x >>= toGlyph >>= foo
-      PermE x -> eval x >>= toGlyph >>= foo
+      DocE   x -> eval x
+      IntE   x -> eval x >>= toGlyph >>= foo
+      StrE   x -> eval x >>= toGlyph >>= foo
+      BoolE  x -> eval x >>= toGlyph >>= foo
+      RatE   x -> eval x >>= toGlyph >>= foo
+      ListE  x -> eval x >>= toGlyph >>= foo
+      MacE   x -> eval x >>= toGlyph >>= foo
+      MatE   x -> eval x >>= toGlyph >>= foo
+      PolyE  x -> eval x >>= toGlyph >>= foo
+      PermE  x -> eval x >>= toGlyph >>= foo
+      ZZModE x -> eval x >>= toGlyph >>= foo
 
   eval (DocMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -1203,16 +1205,17 @@ instance Eval Doc where
     return result
 
   eval (NakedExpr expr :@ loc) = case expr of
-    IntE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    StrE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    RatE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    BoolE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    ListE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    MatE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    MacE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    DocE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    PolyE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    PermE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    IntE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    StrE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    RatE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    BoolE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    ListE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    MatE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    MacE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    DocE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    PolyE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
 
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
@@ -1524,6 +1527,36 @@ instance Eval PermExpr where
 
 
 
+{-------------------}
+{- :Eval:ZZModExpr -}
+{-------------------}
+
+instance Eval ZZModExpr where
+  eval (ZZModConst a :@ loc) = return $ ZZModConst a :@ loc
+
+  eval (ZZModVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+
+  eval (ZZModAtPos a t :@ loc) = lift2 loc (foo) a t
+    where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
+
+  eval (ZZModAtIdx m h k :@ loc) = eAtIdx m h k loc
+
+  eval (ZZModMacro vals mac :@ loc) = eMacro vals mac loc
+
+  eval (ZZModIfThenElse b t f :@ _) = eIfThenElse b t f
+
+  eval (ZZModCast n a :@ loc) = do
+    res <- eval a >>= getVal :: EvalM Integer
+    return (ZZModConst (res `zzmod` n) :@ loc)
+
+  eval (ZZModNeg  a   :@ loc) = lift1 loc (rNegT (0 `zzmod` 0)) a
+  eval (ZZModInv  a   :@ loc) = lift1 loc (rInvT (0 `zzmod` 0)) a
+  eval (ZZModAdd  a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
+  eval (ZZModSub  a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
+  eval (ZZModMult a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
+
+
+
 {----------}
 {- :Typed -}
 {----------}
@@ -1569,16 +1602,17 @@ sameType loc a b = do
 {---------------}
 
 instance Typed Expr where
-  typeOf (StrE  x) = typeOf x
-  typeOf (IntE  x) = typeOf x
-  typeOf (RatE  x) = typeOf x
-  typeOf (BoolE x) = typeOf x
-  typeOf (ListE x) = typeOf x
-  typeOf (MacE  x) = typeOf x
-  typeOf (DocE  x) = typeOf x
-  typeOf (MatE  x) = typeOf x
-  typeOf (PolyE x) = typeOf x
-  typeOf (PermE x) = typeOf x
+  typeOf (StrE   x) = typeOf x
+  typeOf (IntE   x) = typeOf x
+  typeOf (RatE   x) = typeOf x
+  typeOf (BoolE  x) = typeOf x
+  typeOf (ListE  x) = typeOf x
+  typeOf (MacE   x) = typeOf x
+  typeOf (DocE   x) = typeOf x
+  typeOf (MatE   x) = typeOf x
+  typeOf (PolyE  x) = typeOf x
+  typeOf (PermE  x) = typeOf x
+  typeOf (ZZModE x) = typeOf x
 
 
 
@@ -1926,6 +1960,45 @@ instance Typed PermExpr where
 
 
 
+{--------------------}
+{- :Typed:ZZModExpr -}
+{--------------------}
+
+instance Typed ZZModExpr where
+  typeOf (ZZModConst (ZZModulo _ n) :@ _) = return (ZZMod n)
+
+  typeOf (ZZModAtPos m _ :@ loc) = do
+    t <- typeOf m
+    case t of
+      MatOf (ZZMod n) -> return $ ZZMod n
+      _ -> reportErr loc $ ModularIntegerListExpected t
+
+  typeOf (ZZModAtIdx m _ _ :@ loc) = do
+    t <- typeOf m
+    case t of
+      ListOf (ZZMod n) -> return $ ZZMod n
+      _ -> reportErr loc $ ModularIntegerMatrixExpected t
+
+  typeOf (ZZModMacro _ x :@ _) = typeOf x
+
+  typeOf (ZZModIfThenElse _ t f :@ loc) = do
+    a <- typeOf t
+    b <- typeOf f
+    case unify a b of
+      Right u -> return u
+      Left err -> reportErr loc err
+
+  typeOf (ZZModCast n _ :@ _) = return (ZZMod n)
+
+  typeOf (ZZModNeg a :@ _) = typeOf a
+  typeOf (ZZModInv a :@ _) = typeOf a
+
+  typeOf (ZZModAdd  a b :@ loc) = sameType loc a b
+  typeOf (ZZModSub  a b :@ loc) = sameType loc a b
+  typeOf (ZZModMult a b :@ loc) = sameType loc a b
+
+
+
 {--------}
 {- :Get -}
 {--------}
@@ -2131,6 +2204,11 @@ instance Get [PermExpr] where
     x <- eval expr >>= get :: EvalM [Expr]
     sequence $ fmap get x
 
+instance Get [ZZModExpr] where
+  get expr = do
+    x <- eval expr >>= get :: EvalM [Expr]
+    sequence $ fmap get x
+
 
 
 {----------------}
@@ -2193,6 +2271,11 @@ instance Get (Matrix Rat) where
     x <- eval expr >>= get :: EvalM (Matrix Expr)
     mSeq $ fmap get x
 
+instance Get (Matrix ZZModulo) where
+  get expr = do
+    x <- eval expr >>= get :: EvalM (Matrix Expr)
+    mSeq $ fmap get x
+
 instance Get (Matrix String) where
   get expr = do
     x <- eval expr >>= get :: EvalM (Matrix Expr)
@@ -2219,6 +2302,11 @@ instance Get (Matrix MacExpr) where
     mSeq $ fmap get x
 
 instance Get (Matrix PolyExpr) where
+  get expr = do
+    x <- eval expr >>= get :: EvalM (Matrix Expr)
+    mSeq $ fmap get x
+
+instance Get (Matrix ZZModExpr) where
   get expr = do
     x <- eval expr >>= get :: EvalM (Matrix Expr)
     mSeq $ fmap get x
@@ -2326,6 +2414,27 @@ instance Get (Perm Integer) where
     seqPerm $ mapPerm get x
 
 
+{------------------}
+{- :Get:ZZModExpr -}
+{------------------}
+
+instance Get ZZModExpr where
+  get expr = do
+    x <- eval expr
+    case x of
+      ZZModE y -> return y
+      v -> do
+        t <- typeOf v
+        reportErr (locusOf v) $ ModularIntegerExpected t
+
+instance Get ZZModulo where
+  get expr = do
+    x <- eval expr >>= get :: EvalM ZZModExpr
+    case x of
+      ZZModConst k :@ _ -> return k
+      v -> reportErr (locusOf v) UnevaluatedExpression
+
+
 
 {----------}
 {- :Glyph -}
@@ -2337,16 +2446,17 @@ class Glyph t where
 
 instance Glyph Expr where
   toGlyph expr = case expr of
-    IntE  x -> toGlyph x
-    StrE  x -> toGlyph x
-    BoolE x -> toGlyph x
-    RatE  x -> toGlyph x
-    ListE x -> toGlyph x
-    MacE  x -> toGlyph x
-    MatE  x -> toGlyph x
-    DocE  x -> toGlyph x
-    PolyE x -> toGlyph x
-    PermE x -> toGlyph x
+    IntE   x -> toGlyph x
+    StrE   x -> toGlyph x
+    BoolE  x -> toGlyph x
+    RatE   x -> toGlyph x
+    ListE  x -> toGlyph x
+    MacE   x -> toGlyph x
+    MatE   x -> toGlyph x
+    DocE   x -> toGlyph x
+    PolyE  x -> toGlyph x
+    PermE  x -> toGlyph x
+    ZZModE x -> toGlyph x
 
 instance Glyph IntExpr where
   toGlyph expr = do
@@ -2370,6 +2480,11 @@ instance Glyph RatExpr where
   toGlyph expr = do
     r <- eval expr >>= getVal :: EvalM Rat
     return $ show r
+
+instance Glyph ZZModExpr where
+  toGlyph expr = do
+    a <- eval expr >>= getVal :: EvalM ZZModulo
+    return $ showZZMod a
 
 instance Glyph ListExpr where
   toGlyph expr = do
@@ -2439,6 +2554,9 @@ instance Inject Bool BoolExpr where
 
 instance Inject Rat RatExpr where
   inject loc x = RatConst x :@ loc
+
+instance Inject ZZModulo ZZModExpr where
+  inject loc x = ZZModConst x :@ loc
 
 
 {- :ListExpr -}

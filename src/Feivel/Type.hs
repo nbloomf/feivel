@@ -151,6 +151,10 @@ data TypeErr
   | PermutationListExpected Type
   | PermutationMatrixExpected Type
 
+  | ModularIntegerExpected Type
+  | ModularIntegerListExpected Type
+  | ModularIntegerMatrixExpected Type
+
   | TypeUnificationError  Type Type
   deriving Eq
 
@@ -228,6 +232,15 @@ instance Show TypeErr where
 
   show (PermutationMatrixExpected t) =
     "A matrix of permutations was expected, but this expression has type " ++ show t ++ "."
+
+  show (ModularIntegerExpected t) =
+    "A modular integer was expected, but this expression has type " ++ show t ++ "."
+
+  show (ModularIntegerListExpected t) =
+    "A list of modular integers was expected, but this expression has type " ++ show t ++ "."
+
+  show (ModularIntegerMatrixExpected t) =
+    "A matrix of modular integers was expected, but this expression has type " ++ show t ++ "."
 
 
   show (TypeUnificationError a b) =
