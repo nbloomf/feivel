@@ -33,7 +33,7 @@ Feature Ideas
 * Matrix: Smith normal form (uses bezout)
 * Matrix: Shuffle rows/cols by permutation
 * Matrix: Build permutation matrix
-* Polynomial: evaluation, degree, division algorithm, gcd, bezout, content
+* Polynomial: degree, division algorithm, gcd, bezout, content
 * Permutation: Choose random permutation (of Sn? of a list?)
 * Permutation: Orbits {{t}}
 * Permutation: Shape {int}
@@ -43,6 +43,8 @@ Feature Ideas
 * String: strformat (latex/html/ascii) -- in progress
 * String: words/lines/splitat
 * Tests: Golden tests for rational, boolean polynomials
+* Tests: property tests for modular integers
+* Tests: golden tests for modular integers
 * Type: cyclotomic numbers
 * Type: pairs? (constructor)
 * Type: trees (constructor)
