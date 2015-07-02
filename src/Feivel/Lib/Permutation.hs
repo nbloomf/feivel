@@ -25,7 +25,7 @@ import Feivel.Lib.AlgErr
 import Feivel.Lib.Canon
 
 import Control.Monad (foldM)
-import Data.List (lookup, minimumBy, inits, tails, group, sortBy, sort, union, intersperse)
+import Data.List (minimumBy, inits, tails, group, sortBy, sort, union, intersperse)
 
 
 {------------}

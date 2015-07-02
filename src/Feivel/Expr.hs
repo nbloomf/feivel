@@ -29,6 +29,7 @@ module Feivel.Expr (
   IntExpr, IntExprLeaf(..),
   BoolExpr, BoolExprLeaf(..),
   RatExpr, RatExprLeaf(..),
+  ZZModExpr, ZZModExprLeaf(..),
 
   ListExpr, ListExprLeaf(..), ListGuard(..),
   MatExpr, MatExprLeaf(..),
@@ -56,6 +57,7 @@ import Feivel.Store
 {-     :IntExpr  -}
 {-     :BoolExpr -}
 {-     :RatExpr  -}
+{-     :ZZModExpr -}
 {-     :ListExpr -}
 {-     :MatExpr  -}
 {-     :PolyExpr -}
@@ -117,30 +119,33 @@ data DocLeaf
 {---------}
 
 data Expr
- = DocE  Doc
- | BoolE BoolExpr
- | StrE  StrExpr
- | IntE  IntExpr
- | RatE  RatExpr
-
- | ListE  ListExpr
- | MatE   MatExpr
- | PolyE  PolyExpr
- | PermE  PermExpr
- | MacE   MacExpr
- deriving (Eq, Show)
+  = DocE  Doc
+  | BoolE BoolExpr
+  | StrE  StrExpr
+  | IntE  IntExpr
+  | RatE  RatExpr
+ 
+  | ZZModE ZZModExpr
+ 
+  | ListE  ListExpr
+  | MatE   MatExpr
+  | PolyE  PolyExpr
+  | PermE  PermExpr
+  | MacE   MacExpr
+  deriving (Eq, Show)
 
 instance HasLocus Expr where
-  locusOf (DocE  x) = locusOf x
-  locusOf (StrE  x) = locusOf x
-  locusOf (IntE  x) = locusOf x
-  locusOf (BoolE x) = locusOf x
-  locusOf (RatE  x) = locusOf x
-  locusOf (ListE x) = locusOf x
-  locusOf (MatE  x) = locusOf x
-  locusOf (PolyE x) = locusOf x
-  locusOf (PermE x) = locusOf x
-  locusOf (MacE  x) = locusOf x
+  locusOf (DocE   x) = locusOf x
+  locusOf (StrE   x) = locusOf x
+  locusOf (IntE   x) = locusOf x
+  locusOf (BoolE  x) = locusOf x
+  locusOf (RatE   x) = locusOf x
+  locusOf (ZZModE x) = locusOf x
+  locusOf (ListE  x) = locusOf x
+  locusOf (MatE   x) = locusOf x
+  locusOf (PolyE  x) = locusOf x
+  locusOf (PermE  x) = locusOf x
+  locusOf (MacE   x) = locusOf x
 
 
 {- ToExpr -}
@@ -148,17 +153,18 @@ instance HasLocus Expr where
 class ToExpr t where
   toExpr :: t -> Expr
 
-instance ToExpr Expr     where toExpr = id
-instance ToExpr Doc      where toExpr = DocE
-instance ToExpr BoolExpr where toExpr = BoolE
-instance ToExpr StrExpr  where toExpr = StrE
-instance ToExpr IntExpr  where toExpr = IntE
-instance ToExpr RatExpr  where toExpr = RatE
-instance ToExpr ListExpr where toExpr = ListE
-instance ToExpr MatExpr  where toExpr = MatE
-instance ToExpr PolyExpr where toExpr = PolyE
-instance ToExpr PermExpr where toExpr = PermE
-instance ToExpr MacExpr  where toExpr = MacE
+instance ToExpr Expr      where toExpr = id
+instance ToExpr Doc       where toExpr = DocE
+instance ToExpr BoolExpr  where toExpr = BoolE
+instance ToExpr StrExpr   where toExpr = StrE
+instance ToExpr IntExpr   where toExpr = IntE
+instance ToExpr RatExpr   where toExpr = RatE
+instance ToExpr ZZModExpr where toExpr = ZZModE
+instance ToExpr ListExpr  where toExpr = ListE
+instance ToExpr MatExpr   where toExpr = MatE
+instance ToExpr PolyExpr  where toExpr = PolyE
+instance ToExpr PermExpr  where toExpr = PermE
+instance ToExpr MacExpr   where toExpr = MacE
 
 -- Not a fan of "no locus" here
 instance ToExpr Integer where toExpr k = IntE  $ IntConst k :@ NullLocus
@@ -383,14 +389,14 @@ data RatExprLeaf
 
 
 
-{---------------}
+{--------------}
 {- :ZZModExpr -}
-{---------------}
+{--------------}
 
 type ZZModExpr = AtLocus ZZModExprLeaf
 
 data ZZModExprLeaf
-  = ZZModConst Rat
+  = ZZModConst ZZModulo
   | ZZModVar   Key
   | ZZModCast  IntExpr
 

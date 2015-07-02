@@ -31,19 +31,19 @@ module Feivel.Eval (
 {-    :Eval:IntExpr    :Eval:StrExpr     :Eval:BoolExpr    -}
 {-    :Eval:RatExpr    :Eval:ListExpr    :Eval:MacExpr     -}
 {-    :Eval:MatExpr    :Eval:Doc         :Eval:PolyExpr    -}
-{-    :Eval:PermExpr                                       -}
+{-    :Eval:PermExpr   :Eval:ZZModExpr                     -}
 {-                                                         -}
 {-  :Typed             :Typed:Expr                         -}
 {-    :Typed:IntExpr   :Typed:StrExpr    :Typed:BoolExpr   -}
 {-    :Typed:RatExpr   :Typed:ListExpr   :Typed:MacExpr    -}
 {-    :Typed:MatExpr   :Typed:Doc        :Typed:PolyExpr   -}
-{-    :Typed:PermExpr                                      -}
+{-    :Typed:PermExpr  :Typed:ZZModExpr                    -}
 {-                                                         -}
 {-  :Get                                                   -}
 {-    :Get:IntExpr     :Get:StrExpr      :Get:BoolExpr     -}
 {-    :Get:RatExpr     :Get:ListExpr     :Get:MacExpr      -}
 {-    :Get:MatExpr     :Get:Doc          :Get:PolyExpr     -}
-{-    :Get:PermExpr                                        -}
+{-    :Get:PermExpr    :Get:ZZModExpr                      -}
 {-                                                         -}
 {-  :Glyph                                                 -}
 {-  :Inject                                                -}

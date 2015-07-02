@@ -42,10 +42,13 @@ data Type
   | BB -- Boolean
   | QQ -- Rational
 
+  | ZZMod  Integer -- Modular Integer
+  | PermOf Type    -- Permutation
+
   | ListOf   Type -- List
   | MatOf    Type -- Matrix
   | PolyOver Type -- Polynomial
-  | PermOf   Type -- Permutation
+
 
   | MacTo  Type -- Macro
   deriving Eq
@@ -73,6 +76,11 @@ unify (PolyOver a) (PolyOver b) = do
   t <- unify a b
   return (PolyOver t)
 
+unify (ZZMod n) (ZZMod m) = 
+  if n == m
+    then return (ZZMod n)
+    else Left $ TypeUnificationError (ZZMod n) (ZZMod m)
+
 unify (PermOf a) (PermOf b) = do
   t <- unify a b
   return (PermOf t)
@@ -97,6 +105,8 @@ instance Show Type where
   show SS = "str"
   show BB = "bool"
   show QQ = "rat"
+
+  show (ZZMod n) = "mod" ++ show (abs n)
 
   show (ListOf   t) = "{" ++ show t ++ "}"
   show (MatOf    t) = "[" ++ show t ++ "]"

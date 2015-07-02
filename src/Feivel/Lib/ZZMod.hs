@@ -19,62 +19,61 @@
 module Feivel.Lib.ZZMod where
 
 import Feivel.Lib.Ring
-import Feivel.Lib.AlgErr
 
-data ZZMod = ZZMod
+data ZZModulo = ZZModulo
   { residue :: Integer
   , modulus :: Integer
   } deriving Show
 
-zzmod :: Integer -> Integer -> ZZMod
-a `zzmod` n = ZZMod b m
+zzmod :: Integer -> Integer -> ZZModulo
+a `zzmod` n = ZZModulo b m
   where
     m = abs n
     b = ((a `rem` m) + m) `rem` m
 
-instance Eq ZZMod where
-  (ZZMod a n) == (ZZMod b m)
+instance Eq ZZModulo where
+  (ZZModulo a n) == (ZZModulo b m)
     = n == m && ((a-b) `rem` n == 0)
 
-instance Ringoid ZZMod where
-  rAdd (ZZMod a n) (ZZMod b m)
+instance Ringoid ZZModulo where
+  rAdd (ZZModulo a n) (ZZModulo b m)
     | n /= m = Left DifferentModulus
     | otherwise = Right $ (a+b) `zzmod` n
 
-  rMul (ZZMod a 0) (ZZMod b m) = Right $ (a*b) `zzmod` m
-  rMul (ZZMod a n) (ZZMod b 0) = Right $ (a*b) `zzmod` n
-  rMul (ZZMod a n) (ZZMod b m)
+  rMul (ZZModulo a 0) (ZZModulo b m) = Right $ (a*b) `zzmod` m
+  rMul (ZZModulo a n) (ZZModulo b 0) = Right $ (a*b) `zzmod` n
+  rMul (ZZModulo a n) (ZZModulo b m)
     | n /= m = Left DifferentModulus
     | otherwise = Right $ (a*b) `zzmod` n
 
-  rNeg (ZZMod a n) = (-a) `zzmod` n
+  rNeg (ZZModulo a n) = (-a) `zzmod` n
 
   rZero = 0 `zzmod` 0
 
-  rIsZero (ZZMod a n) = (a `rem` n) == 0
+  rIsZero (ZZModulo a n) = (a `rem` n) == 0
 
-  rNeutOf (ZZMod a n) = Right $ ZZMod 0 n
-  rLAnnOf (ZZMod a n) = Right $ ZZMod 0 n
-  rRAnnOf (ZZMod a n) = Right $ ZZMod 0 n
-
-
-instance CRingoid ZZMod
+  rNeutOf (ZZModulo _ n) = Right $ ZZModulo 0 n
+  rLAnnOf (ZZModulo _ n) = Right $ ZZModulo 0 n
+  rRAnnOf (ZZModulo _ n) = Right $ ZZModulo 0 n
 
 
-instance URingoid ZZMod where
-  rOne = ZZMod 1 0
+instance CRingoid ZZModulo
 
-  rIsOne (ZZMod a n) = (a `rem` n) == 1
 
-  rIsUnit (ZZMod a n) = Right $ (a `gcd` n) == 1
+instance URingoid ZZModulo where
+  rOne = ZZModulo 1 0
 
-  rInjInt a = Right (ZZMod a 0)
+  rIsOne (ZZModulo a n) = (a `rem` n) == 1
 
-  rInv (ZZMod a n)
+  rIsUnit (ZZModulo a n) = Right $ (a `gcd` n) == 1
+
+  rInjInt a = Right (ZZModulo a 0)
+
+  rInv (ZZModulo a n)
     | (a `gcd` n) /= 1 = Left $ RingoidNotInvertibleErr (show a ++ " mod " ++ show n)
     | otherwise = do
         (h,_) <- rBezout a n
         return (h `zzmod` n)
 
-  rLOneOf (ZZMod a n) = Right $ ZZMod 1 n
-  rROneOf (ZZMod a n) = Right $ ZZMod 1 n
+  rLOneOf (ZZModulo a n) = Right $ ZZModulo 1 n
+  rROneOf (ZZModulo a n) = Right $ ZZModulo 1 n

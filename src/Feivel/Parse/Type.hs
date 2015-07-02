@@ -36,6 +36,7 @@ pType = choice
   , pTypeMat
   , pTypePoly
   , pTypePerm
+  , pTypeZZMod
   ] <?> "type signature"
 
 pTypeL :: ParseM Type
@@ -69,6 +70,12 @@ pTypeMat = do
   t <- pType
   _ <- char ']'
   return $ MatOf t
+
+pTypeZZMod :: ParseM Type
+pTypeZZMod = do
+  _ <- try $ string "mod"
+  n <- pNatural
+  return $ ZZMod n
 
 pTypeT :: ParseM (Type, Type)
 pTypeT = pType >>= (\t -> return (t,t))

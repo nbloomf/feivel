@@ -260,7 +260,7 @@ ios :: Interaction -> [(String, String)]
 ios = reverse . map (\s -> (inStr s, outStr s))
 
 history :: Interaction -> String
-history x = concat $ zipWith foo (ios x) [1..]
+history x = concat $ zipWith foo (ios x) [(1::Integer)..]
   where
     foo (inp,outp) k = "(" ++ show k ++ ") " ++ inp ++ "\n\n"
       ++ outp ++ (if outp == "" then "" else "\n\n")

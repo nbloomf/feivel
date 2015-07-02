@@ -22,8 +22,6 @@ import Feivel.Eval
 import Feivel.Store (setPaths)
 import Feivel.EvalM
 import Feivel.Format
-import Feivel.Store (emptyStore)
-import Feivel.Error
 import Feivel.GUI
 
 import System.IO

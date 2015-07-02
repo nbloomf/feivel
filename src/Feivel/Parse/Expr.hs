@@ -35,26 +35,27 @@ import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 
-import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles)
+import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod)
 
 import Text.Parsec.Expr
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
-{--------------}
-{- Contents   -}
-{-  :Doc      -}
-{-  :Expr     -}
-{-  :StrExpr  -}
-{-  :IntExpr  -}
-{-  :RatExpr  -}
-{-  :BoolExpr -}
-{-  :ListExpr -}
-{-  :MatExpr  -}
-{-  :PolyExpr -}
-{-  :PermExpr -}
-{-  :MacExpr  -}
-{--------------}
+{---------------}
+{- Contents    -}
+{-  :Doc       -}
+{-  :Expr      -}
+{-  :StrExpr   -}
+{-  :IntExpr   -}
+{-  :RatExpr   -}
+{-  :ZZModExpr -}
+{-  :BoolExpr  -}
+{-  :ListExpr  -}
+{-  :MatExpr   -}
+{-  :PolyExpr  -}
+{-  :PermExpr  -}
+{-  :MacExpr   -}
+{---------------}
 
 {--------------}
 {- :Utilities -}
@@ -406,6 +407,8 @@ pTypedExpr ZZ = pIntExpr  >>= return . mapFst IntE
 pTypedExpr BB = pBoolExpr >>= return . mapFst BoolE
 pTypedExpr QQ = pRatExpr  >>= return . mapFst RatE
 
+pTypedExpr (ZZMod n) = pZZModExpr n >>= return . mapFst ZZModE
+
 pTypedExpr (ListOf   t) = pTypedListExpr t >>= return . mapFst ListE
 pTypedExpr (MatOf    t) = pTypedMatExpr  t >>= return . mapFst MatE
 pTypedExpr (MacTo    t) = pTypedMacExpr  t >>= return . mapFst MacE
@@ -594,6 +597,43 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
         , Infix (opParser2 IntLCM "lcm") AssocLeft
         ]
       , [ Infix (opParser2 IntChoose "choose") AssocLeft]
+      ]
+
+
+
+{--------------}
+{- :ZZModExpr -}
+{--------------}
+
+pZZModConst :: Integer -> ParseM (ZZModExpr, Type)
+pZZModConst n = pAtLocus (pZZModConst' n)
+
+pZZModConst' :: Integer -> ParseM (ZZModExprLeaf, Type)
+pZZModConst' n = do
+  a <- pInteger
+  return (ZZModConst (a `zzmod` n), ZZMod n)
+
+pZZModExpr :: Integer -> ParseM (ZZModExpr, Type)
+pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
+  where
+    pZZModTerm = pTerm (pZZModConst' n) (pZZModExpr n) "integer expression"
+      [ pVarExpr ZZModVar (ZZMod n)
+      , pMacroExpr ZZModMacro
+
+      , pAtPos (ZZMod n) ZZModAtPos
+      , pAtIdx (ZZMod n) ZZModAtIdx
+    
+      , pIfThenElseExpr (pZZModExpr n) ZZModIfThenElse (ZZMod n)
+      ]
+
+    zzModOpTable =
+      [ [ Infix (opParser2 ZZModMult "*") AssocLeft
+        ]
+      , [ Prefix (opParser1 ZZModNeg "neg")
+        ]
+      , [ Infix (opParser2 ZZModAdd "+") AssocLeft
+        , Infix (opParser2 ZZModSub "-") AssocLeft
+        ]
       ]
 
 
