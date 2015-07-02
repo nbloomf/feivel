@@ -359,6 +359,13 @@ These expressions can be used over any type.
 
 - Modular integer constants are written as integer constants.
 
+- `+`, `*`, `-`, `neg`, `inv`
+
+    Arithmetic as usual.
+
+- `int(INT)`
+
+    Cast `INT` to a residue.
 
 
 `{t}`: Lists
