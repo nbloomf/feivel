@@ -143,7 +143,7 @@ The repl should print `#t` back. Here we have used another command: [:square col
 
 Types in `feivel` come in two flavors:
 
-1. *atomic* types, which represent concrete data. As of 0.1.0 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), and `$int` (permutations of integers).
+1. *atomic* types, which represent concrete data. As of 0.1.0 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N), and `$int` (permutations of integers).
 2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.1.0 there are 4 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), and `>typ` (macros of `typ`).
 
 Constructors can be nested, so that (for instance) `[{int}]` represents the set of matrices whose entries are lists of integers. Macros are the strangest of these; they are like functions (but not quite) and allow us to wrap a complicated expression with parameters into a single value. An expression of type `>int` can be *evaluated* to *yield* a value of type `int`. Macros can also be nested, as we'll see later, so for instance an expression of type `>>int` is a macro that yields a macro that yields an integer, and an expression of type `[>rat]` is a matrix of macros that yield rationals. In that sense macros are "first-class" values. Why? Why not? :)
@@ -352,6 +352,13 @@ These expressions can be used over any type.
 - `int(INT)`
 
     Cast `INT` to a rational number; e.g. express n as n/1.
+
+
+`modN`: Modular Integers
+------------------------
+
+- Modular integer constants are written as integer constants.
+
 
 
 `{t}`: Lists
