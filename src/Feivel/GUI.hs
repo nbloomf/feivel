@@ -43,7 +43,7 @@ gui = do
   -- GUI State
   interaction <- newIORef []
 
-  initGUI
+  _ <- initGUI
 
 
   {- :MenuBar -}
@@ -138,9 +138,9 @@ gui = do
 
 
   {- :EventHandlers -}
-  mainWindow `on` deleteEvent $ do
-    liftIO mainQuit
-    return False
+  _ <- mainWindow `on` deleteEvent $ do
+         liftIO mainQuit
+         return False
 
 
 
