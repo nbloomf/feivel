@@ -24,6 +24,7 @@ import Feivel.Lib.Rat (Rat((:/:)))
 
 import Tests.Lib.Integer
 import Tests.Lib.Rat
+import Tests.Lib.ZZModulo
 
 import Tests.Lib.Matrix
 import Tests.Lib.Polynomial
@@ -31,6 +32,7 @@ import Tests.Lib.Polynomial
 main = defaultMain
   [ testInteger
   , testRat
+  , testZZModulo
 
   , testGroup "Integer Matrix"
       [ testRingoidMat    (0::Integer)

@@ -43,7 +43,6 @@ Feature Ideas
 * String: strformat (latex/html/ascii) -- in progress
 * String: words/lines/splitat
 * Tests: Golden tests for rational, boolean polynomials
-* Tests: property tests for modular integers
 * Tests: golden tests for modular integers
 * Type: cyclotomic numbers
 * Type: pairs? (constructor)
