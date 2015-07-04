@@ -119,6 +119,6 @@ instance CRingoidArb ZZModulo where
 
 
 instance URingoidArb ZZModulo where
-  rMulLOne x@(ZZModulo _ n) = return (1 `zzmod` n, x)
-  rMulROne x@(ZZModulo _ n) = return (x, 1 `zzmod` n)
+  rMulLOne _ = arbitrary >>= \x@(ZZModulo _ n) -> return (1 `zzmod` n, x)
+  rMulROne _ = arbitrary >>= \x@(ZZModulo _ n) -> return (x, 1 `zzmod` n)
 

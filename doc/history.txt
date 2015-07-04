@@ -1,5 +1,11 @@
 feivel: version history
 
+N.N.N - TBA
+===========
+* Graphical REPL (replaces old repl)
+* New types
+  * atomic: modN, $int
+
 0.1.0 - TBA
 ===========
 * Basic REPL
