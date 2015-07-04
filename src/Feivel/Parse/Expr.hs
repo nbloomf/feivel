@@ -175,11 +175,14 @@ pBrackDocE = do
   return (DocE d, DD)
 
 pREPL :: ParseM (Doc, Type)
-pREPL = choice $ map pAtLocus
-  [ pDefineREPL
-  , pNakedExprREPL
-  , pVarExpr NakedKey DD
-  ]
+pREPL = do
+  x <- choice $ map pAtLocus
+         [ pDefineREPL
+         , pNakedExprREPL
+         , pVarExpr NakedKey DD
+         ]
+  eof
+  return x
   where
     pDefineREPL = do
       try $ keyword "define"
