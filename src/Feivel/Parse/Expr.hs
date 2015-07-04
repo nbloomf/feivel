@@ -190,7 +190,6 @@ pREPL = do
       return (Define t k v (Empty :@ NullLocus), DD)
 
     pNakedExprREPL = do
-      --try (char '[' >> keyword ":")
       (x,_) <- try pTypedNakedExpr
       return (NakedExpr x, DD)
 

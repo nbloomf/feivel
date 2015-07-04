@@ -169,14 +169,14 @@ gui = do
             scrollOutput
             return ()
 
-  evalButton `on` buttonPressEvent $ do
-    liftIO evalAction 
-    return True
+  _ <- evalButton `on` buttonPressEvent $ do
+         liftIO evalAction 
+         return True
 
-  mainWindow `on` keyPressEvent $ tryEvent $ do
-    [Control] <- eventModifier
-    "Return"  <- eventKeyName
-    liftIO evalAction
+  _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
+         [Control] <- eventModifier
+         "Return"  <- eventKeyName
+         liftIO evalAction
 
 
 
@@ -190,14 +190,14 @@ gui = do
             set outBuf [textBufferText := history ys]
             return ()
 
-  undoButton `on` buttonPressEvent $ do
-    liftIO undoAction
-    return True
+  _ <- undoButton `on` buttonPressEvent $ do
+         liftIO undoAction
+         return True
 
-  mainWindow `on` keyPressEvent $ tryEvent $ do
-    [Control] <- eventModifier
-    "u"       <- eventKeyName
-    liftIO undoAction
+  _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
+         [Control] <- eventModifier
+         "u"       <- eventKeyName
+         liftIO undoAction
 
 
 
@@ -207,9 +207,9 @@ gui = do
         set outBuf [textBufferText := ""]
         return ()
   
-  clearMenuItem `on` buttonPressEvent $ do
-    liftIO clearAction
-    return True
+  _ <- clearMenuItem `on` buttonPressEvent $ do
+         liftIO clearAction
+         return True
 
 
   let adjustFontSize tweak = postGUIAsync $ do
@@ -218,23 +218,23 @@ gui = do
         widgetModifyFont outputView (Just fontDesc)
         widgetModifyFont inputView (Just fontDesc)
 
-  fontSizeIncMenuItem `on` buttonPressEvent $ do
-    liftIO $ adjustFontSize (\s -> s + 1)
-    return True
+  _ <- fontSizeIncMenuItem `on` buttonPressEvent $ do
+         liftIO $ adjustFontSize (\s -> s + 1)
+         return True
 
-  fontSizeDecMenuItem `on` buttonPressEvent $ do
-    liftIO $ adjustFontSize (\s -> s - 1)
-    return True
+  _ <- fontSizeDecMenuItem `on` buttonPressEvent $ do
+         liftIO $ adjustFontSize (\s -> s - 1)
+         return True
 
-  mainWindow `on` keyPressEvent $ tryEvent $ do
-    [Control] <- eventModifier
-    "equal"   <- eventKeyName
-    liftIO $ adjustFontSize (\s -> s + 1)
+  _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
+         [Control] <- eventModifier
+         "equal"   <- eventKeyName
+         liftIO $ adjustFontSize (\s -> s + 1)
 
-  mainWindow `on` keyPressEvent $ tryEvent $ do
-    [Control] <- eventModifier
-    "minus"   <- eventKeyName
-    liftIO $ adjustFontSize (\s -> s - 1)
+  _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
+         [Control] <- eventModifier
+         "minus"   <- eventKeyName
+         liftIO $ adjustFontSize (\s -> s - 1)
 
 
   {- :Finally -}
