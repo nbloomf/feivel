@@ -1,8 +1,10 @@
 # Feivel
 
-This directory contains the Feivel project, which is released as free software under the GNU General Public License version 3.
+This repository contains the Feivel project, which is released as free software under the GNU General Public License version 3.
 
-Feivel is a simple templating language aimed at math teachers. The goal of Feivel is to make it easy (or at least possible) to write math homework problems using "random" data but whose difficulty we can precisely control. To this end it has built-in support for some structures of interest to math teachers, such as arbitrary-precision arithmetic and polynomials. In this usage the template syntax will probably be layered on top of e.g. LaTeX, but Feivel does not assume this and can be used on top of any text or markup.
+Feivel is a simple templating language and expression grammar aimed at math teachers. It can also be used as an interactive calculator.
+
+The goal of Feivel is to make it easy (or at least possible) to write math homework problems using "random" data but whose difficulty we can precisely control. To this end it has built-in support for algebraic doodads such as arbitrary-precision arithmetic and polynomials. In this usage Feivel syntax will probably be layered on top of e.g. LaTeX, but this is not required.
 
 Feivel is in an extremely experimental state. It is missing lots of desired features, poorly documented, subject to breaking changes, unoptimized, and amateurishly written. However the few features it does have seem to work OK and are unlikely to destroy your machine. That said - be careful.
 

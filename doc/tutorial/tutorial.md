@@ -78,7 +78,7 @@ To use `feivel` as an interpreter, run it with the `--repl` flag set. This will 
 
     > feivel --repl &
 
-The interpreter window has a text entry box toward the bottom where we enter commands, and a scrolling text area above where our interaction is recorded. Type this into the command entry box:
+The interpreter window has two text boxes: an **entry box** below where we enter commands, and an uneditable **history box** above where our interaction is recorded. Type this into the entry box:
 
     > int: 2^30
 
@@ -89,6 +89,16 @@ and then click the `Eval` button (or press Ctrl-Enter). You should then see this
     > 1073741824
 
 This is a read-evaluate-print loop, wherein we can essentially process a simplified template one line at a time. This is an effective way to try out bits of syntax on the fly. To exit the REPL, close the window.
+
+The interpreter only understands `define` commands, naked expressions, and individual keys. When entering commands we do not need to use enclosing square brackets or colons. For example, try typing the following lines into the entry box one at a time, clicking `Eval` (or pressing Ctrl-Enter) after each one.
+
+    define int @a := 2
+    @a
+    int: @a + 4
+
+We can save our interaction to a file using the *Save interaction as...* menu command (or Ctrl-s), and we can undo an input with the Undo button. We can increase or decrease the font size with Ctrl-+ and Ctrl--.
+
+Play around with the REPL for a bit- there's not much to it.
 
 
 
