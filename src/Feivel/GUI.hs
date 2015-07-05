@@ -50,7 +50,7 @@ gui = do
 
   {- :MenuBar -}
   clearMenuItem <- menuItemNewWithMnemonic "_Clear Interaction"
-  saveMenuItem  <- menuItemNewWithMnemonic "_Save Interaction as..."
+  saveMenuItem  <- menuItemNewWithMnemonic "_Save Interaction as... (Ctrl s)"
 
   fileMenu <- menuNew
   menuShellAppend fileMenu clearMenuItem
@@ -59,8 +59,8 @@ gui = do
   fileMenuItem <- menuItemNewWithMnemonic "_File"
   menuItemSetSubmenu fileMenuItem fileMenu
 
-  fontSizeIncMenuItem <- menuItemNewWithLabel "Increase Font Size\tCtrl +"
-  fontSizeDecMenuItem <- menuItemNewWithLabel "Decrease Font Size\tCtrl -"
+  fontSizeIncMenuItem <- menuItemNewWithLabel "Increase Font Size (Ctrl +)"
+  fontSizeDecMenuItem <- menuItemNewWithLabel "Decrease Font Size (Ctrl -)"
 
   viewMenu <- menuNew
   menuShellAppend viewMenu fontSizeIncMenuItem
@@ -269,15 +269,17 @@ gui = do
             case path of
               Nothing   -> hPutStrLn stderr "Bad filename chosen!"
               Just file -> writeFile file (history acts)
-          _ -> do
-            putStrLn "cancel pressed"
-
+          _ -> return ()
         widgetDestroy sd
-        putStrLn "save pressed"
 
   _ <- saveMenuItem `on` buttonPressEvent $ do
          liftIO saveInteraction
          return True
+
+  _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
+         [Control] <- eventModifier
+         "s"       <- eventKeyName
+         liftIO saveInteraction
 
 
 

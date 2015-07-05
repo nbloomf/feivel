@@ -19,7 +19,6 @@ Feature Ideas
 * General: read preferences from a config file (.feivel?)
 * General: stack trace on error
 * General: template/data library list, rather than file
-* General: gui repl for expressions only?
 * General: special keys which update after every lookup? e.g. a variable which autoincrements
 * Integer: hex, binary, octal constants
 * Integer: bezout
