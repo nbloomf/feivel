@@ -414,6 +414,7 @@ data ZZModExprLeaf
   | ZZModAdd   ZZModExpr ZZModExpr
   | ZZModSub   ZZModExpr ZZModExpr
   | ZZModMult  ZZModExpr ZZModExpr
+  | ZZModPow   ZZModExpr IntExpr
   deriving (Eq, Show)
 
 

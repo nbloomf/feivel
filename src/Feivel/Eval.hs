@@ -887,9 +887,9 @@ instance Eval MatExpr where
         case mEAddT (constP (0:/:1)) m (i,j) w of
           Left err -> reportErr loc err
           Right y -> return $ inject loc y
-      ZZMod n -> do
+      ZZMod d -> do
         w <- eval x >>= getVal :: EvalM ZZModulo
-        case mEAddT (0`zzmod`n) m (i,j) w of
+        case mEAddT (0`zzmod`d) m (i,j) w of
           Left err -> reportErr loc err
           Right y -> return $ inject loc y
       _ -> reportErr loc $ NumericMatrixExpected t
@@ -1564,6 +1564,7 @@ instance Eval ZZModExpr where
   eval (ZZModAdd  a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
   eval (ZZModSub  a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
   eval (ZZModMult a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
+  eval (ZZModPow  a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
 
 
 
@@ -2006,6 +2007,7 @@ instance Typed ZZModExpr where
   typeOf (ZZModAdd  a b :@ loc) = sameType loc a b
   typeOf (ZZModSub  a b :@ loc) = sameType loc a b
   typeOf (ZZModMult a b :@ loc) = sameType loc a b
+  typeOf (ZZModPow  a _ :@ _)   = typeOf a
 
 
 

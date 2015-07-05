@@ -628,6 +628,8 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
       , pIfThenElseExpr (pZZModExpr n) ZZModIfThenElse (ZZMod n)
 
       , pFun1 "int" pIntExpr (ZZModCast n) (ZZMod n)
+
+      , pFun2 "Pow" (pZZModExpr n) pIntExpr ZZModPow (ZZMod n)
       ]
 
     zzModOpTable =
