@@ -630,6 +630,9 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
       , pFun1 "int" pIntExpr (ZZModCast n) (ZZMod n)
 
       , pFun2 "Pow" (pZZModExpr n) pIntExpr ZZModPow (ZZMod n)
+
+      , pFun1 "Sum"    (pTypedListExpr (ZZMod n)) ZZModSum   (ZZMod n)
+      , pFun1 "Prod"   (pTypedListExpr (ZZMod n)) ZZModProd  (ZZMod n)
       ]
 
     zzModOpTable =

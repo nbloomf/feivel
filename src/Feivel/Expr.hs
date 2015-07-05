@@ -49,22 +49,22 @@ import Feivel.Lib
 import Feivel.Format
 import Feivel.Store
 
-{-----------------}
-{- Contents      -}
-{-   :Doc        -}
-{-   :Expr       -}
-{-     :StrExpr  -}
-{-     :IntExpr  -}
-{-     :BoolExpr -}
-{-     :RatExpr  -}
+{------------------}
+{- Contents       -}
+{-   :Doc         -}
+{-   :Expr        -}
+{-     :StrExpr   -}
+{-     :IntExpr   -}
+{-     :BoolExpr  -}
+{-     :RatExpr   -}
 {-     :ZZModExpr -}
-{-     :ListExpr -}
-{-     :MatExpr  -}
-{-     :PolyExpr -}
-{-     :PermExpr -}
-{-     :MacExpr  -}
-{-  :ExprErr     -}
-{-----------------}
+{-     :ListExpr  -}
+{-     :MatExpr   -}
+{-     :PolyExpr  -}
+{-     :PermExpr  -}
+{-     :MacExpr   -}
+{-  :ExprErr      -}
+{------------------}
 
 
 {--------}
@@ -415,6 +415,9 @@ data ZZModExprLeaf
   | ZZModSub   ZZModExpr ZZModExpr
   | ZZModMult  ZZModExpr ZZModExpr
   | ZZModPow   ZZModExpr IntExpr
+
+  | ZZModSum   ListExpr
+  | ZZModProd  ListExpr
   deriving (Eq, Show)
 
 

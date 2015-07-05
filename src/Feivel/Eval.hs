@@ -1566,6 +1566,9 @@ instance Eval ZZModExpr where
   eval (ZZModMult a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
   eval (ZZModPow  a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
 
+  eval (ZZModSum   ls :@ loc) = lift1 loc (rSumT   (0 `zzmod` 0)) ls
+  eval (ZZModProd  ls :@ loc) = lift1 loc (rUProdT (0 `zzmod` 0)) ls
+
 
 
 {----------}
@@ -2445,6 +2448,11 @@ instance Get ZZModulo where
     case x of
       ZZModConst k :@ _ -> return k
       v -> reportErr (locusOf v) UnevaluatedExpression
+
+instance Get [ZZModulo] where
+  get expr = do
+    xs <- eval expr >>= get :: EvalM [ZZModExpr]
+    sequence $ map getVal xs
 
 
 
