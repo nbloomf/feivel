@@ -1,0 +1,8 @@
+feivel
+<<<
+[define mod5 @k := 2]#
+@k
+>>>
+2 mod 5
+>>>= 0
+

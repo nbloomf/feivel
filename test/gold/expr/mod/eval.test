@@ -1,0 +1,10 @@
+feivel
+<<<
+[define >mod5 @f := Macro(mod5; @t + 2; mod5 @t := 1)]#
+[:mod5: Eval(mod5; @f) :]
+[:mod5: Eval(mod5; @f; mod5 @t := 4) :]
+>>>
+3 mod 5
+1 mod 5
+>>>= 0
+
