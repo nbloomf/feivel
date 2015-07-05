@@ -23,7 +23,9 @@ import Feivel.Expr
 import Feivel.EvalM
 import Feivel.Eval
 import Feivel.Parse
+import Feivel.GUI.Strings
 
+import System.IO (hPutStrLn, stderr)
 import Data.IORef
 import Graphics.UI.Gtk
 import Control.Monad.IO.Class
@@ -48,7 +50,7 @@ gui = do
 
   {- :MenuBar -}
   clearMenuItem <- menuItemNewWithMnemonic "_Clear Interaction"
-  saveMenuItem  <- menuItemNewWithMnemonic "_Save Interaction"
+  saveMenuItem  <- menuItemNewWithMnemonic "_Save Interaction as..."
 
   fileMenu <- menuNew
   menuShellAppend fileMenu clearMenuItem
@@ -235,6 +237,48 @@ gui = do
          [Control] <- eventModifier
          "minus"   <- eventKeyName
          liftIO $ adjustFontSize (\s -> s - 1)
+
+
+
+  let tellAbout = do
+        ad <- aboutDialogNew
+        aboutDialogSetName     ad ui_name_string
+        aboutDialogSetVersion  ad ui_version_string
+        aboutDialogSetAuthors  ad ui_authors
+        aboutDialogSetComments ad ui_about_comment
+        dialogRun ad
+        widgetDestroy ad
+
+  _ <- aboutMenuItem `on` buttonPressEvent $ do
+         liftIO tellAbout
+         return True
+
+
+
+  let saveInteraction = do
+        sd <- fileChooserDialogNew
+                (Just "Save interaction as...")
+                (Just mainWindow)
+                FileChooserActionSave
+                [("Cancel", ResponseCancel), ("Save", ResponseOk)]
+        resp <- dialogRun sd
+        case resp of
+          ResponseOk -> do
+            path <- fileChooserGetFilename sd
+            acts <- readIORef interaction
+            case path of
+              Nothing   -> hPutStrLn stderr "Bad filename chosen!"
+              Just file -> writeFile file (history acts)
+          _ -> do
+            putStrLn "cancel pressed"
+
+        widgetDestroy sd
+        putStrLn "save pressed"
+
+  _ <- saveMenuItem `on` buttonPressEvent $ do
+         liftIO saveInteraction
+         return True
+
 
 
   {- :Finally -}

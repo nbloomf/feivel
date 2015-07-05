@@ -23,6 +23,7 @@ import Feivel.Store (setPaths)
 import Feivel.EvalM
 import Feivel.Format
 import Feivel.GUI
+import Feivel.GUI.Strings
 
 import System.IO
 import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
@@ -188,5 +189,5 @@ options =
 
 
 version :: String
-version = "feivel-0.1.0"
+version = "feivel" ++ ui_version_string
 
