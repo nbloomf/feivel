@@ -967,6 +967,9 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
       , pFun1 "ShuffleRows" (pTypedMatExpr typ) MatShuffleRows (MatOf typ)
       , pFun1 "ShuffleCols" (pTypedMatExpr typ) MatShuffleCols (MatOf typ)
 
+      , pFun1 "RowFromList" (pTypedListExpr typ) (MatRowFromList typ) (MatOf typ)
+      , pFun1 "ColFromList" (pTypedListExpr typ) (MatColFromList typ) (MatOf typ)
+
       , pFun1 "Rand" (pTypedListExpr (MatOf typ)) MatRand (MatOf typ)
 
       , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) MatGetRow (MatOf typ)

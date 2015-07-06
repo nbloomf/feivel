@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib.Ring (
+module Feivel.Lib.Algebra.Ring (
   AlgErr(..),
 
   Ringoid,

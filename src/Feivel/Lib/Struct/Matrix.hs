@@ -68,7 +68,7 @@ module Feivel.Lib.Struct.Matrix (
 {-     :GaussJordan -}
 {--------------------}
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.Monad
 
 import GHC.Arr

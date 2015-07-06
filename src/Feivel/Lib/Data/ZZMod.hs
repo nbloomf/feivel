@@ -18,7 +18,7 @@
 
 module Feivel.Lib.Data.ZZMod where
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 
 data ZZModulo = ZZModulo
   { residue :: Integer

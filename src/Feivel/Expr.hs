@@ -489,6 +489,9 @@ data MatExprLeaf
 
   | MatBuilder Type Expr Key ListExpr Key ListExpr
 
+  | MatRowFromList Type ListExpr
+  | MatColFromList Type ListExpr
+
   -- Special Values
   | MatId     Type IntExpr
   | MatSwapE  Type IntExpr IntExpr IntExpr

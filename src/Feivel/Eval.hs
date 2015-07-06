@@ -809,6 +809,16 @@ instance Eval MatExpr where
       ListOf (MatOf _) -> return s
       _ -> reportErr loc $ ListExpected t
 
+  eval (MatRowFromList t xs :@ loc) = do
+    as <- eval xs >>= getVal :: EvalM [Expr]
+    m  <- tryEvalM loc $ mRowFromList as
+    return $ MatConst t m :@ loc
+
+  eval (MatColFromList t xs :@ loc) = do
+    as <- eval xs >>= getVal :: EvalM [Expr]
+    m  <- tryEvalM loc $ mColFromList as
+    return $ MatConst t m :@ loc
+
   eval (MatId t n :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
     case t of

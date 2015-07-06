@@ -35,7 +35,7 @@ import Data.List (intersperse, sortBy, maximumBy, union)
 import Data.Maybe (fromMaybe)
 import Control.Monad (foldM, join)
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.Either ()
 import Feivel.Lib.Pair
 import Feivel.Lib.Canon

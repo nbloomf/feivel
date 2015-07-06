@@ -39,7 +39,7 @@ module Feivel.Lib.Data.Rat (
 import Prelude hiding (abs)
 import Control.Monad.Instances ()
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.AlgErr ()
 import Feivel.Lib.Canon
 

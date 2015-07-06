@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Lib (
-  module Feivel.Lib.Ring,
+  module Feivel.Lib.Algebra.Ring,
   module Feivel.Lib.String,
   module Feivel.Lib.Bool,
   module Feivel.Lib.Data.Rat,
@@ -29,7 +29,7 @@ module Feivel.Lib (
   module Feivel.Lib.Data.ZZMod
 ) where
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.String
 import Feivel.Lib.Bool
 import Feivel.Lib.Data.Rat

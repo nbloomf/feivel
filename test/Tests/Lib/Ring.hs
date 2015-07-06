@@ -24,7 +24,7 @@ import Test.QuickCheck
 
 import Tests.Util
 
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 
 {--------------------}
 {- Contents         -}
