@@ -18,6 +18,8 @@ tutorial: doc/tutorial/tutorial.md
 
 vis: FORCE
 	find src -name '*.hs' | xargs graphmod -q -p > doc/dev/modules.dot
+	dot -Tsvg doc/dev/modules.dot > doc/dev/modules.svg
+	rm doc/dev/modules.dot
 
 everything: feivel golden tutorial vis
 
