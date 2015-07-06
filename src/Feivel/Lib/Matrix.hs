@@ -576,32 +576,21 @@ instance (Ringoid t) => Ringoid (Matrix t) where
 
   rIsZero m = mAll rIsZero m
 
-  rNeutOf Null = return Null
-  rNeutOf m = case foo of
-    Left _ -> undefined
-    Right z -> Right z
-    where
-      foo = do
-        d <- mDim m
-        mConst d rZero
+  rNeutOf = mSeq . fmap rNeutOf
 
   rLAnnOf Null = return Null
-  rLAnnOf m = case foo of
-    Left _ -> undefined
-    Right z -> Right z
-    where
-      foo = do
-        r <- mNumRows m
-        mConst (r,r) rZero
+  rLAnnOf m = do
+    a <- (1,1) `mEntryOf` m
+    z <- rLAnnOf a
+    r <- mNumRows m
+    mConst (r,r) z
 
   rRAnnOf Null = return Null
-  rRAnnOf m = case foo of
-    Left _ -> undefined
-    Right z -> Right z
-    where
-      foo = do
-        c <- mNumCols m
-        mConst (c,c) rZero
+  rRAnnOf m =  do
+    a <- (1,1) `mEntryOf` m
+    z <- rRAnnOf a
+    c <- mNumCols m
+    mConst (c,c) z
 
 
 mZerosAboveIndex :: (Ringoid a) => Matrix a -> Index -> Either AlgErr Bool

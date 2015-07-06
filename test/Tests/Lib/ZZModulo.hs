@@ -75,6 +75,10 @@ instance Arbitrary ZZModulo where
 {---------------}
 
 instance RingoidArb ZZModulo where
+  rLocalElts (ZZModulo _ n) k = do
+    as <- vectorOf k arbitrary
+    return $ map (`zzmod` n) as
+
   rAddAssoc _ = do
     n <- arbModulus
     a <- arbResidueMod n
@@ -87,6 +91,16 @@ instance RingoidArb ZZModulo where
     a <- arbResidueMod n
     b <- arbResidueMod n
     return (a, b)
+
+  rAddLNeut _ = do
+    n <- arbModulus
+    a <- arbResidueMod n
+    return (0 `zzmod` (fromIntegral n), a)
+
+  rAddRNeut _ = do
+    n <- arbModulus
+    a <- arbResidueMod n
+    return (a, 0 `zzmod` (fromIntegral n))
 
   rMulAssoc _ = do
     n <- arbModulus

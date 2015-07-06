@@ -47,10 +47,16 @@ import Tests.Lib.Ring
 testRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> Test
 testRingoidPoly t = testRingoid (constP t)
 
+testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> Test
+testCRingoidPoly t = testCRingoid (constP t)
+
 
 {---------------}
 {- :Generators -}
 {---------------}
+
+g_MAX_NUM_TERMS :: Int
+g_MAX_NUM_TERMS = 5
 
 varchar :: [Char]
 varchar =
@@ -83,11 +89,57 @@ instance Arbitrary Monomial where
     ks <- vectorOf t arbitrary
     return $ canon $ fromListM $ zip xs ks
 
-instance (Arbitrary a) => Arbitrary (Poly a) where
-  arbitrary = do
-    t  <- choose (1,10)
-    cs <- vectorOf t arbitrary
-    xs <- vectorOf t arbitrary
-    return $ fromListP $ zip cs xs
+arbRingoidPoly :: (RingoidArb t) => t -> Gen (Poly t)
+arbRingoidPoly x = do
+  t  <- choose (1, g_MAX_NUM_TERMS)
+  cs <- rLocalElts x t
+  xs <- vectorOf t arbitrary
+  return $ fromListP $ zip cs xs
 
-instance (RingoidArb a, CRingoidArb a) => RingoidArb (Poly a)
+instance (Arbitrary a, RingoidArb a) => Arbitrary (Poly a) where
+  arbitrary = do
+    x  <- arbitrary
+    arbRingoidPoly x
+
+instance (RingoidArb a, CRingoidArb a) => RingoidArb (Poly a) where
+  rAddAssoc _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    p3 <- arbRingoidPoly x
+    return (p1, p2, p3)
+
+  rAddComm _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    return (p1, p2)
+
+  rMulAssoc _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    p3 <- arbRingoidPoly x
+    return (p1, p2, p3)
+
+  rMulDistLrAdd _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    p3 <- arbRingoidPoly x
+    return (p1, p2, p3)
+
+  rMulDistRrAdd _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    p3 <- arbRingoidPoly x
+    return (p1, p2, p3)
+
+
+instance (RingoidArb a, CRingoidArb a) => CRingoidArb (Poly a) where
+  rMulComm _ = do
+    x  <- arbitrary
+    p1 <- arbRingoidPoly x
+    p2 <- arbRingoidPoly x
+    return (p1, p2)

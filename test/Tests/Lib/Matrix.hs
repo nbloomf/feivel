@@ -41,12 +41,12 @@ import Tests.Lib.Ring
 {- :Suites -}
 {-----------}
 
-testRingoidMat :: (Ringoid t, Arbitrary t, Show t) => t -> Test
+testRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> Test
 testRingoidMat t = testRingoid (mCell t)
 
 testURingoidMat = undefined
 
-testBipRingoidMat :: (Ringoid t, Arbitrary t, Show t) => t -> Test
+testBipRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> Test
 testBipRingoidMat t = testBipRingoid (mCell t)
 
 
@@ -56,7 +56,7 @@ testBipRingoidMat t = testBipRingoid (mCell t)
 {---------------}
 
 gMAX_MAT_DIM :: Int
-gMAX_MAT_DIM = 4
+gMAX_MAT_DIM = 3
 
 {- Arbitrary dimensions (within reason) -}
 
@@ -90,6 +90,13 @@ arbMatDim r c = do
     Left  _ -> return Null
     Right m -> return m
 
+arbRingoidMatDim :: (RingoidArb t) => Integer -> Integer -> t -> Gen (Matrix t)
+arbRingoidMatDim r c x = do
+  as <- rLocalElts x ((fromIntegral r)*(fromIntegral c))
+  case mRowMajorFromList r c as of
+    Left  _ -> return Null
+    Right m -> return m
+
 
 instance (Arbitrary t) => Arbitrary (Matrix t) where
   arbitrary = do
@@ -101,51 +108,73 @@ instance (Arbitrary t) => Arbitrary (Matrix t) where
         arbMatDim r c
 
 
+
 {---------------}
 {- :RingoidArb -}
 {---------------}
 
-instance (Ringoid t, Arbitrary t) => RingoidArb (Matrix t) where
+instance (Ringoid t, Arbitrary t, RingoidArb t) => RingoidArb (Matrix t) where
   rAddAssoc _ = do
     (r,c) <- arbDim2
-    m1 <- arbMatDim r c
-    m2 <- arbMatDim r c
-    m3 <- arbMatDim r c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r c x
+    m2 <- arbRingoidMatDim r c x
+    m3 <- arbRingoidMatDim r c x
     return (m1, m2, m3)
 
   rAddComm _ = do
     (r,c) <- arbDim2
-    m1 <- arbMatDim r c
-    m2 <- arbMatDim r c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r c x
+    m2 <- arbRingoidMatDim r c x
     return (m1, m2)
 
   rMulAssoc _ = do
     (r,k,m,c) <- arbDim4
-    m1 <- arbMatDim r k
-    m2 <- arbMatDim k m
-    m3 <- arbMatDim m c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r k x
+    m2 <- arbRingoidMatDim k m x
+    m3 <- arbRingoidMatDim m c x
     return (m1, m2, m3)
 
   rMulDistLrAdd _ = do
     (r,k,c) <- arbDim3
-    m1 <- arbMatDim r k
-    m2 <- arbMatDim k c
-    m3 <- arbMatDim k c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r k x
+    m2 <- arbRingoidMatDim k c x
+    m3 <- arbRingoidMatDim k c x
     return (m1, m2, m3)
 
   rMulDistRrAdd _ = do
     (r,k,c) <- arbDim3
-    m1 <- arbMatDim r k
-    m2 <- arbMatDim r k
-    m3 <- arbMatDim k c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r k x
+    m2 <- arbRingoidMatDim r k x
+    m3 <- arbRingoidMatDim k c x
     return (m1, m2, m3)
+
+  rMulLZero _ = do
+    (r,c) <- arbDim2
+    x <- arbitrary
+    m <- arbRingoidMatDim r c x
+    case rLAnnOf m of
+      Left _ -> error "rMulLZero in Tests.Lib.Matrix"
+      Right z -> return (z,m)
+
+  rMulRZero _ = do
+    (r,c) <- arbDim2
+    x <- arbitrary
+    m <- arbRingoidMatDim r c x
+    case rRAnnOf m of
+      Left _ -> error "rMulRZero in Tests.Lib.Matrix"
+      Right z -> return (m,z)
 
 
 {------------------}
 {- :BipRingoidArb -}
 {------------------}
 
-instance (Ringoid t, Arbitrary t) => BipRingoidArb (Matrix t) where
+instance (Ringoid t, Arbitrary t, RingoidArb t) => BipRingoidArb (Matrix t) where
   rBipInAssoc _ = do
     (r1,r2,r3,c) <- arbDim4
     m1 <- arbMatDim r1 c
@@ -155,9 +184,10 @@ instance (Ringoid t, Arbitrary t) => BipRingoidArb (Matrix t) where
 
   rMulDistRrBipIn _ = do
     (r1,r2,k,c) <- arbDim4
-    m1 <- arbMatDim r1 k
-    m2 <- arbMatDim r2 k
-    m3 <- arbMatDim k  c
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r1 k x
+    m2 <- arbRingoidMatDim r2 k x
+    m3 <- arbRingoidMatDim k  c x
     return (m1, m2, m3)
 
   rBipOutAssoc _ = do
@@ -169,9 +199,10 @@ instance (Ringoid t, Arbitrary t) => BipRingoidArb (Matrix t) where
 
   rMulDistLrBipOut _ = do
     (r,k,c1,c2) <- arbDim4
-    m1 <- arbMatDim r k
-    m2 <- arbMatDim k c1
-    m3 <- arbMatDim k c2
+    x  <- arbitrary
+    m1 <- arbRingoidMatDim r k  x
+    m2 <- arbRingoidMatDim k c1 x
+    m3 <- arbRingoidMatDim k c2 x
     return (m1, m2, m3)
 
 

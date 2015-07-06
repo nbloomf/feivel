@@ -20,7 +20,7 @@ module Tests.Main where
 
 import Test.Framework (defaultMain, testGroup)
 
-import Feivel.Lib.Rat (Rat((:/:)))
+import Feivel.Lib (Rat((:/:)), zzmod)
 
 import Tests.Lib.Integer
 import Tests.Lib.Rat
@@ -40,15 +40,27 @@ main = defaultMain
       ]
 
   , testGroup "Rat Matrix"
-      [ testRingoidMat     (0:/:1)
-      , testBipRingoidMat  (0:/:1)
+      [ testRingoidMat    (0:/:1)
+      , testBipRingoidMat (0:/:1)
+      ]
+
+  , testGroup "ZZMod Matrix"
+      [ testRingoidMat    (0`zzmod`0)
+      , testBipRingoidMat (0`zzmod`0)
       ]
 
   , testGroup "Integer Polynomial"
-      [ testRingoidPoly (0::Integer)
+      [ testRingoidPoly  (0::Integer)
+      , testCRingoidPoly (0::Integer)
       ]
 
   , testGroup "Rat Polynomial"
-      [ testRingoidPoly (0:/:1)
+      [ testRingoidPoly  (0:/:1)
+      , testCRingoidPoly (0:/:1)
+      ]
+
+  , testGroup "ZZMod Polynomial"
+      [ testRingoidPoly  (0`zzmod`0)
+      , testCRingoidPoly (0`zzmod`0)
       ]
   ]

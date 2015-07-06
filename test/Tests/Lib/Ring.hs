@@ -107,10 +107,11 @@ testGCDoid t = testGroup "GCDoid Structure"
 
 testBipRingoid :: (RingoidArb t, BipRingoidArb t, Show t) => t -> Test
 testBipRingoid t = testGroup "BipRingoid Structure"
-  [ testProperty "(a÷b)÷c == a÷(b÷c)  " $ prop_rBipIn_assoc      t
-  , testProperty "(a÷b)·c == a·c ÷ b·c" $ prop_rMul_rdist_rBipIn t
+  [ testProperty "(a÷b)÷c == a÷(b÷c)  " $ prop_rBipIn_assoc       t
+  , testProperty "(a÷b)·c == a·c ÷ b·c" $ prop_rMul_rdist_rBipIn  t
 
-  , testProperty "(a|b)|c == a|(b|c)  " $ prop_rBipOut_assoc     t
+  , testProperty "(a|b)|c == a|(b|c)  " $ prop_rBipOut_assoc      t
+  , testProperty "a·(b|c) == a·b | a·c" $ prop_rMul_ldist_rBipOut t
   ]
 
 
@@ -126,6 +127,9 @@ testBipRingoid t = testGroup "BipRingoid Structure"
 class (Ringoid t, Arbitrary t) => RingoidArb t where
   rElt :: t -> Gen t
   rElt _ = arbitrary
+
+  rLocalElts :: t -> Int -> Gen [t]
+  rLocalElts _ n = vectorOf n arbitrary
 
   rAddAssoc     :: t -> Gen (t,t,t) -- (x+y)+z and x+(y+z) both exist
   rAddComm      :: t -> Gen (t,t)   -- x+y and y+x both exist
@@ -439,3 +443,6 @@ prop_rMul_rdist_rBipIn t = forAll (rMulDistRrBipIn t) (rMul `isRDistributiveOver
 
 prop_rBipOut_assoc :: (RingoidArb t, BipRingoidArb t, Show t) => t -> Property
 prop_rBipOut_assoc t = forAll (rBipOutAssoc t) (rBipOut `isAssociativeBy` rEQ)
+
+prop_rMul_ldist_rBipOut :: (RingoidArb t, BipRingoidArb t, Show t) => t -> Property
+prop_rMul_ldist_rBipOut t = forAll (rMulDistLrBipOut t) (rMul `isLDistributiveOverBy` rBipOut $ rEQ)
