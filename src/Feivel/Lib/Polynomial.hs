@@ -263,7 +263,13 @@ powerP :: (Ringoid a, CRingoid a, URingoid a) => Poly a -> Integer -> Either Alg
 powerP p n = productP [p | _ <- [1..n]]
 
 fromRootsP :: (Ringoid a, CRingoid a, URingoid a) => Variable -> [a] -> Either AlgErr (Poly a)
-fromRootsP x cs = productP [fromListP [(rOne, varM x), (rNeg c, identityM)] | c <- cs]
+--fromRootsP x cs = productP [fromListP [(rLOneOf c, varM x), (rNeg c, identityM)] | c <- cs]
+fromRootsP x cs = do
+  let foo c = do
+        u <- rLOneOf c
+        return $ fromListP [(u, varM x), (rNeg c, identityM)]
+  ps <- sequence $ map foo cs
+  productP ps
 
 toScalarP :: (Ringoid a) => Poly a -> Either AlgErr a
 toScalarP q

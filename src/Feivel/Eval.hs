@@ -1409,6 +1409,11 @@ instance Eval PolyExpr where
         lift2 loc (rAddT (constP (0:/:1))) a b
       PolyOver BB ->
         lift2 loc (rAddT (constP False)) a b
+      PolyOver (ZZMod n) -> do
+        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
+        y <- eval b >>= getVal :: EvalM (Poly ZZModulo)
+        z <- tryEvalM loc $ rAdd x y
+        return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolySub a b :@ loc) = do
@@ -1420,6 +1425,11 @@ instance Eval PolyExpr where
         lift2 loc (rSubT (constP (0:/:1))) a b
       PolyOver BB ->
         lift2 loc (rSubT (constP False)) a b
+      PolyOver (ZZMod n) -> do
+        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
+        y <- eval b >>= getVal :: EvalM (Poly ZZModulo)
+        z <- tryEvalM loc $ rSub x y
+        return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyMul a b :@ loc) = do
@@ -1431,6 +1441,11 @@ instance Eval PolyExpr where
         lift2 loc (rMulT (constP (0:/:1))) a b
       PolyOver BB ->
         lift2 loc (rMulT (constP False)) a b
+      PolyOver (ZZMod n) -> do
+        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
+        y <- eval b >>= getVal :: EvalM (Poly ZZModulo)
+        z <- tryEvalM loc $ rMul x y
+        return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyNeg a :@ loc) = do
@@ -1442,6 +1457,10 @@ instance Eval PolyExpr where
         lift1 loc (rNegT (constP (0:/:1))) a
       PolyOver BB ->
         lift1 loc (rNegT (constP False)) a
+      PolyOver (ZZMod n) -> do
+        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
+        let y = rNeg x
+        return $ PolyConst (ZZMod n) (fmap toExpr y) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyPow a b :@ loc) = do
@@ -1453,6 +1472,11 @@ instance Eval PolyExpr where
         lift2 loc (rPowT (constP (0:/:1))) a b
       PolyOver BB ->
         lift2 loc (rPowT (constP False)) a b
+      PolyOver (ZZMod n) -> do
+        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
+        y <- eval b >>= getVal :: EvalM Integer
+        z <- tryEvalM loc $ rPow x y
+        return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyFromRoots x cs :@ loc) = do
@@ -1468,6 +1492,11 @@ instance Eval PolyExpr where
         p  <- tryEvalM loc $ fromRootsP x as
         let q = fmap toExpr p
         return (PolyConst QQ q :@ loc)
+      ListOf (ZZMod n) -> do
+        as <- eval cs >>= getVal :: EvalM [ZZModulo]
+        p  <- tryEvalM loc $ fromRootsP x as
+        let q = fmap toExpr p
+        return (PolyConst (ZZMod n) q :@ loc)
       _ -> reportErr loc $ NumericListExpected t
 
   eval (PolyEvalPoly p qs :@ loc) = do
@@ -1481,6 +1510,22 @@ instance Eval PolyExpr where
         ks <- sequence $ map foo qs
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
         return (PolyConst ZZ (fmap toExpr c) :@ loc)
+      PolyOver QQ -> do
+        a <- eval p >>= getVal :: EvalM (Poly Rat)
+        let foo (x,h) = do
+              b <- eval h >>= getVal :: EvalM (Poly Rat)
+              return (x,b)
+        ks <- sequence $ map foo qs
+        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
+        return (PolyConst QQ (fmap toExpr c) :@ loc)
+      PolyOver (ZZMod n) -> do
+        a <- eval p >>= getVal :: EvalM (Poly ZZModulo)
+        let foo (x,h) = do
+              b <- eval h >>= getVal :: EvalM (Poly ZZModulo)
+              return (x,b)
+        ks <- sequence $ map foo qs
+        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
+        return (PolyConst (ZZMod n) (fmap toExpr c) :@ loc)
       _ -> reportErr loc $ NumericPolynomialExpected t
 
 
@@ -2398,6 +2443,12 @@ instance Get (Poly Bool) where
   get expr = do
     x <- eval expr >>= get :: EvalM (Poly Expr)
     polySeq $ fmap get x
+
+instance Get (Poly ZZModulo) where
+  get expr = do
+    x <- eval expr >>= get :: EvalM (Poly Expr)
+    polySeq $ fmap get x
+
 
 
 {-----------------}

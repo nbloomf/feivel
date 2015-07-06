@@ -26,6 +26,7 @@ data ZZModulo = ZZModulo
   } deriving Show
 
 zzmod :: Integer -> Integer -> ZZModulo
+a `zzmod` 0 = ZZModulo a 0
 a `zzmod` n = ZZModulo b m
   where
     m = abs n
@@ -36,7 +37,8 @@ showZZMod (ZZModulo a n) = show a ++ " mod " ++ show n
 
 instance Eq ZZModulo where
   (ZZModulo a n) == (ZZModulo b m)
-    = n == m && ((a-b) `rem` n == 0)
+    | n == 0    = m == 0 && a == b
+    | otherwise = m == n && ((a-b) `rem` n == 0)
 
 instance Ringoid ZZModulo where
   rAdd (ZZModulo a n) (ZZModulo b m)
@@ -53,6 +55,7 @@ instance Ringoid ZZModulo where
 
   rZero = 0 `zzmod` 0
 
+  rIsZero (ZZModulo a 0) = a == 0
   rIsZero (ZZModulo a n) = (a `rem` n) == 0
 
   rNeutOf (ZZModulo _ n) = Right $ ZZModulo 0 n
@@ -66,8 +69,10 @@ instance CRingoid ZZModulo
 instance URingoid ZZModulo where
   rOne = ZZModulo 1 0
 
+  rIsOne (ZZModulo a 0) = a == 1
   rIsOne (ZZModulo a n) = (a `rem` n) == 1
 
+  rIsUnit (ZZModulo a 0) = Right $ a==1 || a==(-1)
   rIsUnit (ZZModulo a n) = Right $ (a `gcd` n) == 1
 
   rInjInt a = Right (ZZModulo a 0)
