@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Tests.Lib.ZZModulo where
+module Tests.Lib.Data.ZZModulo where
 
 {-------------------}
 {- Contents        -}
@@ -30,7 +30,7 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck
 
 import Feivel.Lib.Data.ZZMod
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 
 import Tests.Util
 import Tests.Lib.Ring

@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Tests.Lib.Rat where
+module Tests.Lib.Data.Rat where
 
 import Test.Framework (Test, testGroup)
 import Test.QuickCheck

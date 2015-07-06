@@ -19,7 +19,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Lib.Permutation where
+module Feivel.Lib.Struct.Permutation where
 
 import Feivel.Lib.AlgErr
 import Feivel.Lib.Canon

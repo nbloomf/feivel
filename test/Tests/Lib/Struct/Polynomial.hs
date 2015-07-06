@@ -19,7 +19,7 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
-module Tests.Lib.Polynomial where
+module Tests.Lib.Struct.Polynomial where
 
 {-------------------}
 {- Contents        -}
@@ -33,7 +33,7 @@ import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck
 
 import Feivel.Lib.Struct.Polynomial
-import Feivel.Lib.Ring
+import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.Canon
 
 import Tests.Util

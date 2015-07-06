@@ -25,7 +25,7 @@ module Feivel.Lib (
   module Feivel.Lib.Struct.Matrix,
   module Feivel.Lib.Struct.Polynomial,
   module Feivel.Lib.Pair,
-  module Feivel.Lib.Permutation,
+  module Feivel.Lib.Struct.Permutation,
   module Feivel.Lib.Data.ZZMod
 ) where
 
@@ -37,5 +37,5 @@ import Feivel.Lib.List
 import Feivel.Lib.Struct.Matrix
 import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Pair
-import Feivel.Lib.Permutation
+import Feivel.Lib.Struct.Permutation
 import Feivel.Lib.Data.ZZMod

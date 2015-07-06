@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Tests.Lib.Integer where
+module Tests.Lib.Data.Integer where
 
 import Test.Framework (Test, testGroup)
 import Test.QuickCheck (arbitrary)

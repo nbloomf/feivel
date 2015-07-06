@@ -22,12 +22,12 @@ import Test.Framework (defaultMain, testGroup)
 
 import Feivel.Lib (Rat((:/:)), zzmod)
 
-import Tests.Lib.Integer
-import Tests.Lib.Rat
-import Tests.Lib.ZZModulo
+import Tests.Lib.Data.Integer
+import Tests.Lib.Data.Rat
+import Tests.Lib.Data.ZZModulo
 
-import Tests.Lib.Matrix
-import Tests.Lib.Polynomial
+import Tests.Lib.Struct.Matrix
+import Tests.Lib.Struct.Polynomial
 
 main = defaultMain
   [ testInteger
