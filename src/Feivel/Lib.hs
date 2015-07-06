@@ -20,22 +20,22 @@ module Feivel.Lib (
   module Feivel.Lib.Ring,
   module Feivel.Lib.String,
   module Feivel.Lib.Bool,
-  module Feivel.Lib.Rat,
+  module Feivel.Lib.Data.Rat,
   module Feivel.Lib.List,
-  module Feivel.Lib.Matrix,
-  module Feivel.Lib.Polynomial,
+  module Feivel.Lib.Struct.Matrix,
+  module Feivel.Lib.Struct.Polynomial,
   module Feivel.Lib.Pair,
   module Feivel.Lib.Permutation,
-  module Feivel.Lib.ZZMod
+  module Feivel.Lib.Data.ZZMod
 ) where
 
 import Feivel.Lib.Ring
 import Feivel.Lib.String
 import Feivel.Lib.Bool
-import Feivel.Lib.Rat
+import Feivel.Lib.Data.Rat
 import Feivel.Lib.List
-import Feivel.Lib.Matrix
-import Feivel.Lib.Polynomial
+import Feivel.Lib.Struct.Matrix
+import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Pair
 import Feivel.Lib.Permutation
-import Feivel.Lib.ZZMod
+import Feivel.Lib.Data.ZZMod

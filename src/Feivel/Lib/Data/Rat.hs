@@ -18,7 +18,7 @@
 
 {-# OPTIONS_GHC -XTypeOperators #-}
 
-module Feivel.Lib.Rat (
+module Feivel.Lib.Data.Rat (
   Rat(..), toRat, makeRat, digits, ratRed, toDouble, canon,
 
   ratFlr, ratNum, ratDen,

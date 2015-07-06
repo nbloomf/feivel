@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib.ZZMod where
+module Feivel.Lib.Data.ZZMod where
 
 import Feivel.Lib.Ring
 

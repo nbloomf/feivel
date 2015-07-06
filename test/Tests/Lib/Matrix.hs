@@ -29,7 +29,7 @@ import Test.Framework (Test, testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck
 
-import Feivel.Lib.Matrix
+import Feivel.Lib.Struct.Matrix
 import Feivel.Lib.Ring
 
 import Tests.Util

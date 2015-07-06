@@ -19,7 +19,7 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
-module Feivel.Lib.Polynomial (
+module Feivel.Lib.Struct.Polynomial (
   Monomial, fromListM, Natural(..), Variable(..), identityM,
 
   Poly, fromListP, constP, polySeq, showP, mapCoef, showOUP, showByOUP, revlexM, varP,

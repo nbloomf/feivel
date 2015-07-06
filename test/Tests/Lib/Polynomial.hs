@@ -32,7 +32,7 @@ import Test.Framework (Test, testGroup)
 import Test.Framework.Providers.QuickCheck2 (testProperty)
 import Test.QuickCheck
 
-import Feivel.Lib.Polynomial
+import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Ring
 import Feivel.Lib.Canon
 

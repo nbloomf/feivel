@@ -21,7 +21,7 @@ module Tests.Lib.Rat where
 import Test.Framework (Test, testGroup)
 import Test.QuickCheck
 
-import Feivel.Lib.Rat
+import Feivel.Lib.Data.Rat
 
 import Tests.Util
 import Tests.Lib.Ring

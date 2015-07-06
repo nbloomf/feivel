@@ -18,7 +18,7 @@
 
 {-# OPTIONS_GHC -XMultiParamTypeClasses #-}
 
-module Feivel.Lib.Matrix (
+module Feivel.Lib.Struct.Matrix (
   Matrix(Null), Dim, Index, mCell,
 
   -- Construct
