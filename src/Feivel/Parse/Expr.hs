@@ -20,7 +20,7 @@ module Feivel.Parse.Expr (
   pDoc, pREPL,
 
   pTypedConst,
-    pStrConst, pIntConst, pBoolConst, pRatConst,
+    pStrConst, pIntConst, pBoolConst, pRatConst, pZZModConst,
     pListLiteral, pMatLiteral, pPolyLiteral, pPermLiteral
 ) where
 
@@ -204,7 +204,7 @@ pDoc = choice $ map pAtLocus
   , lookAhead (char ']') >> return (Empty, DD)
   , do
     xs <- many1 $ choice $ map pAtLocus
-      [ try (char '#' >> many1 space) >> return (Empty, DD)
+      [ try (char '#' >> many space) >> return (Empty, DD)
       , many1 (noneOf "#@[]") >>= \x -> return (DocText x, DD)
       , pVarExpr NakedKey DD
       , pEscaped
@@ -466,6 +466,7 @@ pTypedConst SS = pStrConst  >>= return . mapFst StrE
 pTypedConst ZZ = pIntConst  >>= return . mapFst IntE
 pTypedConst BB = pBoolConst >>= return . mapFst BoolE
 pTypedConst QQ = pRatConst  >>= return . mapFst RatE
+pTypedConst (ZZMod n) = pZZModConst n >>= return . mapFst ZZModE
 
 pTypedConst (ListOf   t) = pListConst t >>= return . mapFst ListE
 pTypedConst (MatOf    t) = pMatConst  t >>= return . mapFst MatE
