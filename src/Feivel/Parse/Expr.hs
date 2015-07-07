@@ -186,7 +186,11 @@ pREPL = do
   where
     pDefineREPL = do
       try $ keyword "define"
-      (t,k,v) <- pTypeKeyExpr
+      t <- pType
+      whitespace
+      (k,_) <- pUntypedKey
+      keyword ":="
+      (v,_) <- if t == DD then pBrackDocE else pTypedExpr t
       return (Define t k v (Empty :@ NullLocus), DD)
 
     pNakedExprREPL = do
@@ -245,7 +249,11 @@ pDoc = choice $ map pAtLocus
 
     pDefine = do
       try (char '[' >> keyword "define")
-      (t,k,v) <- pTypeKeyExpr
+      t <- pType
+      whitespace
+      (k,_) <- pUntypedKey
+      keyword ":="
+      (v,_) <- if t == DD then pBrackDocE else pTypedExpr t
       _ <- option () (try (keyword "enddefine")) >> char ']'
       (rest,_) <- pDoc
       return (Define t k v rest, DD)

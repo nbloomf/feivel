@@ -1,0 +1,7 @@
+feivel
+<<<
+[define doc @m := [hello]]#
+@m
+>>>
+hello
+>>>= 0
