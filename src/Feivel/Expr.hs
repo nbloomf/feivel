@@ -458,10 +458,11 @@ data ListExprLeaf
   | ListMatCol IntExpr MatExpr
 
   -- Random
-  | ListShuffle ListExpr
-  | ListChoose  IntExpr  ListExpr
+  | ListShuffle  ListExpr
+  | ListChoose   IntExpr  ListExpr
 
-  | ListChoices IntExpr  ListExpr
+  | ListShuffles ListExpr
+  | ListChoices  IntExpr  ListExpr
 
   -- Permutations
   | ListPermsOf Type ListExpr

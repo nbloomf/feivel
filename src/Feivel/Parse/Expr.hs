@@ -842,10 +842,11 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
 
       , pFun1 "Rand" (pTypedListExpr (ListOf typ)) ListRand (ListOf typ)
 
-      , pFun1 "Reverse" (pTypedListExpr typ) ListRev     (ListOf typ)
-      , pFun1 "Sort"    (pTypedListExpr typ) ListSort    (ListOf typ)
-      , pFun1 "Unique"  (pTypedListExpr typ) ListUniq    (ListOf typ)
-      , pFun1 "Shuffle" (pTypedListExpr typ) ListShuffle (ListOf typ)
+      , pFun1 "Reverse"  (pTypedListExpr typ) ListRev      (ListOf typ)
+      , pFun1 "Sort"     (pTypedListExpr typ) ListSort     (ListOf typ)
+      , pFun1 "Unique"   (pTypedListExpr typ) ListUniq     (ListOf typ)
+      , pFun1 "Shuffle"  (pTypedListExpr typ) ListShuffle  (ListOf typ)
+      , pListShuffles
 
       , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) ListMatRow (ListOf typ)
       , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) ListMatCol (ListOf typ)
@@ -881,6 +882,16 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
               keyword ")"
               return (ListChoices n xs, ListOf (ListOf t))
             _ -> error "pListChoices"
+
+        pListShuffles = do
+          _ <- try $ keyword "Shuffles"
+          case typ of
+            ListOf t -> do
+              keyword "("
+              (xs,_) <- pTypedListExpr t
+              keyword ")"
+              return (ListShuffles xs, ListOf (ListOf t))
+            _ -> error "pListShuffles"
 
         pListPermsOf = do
           _ <- try $ keyword "PermutationsOf"

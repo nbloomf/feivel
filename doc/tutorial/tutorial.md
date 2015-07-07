@@ -405,6 +405,14 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
 
     Return a list of all possible `INT`-element index-wise samples from `LIST`. The samples will be in the same order they were in in `LIST`. (By index-wise, I mean that `Choices(2;{1;1;1})` will return `{{1;1};{1;1};{1;1}}`, as each of these `1`s has a different index in `{1;1;1}`.)
 
+- `Shuffles(LIST)`
+
+    Return a list of all possible rearrangements of `LIST`; has type `{{t}}`.
+
+- `PermutationsOf(LIST)`
+
+    Return a list of all permutations of `LIST`; has type `{$t}`
+
 - `Filter(KEY; BOOL; LIST)`
 
     Take each entry of `LIST` and bind it to `KEY` before evaluating `BOOL`. Return a list of only those elements of `LIST` (in order) such that `BOOL` evaluates to `#t`.

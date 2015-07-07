@@ -61,7 +61,7 @@ import Feivel.Store
 import Feivel.Type
 import Feivel.LaTeX
 
-import Data.List (intersperse, (\\), sort, nub)
+import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
 
 
@@ -674,6 +674,15 @@ instance Eval ListExpr where
         xs <- eval ls >>= getVal :: EvalM [Expr]
         ys <- shuffleEvalM xs
         return $ ListConst u ys :@ loc
+      u -> reportErr loc $ ListExpected u
+
+  eval (ListShuffles ls :@ loc) = do
+    t <- typeOf ls
+    case t of
+      ListOf u -> do
+        xs <- eval ls >>= getVal :: EvalM [Expr]
+        let us = [ListConst (ListOf u) ys :@ loc | ys <- permutations xs]
+        return (ListConst (ListOf u) (map toExpr us) :@ loc)
       u -> reportErr loc $ ListExpected u
 
   eval (ListChoose n ls :@ loc) = do
