@@ -25,7 +25,7 @@ import Feivel.Lib.AlgErr
 import Feivel.Lib.Canon
 
 import Control.Monad (foldM)
-import Data.List (minimumBy, inits, tails, group, sortBy, sort, union, intersperse)
+import Data.List (minimumBy, inits, tails, group, sortBy, sort, union, intersperse, permutations)
 
 
 {------------}
@@ -104,6 +104,12 @@ fromCycles xss = do
   os <- sequence $ map fromCycle xss
   foldM unionDisjoint idPerm os
 
+fromPairs :: (Eq a) => [(a,a)] -> Either AlgErr (Perm a)
+fromPairs ps = case isValid q of
+  True  -> return q
+  False -> Left NotAPermutation
+  where q = Perm ps
+
 
 
 {----------}
@@ -174,3 +180,6 @@ seqPerm (Perm ps) = fmap Perm $ sequence $ map foo ps
       a <- x
       b <- y
       return (a,b)
+
+permsOf :: (Eq a) => [a] -> Either AlgErr [Perm a]
+permsOf xs = sequence $ map (fromPairs . zip xs) (permutations xs)

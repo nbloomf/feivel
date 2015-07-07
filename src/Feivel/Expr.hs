@@ -462,6 +462,9 @@ data ListExprLeaf
   | ListChoose  IntExpr  ListExpr
 
   | ListChoices IntExpr  ListExpr
+
+  -- Permutations
+  | ListPermsOf Type ListExpr
   deriving (Eq, Show)
 
 data ListGuard

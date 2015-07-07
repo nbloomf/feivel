@@ -57,6 +57,7 @@ data AlgErr
 
   | NotACycle
   | NotDisjoint
+  | NotAPermutation
 
   | DifferentModulus
   deriving (Eq, Show)

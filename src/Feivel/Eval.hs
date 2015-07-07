@@ -744,6 +744,24 @@ instance Eval ListExpr where
     as <- tryEvalM loc $ mListColOf i n
     return (ListConst u as :@ loc)
 
+  eval (ListPermsOf t xs :@ loc) = do
+    case t of
+      PermOf ZZ -> do
+        as <- eval xs >>= getVal :: EvalM [Integer]
+        qs <- tryEvalM loc $ permsOf as
+        let us = map (inject loc) qs :: [PermExpr]
+        return (ListConst (PermOf ZZ) (map toExpr us) :@ loc)
+      PermOf SS -> do
+        as <- eval xs >>= getVal :: EvalM [String]
+        qs <- tryEvalM loc $ permsOf as
+        let us = map (inject loc) qs :: [PermExpr]
+        return (ListConst (PermOf SS) (map toExpr us) :@ loc)
+      PermOf QQ -> do
+        as <- eval xs >>= getVal :: EvalM [Rat]
+        qs <- tryEvalM loc $ permsOf as
+        let us = map (inject loc) qs :: [PermExpr]
+        return (ListConst (PermOf SS) (map toExpr us) :@ loc)
+
 
 
 {-----------------}
@@ -2708,6 +2726,12 @@ instance Inject (Poly Bool) PolyExpr where
 
 instance Inject (Perm Integer) PermExpr where
   inject loc x = (PermConst ZZ $ mapPerm toExpr x) :@ loc
+
+instance Inject (Perm String) PermExpr where
+  inject loc x = (PermConst SS $ mapPerm toExpr x) :@ loc
+
+instance Inject (Perm Rat) PermExpr where
+  inject loc x = (PermConst QQ $ mapPerm toExpr x) :@ loc
 
 
 instance Inject String Doc where

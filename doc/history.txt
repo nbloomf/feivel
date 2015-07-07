@@ -2,13 +2,14 @@ feivel: version history
 
 N.N.N
 =====
-* Graphical REPL (replaces old repl)
+* Shiny new graphical REPL (replaces old repl)
 * New types
-  * atomic: modN, $int
+  * atomic: modN
+  * constructor: permutation
 
 0.1.0
 =====
 * Basic REPL
 * New types
   * atomic: int, str, bool, rat
-  * constructors: list, matrix, macro, polynomial
+  * constructor: list, matrix, macro, polynomial

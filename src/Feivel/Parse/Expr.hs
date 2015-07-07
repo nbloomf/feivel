@@ -850,6 +850,8 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
       , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) ListMatRow (ListOf typ)
       , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) ListMatCol (ListOf typ)
 
+      , pListPermsOf
+
       , pListRange
       , pListBuilder
       , pFun2 "Choose" pIntExpr (pTypedListExpr typ) ListChoose (ListOf typ)
@@ -879,6 +881,16 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
               keyword ")"
               return (ListChoices n xs, ListOf (ListOf t))
             _ -> error "pListChoices"
+
+        pListPermsOf = do
+          _ <- try $ keyword "PermutationsOf"
+          case typ of
+            PermOf t -> do
+              keyword "("
+              (xs,_) <- pTypedListExpr t
+              keyword ")"
+              return (ListPermsOf typ xs, ListOf typ)
+            _ -> error "pListPermsOf"
 
         pListRange = case unify typ ZZ of
           Right _ -> do
