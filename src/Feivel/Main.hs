@@ -156,7 +156,7 @@ options =
 
  , Option [] ["repl"]
      (NoArg (\opt -> return $ opt {replFlag = True}))
-     "REPL mode"
+     "interactive mode (graphical)"
 
  , Option ['t'] ["template"]
      (ReqArg (\arg opt -> return $ opt {templateFlag = True, templatePath = arg}) "FILE")
@@ -189,5 +189,5 @@ options =
 
 
 version :: String
-version = "feivel" ++ ui_version_string
+version = "feivel-" ++ ui_version_string
 
