@@ -204,7 +204,8 @@ pDoc = choice $ map pAtLocus
   , lookAhead (char ']') >> return (Empty, DD)
   , do
     xs <- many1 $ choice $ map pAtLocus
-      [ try (char '#' >> many space) >> return (Empty, DD)
+      [ try (char '#' >> many1 space) >> return (Empty, DD)
+      , try (char '#' >> eof) >> return (Empty, DD)
       , many1 (noneOf "#@[]") >>= \x -> return (DocText x, DD)
       , pVarExpr NakedKey DD
       , pEscaped

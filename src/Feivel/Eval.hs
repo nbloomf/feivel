@@ -770,6 +770,7 @@ instance Eval ListExpr where
         qs <- tryEvalM loc $ permsOf as
         let us = map (inject loc) qs :: [PermExpr]
         return (ListConst (PermOf SS) (map toExpr us) :@ loc)
+      u -> reportErr loc $ PermutationExpected u
 
 
 
@@ -1932,6 +1933,9 @@ instance Typed MatExpr where
 
   typeOf (MatGetRow _ m :@ _) = typeOf m
   typeOf (MatGetCol _ m :@ _) = typeOf m
+
+  typeOf (MatRowFromList t _ :@ _) = return (MatOf t)
+  typeOf (MatColFromList t _ :@ _) = return (MatOf t)
 
   typeOf (MatRand ms :@ loc) = do
     t <- typeOf ms
