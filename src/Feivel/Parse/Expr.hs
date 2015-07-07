@@ -462,11 +462,11 @@ pTypedNakedExpr = do
     Right w -> return (v, w)
 
 pTypedConst :: Type -> ParseM (Expr, Type)
-pTypedConst SS = pStrConst  >>= return . mapFst StrE
-pTypedConst ZZ = pIntConst  >>= return . mapFst IntE
-pTypedConst BB = pBoolConst >>= return . mapFst BoolE
-pTypedConst QQ = pRatConst  >>= return . mapFst RatE
-pTypedConst (ZZMod n) = pZZModConst n >>= return . mapFst ZZModE
+pTypedConst SS          = pStrConst     >>= return . mapFst StrE
+pTypedConst ZZ          = pIntConst     >>= return . mapFst IntE
+pTypedConst BB          = pBoolConst    >>= return . mapFst BoolE
+pTypedConst QQ          = pRatConst     >>= return . mapFst RatE
+pTypedConst (ZZMod n)   = pZZModConst n >>= return . mapFst ZZModE
 
 pTypedConst (ListOf   t) = pListConst t >>= return . mapFst ListE
 pTypedConst (MatOf    t) = pMatConst  t >>= return . mapFst MatE

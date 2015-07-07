@@ -1,0 +1,37 @@
+In this example, we demonstrate how macros can be used to define parameterized subtemplates.
+
+Remember that every expression feivel understands has a *type*. Templates themselves also have a type - doc - and can be returned by macros.
+
+For example, here is a template macro that displays a quadratic polynomial factorization problem. It takes two integer parameters, the roots of the polynomial, and a boolean parameter that governs whether or not to show the solution.
+
+
+[define >doc @monic.int.quadratic := Macro(doc; [#
+
+  [define ^int @h := FromRoots(x; {@a})]#
+  [define ^int @k := FromRoots(x; {@b})]#
+
+  [define ^int @p := @h * @k]#
+
+  [define str @prob := Format(^int; latex; @p)]#
+  [define str @soln := "(" ++ Format(^int; latex; @h) ++ ")" ++
+                       "(" ++ Format(^int; latex; @k) ++ ")"]#
+
+  [if (@show.soln)
+    then [$@prob = @soln$]
+    else [$@prob$]
+  endif]#
+
+]; int @a := 1; int @b := 2; bool @show.soln := #f)]#
+
+
+Having bundled this logic in a macro, we can call it...
+
+...with default parameters...
+[eval @monic.int.quadratic]
+
+...or new parameters...
+[eval @monic.int.quadratic (int @a := -2; int @b := 5)]
+[eval @monic.int.quadratic (bool @show.soln := #t)]
+[eval @monic.int.quadratic (int @a := 1703; int @b := 1337; bool @show.soln := #t)]
+
+...as desired. The macro only needs to be written once and can be kept in a separate library of macros.
