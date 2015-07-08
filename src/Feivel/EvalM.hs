@@ -51,9 +51,9 @@ module Feivel.EvalM (
 {------------}
 
 import Feivel.Error
-import Feivel.Expr (Doc, Expr())
+import Feivel.Expr (Doc, Expr(), DocLeaf(DocText))
 import Feivel.Key (Key)
-import Feivel.Locus (Locus(NullLocus))
+import Feivel.Locus (Locus(NullLocus), AtLocus((:@)))
 import Feivel.Store
 import Feivel.Parse (pDoc, pRecords)
 import Feivel.Format
@@ -75,6 +75,7 @@ import Control.Monad.IO.Class (liftIO)
 import Control.Exception
 import System.Exit (exitWith, ExitCode(ExitFailure))
 import System.IO
+import System.Directory (getHomeDirectory)
 
 
 {----------}
@@ -137,7 +138,8 @@ readPath path = do
 
 findFileInPaths :: FilePath -> [FilePath] -> EvalM (String, FilePath)
 findFileInPaths file [] = do
-  let current = "~/fvl.lib/" ++ file
+  home <- liftIO getHomeDirectory
+  let current = home ++ "/fvl.lib/" ++ file
   content <- liftIO $ try $ readFile current :: EvalM (Either IOError String)
   case content of
     Left  err -> reportErr NullLocus err
@@ -161,6 +163,7 @@ parseDoc :: String -> String -> EvalM Doc
 parseDoc = parseWith pDoc
 
 parsePaths :: String -> EvalM [FilePath]
+parsePaths ""  = return []
 parsePaths str = case runParseM pPaths "" str of
   Left goof -> throwError goof
   Right ps -> return ps

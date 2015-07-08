@@ -130,7 +130,7 @@ pPath = many1 $ oneOf allowed
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ++
-      "_[]+-.0123456789/<>=:;@#$%^&()"
+      "_[]+-.0123456789/<>=:;@#$%^&"
 
 pPaths :: ParseM [FilePath]
 pPaths = sepBy1 pPath spaces

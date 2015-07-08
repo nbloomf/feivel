@@ -61,6 +61,9 @@ main = do
         else return ()
 
 
+  {------------------------------------------------}
+  {- If --repl is set, start the repl (surprise!) -}
+  {------------------------------------------------}
   _ <- if (replFlag opts) == True
         then gui >> exitWith ExitSuccess
         else return ()
@@ -77,7 +80,9 @@ main = do
   records' <- attempt $ readAndParseStates (recordPath opts) (dataFormat opts)
 
   -- Note the library paths.
-  paths <- attempt $ parsePaths (libPathsNames opts)
+  paths <- if (libPathsFlag opts) == True
+             then attempt $ parsePaths (libPathsNames opts)
+             else return []
   let records = map (setLibPaths paths) records'
 
   -- Evaluate template against all records.
