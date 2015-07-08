@@ -60,6 +60,7 @@ import Feivel.EvalM
 import Feivel.Store
 import Feivel.Type
 import Feivel.LaTeX
+import Feivel.Parse (pInteger)
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -222,6 +223,11 @@ instance Eval IntExpr where
     q <- eval lambda >>= getVal
     t <- observeIntegerPoisson loc (toDouble q)
     return $ IntConst t :@ loc
+
+  eval (IntCastStr str :@ loc) = do
+    x <- eval str >>= getVal
+    n <- parseAsAt pInteger loc x
+    return $ IntConst n :@ loc
 
 
 

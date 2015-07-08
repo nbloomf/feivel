@@ -24,7 +24,7 @@ module Feivel.EvalM (
   tryEvalM,
 
   -- IO and Parsing
-  readAndParseDoc, readAndParseStates, parseDoc, parsePaths, readAndParseDocFromLib,
+  readAndParseDoc, readAndParseStates, parseDoc, parsePaths, readAndParseDocFromLib, parseAsAt,
 
   -- State
   defineKey, lookupKey, getState, putState, clearState, toState,
@@ -158,6 +158,11 @@ parseWith :: ParseM (a,b) -> String -> String -> EvalM a
 parseWith p path str = case runParseM p path str of
   Left  goof  -> throwError goof
   Right (x,_) -> return x
+
+parseAsAt :: ParseM a -> Locus -> String -> EvalM a
+parseAsAt p loc str = case runParseM p "" str of
+  Left  goof -> throwError goof
+  Right x    -> return x
 
 parseDoc :: String -> String -> EvalM Doc
 parseDoc = parseWith pDoc

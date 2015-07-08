@@ -562,6 +562,8 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun2 "Uniform"  pIntExpr pIntExpr IntObserveUniform ZZ
       , pFun2 "Binomial" pIntExpr pRatExpr IntObserveBinomial ZZ
       , pFun1 "Poisson"  pRatExpr IntObservePoisson ZZ
+
+      , pFun1 "str" pStrExpr IntCastStr ZZ
       ]
 
     intOpTable =

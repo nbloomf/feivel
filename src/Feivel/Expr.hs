@@ -281,6 +281,9 @@ data IntExprLeaf
   | IntObserveUniform  IntExpr IntExpr
   | IntObserveBinomial IntExpr RatExpr
   | IntObservePoisson  RatExpr
+
+  -- Casts
+  | IntCastStr StrExpr
   deriving (Eq, Show)
 
 
