@@ -20,7 +20,7 @@ module Feivel.Parse.ParseM (
   ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt, stringParseM,
 
   -- Constants
-  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat,
+  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath,
 
   -- Fences
   pParens, pBrack, pBrace,
@@ -123,6 +123,14 @@ pString = do
          ]
   _ <- char '"'
   return t
+
+pPath :: ParseM String
+pPath = many $ oneOf allowed
+  where
+    allowed =
+      "abcdefghijklmnopqrstuvwxyz" ++
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ++
+      "_[]+-.0123456789/<>=:;@#$%^&()"
 
 pVar :: ParseM Variable
 pVar = fmap Var $ many $ oneOf allowed

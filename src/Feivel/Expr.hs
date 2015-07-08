@@ -83,6 +83,8 @@ data DocLeaf
  | Input     StrExpr
  | NakedExpr Expr
 
+ | Import    String (Maybe String)
+
  | DocMacro [(Type, Key, Expr)] MacExpr
 
  -- Combination

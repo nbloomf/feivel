@@ -210,6 +210,7 @@ pDoc = choice $ map pAtLocus
       , pVarExpr NakedKey DD
       , pEscaped
       , pEval
+      , pImport
       , pDefine
       , pScope
       , pNakedExpr
@@ -246,6 +247,14 @@ pDoc = choice $ map pAtLocus
       return (Escaped x, DD)
       where
         pEsc c d = try (string $ '#':[c]) >> (return d)
+
+    pImport = do
+      try (char '[' >> keyword "import")
+      path <- pPath
+      qual <- option Nothing (try (keyword "as") >> pToken >>= return . Just)
+      _ <- option () (try (keyword "endimport")) >> char ']'
+      return (Import path qual, DD)
+
 
     pDefine = do
       try (char '[' >> keyword "define")

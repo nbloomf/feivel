@@ -1265,6 +1265,8 @@ instance Eval Doc where
     PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
     ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
 
+  eval (Import path Nothing :@ loc) = do
+    undefined
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
   eval (Cat ts :@ loc) = do
