@@ -46,7 +46,6 @@ import Feivel.Key
 import Feivel.Type
 import Feivel.Locus
 import Feivel.Lib
-import Feivel.Format
 import Feivel.Store
 
 {------------------}
@@ -82,7 +81,7 @@ data DocLeaf
  | NakedKey  Key
  | NakedExpr Expr
 
- | Import    String (Maybe String)
+ | Import    String (Maybe String) Doc
 
  | DocMacro [(Type, Key, Expr)] MacExpr
 

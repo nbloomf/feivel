@@ -1265,8 +1265,14 @@ instance Eval Doc where
     PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
     ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
 
-  eval (Import path Nothing :@ loc) = do
-    undefined
+  eval (Import file Nothing rest :@ loc) = do
+    oldSt <- getState
+    clearState
+    readAndParseDocFromLib file >>= eval
+    newSt <- getState
+    putState oldSt
+    mergeState' newSt
+    eval rest
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
   eval (Cat ts :@ loc) = do

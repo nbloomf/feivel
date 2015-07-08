@@ -78,9 +78,6 @@ main = do
 
   -- Note the library paths.
   paths <- attempt $ parsePaths (libPathsNames opts)
-
-  putStrLn $ show paths
-
   let records = map (setLibPaths paths) records'
 
   -- Evaluate template against all records.

@@ -125,7 +125,7 @@ pString = do
   return t
 
 pPath :: ParseM FilePath
-pPath = many $ oneOf allowed
+pPath = many1 $ oneOf allowed
   where
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++
@@ -136,7 +136,7 @@ pPaths :: ParseM [FilePath]
 pPaths = sepBy1 pPath spaces
 
 pVar :: ParseM Variable
-pVar = fmap Var $ many $ oneOf allowed
+pVar = fmap Var $ many1 $ oneOf allowed
   where
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++

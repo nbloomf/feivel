@@ -24,7 +24,7 @@ module Feivel.EvalM (
   tryEvalM,
 
   -- IO and Parsing
-  readAndParseDoc, readAndParseStates, parseDoc, parsePaths,
+  readAndParseDoc, readAndParseStates, parseDoc, parsePaths, readAndParseDocFromLib,
 
   -- State
   defineKey, lookupKey, getState, putState, clearState, toState,
@@ -135,6 +135,22 @@ readPath path = do
     Left  err -> reportErr NullLocus err
     Right str -> return str
 
+findFileInPaths :: FilePath -> [FilePath] -> EvalM (String, FilePath)
+findFileInPaths file [] = do
+  let current = "~/fvl.lib/" ++ file
+  content <- liftIO $ try $ readFile current :: EvalM (Either IOError String)
+  case content of
+    Left  err -> reportErr NullLocus err
+    Right str -> return (str, current)
+
+findFileInPaths file (p:ps) = do
+  let current = p ++ file
+  content <- liftIO $ try $ readFile current :: EvalM (Either IOError String)
+  case content of
+    Left  err -> findFileInPaths file ps
+    Right str -> return (str, current)
+
+
 -- Message then string being parsed
 parseWith :: ParseM (a,b) -> String -> String -> EvalM a
 parseWith p path str = case runParseM p path str of
@@ -156,6 +172,12 @@ readAndParseDoc :: FilePath -> EvalM Doc
 readAndParseDoc path = do
   file <- if path == "" then liftIO getContents else readPath path
   parseDoc path file
+
+readAndParseDocFromLib :: FilePath -> EvalM Doc
+readAndParseDocFromLib file = do
+  lib <- lookupLibPaths
+  (str, path) <- findFileInPaths file lib
+  parseDoc path str
 
 parseStates :: String -> String -> DataFormat -> EvalM [Store Expr]
 parseStates _ "" _ = return [emptyStore]
