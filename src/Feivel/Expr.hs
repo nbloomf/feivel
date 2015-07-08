@@ -103,10 +103,6 @@ data DocLeaf
  | ForSay Key ListExpr Doc (Maybe Doc)
  | Select Key ListExpr Doc
 
- -- Splice
- | Splice StrExpr (Maybe (Either StrExpr StrExpr)) (Maybe DataFormat)
- | Pull   StrExpr (Maybe StrExpr) Doc
-
  -- Debugging
  | Bail      StrExpr
  | ShowState

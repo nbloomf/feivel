@@ -1305,18 +1305,6 @@ instance Eval Doc where
       else reportErr loc $ TypeMismatch t tw
 
 
-  eval (Pull d Nothing rest :@ _) = do
-    dFile <- eval d >>= getVal
-    mergeDataFromLibrary dFile
-    eval rest
-
-  eval (Pull d (Just n) rest :@ _) = do
-    dFile <- eval d >>= getVal
-    name  <- eval n >>= getVal
-    mergeQualifiedDataFromLibrary dFile name
-    eval rest
-
-
   eval (LetIn key val expr :@ loc) = do
     defineKey key val loc
     t <- eval expr
@@ -1340,57 +1328,7 @@ instance Eval Doc where
     result <- eval expr >>= getVal :: EvalM String
     putState state
     return $ DocText (init result) :@ loc
-    
 
-  eval (Splice t Nothing _ :@ _) = do
-    old   <- getState
-    tFile <- eval t >>= getVal
-    expr  <- readTemplateFromLibrary tFile
-    undefineKeys
-    result <- eval expr
-    putState old
-    return result
-
-  eval (Splice t (Just (Left d)) Nothing :@ _) = do
-    old    <- getState
-    tFile  <- eval t >>= getVal
-    expr   <- readTemplateFromLibrary tFile
-    dFile  <- eval d >>= getVal
-    readRandomDataFromLibrary dFile
-    result <- eval expr
-    putState old
-    return result
-
-  eval (Splice t (Just (Left d)) (Just fmt) :@ _) = do
-    old    <- getState
-    tFile  <- eval t >>= getVal
-    expr   <- readTemplateFromLibrary tFile
-    dFile  <- eval d >>= getVal :: EvalM String
-    readRandomFormattedDataFromLibrary dFile fmt
-    result <- eval expr
-    putState old
-    return result
-
-  eval (Splice t (Just (Right d)) Nothing :@ _) = do
-    old   <- getState
-    tFile <- eval t >>= getVal
-    expr  <- readTemplateFromLibrary tFile
-    dFile <- eval d >>= getVal :: EvalM String
-    fmt   <- lookupDataFormat
-    readRandomFormattedDataFromLibrary dFile fmt
-    result <- eval expr
-    putState old
-    return result
-
-  eval (Splice t (Just (Right d)) (Just fmt) :@ _) = do
-    old   <- getState
-    tFile <- eval t >>= getVal
-    expr  <- readTemplateFromLibrary tFile
-    dFile <- eval d >>= getVal :: EvalM String
-    readRandomFormattedDataFromLibrary dFile fmt
-    result <- eval expr
-    putState old
-    return result
 
   eval (ForSay k ls body Nothing :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
@@ -1821,6 +1759,12 @@ instance Typed ListExpr where
     u <- expectMatrix loc m
     return (ListOf u)
 
+  typeOf (ListShuffles xs :@ _) = do
+    t <- typeOf xs
+    return $ ListOf t
+
+  typeOf (ListPermsOf t _ :@ _) = return (ListOf (PermOf t))
+
 
 
 {------------------}
@@ -2097,6 +2041,12 @@ instance Typed ZZModExpr where
   typeOf (ZZModSub  a b :@ loc) = sameType loc a b
   typeOf (ZZModMult a b :@ loc) = sameType loc a b
   typeOf (ZZModPow  a _ :@ _)   = typeOf a
+
+  typeOf (ZZModSum xs :@ loc) = do
+    t <- typeOf xs
+    case t of
+      ListOf u -> return u
+      u -> reportErr loc $ ListExpected u
 
 
 

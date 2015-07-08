@@ -211,7 +211,6 @@ pDoc = choice $ map pAtLocus
       , pEscaped
       , pEval
       , pDefine
-      , pPull
       , pScope
       , pNakedExpr
       , pIfThenElse
@@ -258,17 +257,6 @@ pDoc = choice $ map pAtLocus
       _ <- option () (try (keyword "enddefine")) >> char ']'
       (rest,_) <- pDoc
       return (Define t k v rest, DD)
-
-    pPull = do
-      try (char '[' >> keyword "pull")
-      (file,_) <- keyword "from" >> pParens pStrExpr
-      name <- option Nothing (try (keyword "as") >> pParens (pJust pStrExpr))
-      (rest,_) <- char ']' >> pDoc
-      return (Pull file name rest, DD)
-        where
-          pJust p = do
-            (x,_) <- p
-            return (Just x)
 
     pScope = do
       try (char '[' >> keyword "scope")
@@ -388,21 +376,6 @@ pDoc = choice $ map pAtLocus
       try (keyword "state")
       end   <- getPosition
       return $ ShowState (locus start end)
-
-
-    pSplice = do
-      try (char '[' >> keyword "splice")
-      (t,_) <- pParens pStrExpr
-      d <- option 
-             Nothing
-             (choice 
-               [ try (keyword "with") >> pParens pStrExpr >>= (return . Just . Left)
-               , try (keyword "at")   >> pParens pStrExpr >>= (return . Just . Right)])
-      f <- option
-             Nothing
-             (try (keyword "as") >> pDataFormat >>= (return . Just))
-      end <- getPosition
-      return $ Splice (locus start end) t d f
 -}
 
 
