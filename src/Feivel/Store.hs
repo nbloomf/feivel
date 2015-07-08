@@ -24,10 +24,10 @@ module Feivel.Store (
   Store(), emptyStore, fromKeyValList, fromKeyValLocList,
 
   -- Query
-  isDefinedKey, getTemplatePath, getDataPath, getDataFormat, valueOf,
+  isDefinedKey, getLibPaths, valueOf,
 
   -- Mutate
-  addKey, removeKey, setPaths, clearKeys, mergeState, qualify,
+  addKey, removeKey, setLibPaths, clearKeys, mergeState, qualify,
 
   -- Stack
   getStack, push, pop
@@ -59,11 +59,9 @@ import Control.Monad (foldM)
 {----------}
 
 data Store a = Store
- { keyValues       :: M.Map Key (a, Locus)
- , templatePath    :: FilePath
- , dataPath        :: FilePath
- , dataFormat      :: DataFormat
- , stack           :: [(String, Locus)]
+ { keyValues :: M.Map Key (a, Locus)
+ , libPaths  :: [FilePath]
+ , stack     :: [(String, Locus)]
  } deriving (Eq, Show)
 
 
@@ -91,11 +89,9 @@ instance Show StateErr where
 
 emptyStore :: Store a
 emptyStore = Store
- { keyValues       = M.empty
- , templatePath    = ""
- , dataPath        = ""
- , dataFormat      = TypeKeyVal
- , stack           = []
+ { keyValues = M.empty
+ , libPaths  = []
+ , stack     = []
  }
 
 addKey :: Key -> a -> Locus -> Store a -> Either StateErr (Store a)
@@ -126,12 +122,8 @@ valueOf st k = case M.lookup k (keyValues st) of
   Nothing     -> Left $ KeyNotDefined k
   Just (a, _) -> Right a
 
-getTemplatePath, getDataPath :: Store a -> FilePath
-getTemplatePath = templatePath
-getDataPath     = dataPath
-
-getDataFormat :: Store a -> DataFormat
-getDataFormat   = dataFormat
+getLibPaths :: Store a -> [FilePath]
+getLibPaths = libPaths
 
 
 
@@ -155,9 +147,8 @@ mergeState :: Store a -> Store a -> Store a
 mergeState a b = a
  { keyValues = M.union (keyValues a) (keyValues b) }
 
-setPaths :: FilePath -> FilePath -> DataFormat -> Store a -> Store a
-setPaths tmp dat for st = st
- {templatePath = tmp, dataPath = dat, dataFormat = for}
+setLibPaths :: [FilePath] -> Store a -> Store a
+setLibPaths paths st = st {libPaths = paths}
 
 
 

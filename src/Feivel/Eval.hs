@@ -1323,15 +1323,6 @@ instance Eval Doc where
     eval $ Cat x :@ loc
 
 
-  eval (Input t :@ loc) = do
-    state  <- getState
-    tFile  <- eval t >>= getVal
-    expr   <- readTemplateFromLibrary tFile
-    result <- eval expr >>= getVal :: EvalM String
-    putState state
-    return $ DocText (init result) :@ loc
-
-
   eval (ForSay k ls body Nothing :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     eval $ CatPar [LetIn k x body :@ loc | x <- xs] :@ loc

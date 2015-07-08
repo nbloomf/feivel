@@ -20,7 +20,7 @@ module Feivel.Parse.ParseM (
   ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt, stringParseM,
 
   -- Constants
-  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath,
+  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath, pPaths,
 
   -- Fences
   pParens, pBrack, pBrace,
@@ -37,7 +37,7 @@ import Feivel.Lib (Rat((:/:)), Variable(..), Format(..))
 import Text.Parsec.Prim
   (ParsecT, runParserT, try, (<|>), (<?>), many, getPosition)
 import Text.ParserCombinators.Parsec
-  (digit, many1, char, string, choice, option, noneOf, spaces, sepBy, oneOf)
+  (digit, many1, char, string, choice, option, noneOf, spaces, sepBy, oneOf, sepBy1)
 
 import Control.Monad.Trans.Class (lift)
 
@@ -124,13 +124,16 @@ pString = do
   _ <- char '"'
   return t
 
-pPath :: ParseM String
+pPath :: ParseM FilePath
 pPath = many $ oneOf allowed
   where
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ++
       "_[]+-.0123456789/<>=:;@#$%^&()"
+
+pPaths :: ParseM [FilePath]
+pPaths = sepBy1 pPath spaces
 
 pVar :: ParseM Variable
 pVar = fmap Var $ many $ oneOf allowed

@@ -222,7 +222,6 @@ pDoc = choice $ map pAtLocus
       , pBail
       , pLetIn
       , pSelect
-      , pInput
       , pQuit
       , pNote
       ]
@@ -354,12 +353,6 @@ pDoc = choice $ map pAtLocus
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t, DD)
-
-    pInput = do
-      try (char '[' >> keyword "input")
-      (x,_) <- pStrExpr
-      _ <- whitespace >> char ']'
-      return (Input x, DD)
 
     pQuit = do
       try (char '[' >> keyword "quit")

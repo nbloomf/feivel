@@ -19,7 +19,7 @@
 module Feivel.Main where
 
 import Feivel.Eval
-import Feivel.Store (setPaths)
+import Feivel.Store (setLibPaths)
 import Feivel.EvalM
 import Feivel.Format
 import Feivel.GUI
@@ -76,8 +76,12 @@ main = do
   -- Read and parse the records file.
   records' <- attempt $ readAndParseStates (recordPath opts) (dataFormat opts)
 
-  -- Note the user's template and record directories.
-  let records = map (setPaths (templateDirPath opts) (recordDirPath opts) (dataFormat opts)) records'
+  -- Note the library paths.
+  paths <- attempt $ parsePaths (libPathsNames opts)
+
+  putStrLn $ show paths
+
+  let records = map (setLibPaths paths) records'
 
   -- Evaluate template against all records.
   results <- attemptsWith records $ evalToText template
@@ -118,10 +122,9 @@ showErrors :: [String] -> IO ()
 showErrors es = hPutStrLn stderr (concat es)
 
 data Flag = Flag
- { templateFlag    :: Bool, templatePath    :: String
- , recordFlag      :: Bool, recordPath      :: String
- , templateDirFlag :: Bool, templateDirPath :: String
- , recordDirFlag   :: Bool, recordDirPath   :: String
+ { templateFlag    :: Bool, templatePath  :: String
+ , recordFlag      :: Bool, recordPath    :: String
+ , libPathsFlag    :: Bool, libPathsNames :: String
  , dataFormat      :: DataFormat
  , outputFlag      :: (Bool, String)
  , helpFlag        :: Bool
@@ -131,10 +134,9 @@ data Flag = Flag
 
 defaultArgs :: Flag
 defaultArgs = Flag 
- { templateFlag    = False, templatePath    = ""
- , recordFlag      = False, recordPath      = ""
- , templateDirFlag = False, templateDirPath = ""
- , recordDirFlag   = False, recordDirPath   = ""
+ { templateFlag    = False, templatePath  = ""
+ , recordFlag      = False, recordPath    = ""
+ , libPathsFlag    = False, libPathsNames = ""
  , dataFormat      = TypeKeyVal
  , outputFlag      = (False, "")
  , helpFlag        = False
@@ -162,17 +164,13 @@ options =
      (ReqArg (\arg opt -> return $ opt {templateFlag = True, templatePath = arg}) "FILE")
      "template (if not set, use stdin)"
 
- , Option ['T'] ["template-dir"]
-     (ReqArg (\arg opt -> return $ opt {templateDirFlag = True, templateDirPath = arg}) "PATH")
+ , Option ['l'] ["library"]
+     (ReqArg (\arg opt -> return $ opt {libPathsFlag = True, libPathsNames = arg}) "PATH")
      "path to template directory"
 
  , Option ['d'] ["data"]
      (ReqArg (\arg opt -> return $ opt {recordFlag = True, recordPath = arg}) "FILE")
      "data (if not set, use empty context)"
-
- , Option ['D'] ["data-dir"]
-     (ReqArg (\arg opt -> return $ opt {recordDirFlag = True, recordDirPath = arg}) "PATH")
-     "path to data directory"
 
  , Option ['o'] ["output-name"]
      (ReqArg (\arg opt -> return $ opt {outputFlag = (True, arg)}) "STRING")

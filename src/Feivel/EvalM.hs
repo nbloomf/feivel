@@ -24,12 +24,12 @@ module Feivel.EvalM (
   tryEvalM,
 
   -- IO and Parsing
-  readAndParseDoc, readAndParseStates, parseDoc,
+  readAndParseDoc, readAndParseStates, parseDoc, parsePaths,
 
   -- State
   defineKey, lookupKey, getState, putState, clearState, toState,
   undefineKeys, undefineKey, isKeyDefined,
-  lookupDataFormat, lookupDataPath, lookupTemplatePath,
+  lookupLibPaths,
   addKeyToStore,
 
   -- Randomness
@@ -39,9 +39,7 @@ module Feivel.EvalM (
   -- Call Stack
   --pushTrace, popTrace, getTrace,
   
-  mergeState', readTemplateFromLibrary, 
-  readRandomDataFromLibrary, readRandomFormattedDataFromLibrary, --readData,
-  mergeDataFromLibrary, mergeQualifiedDataFromLibrary
+  mergeState'
 ) where
 
 {------------}
@@ -146,6 +144,11 @@ parseWith p path str = case runParseM p path str of
 parseDoc :: String -> String -> EvalM Doc
 parseDoc = parseWith pDoc
 
+parsePaths :: String -> EvalM [FilePath]
+parsePaths str = case runParseM pPaths "" str of
+  Left goof -> throwError goof
+  Right ps -> return ps
+
 parseStringDoc :: String -> EvalM Doc
 parseStringDoc str = parseWith pDoc "" str
 
@@ -170,44 +173,6 @@ readAndParseStates path format = do
   parseStates path file format
 
 {- :Library -}
-
-readRandomDataFromLibrary :: String -> EvalM ()
-readRandomDataFromLibrary name = do
-  path   <- lookupDataPath
-  format <- lookupDataFormat
-  states <- readAndParseStates (path ++ name) format
-  state  <- randomElementEvalM states
-  putState state
-
-mergeDataFromLibrary :: String -> EvalM ()
-mergeDataFromLibrary name = do
-  old    <- getState
-  path   <- lookupDataPath
-  format <- lookupDataFormat
-  states <- readAndParseStates (path ++ name) format
-  new    <- randomElementEvalM states
-  putState $ mergeState old new
-
-mergeQualifiedDataFromLibrary :: String -> String -> EvalM ()
-mergeQualifiedDataFromLibrary file name = do
-  old    <- getState
-  path   <- lookupDataPath
-  format <- lookupDataFormat
-  states <- readAndParseStates (path ++ file) format
-  new    <- randomElementEvalM states
-  putState $ mergeState old (qualify name new)
-
-readRandomFormattedDataFromLibrary :: String -> DataFormat -> EvalM ()
-readRandomFormattedDataFromLibrary name format = do
-  path   <- lookupDataPath
-  states <- readAndParseStates (path ++ name) format
-  state  <- randomElementEvalM states
-  putState state
-
-readTemplateFromLibrary :: String -> EvalM Doc
-readTemplateFromLibrary name = do
-  path <- lookupTemplatePath
-  readAndParseDoc $ path ++ name
 
 
 
@@ -308,29 +273,14 @@ mergeState' new = do
 
 
 
-lookupDataFormat :: EvalM DataFormat
-lookupDataFormat = do
+
+
+
+lookupLibPaths :: EvalM [FilePath]
+lookupLibPaths = do
   state <- getState
-  return $ getDataFormat state
+  return $ getLibPaths state
 
-lookupDataPath :: EvalM FilePath
-lookupDataPath = do
-  state <- getState
-  return $ getDataPath state
-
-lookupTemplatePath :: EvalM FilePath
-lookupTemplatePath = do
-  state <- getState
-  return $ getTemplatePath state
-
-
-{-
-readData :: String -> EvalM ()
-readData str = do
-  format <- lookupDataFormat
-  state  <- liftIO $ parseData str format
-  putState state
--}
 
 undefineKeys :: EvalM ()
 undefineKeys = do

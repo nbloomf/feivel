@@ -80,7 +80,6 @@ data DocLeaf
  | Escaped   Char
  | Scope     Doc
  | NakedKey  Key
- | Input     StrExpr
  | NakedExpr Expr
 
  | Import    String (Maybe String)
