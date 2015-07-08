@@ -154,7 +154,7 @@ findFileInPaths file (p:ps) = do
 -- Message then string being parsed
 parseWith :: ParseM (a,b) -> String -> String -> EvalM a
 parseWith p path str = case runParseM p path str of
-  Left goof -> throwError goof
+  Left  goof  -> throwError goof
   Right (x,_) -> return x
 
 parseDoc :: String -> String -> EvalM Doc
