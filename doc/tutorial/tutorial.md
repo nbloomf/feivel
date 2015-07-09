@@ -8,7 +8,7 @@ Introduction
 The Elevator Pitch
 ------------------
 
-Feivel is an extremely simple template processing language. The primary audience is math teachers who are writing problem sets. For example, the input may be a "generic" problem set on factoring polynomials with the coefficients unspecified, and the output is a specific problem set with numbers chosen for the coefficients (either randomly, or from a store of data, or as the result of some calculation). In this way, once the generic problem set is written we can easily generate as many different-but-similar copies as we want. In practice, the output will typically be in e.g. LaTeX, but `feivel` operates on streams of plain text and so might be applied to other uses as well.
+Feivel is a simple template processing language; its primary intended audience is math teachers who are writing problem sets. For example, the input may be a "generic" problem set on factoring polynomials with the coefficients unspecified, and the output is a specific problem set with numbers chosen for the coefficients (either randomly, or from a store of data, or as the result of some calculation). In this way, once the generic problem set is written we can easily generate as many different-but-similar copies as we want. In practice, the output will typically be in e.g. LaTeX, but `feivel` operates on streams of plain text and so might be applied to other uses as well.
 
 `feivel` is free software and licensed under Version 3 of the GNU GPL. For installation instructions, see the `README`.
 
@@ -16,7 +16,7 @@ Feivel is an extremely simple template processing language. The primary audience
 First Steps
 -----------
 
-The simplest way to use `feivel` is from the command line. You will need to be comfortable editing plain text and running basic commands from a shell prompt.
+The simplest way to use `feivel` is from the command line. You will need to be comfortable editing plain text and running basic commands from a shell prompt. This tutorial will assume that you are using a unix-like environment (Linux, Mac OSX, or BSD).
 
 To use `feivel`, we prepare a specially formatted text file called a *template*, and then *process* this template.
 
@@ -72,7 +72,7 @@ Running `feivel`
 
 There are two ways to use `feivel`: as a unix-style *filter* (for producing documents) and as an interactive graphical *interpreter* (as a calculator).
 
-To use `feivel` as a filter, we can simply put it in a pipeline or call it with the `-t` flag set. The examples from the introduction use filter mode.
+To use `feivel` as a filter, we can simply put it in a pipeline or specify a template file with the `-t` flag set. The examples from the introduction use filter mode.
 
 To use `feivel` as an interpreter, run it with the `--repl` flag set. This will launch a graphical window. For example, try calling the following command.
 
