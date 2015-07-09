@@ -84,25 +84,40 @@ pTypeKeyValFile = do
 {-------}
 
 pCSVwithHead :: Char -> ParseM [[(Key, Expr, Locus)]]
-pCSVwithHead delim = undefined
+pCSVwithHead delim = do
+  headers <- pCSVFields delim
+  rs <- many1 (pCSVRecordWithHead (map fst headers) delim)
+  eof
+  return rs
 
+pCSVRecordWithHead :: [String] -> Char -> ParseM [(Key, Expr, Locus)]
+pCSVRecordWithHead headers delim = do
+  fs <- pCSVFields delim
+  let gs = zipWith (\k (e,l) -> (Key k, StrE $ StrConst e :@ l, l)) headers fs
+  return gs
 
 pCSVsansHead :: Char -> ParseM [[(Key, Expr, Locus)]]
-pCSVsansHead delim = undefined
+pCSVsansHead delim = do
+  rs <- many1 (pCSVRecordSansHead delim)
+  eof
+  return rs
 
 pCSVRecordSansHead :: Char -> ParseM [(Key, Expr, Locus)]
-pCSVRecordSansHead = undefined
+pCSVRecordSansHead delim = do
+  fs <- pCSVFields delim
+  let gs = zipWith (\k (e,l) -> (Key $ show k, StrE $ StrConst e :@ l, l)) [0..] fs
+  return gs
 
-pCSVFields :: Char -> ParseM [(Expr, Locus)]
+pCSVFields :: Char -> ParseM [(String, Locus)]
 pCSVFields delim = do
   fs <- sepBy1 (pCSVField delim) (char delim)
   choice [char '\n' >> return (), eof]
   return fs
 
-pCSVField :: Char -> ParseM (Expr, Locus)
+pCSVField :: Char -> ParseM (String, Locus)
 pCSVField delim = choice [pCSVFieldQuoted delim, pCSVFieldUnquoted delim]
 
-pCSVFieldQuoted :: Char -> ParseM (Expr, Locus)
+pCSVFieldQuoted :: Char -> ParseM (String, Locus)
 pCSVFieldQuoted delim = do
   start <- getPosition
   _ <- try $ char '"'
@@ -110,15 +125,15 @@ pCSVFieldQuoted delim = do
   char '"'
   end <- getPosition
   let loc = locus start end
-  return (StrE $ StrConst str :@ loc, loc)
+  return (str, loc)
 
-pCSVFieldUnquoted :: Char -> ParseM (Expr, Locus)
+pCSVFieldUnquoted :: Char -> ParseM (String, Locus)
 pCSVFieldUnquoted delim = do
   start <- getPosition
   str   <- many1 $ noneOf [delim, '\n', '\r']
   end   <- getPosition
   let loc = locus start end
-  return $ (StrE $ StrConst str :@ loc, loc)
+  return $ (str, loc)
 
 
 

@@ -25,10 +25,12 @@ import Feivel.Format
 import Feivel.GUI
 import Feivel.GUI.Strings
 
+import Data.Maybe (fromMaybe)
+
 import System.IO
 import System.Exit (exitWith, ExitCode(ExitSuccess, ExitFailure))
 import System.Environment (getArgs)
-import System.Console.GetOpt (getOpt, ArgOrder(Permute), OptDescr(Option), ArgDescr(ReqArg, NoArg), usageInfo)
+import System.Console.GetOpt (getOpt, ArgOrder(Permute), OptDescr(Option), ArgDescr(..), usageInfo)
 
 
 main :: IO ()
@@ -184,7 +186,15 @@ options =
 
  , Option [] ["awk"]
      (ReqArg (\arg opt -> return $ opt {dataFormat = AWK {recordSeparator = arg}}) "STRING")
-     "parse data in awk-mode"
+     "parse data in awk mode"
+
+ , Option [] ["csv"]
+     (OptArg ((\ d opt ->return $ opt {dataFormat = CSV {csvDelim = head d, csvHead = False}}) . fromMaybe ",") "CHAR")
+     "parse data as csv (sans headers)"
+
+ , Option [] ["csv-with-headers"]
+     (OptArg ((\ d opt ->return $ opt {dataFormat = CSV {csvDelim = head d, csvHead = True}}) . fromMaybe ",") "CHAR")
+     "parse data as csv (with headers)"
  ]
 
 
