@@ -35,7 +35,13 @@ import Text.Parsec.Prim (try)
 
 pRecords :: DataFormat -> ParseM [[(Key, Expr, Locus)]]
 pRecords TypeKeyVal = pTypeKeyValFile
+
+pRecords (CSV {csvHead = True,  csvDelim = delim}) = pCSVwithHead delim
+pRecords (CSV {csvHead = False, csvDelim = delim}) = pCSVsansHead delim
+
 pRecords _ = error "pRecords"
+
+
 
 {--------------------}
 {- TypeKeyVal       -}
@@ -73,6 +79,46 @@ pTypeKeyValFile = do
         return (Key k, e, locus start end)
 
 
+{-------}
+{- CSV -}
+{-------}
+
+pCSVwithHead :: Char -> ParseM [[(Key, Expr, Locus)]]
+pCSVwithHead delim = undefined
+
+
+pCSVsansHead :: Char -> ParseM [[(Key, Expr, Locus)]]
+pCSVsansHead delim = undefined
+
+pCSVRecordSansHead :: Char -> ParseM [(Key, Expr, Locus)]
+pCSVRecordSansHead = undefined
+
+pCSVFields :: Char -> ParseM [(Expr, Locus)]
+pCSVFields delim = do
+  fs <- sepBy1 (pCSVField delim) (char delim)
+  choice [char '\n' >> return (), eof]
+  return fs
+
+pCSVField :: Char -> ParseM (Expr, Locus)
+pCSVField delim = choice [pCSVFieldQuoted delim, pCSVFieldUnquoted delim]
+
+pCSVFieldQuoted :: Char -> ParseM (Expr, Locus)
+pCSVFieldQuoted delim = do
+  start <- getPosition
+  _ <- try $ char '"'
+  str <- many1 (noneOf ['"'] <|> (try $ string "\"\"" >> return '"'))
+  char '"'
+  end <- getPosition
+  let loc = locus start end
+  return (StrE $ StrConst str :@ loc, loc)
+
+pCSVFieldUnquoted :: Char -> ParseM (Expr, Locus)
+pCSVFieldUnquoted delim = do
+  start <- getPosition
+  str   <- many1 $ noneOf [delim, '\n', '\r']
+  end   <- getPosition
+  let loc = locus start end
+  return $ (StrE $ StrConst str :@ loc, loc)
 
 
 

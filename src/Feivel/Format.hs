@@ -21,8 +21,14 @@ module Feivel.Format (
 ) where
 
 data DataFormat
- = RFC822                            -- key: val\n
- | JSON                              -- 
- | AWK {recordSeparator :: String}   -- @$1, @$2, ...
- | TypeKeyVal                        -- :type:key:val;
- deriving (Eq, Show)
+  = TypeKeyVal               -- :type:key:val;
+
+  | CSV                      -- CSV with header (RFC 4180)
+      { csvHead  :: Bool
+      , csvDelim :: Char
+      }
+
+  | RFC822                            -- key: val\n
+  | JSON                              -- 
+  | AWK {recordSeparator :: String}   -- @$1, @$2, ...
+  deriving (Eq, Show)
