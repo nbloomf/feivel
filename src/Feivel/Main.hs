@@ -200,4 +200,3 @@ options =
 
 version :: String
 version = "feivel-" ++ ui_version_string
-

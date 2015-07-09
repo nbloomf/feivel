@@ -6,6 +6,7 @@ N.N.N
 * New types
   * atomic: modN
   * constructor: permutation
+* New data source: CSV (with or without headers)
 
 0.1.0
 =====

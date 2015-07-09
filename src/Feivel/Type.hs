@@ -49,7 +49,6 @@ data Type
   | MatOf    Type -- Matrix
   | PolyOver Type -- Polynomial
 
-
   | MacTo  Type -- Macro
   deriving Eq
 
