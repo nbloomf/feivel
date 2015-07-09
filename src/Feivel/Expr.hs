@@ -385,6 +385,9 @@ data RatExprLeaf
 
   -- Approximations
   | RatSqrt  RatExpr IntExpr
+
+  -- Casting
+  | RatCastStr StrExpr
   deriving (Eq, Show)
 
 

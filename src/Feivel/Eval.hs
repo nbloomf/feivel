@@ -60,7 +60,7 @@ import Feivel.EvalM
 import Feivel.Store
 import Feivel.Type
 import Feivel.LaTeX
-import Feivel.Parse (pInteger)
+import Feivel.Parse (pInteger, pRat)
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -587,6 +587,11 @@ instance Eval RatExpr where
         m  <- tryEvalM loc $ ratZScore y xs k
         return $ RatConst m :@ loc
       u -> reportErr loc $ NumericListExpected u
+
+  eval (RatCastStr str :@ loc) = do
+    x <- eval str >>= getVal
+    n <- parseAsAt pRat loc x
+    return $ RatConst n :@ loc
 
 
 

@@ -729,6 +729,8 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
       , pMeanDev
       , pStdDev
       , pZScore
+
+      , pFun1 "str" pStrExpr RatCastStr QQ
       ]
       where
         pMean = do
