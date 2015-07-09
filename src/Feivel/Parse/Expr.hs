@@ -180,6 +180,7 @@ pREPL = do
          [ pDefineREPL
          , pNakedExprREPL
          , pVarExpr NakedKey DD
+         , pImportREPL
          ]
   eof
   return x
@@ -196,6 +197,12 @@ pREPL = do
     pNakedExprREPL = do
       (x,_) <- try pTypedNakedExpr
       return (NakedExpr x, DD)
+
+    pImportREPL = do
+      try $ keyword "import"
+      path <- pParens pPath
+      qual <- option Nothing (try (keyword "as") >> pToken >>= return . Just)
+      return (Import path qual (Empty :@ NullLocus), DD)
 
 
 pDoc :: ParseM (Doc, Type)

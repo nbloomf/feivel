@@ -375,6 +375,10 @@ These expressions can be used over any type.
 
     Cast `INT` to a rational number; e.g. express n as n/1.
 
+- `str(STR)`
+
+    Cast `STR` to a rational number.
+
 
 `modN`: Modular Integers
 ------------------------
@@ -538,4 +542,4 @@ The difference between evaluating at definition time and invocation time may all
 The Interpreter
 ===============
 
-The `feivel` interpreter understands a simplified subset of the full template language: we can use `define` statements as well as naked expressions and naked keys. Also, in the interpreter we do not need enclosing square brackets and colons, as are used in templates.
+The `feivel` interpreter understands a simplified subset of the full template language: we can use `define` and `import` statements as well as naked expressions and naked keys. Also, in the interpreter we do not need enclosing square brackets and colons, as are used in templates.
