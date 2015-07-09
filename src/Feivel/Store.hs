@@ -47,7 +47,6 @@ import qualified Data.Map as M
 
 import Feivel.Key
 import Feivel.Locus
-import Feivel.Format
 
 import Data.Maybe (isJust)
 import Control.Monad (foldM)

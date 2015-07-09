@@ -127,11 +127,13 @@ orbit p a = rotate $ a : cycle' (image p a)
     cycle' x = if x==a then [] else x : cycle' (image p x)
     rotate xs = minimumBy compareHead $ zipWith (++) (tails xs) (inits xs)
     compareHead (x:_) (y:_) = compare x y
+    compareHead _     _     = error "compareHead in orbit"
 
 cycles :: (Eq a, Ord a) => Perm a -> [[a]]
 cycles p = munch $ sortBy compareHead $ map (orbit p) (movedBy p)
   where
     compareHead (x:_) (y:_) = compare x y
+    compareHead _     _     = error "compareHead in cycles"
     munch = (map head) . group
 
 shape :: (Eq a, Ord a) => Perm a -> [Integer]

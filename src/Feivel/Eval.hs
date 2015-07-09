@@ -1276,13 +1276,22 @@ instance Eval Doc where
     PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
     ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
 
-  eval (Import file Nothing rest :@ loc) = do
+  eval (Import file Nothing rest :@ _) = do
     oldSt <- getState
     clearState
-    readAndParseDocFromLib file >>= eval
+    _ <- readAndParseDocFromLib file >>= eval
     newSt <- getState
     putState oldSt
     mergeState' newSt
+    eval rest
+
+  eval (Import file (Just prefix) rest :@ _) = do
+    oldSt <- getState
+    clearState
+    _ <- readAndParseDocFromLib file >>= eval
+    newSt <- getState
+    putState oldSt
+    mergeState' (qualify prefix newSt)
     eval rest
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
@@ -2021,6 +2030,13 @@ instance Typed PermExpr where
 instance Typed ZZModExpr where
   typeOf (ZZModConst (ZZModulo _ n) :@ _) = return (ZZMod n)
 
+  typeOf (ZZModVar key :@ loc) = do
+    expr <- lookupKey loc key
+    t <- typeOf expr
+    case t of
+      ZZMod n -> return $ ZZMod n
+      u -> reportErr loc $ ModularIntegerExpected u
+
   typeOf (ZZModAtPos m _ :@ loc) = do
     t <- typeOf m
     case t of
@@ -2053,6 +2069,12 @@ instance Typed ZZModExpr where
   typeOf (ZZModPow  a _ :@ _)   = typeOf a
 
   typeOf (ZZModSum xs :@ loc) = do
+    t <- typeOf xs
+    case t of
+      ListOf u -> return u
+      u -> reportErr loc $ ListExpected u
+
+  typeOf (ZZModProd xs :@ loc) = do
     t <- typeOf xs
     case t of
       ListOf u -> return u

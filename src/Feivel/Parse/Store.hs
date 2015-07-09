@@ -105,7 +105,7 @@ pCSVsansHead delim = do
 pCSVRecordSansHead :: Char -> ParseM [(Key, Expr, Locus)]
 pCSVRecordSansHead delim = do
   fs <- pCSVFields delim
-  let gs = zipWith (\k (e,l) -> (Key $ show k, StrE $ StrConst e :@ l, l)) [0..] fs
+  let gs = zipWith (\k (e,l) -> (Key $ show k, StrE $ StrConst e :@ l, l)) [(0::Integer)..] fs
   return gs
 
 pCSVFields :: Char -> ParseM [(String, Locus)]
@@ -118,11 +118,11 @@ pCSVField :: Char -> ParseM (String, Locus)
 pCSVField delim = choice [pCSVFieldQuoted delim, pCSVFieldUnquoted delim]
 
 pCSVFieldQuoted :: Char -> ParseM (String, Locus)
-pCSVFieldQuoted delim = do
+pCSVFieldQuoted _ = do
   start <- getPosition
   _ <- try $ char '"'
   str <- many1 (noneOf ['"'] <|> (try $ string "\"\"" >> return '"'))
-  char '"'
+  _ <- char '"'
   end <- getPosition
   let loc = locus start end
   return (str, loc)

@@ -257,7 +257,7 @@ pDoc = choice $ map pAtLocus
     pImport = do
       try (char '[' >> keyword "import")
       path <- pParens pPath
-      qual <- option Nothing (try (keyword "as") >> pToken >>= return . Just)
+      qual <- option Nothing (try (keyword "as") >> pParens pToken >>= return . Just)
       _    <- option () (try (keyword "endimport")) >> char ']'
       (rest,_) <- pDoc
       return (Import path qual rest, DD)

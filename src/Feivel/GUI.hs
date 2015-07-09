@@ -164,7 +164,7 @@ gui = do
         if input == ""
           then return ()
           else do
-            c@((Step _ output _):_) <- evalString x input
+            c <- evalString x input
             set inputBuf  [textBufferText := ""]
             set outputBuf [textBufferText := history c]
             writeIORef interaction c
@@ -246,7 +246,7 @@ gui = do
         aboutDialogSetVersion  ad ui_version_string
         aboutDialogSetAuthors  ad ui_authors
         aboutDialogSetComments ad ui_about_comment
-        dialogRun ad
+        _ <- dialogRun ad
         widgetDestroy ad
 
   _ <- aboutMenuItem `on` buttonPressEvent $ do
