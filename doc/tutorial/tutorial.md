@@ -235,6 +235,14 @@ Usage: `[eval MAC (TYP KEY := EXPR; ...) endeval]`
 `eval` is used to evaluate template macros.
 
 
+`import`
+--------
+
+Usage: `[import (PATH)]`
+
+`import` is used to bring keys defined in a separate template (at PATH) into the current template. By default, `feivel` looks for PATH under fvl.lib/ in the user's home directory in unix-like environments. Alternative locations can be specified with the `--library` command line option.
+
+
 
 Expressions
 ===========
@@ -318,6 +326,10 @@ These expressions can be used over any type.
 - `min`, `max`, `gcd`, `lcm`, `choose`
 
     Infix operations.
+
+- `str(STR)`
+
+    Cast a string to an integer.
 
 
 `str`: Strings
