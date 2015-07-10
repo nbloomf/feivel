@@ -8,7 +8,7 @@ Introduction
 The Elevator Pitch
 ------------------
 
-Feivel is a simple template processing language; its primary intended audience is math teachers who are writing problem sets. For example, the input may be a "generic" problem set on factoring polynomials with the coefficients unspecified, and the output is a specific problem set with numbers chosen for the coefficients (either randomly, or from a store of data, or as the result of some calculation). In this way, once the generic problem set is written we can easily generate as many different-but-similar copies as we want. In practice, the output will typically be in e.g. LaTeX, but `feivel` operates on streams of plain text and so might be applied to other uses as well.
+Feivel is a simple template processing language; its intended audience is math teachers who are writing problem sets. For example, the input may be a "generic" problem set on factoring polynomials with the coefficients unspecified, and the output is a specific problem set with numbers chosen for the coefficients (either randomly, or from a store of data, or as the result of some calculation). In this way, once the generic problem set is written we can easily generate as many different-but-similar copies as we want. In practice, the output will typically be in e.g. LaTeX, but `feivel` operates on streams of plain text and so might be applied to other uses as well.
 
 `feivel` is free software and licensed under Version 3 of the GNU GPL. For installation instructions, see the `README`.
 
@@ -58,21 +58,12 @@ This time we defined two matrices, computed their product, and displayed the res
 
 
 
-Purpose
--------
-
-Like other templating languages, `feivel` allows us to write documents which carry state, within which we can perform basic computations which affect the document itself. Why make a new language? Most existing templating languages are designed for the web. `feivel` is different: it is designed for math teachers writing problems. Where a more conventional templating language may be used to build a nicely formatted web page using data from a database (say), `feivel` can be used to build a nicely formatted math problem set using data chosen randomly (or maybe from a database if you want, but this feature is incomplete).
-
-An important design goal for the `feivel` language is to be simple and unsurprising. The ability to write generic math problems is useless if the syntax needed to do so is too opaque or cumbersome.
-
-
-
 Running `feivel`
 -----------------
 
-There are two ways to use `feivel`: as a unix-style *filter* (for producing documents) and as an interactive graphical *interpreter* (as a calculator).
+There are two ways to use `feivel`: as a unix-style *filter* and as an interactive graphical *interpreter*.
 
-To use `feivel` as a filter, we can simply put it in a pipeline or specify a template file with the `-t` flag set. The examples from the introduction use filter mode.
+To use `feivel` as a filter, we can simply put it in a pipeline or specify a template file with the `-t` flag. The examples from the introduction use filter mode.
 
 To use `feivel` as an interpreter, run it with the `--repl` flag set. This will launch a graphical window. For example, try calling the following command.
 
@@ -90,15 +81,7 @@ and then click the `Eval` button (or press Ctrl-Enter). You should then see this
 
 This is a read-evaluate-print loop, wherein we can essentially process a simplified template one line at a time. This is an effective way to try out bits of syntax on the fly. To exit the REPL, close the window.
 
-The interpreter only understands `define` commands, naked expressions, and individual keys. When entering commands we do not need to use enclosing square brackets or colons. For example, try typing the following lines into the entry box one at a time, clicking `Eval` (or pressing Ctrl-Enter) after each one.
-
-    define int @a := 2
-    @a
-    int: @a + 4
-
-We can save our interaction to a file using the *Save interaction as...* menu command (or Ctrl-s), and we can undo an input with the Undo button. We can increase or decrease the font size with Ctrl-+ and Ctrl--.
-
-Play around with the REPL for a bit- there's not much to it.
+For more information about the feivel interpreter, see the [Interpreter](#the-interpreter) section.
 
 
 
@@ -442,6 +425,7 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
     Extract a row or column from the given matrix. INT is the index (counting from 1) of the desired row/column.
 
 
+
 `[t]`: Matrices
 ---------------
 
@@ -465,6 +449,41 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
     Matrix builder notation. The first list argument ranges over the rows of the matrix, and the second over the columns; the entries are given by EXPR. For example, `Build(@i ^ @j; int @i <- {2;3}; int @j <- {1;2;3})` gives the matrix `[[2;4;8];[3;9;27]]`.
 
+- `ShuffleRows(MAT)` and `ShuffleCols(Mat)`
+
+- `Transpose(MAT)`
+
+- `RowFromList(LIST)` and `ColFromList(LIST)`
+
+- `SwapRows(MAT; INT; INT)` and `SwapCols(MAT; INT; INT)`
+
+- `ScaleRow(MAT; EXPR; INT)` and `ScaleCol(MAT; EXPR; INT)`
+
+- `AddRow(MAT; EXPR; INT; INT)` and `AddCol(MAT; EXPR; INT; INT)`
+
+- `DelRow(MAT; INT)` and `DelCol(MAT; INT)`
+
+- `Id(TYP; INT)`
+
+    The identity matrix of a given dimension.
+
+- `SwapE(TYP; INT, INT, INT)
+
+    `SwapE(typ;n;h;k)` is the elementary matrix with entries of type `typ`, dimension `n`, which swaps row/col `h` and `k`.
+
+- `ScaleE(TYP; INT; INT; EXPR)`
+
+    `ScaleE(typ; n; k; e)` is the elementary matrix with entries of type `typ`, dimension `n`, which scales row/col `k` by `e`.
+
+- `AddE(TYP; INT; INT; INT; EXPR)`
+
+    `AddE(typ; n; i; j; e)`
+
+- `GJForm(MAT)`
+
+    Returns the gauss-jordan form of a matrix over a field. (a.k.a. reduced row echelon form.)
+
+
 
 `^t`: Polynomials
 -----------------
@@ -478,6 +497,7 @@ A polynomial is a partial map over a set of string-like expressions called monom
 - `EvalPoly(POLY; VAR <- POLY; ...)`
 
 
+
 `$t`: Permutations
 ------------------
 
@@ -486,6 +506,7 @@ A permutation of a list is a rearrangement of the items in it; specifically, a o
 - `o` and `inv`
 
     Composition and inversion of permutations. Note that composition is right to left, and inversion is a prefix operator.
+
 
 
 `>t`: Macros
@@ -542,4 +563,67 @@ The difference between evaluating at definition time and invocation time may all
 The Interpreter
 ===============
 
-The `feivel` interpreter understands a simplified subset of the full template language: we can use `define` and `import` statements as well as naked expressions and naked keys. Also, in the interpreter we do not need enclosing square brackets and colons, as are used in templates.
+The `feivel` interpreter understands a simplified subset of the full template language: we can use `define` and `import` statements as well as (typed) expressions and (untyped) keys. Also, in the interpreter we do not need enclosing square brackets and colons, as are used in templates. For example, try typing the following lines into the entry box one at a time, clicking `Eval` (or pressing Ctrl-Enter) after each one.
+
+    define int @a := 2
+    @a
+    int: @a + 4
+
+We can save our interaction to a file using the *Save interaction as...* menu command (or Ctrl-s), and we can undo an input with the Undo button. We can increase or decrease the font size with Ctrl-+ and Ctrl--.
+
+Play around with the REPL for a bit- there's not much to it.
+
+
+
+Data Sources
+============
+
+The `define` and `let` statements are used to declare key-value pairs inside a template. It is also possible to declare key-value pairs before the template is processed, by specifying an external data source at the command line.
+
+As of version 0.1.0, `feivel` understands two different kinds of external data sources: CSV files as specified in RFC 4180 (with or without headers) and a custom textual format called TypeKeyVal. Future versions will support other formats.
+
+To specify an external data source, we give feivel a path using the `-d` flag. The format is specified using a separate flag.
+
+By default, `feivel` processes the given template against every record in the data source and concatenates the results. Output can be sent to separate, numbered files by using the `-o` flag with a filename argument.
+
+
+CSV
+---
+
+CSV (comma separated value) formatted data consists of one or more *records*, separated by newlines, each of which consists of one or more *fields*, which are either "quoted" or unquoted strings separated by delimiting characters, which are commas by default. As per the specification in RFC 4180, CSV files may include a header row which gives the name of each column.
+
+For example, here is a sample CSV file without headers.
+
+    >>> no-headers.csv
+    Jane Austen,Pride and Prejudice
+    Oscar Wilde,The Picture of Dorian Gray
+    "Emily Bronte",Wuthering Heights
+    >>>
+
+We can pass this data to a template like so.
+
+    feivel -t writers.fvl -d no-headers.csv --csv > output.txt
+
+Now the template `writers.fvl` can refer to the fields of a record specified in `no-headers.csv` with the automatic keys `@0`, `@1`, and so on.
+
+Here is a sample CSV file with headers.
+
+    >>> headers.csv
+    name,instrument
+    John,guitar
+    Paul,bass guitar
+    George,guitar
+    Ringo,drums
+    >>>
+
+If we invoke `feivel` like so:
+
+    feivel -t beatles.fvl -d headers.csv --csv-with-headers > output.txt
+
+Then the template `beatles.fvl` can refer to the data in `headers.csv` by column name; e.g. `@name` and `@instrument`.
+
+When using CSV, with or without headers, we can specify the delimiting character like so:
+
+    feivel -t foo.fvl -d bar.csv --csv ";"
+
+Note that the field delimiter **must be** a single character. Any characters after the first will be discarded. Passing the empty string as a delimiter is an error.

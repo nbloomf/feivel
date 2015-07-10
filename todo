@@ -35,11 +35,13 @@ Feature Ideas
 * Permutation: Orbits {{t}}
 * Permutation: Shape {int}
 * Rational: more Cauchy sequences (pi, e, trig functions)
-* String: Cast (parse) to rat
 * String: escaped unicode characters
 * String: strformat (latex/html/ascii) -- in progress
 * String: words/lines/splitat
 * Tests: Golden tests for rational, boolean polynomials
 * Type: cyclotomic numbers
-* Type: pairs? (constructor)
+* Type: tuples? (constructor)
 * Type: trees (constructor)
+* Arch: Groupoid class
+* Arch: Does it make more sense to put type info in expression constructors?
+* Arch: type synonyms
