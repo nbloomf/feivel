@@ -1,6 +1,6 @@
 feivel: version history
 
-N.N.N
+0.2.0
 =====
 * Shiny new graphical REPL (replaces old repl)
 * New types

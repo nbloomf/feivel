@@ -136,8 +136,8 @@ The repl should print `#t` back. Here we have used another command: [:square col
 
 Types in `feivel` come in two flavors:
 
-1. *atomic* types, which represent concrete data. As of 0.1.0 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N), and `$int` (permutations of integers).
-2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.1.0 there are 4 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), and `>typ` (macros of `typ`).
+1. *atomic* types, which represent concrete data. As of 0.2.0 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N), and `$int` (permutations of integers).
+2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.2.0 there are 4 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), and `>typ` (macros of `typ`).
 
 Constructors can be nested, so that (for instance) `[{int}]` represents the set of matrices whose entries are lists of integers. Macros are the strangest of these; they are like functions (but not quite) and allow us to wrap a complicated expression with parameters into a single value. An expression of type `>int` can be *evaluated* to *yield* a value of type `int`. Macros can also be nested, as we'll see later, so for instance an expression of type `>>int` is a macro that yields a macro that yields an integer, and an expression of type `[>rat]` is a matrix of macros that yield rationals. In that sense macros are "first-class" values. Why? Why not? :)
 
@@ -580,7 +580,7 @@ Data Sources
 
 The `define` and `let` statements are used to declare key-value pairs inside a template. It is also possible to declare key-value pairs before the template is processed, by specifying an external data source at the command line.
 
-As of version 0.1.0, `feivel` understands two different kinds of external data sources: CSV files as specified in RFC 4180 (with or without headers) and a custom textual format called TypeKeyVal. Future versions will support other formats.
+As of version 0.2.0, `feivel` understands two different kinds of external data sources: CSV files as specified in RFC 4180 (with or without headers) and a custom textual format called TypeKeyVal. Future versions will support other formats.
 
 To specify an external data source, we give feivel a path using the `-d` flag. The format is specified using a separate flag.
 
