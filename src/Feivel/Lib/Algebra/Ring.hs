@@ -41,7 +41,7 @@ module Feivel.Lib.Algebra.Ring (
   URingoid,
     rOne, rIsOne, rUProd, rInjInt, rChoose, rInv, rDiv, rPosPow, rPow, rMean, rIsUnit, rLOneOf, rROneOf,
 
-    rDivT, rUProdT, rChooseT, rPowT, rMeanT, rIntMeanT, rMeanDevT, rIntMeanDevT, rInvT,
+    rDivT, rUProdT, rChooseT, rPowT, rMeanT, rIntMeanT, rMeanDevT, rIntMeanDevT, rInvT, rPosPowT,
 
   URingoidAssoc,
     rAssoc,
@@ -171,6 +171,9 @@ rDividesT _ = rDivides
 
 rDotT :: (Ringoid t) => t -> [t] -> [t] -> Either AlgErr t
 rDotT _ = rDot
+
+rPosPowT :: (Ringoid t) => t -> t -> Integer -> Either AlgErr t
+rPosPowT _ = rPosPow
 
 
 
