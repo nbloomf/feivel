@@ -887,9 +887,11 @@ instance Eval MatExpr where
           x <- tryEvalM loc $ mESwapT a m i j
           return $ inject loc x
     case t of
-      ZZ -> makeSwapMat (0::Integer)
-      QQ -> makeSwapMat (0:/:1)
-      BB -> makeSwapMat (False)
+      ZZ -> makeSwapMat zeroZZ
+      QQ -> makeSwapMat zeroQQ
+      BB -> makeSwapMat zeroBB
+      ZZMod d -> makeSwapMat (zeroMod d)
+      PolyOver ZZ -> makeSwapMat (constP zeroZZ)
       _  -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatScaleE t n h x :@ loc) = do
@@ -900,9 +902,11 @@ instance Eval MatExpr where
           y <- tryEvalM loc $ mEScaleT a m k w
           return $ inject loc y
     case t of
-      ZZ -> makeScaleMat (0::Integer)
-      QQ -> makeScaleMat (0:/:1)
-      BB -> makeScaleMat (False)
+      ZZ -> makeScaleMat zeroZZ
+      QQ -> makeScaleMat zeroQQ
+      BB -> makeScaleMat zeroBB
+      ZZMod d -> makeScaleMat (zeroMod d)
+      PolyOver ZZ -> makeScaleMat (constP zeroZZ)
       _  -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatAddE t n h k x :@ loc) = do
@@ -911,16 +915,16 @@ instance Eval MatExpr where
     j <- eval k >>= getVal
     let makeAddMat a = do
           w <- eval x >>= getVal
-          case mEAddT a m (i,j) w of
-            Left err -> reportErr loc err
-            Right y  -> return $ inject loc y
+          y <- tryEvalM loc $ mEAddT a m (i,j) w
+          return $ inject loc y
     case t of
-      ZZ -> makeAddMat (0::Integer)
-      QQ -> makeAddMat (0:/:1)
-      BB -> makeAddMat (False)
+      ZZ -> makeAddMat zeroZZ
+      QQ -> makeAddMat zeroQQ
+      BB -> makeAddMat zeroBB
       ZZMod d -> makeAddMat (0`zzmod`d)
-      PolyOver ZZ -> makeAddMat (constP (0::Integer))
-      PolyOver QQ -> makeAddMat (constP (0:/:1))
+      PolyOver ZZ -> makeAddMat (constP zeroZZ)
+      PolyOver QQ -> makeAddMat (constP zeroQQ)
+      PolyOver BB -> makeAddMat (constP zeroBB)
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatShuffleRows m :@ loc) = do
@@ -960,24 +964,21 @@ instance Eval MatExpr where
   eval (MatAdd a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
-      MatOf ZZ ->
-        lift2 loc (rAddT (mCell (0::Integer))) a b
-      MatOf QQ ->
-        lift2 loc (rAddT (mCell (0:/:1))) a b
-      MatOf BB ->
-        lift2 loc (rAddT (mCell False)) a b
-      MatOf (PolyOver ZZ) ->
-        lift2 loc (rAddT (mCell $ constP (0::Integer))) a b
-      MatOf (ZZMod n) ->
-        lift2 loc (rAddT (mCell (0`zzmod`n))) a b
+      MatOf ZZ -> lift2 loc (rAddT (mCell zeroZZ)) a b
+      MatOf QQ -> lift2 loc (rAddT (mCell zeroQQ)) a b
+      MatOf BB -> lift2 loc (rAddT (mCell zeroBB)) a b
+      MatOf (ZZMod n) -> lift2 loc (rAddT (mCell (zeroMod n))) a b
+      MatOf (PolyOver ZZ) -> lift2 loc (rAddT (mCell $ constP zeroZZ)) a b
+      MatOf (PolyOver QQ) -> lift2 loc (rAddT (mCell $ constP zeroQQ)) a b
+      MatOf (PolyOver BB) -> lift2 loc (rAddT (mCell $ constP zeroBB)) a b
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatNeg a :@ loc) = do
     t <- typeOf a
     case t of
-      MatOf ZZ        -> lift1 loc (rNegT (mCell (0::Integer))) a
-      MatOf QQ        -> lift1 loc (rNegT (mCell (0:/:1))) a
-      MatOf BB        -> lift1 loc (rNegT (mCell False)) a
+      MatOf ZZ -> lift1 loc (rNegT (mCell zeroZZ)) a
+      MatOf QQ -> lift1 loc (rNegT (mCell zeroQQ)) a
+      MatOf BB -> lift1 loc (rNegT (mCell zeroBB)) a
       MatOf (ZZMod n) -> lift1 loc (rNegT (mCell (0`zzmod`n))) a
       _ -> reportErr loc $ NumericMatrixExpected t
 
@@ -1076,16 +1077,17 @@ instance Eval MatExpr where
     u <- typeOf a
     i <- eval h >>= getVal
     j <- eval k >>= getVal
-    let makeAddRow a = do
+    let makeAddRow zer = do
           n <- eval m >>= getVal
           r <- eval a >>= getVal
-          suchThat $ r `hasSameTypeAs` a
+          suchThat $ r `hasSameTypeAs` zer
           p <- tryEvalM loc $ mAddRow r i j n
           return $ inject loc p
     case unify t (MatOf u) of
       Right (MatOf ZZ) -> makeAddRow zeroZZ
       Right (MatOf QQ) -> makeAddRow zeroQQ
-      Right (MatOf BB) -> makeAddRow False
+      Right (MatOf BB) -> makeAddRow zeroBB
+      Right (MatOf (ZZMod n)) -> makeAddRow (zeroMod n)
       Right w  -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1094,36 +1096,31 @@ instance Eval MatExpr where
     u <- typeOf a
     i <- eval h >>= getVal
     j <- eval k >>= getVal
+    let makeAddCol zer = do
+          n <- eval m >>= getVal
+          r <- eval a >>= getVal
+          suchThat $ r `hasSameTypeAs` zer
+          p <- tryEvalM loc $ mAddCol r i j n
+          return $ inject loc p
     case unify t (MatOf u) of
-      Right (MatOf ZZ) -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Integer)
-        r <- eval a >>= getVal :: EvalM Integer
-        p <- tryEvalM loc $ mAddCol r i j n
-        return $ MatConst ZZ (fmap (IntE . inject loc) p) :@ loc
-      Right (MatOf QQ) -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Rat)
-        r <- eval a >>= getVal :: EvalM Rat
-        p <- tryEvalM loc $ mAddCol r i j n
-        return $ MatConst QQ (fmap (RatE . inject loc) p) :@ loc
-      Right (MatOf BB) -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Bool)
-        r <- eval a >>= getVal :: EvalM Bool
-        p <- tryEvalM loc $ mAddCol r i j n
-        return $ MatConst BB (fmap (BoolE . inject loc) p) :@ loc
+      Right (MatOf ZZ) -> makeAddCol zeroZZ
+      Right (MatOf QQ) -> makeAddCol zeroQQ
+      Right (MatOf BB) -> makeAddCol zeroBB
+      Right (MatOf (ZZMod n)) -> makeAddCol (zeroMod n)
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
   eval (MatDelRow m a :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    i <- eval a >>= getVal :: EvalM Integer
+    i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelRow n i
     return $ MatConst u p :@ loc
 
   eval (MatDelCol m a :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    i <- eval a >>= getVal :: EvalM Integer
+    i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelCol n i
     return $ MatConst u p :@ loc
 
