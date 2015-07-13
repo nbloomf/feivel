@@ -87,14 +87,6 @@ instance Get StrExpr where
     t <- typeOf v
     reportErr (locusOf v) $ TypeMismatch SS t
 
-{-
-instance Get String where
-  get expr = do
-    x <- get expr
-    case x of
-      StrConst (Text s) :@ _ -> return s
-      v -> reportErr (locusOf v) UnevaluatedExpression-}
-
 instance Get Text where
   get expr = do
     x <- get expr

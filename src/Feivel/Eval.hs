@@ -129,12 +129,12 @@ eIfThenElse b t f = do
   false <- eval f >>= getVal
   if test then (eval true) else (eval false)
 
-eMacro :: (ToExpr a, Get b, Eval a) => [(Type, Key, Expr)] -> a -> Locus -> EvalM b
+eMacro :: (ToExpr a, Get b, Eval a, Eval b) => [(Type, Key, Expr)] -> a -> Locus -> EvalM b
 eMacro vals mac loc = do
   old <- getState
   ctx <- toStateT loc vals
   (def, e) <- evalWith mac (ctx `mergeState` old) >>= getVal :: EvalM (Store Expr, Expr)
-  evalWith e (ctx `mergeState` (def `mergeState` old)) >>= eval >>= getVal
+  evalWith e (ctx `mergeState` (def `mergeState` old)) >>= eval >>= getVal >>= eval
 
 eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
   => c -> a -> b -> Locus -> EvalM d

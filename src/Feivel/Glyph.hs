@@ -19,7 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Feivel.Glyph where
+module Feivel.Glyph (
+  Glyph, toGlyph
+) where
 
 import Feivel.EvalM
 import Feivel.Expr
@@ -29,6 +31,7 @@ import Feivel.Error
 
 import Data.List (intersperse)
 
+
 {----------}
 {- :Glyph -}
 {----------}
@@ -37,6 +40,11 @@ class Glyph t where
   toGlyph :: t -> EvalM String
 
 
+
+{--------------}
+{- :Instances -}
+{--------------}
+
 instance Glyph Expr where
   toGlyph expr = case expr of
     IntE   x -> toGlyph x
@@ -44,39 +52,46 @@ instance Glyph Expr where
     BoolE  x -> toGlyph x
     RatE   x -> toGlyph x
     ListE  x -> toGlyph x
-    MacE   x -> return "(macro)"
     MatE   x -> toGlyph x
     DocE   x -> toGlyph x
     PolyE  x -> toGlyph x
     PermE  x -> toGlyph x
     ZZModE x -> toGlyph x
+    MacE   x -> toGlyph x
+
 
 instance Glyph IntExpr where
   toGlyph (IntConst n :@ _) = return $ show n
-  toGlyph _ = error "toGlyph: IntExpr"
+  toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
+
 
 instance Glyph StrExpr where
   toGlyph (StrConst (Text s) :@ _) = return s
-  toGlyph _ = error "toGlyph: StrExpr"
+  toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
+
 
 instance Glyph BoolExpr where
   toGlyph (BoolConst True  :@ _) = return "#t"
   toGlyph (BoolConst False :@ _) = return "#f"
-  toGlyph _ = error "toGlyph: BoolExpr"
+  toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
+
 
 instance Glyph RatExpr where
   toGlyph (RatConst x :@ _) = return $ show x
-  toGlyph _ = error "toGlyph: RatExpr"
+  toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
+
 
 instance Glyph ZZModExpr where
   toGlyph (ZZModConst a :@ _) = return $ showZZMod a
-  toGlyph _ = error "toGlyph: ZZModExpr"
+  toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
+
 
 instance Glyph ListExpr where
   toGlyph (ListConst _ xs :@ _) = do
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
-  toGlyph _ = error "toGlyph: ListExpr"
+  toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
+
 
 instance Glyph MatExpr where
   toGlyph (MatConst _ m :@ _) = do
@@ -84,21 +99,29 @@ instance Glyph MatExpr where
     case mShowStr n of
       Left err -> reportErr (error "Glyph instance of MatExpr") err
       Right x  -> return x
-  toGlyph _ = error "toGlyph: MatExpr"
+  toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
+
 
 instance Glyph PolyExpr where
   toGlyph (PolyConst _ px :@ _) = do
     qx <- polySeq $ mapCoef toGlyph px
     return $ showStrP qx
-  toGlyph _ = error "toGlyph: PolyExpr"
+  toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
+
 
 instance Glyph PermExpr where
   toGlyph (PermConst _ px :@ _) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx
-  toGlyph _ = error "toGlyph: PermExpr"
+  toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
+
+
+instance Glyph MacExpr where
+  toGlyph (MacConst _ _ e _ :@ _) = toGlyph e
+  toGlyph _ = error "toGlyph: MacExpr"
+
 
 instance Glyph Doc where
   toGlyph (Empty     :@ _) = return ""
   toGlyph (DocText (Text s) :@ _) = return s
-  toGlyph _ = error "toGlyph: Doc"
+  toGlyph x = error $ "toGlyph: Doc: " ++ show x

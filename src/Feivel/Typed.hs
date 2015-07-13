@@ -19,7 +19,13 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Feivel.Typed where
+module Feivel.Typed (
+  Typed, typeOf,
+
+  unifyTypesOf,
+
+  expectMatrix
+) where
 
 import Feivel.Type
 import Feivel.Expr
@@ -33,6 +39,8 @@ import Feivel.Lib
 {-   :ListExpr -}
 {-   :MacExpr  -}
 {-   :MatExpr  -}
+{-   :PolyExpr -}
+{-   :PermExpr -}
 {---------------}
 
 
