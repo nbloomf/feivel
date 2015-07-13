@@ -20,6 +20,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE OverlappingInstances #-}
 
 module Feivel.Eval (
  eval, runEvalM, evalToText
@@ -2158,38 +2159,20 @@ instance Get ListExpr where
         t <- typeOf v
         reportErr (locusOf v) $ ListExpected t
 
-instance Get [Expr] where
+instance (Get a) => Get [a] where
   get expr = do
-    x <- eval expr
-    case x of
-      ListE (ListConst _ xs :@ _) -> return xs
-      ListE v -> reportErr (locusOf v) UnevaluatedExpression
-      v -> do
-        t <- typeOf v
-        reportErr (locusOf v) $ ListExpected t
-
-getListExpr :: (Get a) => Expr -> EvalM [a]
-getListExpr expr = do
-  x <- eval expr >>= get :: EvalM [Expr]
-  sequence $ fmap get x
-
-instance Get [Integer]  where get = getListExpr
-instance Get [String]   where get = getListExpr
-instance Get [Bool]     where get = getListExpr
-instance Get [Rat]      where get = getListExpr
-instance Get [ZZModulo] where get = getListExpr
-
-instance Get [IntExpr]   where get = getListExpr
-instance Get [StrExpr]   where get = getListExpr
-instance Get [BoolExpr]  where get = getListExpr
-instance Get [RatExpr]   where get = getListExpr
-instance Get [ListExpr]  where get = getListExpr
-instance Get [MatExpr]   where get = getListExpr
-instance Get [MacExpr]   where get = getListExpr
-instance Get [PolyExpr]  where get = getListExpr
-instance Get [PermExpr]  where get = getListExpr
-instance Get [ZZModExpr] where get = getListExpr
-
+    x <- eval expr >>= getList
+    sequence $ fmap get x
+    where
+      getList :: Expr -> EvalM [Expr]
+      getList w = do
+        x <- eval w
+        case x of
+          ListE (ListConst _ xs :@ _) -> return xs
+          ListE v -> reportErr (locusOf v) UnevaluatedExpression
+          v -> do
+            t <- typeOf v
+            reportErr (locusOf v) $ ListExpected t
 
 
 {----------------}
@@ -2231,42 +2214,20 @@ instance Get MatExpr where
         t <- typeOf v
         reportErr (locusOf v) $ MatrixExpected t
 
-instance Get (Matrix Expr) where
+instance (Get a) => Get (Matrix a) where
   get expr = do
-    x <- eval expr
-    case x of
-      MatE (MatConst _ m :@ _) -> return m
-      MatE v -> reportErr (locusOf v) UnevaluatedExpression
-      v -> do
-        t <- typeOf v
-        reportErr (locusOf v) $ MatrixExpected t
-
-getMatExpr :: (Get a) => Expr -> EvalM (Matrix a)
-getMatExpr expr = do
-  x <- eval expr >>= get :: EvalM (Matrix Expr)
-  mSeq $ fmap get x
-
-instance Get (Matrix Integer)  where get = getMatExpr
-instance Get (Matrix Rat)      where get = getMatExpr
-instance Get (Matrix ZZModulo) where get = getMatExpr
-instance Get (Matrix String)   where get = getMatExpr
-instance Get (Matrix Bool)     where get = getMatExpr
-
-instance Get (Matrix IntExpr)   where get = getMatExpr
-instance Get (Matrix RatExpr)   where get = getMatExpr
-instance Get (Matrix StrExpr)   where get = getMatExpr
-instance Get (Matrix ListExpr)  where get = getMatExpr
-instance Get (Matrix MatExpr)   where get = getMatExpr
-instance Get (Matrix MacExpr)   where get = getMatExpr
-instance Get (Matrix PolyExpr)  where get = getMatExpr
-instance Get (Matrix ZZModExpr) where get = getMatExpr
-instance Get (Matrix PermExpr)  where get = getMatExpr
-
-instance Get (Matrix (Poly Integer))  where get = getMatExpr
-instance Get (Matrix (Poly Rat))      where get = getMatExpr
-instance Get (Matrix (Poly Bool))     where get = getMatExpr
-instance Get (Matrix (Poly ZZModulo)) where get = getMatExpr
-
+    x <- eval expr >>= getMatrix
+    mSeq $ fmap get x
+    where
+      getMatrix :: Expr -> EvalM (Matrix Expr)
+      getMatrix w = do
+        x <- eval w
+        case x of
+          MatE (MatConst _ m :@ _) -> return m
+          MatE v -> reportErr (locusOf v) UnevaluatedExpression
+          v -> do
+            t <- typeOf v
+            reportErr (locusOf v) $ MatrixExpected t
 
 
 {------------}
@@ -2296,26 +2257,20 @@ instance Get PolyExpr where
         t <- typeOf v
         reportErr (locusOf v) $ PolynomialExpected t
 
-instance Get (Poly Expr) where
+instance (Get a) => Get (Poly a) where
   get expr = do
-    x <- eval expr
-    case x of
-      PolyE (PolyConst _ m :@ _) -> return m
-      PolyE v -> reportErr (locusOf v) UnevaluatedExpression
-      v -> do
-        t <- typeOf v
-        reportErr (locusOf v) $ PolynomialExpected t
-
-getPolyExpr :: (Get a) => Expr -> EvalM (Poly a)
-getPolyExpr expr = do
-  x <- eval expr >>= get :: EvalM (Poly Expr)
-  polySeq $ fmap get x
-
-instance Get (Poly Integer)  where get = getPolyExpr
-instance Get (Poly Rat)      where get = getPolyExpr
-instance Get (Poly Bool)     where get = getPolyExpr
-instance Get (Poly ZZModulo) where get = getPolyExpr
-
+    x <- eval expr >>= getPoly
+    polySeq $ fmap get x
+    where
+      getPoly :: Expr -> EvalM (Poly Expr)
+      getPoly w = do
+        x <- eval w
+        case x of
+          PolyE (PolyConst _ m :@ _) -> return m
+          PolyE v -> reportErr (locusOf v) UnevaluatedExpression
+          v -> do
+            t <- typeOf v
+            reportErr (locusOf v) $ PolynomialExpected t
 
 
 {-----------------}
