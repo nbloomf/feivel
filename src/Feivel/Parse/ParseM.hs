@@ -20,7 +20,7 @@ module Feivel.Parse.ParseM (
   ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt, stringParseM,
 
   -- Constants
-  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath, pPaths,
+  pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath, pPaths, pText,
 
   -- Fences
   pParens, pBrack, pBrace,
@@ -32,7 +32,7 @@ module Feivel.Parse.ParseM (
 
 import Feivel.Error
 import Feivel.Locus
-import Feivel.Lib (Rat((:/:)), Variable(..), Format(..))
+import Feivel.Lib (Rat((:/:)), Variable(..), Format(..), Text(..))
 
 import Text.Parsec.Prim
   (ParsecT, runParserT, try, (<|>), (<?>), many, getPosition)
@@ -111,6 +111,9 @@ pBool = choice
   [ try $ string "#t" >> return True
   , try $ string "#f" >> return False
   ] <?> "boolean constant"
+
+pText :: ParseM Text
+pText = fmap Text pString
 
 pString :: ParseM String
 pString = do

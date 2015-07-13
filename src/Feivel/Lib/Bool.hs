@@ -23,6 +23,8 @@ module Feivel.Lib.Bool (
   boolEq, boolNEq, boolImp, boolAnd, boolOr, boolXOr, boolNot
 ) where
 
+import Feivel.Lib.String
+
 import Text.Regex.Posix ((=~))
 
 data BoolErr
@@ -40,8 +42,8 @@ strEq a b = Right $ a == b
 strNEq :: String -> String -> Either BoolErr Bool
 strNEq a b = Right $ a /= b
 
-strMatch :: String -> String -> Either BoolErr Bool
-strMatch str pat = Right $ str =~ pat
+strMatch :: Text -> Text -> Either BoolErr Bool
+strMatch (Text str) (Text pat) = Right $ str =~ pat
 
 {- Bool -}
 

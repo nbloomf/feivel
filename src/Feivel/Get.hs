@@ -82,12 +82,20 @@ instance Get StrExpr where
   get (StrE y) = return y
   get (DocE y) = do  -- this shouldn't be necessary. why is it?
     str <- toGlyph y
-    return $ StrConst str :@ (locusOf y)
+    return $ StrConst (Text str) :@ (locusOf y)
   get v = do
     t <- typeOf v
     reportErr (locusOf v) $ TypeMismatch SS t
 
+{-
 instance Get String where
+  get expr = do
+    x <- get expr
+    case x of
+      StrConst (Text s) :@ _ -> return s
+      v -> reportErr (locusOf v) UnevaluatedExpression-}
+
+instance Get Text where
   get expr = do
     x <- get expr
     case x of

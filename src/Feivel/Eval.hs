@@ -16,11 +16,11 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances  #-}
+{-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE OverlappingInstances #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE OverlappingInstances  #-}
 
 module Feivel.Eval (
  eval, runEvalM, evalToText
@@ -93,6 +93,7 @@ class Eval t where
 
 instance Eval Integer where eval = return
 instance Eval String  where eval = return
+instance Eval Text    where eval = return
 instance Eval Rat     where eval = return
 instance Eval Bool    where eval = return
 
@@ -142,6 +143,18 @@ eAtIdx m h k loc = do
   j <- eval k >>= getVal
   p <- eval m >>= getVal
   tryEvalM loc $ mEntryOf (i,j) p
+
+macToGlyph :: MacExpr -> EvalM String
+macToGlyph expr = do
+  m <- getVal expr :: EvalM MacExpr
+  case m of
+    MacConst _ st ex (amb,_) :@ loc -> do
+      old <- getState
+      ctx <- toStateT loc st
+      f   <- evalWith ex (ctx `mergeState` old `mergeState` amb)
+      eval f >>= toGlyph
+    _ -> reportErr (locusOf m) UnevaluatedExpression
+
 
 
 
@@ -231,7 +244,7 @@ instance Eval IntExpr where
     return $ IntConst t :@ loc
 
   eval (IntCastStr str :@ loc) = do
-    x <- eval str >>= getVal
+    Text x <- eval str >>= getVal
     n <- parseAsAt pInteger loc x
     return $ IntConst n :@ loc
 
@@ -269,7 +282,7 @@ instance Eval StrExpr where
   eval (StrDecimal p k :@ loc) = do
     x <- eval p >>= getVal
     d <- eval k >>= getVal
-    return $ StrConst (digits d x) :@ loc
+    return $ StrConst (Text $ digits d x) :@ loc
 
   eval (StrRand ls :@ loc) = do
     xs <- eval ls >>= getVal
@@ -279,39 +292,39 @@ instance Eval StrExpr where
   eval (StrTab m :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     tab <- tabulateWithM toGlyph n
-    return $ StrConst tab :@ loc
+    return $ StrConst (Text tab) :@ loc
 
   eval (StrTypeOf e :@ loc) = do
     t <- typeOf e
-    return $ StrConst (show t) :@ loc
+    return $ StrConst (Text $ show t) :@ loc
 
   eval (StrFormat LaTeX e :@ loc) = do
     t <- typeOf e
     case t of
       ZZ -> do
         x <- eval e >>= getVal :: EvalM Integer
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       QQ -> do
         x <- eval e >>= getVal :: EvalM Rat
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       MatOf ZZ -> do
         x <- eval e >>= getVal :: EvalM (Matrix Integer)
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       MatOf QQ -> do
         x <- eval e >>= getVal :: EvalM (Matrix Rat)
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       PolyOver ZZ -> do
         x <- eval e >>= getVal :: EvalM (Poly Integer)
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       PolyOver QQ -> do
         x <- eval e >>= getVal :: EvalM (Poly Rat)
-        return $ StrConst (latex x) :@ loc
+        return $ StrConst (Text $ latex x) :@ loc
       _ -> error "StrFormat LaTeX"
 
   eval (StrIntCast n :@ loc) = do
     a <- eval n >>= getVal :: EvalM IntExpr
     s <- toGlyph a
-    return $ StrConst s :@ loc
+    return $ StrConst (Text s) :@ loc
 
 
 
@@ -361,8 +374,8 @@ instance Eval BoolExpr where
         y <- eval b >>= getVal :: EvalM Integer
         return $ BoolConst (x < y) :@ loc
       Right SS -> do
-        x <- eval a >>= getVal :: EvalM String
-        y <- eval b >>= getVal :: EvalM String
+        x <- eval a >>= getVal :: EvalM Text
+        y <- eval b >>= getVal :: EvalM Text
         return $ BoolConst (x < y) :@ loc
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
@@ -380,8 +393,8 @@ instance Eval BoolExpr where
         y <- eval b >>= getVal :: EvalM Integer
         return $ BoolConst (x <= y) :@ loc
       Right SS -> do
-        x <- eval a >>= getVal :: EvalM String
-        y <- eval b >>= getVal :: EvalM String
+        x <- eval a >>= getVal :: EvalM Text
+        y <- eval b >>= getVal :: EvalM Text
         return $ BoolConst (x <= y) :@ loc
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
@@ -399,8 +412,8 @@ instance Eval BoolExpr where
         y <- eval b >>= getVal :: EvalM Integer
         return $ BoolConst (x > y) :@ loc
       Right SS -> do
-        x <- eval a >>= getVal :: EvalM String
-        y <- eval b >>= getVal :: EvalM String
+        x <- eval a >>= getVal :: EvalM Text
+        y <- eval b >>= getVal :: EvalM Text
         return $ BoolConst (x > y) :@ loc
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
@@ -418,8 +431,8 @@ instance Eval BoolExpr where
         y <- eval b >>= getVal :: EvalM Integer
         return $ BoolConst (x >= y) :@ loc
       Right SS -> do
-        x <- eval a >>= getVal :: EvalM String
-        y <- eval b >>= getVal :: EvalM String
+        x <- eval a >>= getVal :: EvalM Text
+        y <- eval b >>= getVal :: EvalM Text
         return $ BoolConst (x >= y) :@ loc
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
@@ -590,7 +603,7 @@ instance Eval RatExpr where
       u -> reportErr loc $ NumericListExpected u
 
   eval (RatCastStr str :@ loc) = do
-    x <- eval str >>= getVal
+    Text x <- eval str >>= getVal
     n <- parseAsAt pRat loc x
     return $ RatConst n :@ loc
 
@@ -650,7 +663,7 @@ instance Eval ListExpr where
     t <- typeOf a
     case t of
       ListOf SS -> do
-        xs <- eval a >>= getVal :: EvalM [String]
+        xs <- eval a >>= getVal :: EvalM [Text]
         return $ ListConst SS (map (\k -> StrE $ StrConst k :@ loc) (sort xs)) :@ loc
       ListOf ZZ -> do
         xs <- eval a >>= getVal :: EvalM [Integer]
@@ -773,7 +786,7 @@ instance Eval ListExpr where
         let us = map (inject loc) qs :: [PermExpr]
         return (ListConst (PermOf ZZ) (map toExpr us) :@ loc)
       PermOf SS -> do
-        as <- eval xs >>= getVal :: EvalM [String]
+        as <- eval xs >>= getVal :: EvalM [Text]
         qs <- tryEvalM loc $ permsOf as
         let us = map (inject loc) qs :: [PermExpr]
         return (ListConst (PermOf SS) (map toExpr us) :@ loc)
@@ -1176,15 +1189,15 @@ instance Eval MatExpr where
 instance Eval Doc where
   eval (Empty :@ loc)     = return (Empty :@ loc)
   eval (DocText s :@ loc) = return (DocText s :@ loc)
-  eval (Escaped c :@ loc) = return (DocText [c] :@ loc)
+  eval (Escaped c :@ loc) = return (DocText (Text [c]) :@ loc)
 
   eval (ShowState :@ loc) = do
     st <- getState
-    return $ DocText (show st) :@ loc
+    return $ DocText (Text $ show st) :@ loc
 
   eval (NakedKey k :@ loc) = do
     expr <- lookupKey loc k
-    let foo s = return (DocText s :@ loc)
+    let foo s = return (DocText (Text s) :@ loc)
     case expr of
       DocE   x -> eval x
       IntE   x -> eval x >>= toGlyph >>= foo
@@ -1192,7 +1205,7 @@ instance Eval Doc where
       BoolE  x -> eval x >>= toGlyph >>= foo
       RatE   x -> eval x >>= toGlyph >>= foo
       ListE  x -> eval x >>= toGlyph >>= foo
-      MacE   x -> eval x >>= toGlyph >>= foo
+      MacE   x -> eval x >>= macToGlyph >>= foo
       MatE   x -> eval x >>= toGlyph >>= foo
       PolyE  x -> eval x >>= toGlyph >>= foo
       PermE  x -> eval x >>= toGlyph >>= foo
@@ -1217,17 +1230,17 @@ instance Eval Doc where
     return result
 
   eval (NakedExpr expr :@ loc) = case expr of
-    IntE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    StrE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    RatE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    BoolE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    ListE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    MatE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    MacE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    DocE   e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    PolyE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
-    ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText x :@ loc)
+    IntE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    StrE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    RatE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    BoolE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    ListE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    MatE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    MacE   e -> eval e >>= macToGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    DocE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    PolyE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+    ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
 
   eval (Import file Nothing rest :@ _) = do
     oldSt <- getState
@@ -1250,7 +1263,7 @@ instance Eval Doc where
   eval (Cat [] :@ loc) = return $ Empty :@ loc
   eval (Cat ts :@ loc) = do
     exprs <- sequence [eval t >>= getVal | t <- ts]
-    return $ DocText (concat exprs) :@ loc
+    return $ DocText (concatText exprs) :@ loc
 
   eval (CatPar [] :@ loc) = return $ Empty :@ loc
   eval (CatPar ts :@ loc) = do
@@ -1260,7 +1273,7 @@ instance Eval Doc where
           putState st
           return y
     exprs <- sequence $ map foo ts
-    return $ DocText (concat exprs) :@ loc
+    return $ DocText (concatText exprs) :@ loc
 
 
   eval (Cond [] defa :@ _) = do
@@ -1292,7 +1305,7 @@ instance Eval Doc where
     undefineKey key
     return t
 
-  eval (Bail s :@ loc) = (eval s) >>= getVal >>= (reportErr loc . BailMessage)
+  eval (Bail s :@ loc) = (eval s) >>= getVal >>= (reportErr loc . BailMessage . unText)
 
   eval (Alt [] :@ loc) = return $ Empty :@ loc
   eval (Alt ts :@ _)   = randomElementEvalM ts >>= eval
@@ -1578,6 +1591,9 @@ instance Inject Integer IntExpr where
   inject loc x = IntConst x :@ loc
 
 instance Inject String StrExpr where
+  inject loc x = StrConst (Text x) :@ loc
+
+instance Inject Text StrExpr where
   inject loc x = StrConst x :@ loc
 
 instance Inject Bool BoolExpr where
@@ -1597,6 +1613,10 @@ instance Inject [Integer] ListExpr where
     where foo x = toExpr (IntConst x :@ loc)
 
 instance Inject [String] ListExpr where
+  inject loc xs = (ListConst SS $ map foo xs) :@ loc
+    where foo x = toExpr (StrConst (Text x) :@ loc)
+
+instance Inject [Text] ListExpr where
   inject loc xs = (ListConst SS $ map foo xs) :@ loc
     where foo x = toExpr (StrConst x :@ loc)
 
@@ -1662,12 +1682,15 @@ instance Inject (Perm Integer) PermExpr where
 instance Inject (Perm String) PermExpr where
   inject loc x = (PermConst SS $ mapPerm toExpr x) :@ loc
 
+instance Inject (Perm Text) PermExpr where
+  inject loc x = (PermConst SS $ mapPerm toExpr x) :@ loc
+
 instance Inject (Perm Rat) PermExpr where
   inject loc x = (PermConst QQ $ mapPerm toExpr x) :@ loc
 
 
 instance Inject String Doc where
-  inject loc = \x -> DocText x :@ loc
+  inject loc = \x -> DocText (Text x) :@ loc
 
 
 {---------}

@@ -20,7 +20,9 @@ module Feivel.Lib.String (
   Text(..), StrErr(), Format(..),
 
   strCat, strRev, strLen, strUpper, strLower, strRot13, strStrip, strRoman,
-  strHex, strBase36
+  strHex, strBase36,
+
+  concatText
 ) where
 
 import Data.Char (toUpper, toLower)
@@ -31,7 +33,8 @@ import Data.Maybe (fromMaybe)
 {- :Types -}
 {----------}
 
-data Text = Text { unText :: String }
+data Text = Text { unText :: String } deriving (Eq, Ord, Show)
+
 
 data Format = LaTeX deriving (Eq, Show)
 
@@ -112,8 +115,8 @@ hex k
        dig 12 = 'c'; dig 13 = 'd'; dig 14 = 'e'; dig 15 = 'f'
        dig _  = 'X';
 
-strHex :: Integer -> Either StrErr String
-strHex n = Right $ hex n
+strHex :: Integer -> Either StrErr Text
+strHex n = Right $ Text $ hex n
 
 base36 :: Integer -> String
 base36 k
@@ -136,5 +139,8 @@ base36 k
        dig 32 = 'w'; dig 33 = 'x'; dig 34 = 'y'; dig 35 = 'z'
        dig _  = 'X'
 
-strBase36 :: Integer -> Either StrErr String
-strBase36 n = Right $ base36 n
+strBase36 :: Integer -> Either StrErr Text
+strBase36 n = Right $ Text $ base36 n
+
+concatText :: [Text] -> Text
+concatText xs = Text $ concat $ map unText xs

@@ -75,7 +75,7 @@ type Doc = AtLocus DocLeaf
 data DocLeaf
  -- Primitives
  = Empty
- | DocText   String
+ | DocText   Text
  | Escaped   Char
  | Scope     Doc
  | NakedKey  Key
@@ -165,7 +165,8 @@ instance ToExpr MacExpr   where toExpr = MacE
 -- Not a fan of "no locus" here
 instance ToExpr Integer  where toExpr k = IntE   $ IntConst k :@ NullLocus
 instance ToExpr Rat      where toExpr r = RatE   $ RatConst r :@ NullLocus
-instance ToExpr String   where toExpr s = StrE   $ StrConst s :@ NullLocus
+instance ToExpr String   where toExpr s = StrE   $ StrConst (Text s) :@ NullLocus
+instance ToExpr Text     where toExpr t = StrE   $ StrConst t :@ NullLocus
 instance ToExpr Bool     where toExpr b = BoolE  $ BoolConst b :@ NullLocus
 instance ToExpr ZZModulo where toExpr a = ZZModE $ ZZModConst a :@ NullLocus
 
@@ -178,7 +179,7 @@ instance ToExpr ZZModulo where toExpr a = ZZModE $ ZZModConst a :@ NullLocus
 type StrExpr = AtLocus StrExprLeaf
 
 data StrExprLeaf
-  = StrConst String
+  = StrConst Text
   | StrVar   Key
 
   | StrMacro [(Type, Key, Expr)] MacExpr
@@ -320,7 +321,7 @@ data BoolExprLeaf
   | Neg  BoolExpr
 
   -- String
-  | Matches StrExpr String
+  | Matches StrExpr Text
 
   -- Integer
   | IntDiv    IntExpr IntExpr

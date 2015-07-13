@@ -28,6 +28,7 @@ import Feivel.Format
 import Feivel.Parse.ParseM
 import Feivel.Parse.Expr
 import Feivel.Parse.Type
+import Feivel.Lib (Text(..))
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
@@ -93,7 +94,7 @@ pCSVwithHead delim = do
 pCSVRecordWithHead :: [String] -> Char -> ParseM [(Key, Expr, Locus)]
 pCSVRecordWithHead headers delim = do
   fs <- pCSVFields delim
-  let gs = zipWith (\k (e,l) -> (Key k, StrE $ StrConst e :@ l, l)) headers fs
+  let gs = zipWith (\k (e,l) -> (Key k, StrE $ StrConst (Text e) :@ l, l)) headers fs
   return gs
 
 pCSVsansHead :: Char -> ParseM [[(Key, Expr, Locus)]]
@@ -105,7 +106,7 @@ pCSVsansHead delim = do
 pCSVRecordSansHead :: Char -> ParseM [(Key, Expr, Locus)]
 pCSVRecordSansHead delim = do
   fs <- pCSVFields delim
-  let gs = zipWith (\k (e,l) -> (Key $ show k, StrE $ StrConst e :@ l, l)) [(0::Integer)..] fs
+  let gs = zipWith (\k (e,l) -> (Key $ show k, StrE $ StrConst (Text e) :@ l, l)) [(0::Integer)..] fs
   return gs
 
 pCSVFields :: Char -> ParseM [(String, Locus)]

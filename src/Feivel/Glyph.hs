@@ -44,7 +44,7 @@ instance Glyph Expr where
     BoolE  x -> toGlyph x
     RatE   x -> toGlyph x
     ListE  x -> toGlyph x
-    MacE   x -> toGlyph x
+    MacE   x -> return "(macro)"
     MatE   x -> toGlyph x
     DocE   x -> toGlyph x
     PolyE  x -> toGlyph x
@@ -56,7 +56,7 @@ instance Glyph IntExpr where
   toGlyph _ = error "toGlyph: IntExpr"
 
 instance Glyph StrExpr where
-  toGlyph (StrConst s :@ _) = return s
+  toGlyph (StrConst (Text s) :@ _) = return s
   toGlyph _ = error "toGlyph: StrExpr"
 
 instance Glyph BoolExpr where
@@ -77,18 +77,6 @@ instance Glyph ListExpr where
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
   toGlyph _ = error "toGlyph: ListExpr"
-
-instance Glyph MacExpr where
-{-
-  toGlyph expr = do
-    m <- getVal expr :: EvalM MacExpr
-    case m of
-      MacConst _ st ex (amb,_) :@ loc -> do
-        old <- getState
-        ctx <- toStateT loc st
-        f   <- evalWith ex (ctx `mergeState` old `mergeState` amb)
-        eval f >>= toGlyph
-      _ -> reportErr (locusOf m) UnevaluatedExpression -}
 
 instance Glyph MatExpr where
   toGlyph (MatConst _ m :@ _) = do
@@ -112,5 +100,5 @@ instance Glyph PermExpr where
 
 instance Glyph Doc where
   toGlyph (Empty     :@ _) = return ""
-  toGlyph (DocText s :@ _) = return s
+  toGlyph (DocText (Text s) :@ _) = return s
   toGlyph _ = error "toGlyph: Doc"

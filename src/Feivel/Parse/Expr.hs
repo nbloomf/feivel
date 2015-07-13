@@ -35,7 +35,7 @@ import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 
-import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod)
+import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod, Text(..))
 
 import Text.Parsec.Expr
 import Text.ParserCombinators.Parsec hiding (try)
@@ -213,7 +213,7 @@ pDoc = choice $ map pAtLocus
     xs <- many1 $ choice $ map pAtLocus
       [ try (char '#' >> many1 space) >> return (Empty, DD)
       , try (char '#' >> eof) >> return (Empty, DD)
-      , many1 (noneOf "#@[]") >>= \x -> return (DocText x, DD)
+      , many1 (noneOf "#@[]") >>= \x -> return (DocText (Text x), DD)
       , pVarExpr NakedKey DD
       , pEscaped
       , pEval
@@ -469,7 +469,7 @@ pStrConst :: ParseM (StrExpr, Type)
 pStrConst = pAtLocus pStrConst'
 
 pStrConst' :: ParseM (StrExprLeaf, Type)
-pStrConst' = pConst pString StrConst SS
+pStrConst' = pConst pText StrConst SS
 
 pStrExpr :: ParseM (StrExpr, Type)
 pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
@@ -684,7 +684,7 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
       , pTypedArgPair "GT"       pTypedExpr pTypedExpr BoolGT  (const BB)
       , pTypedArgPair "GEq"      pTypedExpr pTypedExpr BoolGEq (const BB)
 
-      , pFun2 "Matches" pStrExpr (pPair SS pString) Matches BB
+      , pFun2 "Matches" pStrExpr (pPair SS pText) Matches BB
       , pFun2 "Divides" pIntExpr pIntExpr IntDiv BB
       ]
 
