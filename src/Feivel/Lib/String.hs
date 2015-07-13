@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Lib.String (
-  StrErr(), Format(..),
+  Text(..), StrErr(), Format(..),
 
   strCat, strRev, strLen, strUpper, strLower, strRot13, strStrip, strRoman,
   strHex, strBase36
@@ -31,28 +31,34 @@ import Data.Maybe (fromMaybe)
 {- :Types -}
 {----------}
 
+data Text = Text { unText :: String }
+
 data Format = LaTeX deriving (Eq, Show)
 
 data StrErr
  = OutOfRomanRange Integer
  deriving (Eq, Show)
 
+liftText :: (String -> String) -> Text -> Text
+liftText f = Text . f . unText
 
 
-strCat :: String -> String -> Either StrErr String
-strCat a b = Right $ a ++ b
 
-strRev :: String -> Either StrErr String
-strRev a = Right $ reverse a
 
-strLen :: String -> Either StrErr Integer
-strLen a = Right $ sum $ map (const 1) a
+strCat :: Text -> Text -> Either StrErr Text
+strCat (Text a) (Text b) = Right $ Text $ a ++ b
 
-strUpper :: String -> Either StrErr String
-strUpper a = Right $ map toUpper a
+strRev :: Text -> Either StrErr Text
+strRev = Right . liftText reverse
 
-strLower :: String -> Either StrErr String
-strLower a = Right $ map toLower a
+strLen :: Text -> Either StrErr Integer
+strLen (Text a) = Right $ sum $ map (const 1) a
+
+strUpper :: Text -> Either StrErr Text
+strUpper = Right . liftText (map toUpper)
+
+strLower :: Text -> Either StrErr Text
+strLower = Right . liftText (map toLower)
 
 rot13 :: String -> String
 rot13 str = map rot str 
@@ -65,8 +71,8 @@ rot13 str = map rot str
     rot c = fromMaybe c $ lookup c assocs
 
 
-strRot13 :: String -> Either StrErr String
-strRot13 a = Right $ rot13 a
+strRot13 :: Text -> Either StrErr Text
+strRot13 = Right . liftText rot13
 
 strip :: String -> String -> String
 strip a b = last $ foo a b
@@ -75,13 +81,13 @@ strip a b = last $ foo a b
     foo [] _  = [[]]
     foo xs ys = xs : (if head xs == head ys then foo (tail xs) (tail ys) else [])
 
-strStrip :: String -> String -> Either StrErr String
-strStrip a b = Right $ strip a b
+strStrip :: Text -> Text -> Either StrErr Text
+strStrip (Text a) (Text b) = Right $ Text $ strip a b
 
-strRoman :: Integer -> Either StrErr String
+strRoman :: Integer -> Either StrErr Text
 strRoman n 
  | n <= 0 || n >= 4000 = Left $ OutOfRomanRange n
- | otherwise = Right $ convert n digits []
+ | otherwise = Right $ Text $ convert n digits []
  where
    convert _ [] ds = concat $ reverse ds
    convert k rs@((i,s):rs') ds = if i > k then convert k rs' ds else convert (k-i) rs (s:ds)

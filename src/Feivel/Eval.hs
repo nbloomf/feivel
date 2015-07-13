@@ -1744,15 +1744,6 @@ lift4 loc f x y z w = do
 evalToText :: (Eval t, ToExpr t, Glyph t) => t -> EvalM String
 evalToText t = eval t >>= toGlyph
 
-toStateT :: Locus -> [(Type, Key, Expr)] -> EvalM (Store Expr)
-toStateT loc vs = do
-  ws <- sequence $ map (checkType loc) vs
-  toState loc ws
-    where
-      checkType :: Locus -> (Type, Key, Expr) -> EvalM (Key, Expr)
-      checkType loc' (t,k,v) = do
-        tv <- typeOf v
-        if tv == t
-          then return (k,v)
-          else reportErr loc' $ TypeMismatch t tv
+
+
 

@@ -19,7 +19,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Feivel.Get (Get, get, getVal) where
+module Feivel.Get (Get, get, getVal, toStateT) where
 
 import Feivel.Glyph
 import Feivel.Type
@@ -30,6 +30,21 @@ import Feivel.EvalM
 import Feivel.Expr
 import Feivel.Lib
 import Feivel.Store
+import Feivel.Key
+
+
+toStateT :: Locus -> [(Type, Key, Expr)] -> EvalM (Store Expr)
+toStateT loc vs = do
+  ws <- sequence $ map (checkType loc) vs
+  toState loc ws
+    where
+      checkType :: Locus -> (Type, Key, Expr) -> EvalM (Key, Expr)
+      checkType loc' (t,k,v) = do
+        tv <- typeOf v
+        if tv == t
+          then return (k,v)
+          else reportErr loc' $ TypeMismatch t tv
+
 
 class Get a where
   get :: Expr -> EvalM a
