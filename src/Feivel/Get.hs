@@ -21,6 +21,7 @@
 
 module Feivel.Get (Get, get, getVal) where
 
+import Feivel.Glyph
 import Feivel.Type
 import Feivel.Error
 import Feivel.Typed

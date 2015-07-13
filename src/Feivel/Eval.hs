@@ -34,13 +34,6 @@ module Feivel.Eval (
 {-    :Eval:MatExpr    :Eval:Doc         :Eval:PolyExpr    -}
 {-    :Eval:PermExpr   :Eval:ZZModExpr                     -}
 {-                                                         -}
-{-  :Get                                                   -}
-{-    :Get:IntExpr     :Get:StrExpr      :Get:BoolExpr     -}
-{-    :Get:RatExpr     :Get:ListExpr     :Get:MacExpr      -}
-{-    :Get:MatExpr     :Get:Doc          :Get:PolyExpr     -}
-{-    :Get:PermExpr    :Get:ZZModExpr                      -}
-{-                                                         -}
-{-  :Glyph                                                 -}
 {-  :Inject                                                -}
 {-  :Lift                                                  -}
 {-  :Utilities                                             -}
@@ -58,6 +51,7 @@ import Feivel.Typed
 import Feivel.LaTeX
 import Feivel.Get
 import Feivel.Parse (pInteger, pRat)
+import Feivel.Glyph
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -1567,103 +1561,6 @@ instance Eval ZZModExpr where
 
   eval (ZZModSum   ls :@ loc) = lift1 loc (rSumT   (0 `zzmod` 0)) ls
   eval (ZZModProd  ls :@ loc) = lift1 loc (rUProdT (0 `zzmod` 0)) ls
-
-
-
-{----------}
-{- :Glyph -}
-{----------}
-
-class Glyph t where
-  toGlyph :: t -> EvalM String
-
-
-instance Glyph Expr where
-  toGlyph expr = case expr of
-    IntE   x -> toGlyph x
-    StrE   x -> toGlyph x
-    BoolE  x -> toGlyph x
-    RatE   x -> toGlyph x
-    ListE  x -> toGlyph x
-    MacE   x -> toGlyph x
-    MatE   x -> toGlyph x
-    DocE   x -> toGlyph x
-    PolyE  x -> toGlyph x
-    PermE  x -> toGlyph x
-    ZZModE x -> toGlyph x
-
-instance Glyph IntExpr where
-  toGlyph expr = do
-    n <- eval expr >>= getVal :: EvalM Integer
-    return $ show n
-
-instance Glyph StrExpr where
-  toGlyph expr = do
-    s <- eval expr >>= getVal :: EvalM String
-    return s
-
-instance Glyph BoolExpr where
-  toGlyph expr = do
-    b <- eval expr >>= getVal :: EvalM Bool
-    return $ foo b
-      where
-        foo True  = "#t"
-        foo False = "#f"
-
-instance Glyph RatExpr where
-  toGlyph expr = do
-    r <- eval expr >>= getVal :: EvalM Rat
-    return $ show r
-
-instance Glyph ZZModExpr where
-  toGlyph expr = do
-    a <- eval expr >>= getVal :: EvalM ZZModulo
-    return $ showZZMod a
-
-instance Glyph ListExpr where
-  toGlyph expr = do
-    xs <- eval expr >>= getVal :: EvalM [Expr]
-    ys <- sequence [toGlyph x | x <- xs]
-    return $ "{" ++ concat (intersperse ";" ys) ++ "}"
-
-instance Glyph MacExpr where
-  toGlyph expr = do
-    m <- eval expr >>= getVal :: EvalM MacExpr
-    case m of
-      MacConst _ st ex (amb,_) :@ loc -> do
-        old <- getState
-        ctx <- toStateT loc st
-        f   <- evalWith ex (ctx `mergeState` old `mergeState` amb)
-        eval f >>= toGlyph
-      _ -> reportErr (locusOf m) UnevaluatedExpression 
-
-instance Glyph MatExpr where
-  toGlyph expr = do
-    m <- eval expr >>= getVal :: EvalM (Matrix Expr)
-    n <- mSeq $ fmap toGlyph m
-    case mShowStr n of
-      Left err -> reportErr (error "Glyph instance of MatExpr") err
-      Right x  -> return x
-
-instance Glyph PolyExpr where
-  toGlyph expr = do
-    p <- eval expr >>= getVal :: EvalM (Poly Expr)
-    q <- polySeq $ mapCoef toGlyph p
-    return $ showStrP q
-
-instance Glyph PermExpr where
-  toGlyph expr = do
-    p <- eval expr >>= getVal :: EvalM (Perm Expr)
-    q <- seqPerm $ mapPerm toGlyph p
-    return $ showPerm q
-
-instance Glyph Doc where
-  toGlyph expr = do
-    d <- eval expr >>= getVal :: EvalM Doc
-    case d of
-      Empty :@ _     -> return ""
-      DocText s :@ _ -> return s
-      a              -> reportErr (locusOf a) UnevaluatedExpression
 
 
 {-----------}
