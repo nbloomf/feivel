@@ -91,6 +91,30 @@ class Eval t where
     putState old
     return u
 
+evalSeq :: (Eval t) => [t] -> EvalM [t]
+evalSeq = sequence . map eval
+
+evalWithSeq :: (Eval t) => [t] -> Store Expr -> EvalM [t]
+evalWithSeq xs st = sequence $ map (`evalWith` st) xs
+
+evalPar :: (Eval t) => [t] -> EvalM [t]
+evalPar xs = do
+  let evalLoc x = do
+        st <- getState
+        y  <- eval x
+        putState st
+        return y
+  sequence $ map evalLoc xs
+
+evalWithPar :: (Eval t) => [t] -> Store Expr -> EvalM [t]
+evalWithPar xs store = do
+  let evalLoc x = do
+        st <- getState
+        y  <- evalWith x store
+        putState st
+        return y
+  sequence $ map evalLoc xs
+
 instance Eval Integer where eval = return
 instance Eval String  where eval = return
 instance Eval Text    where eval = return
@@ -129,12 +153,12 @@ eIfThenElse b t f = do
   false <- eval f >>= getVal
   if test then (eval true) else (eval false)
 
-eMacro :: (ToExpr a, Get b, Eval a, Eval b) => [(Type, Key, Expr)] -> a -> Locus -> EvalM b
+eMacro :: (Get b, Eval b) => [(Type, Key, Expr)] -> MacExpr -> Locus -> EvalM b
 eMacro vals mac loc = do
   old <- getState
   ctx <- toStateT loc vals
-  (def, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
-  let newSt = mergeStores [ctx, def, old]
+  (defaultVals, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
+  let newSt = mergeStores [ctx, defaultVals, old]
   evalWith e newSt >>= getVal >>= (`evalWith` newSt)
 
 eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
@@ -154,7 +178,9 @@ macToGlyph expr = do
       ctx <- toStateT loc st
       let newSt = mergeStores [ctx, old, amb]
       f <- evalWith ex newSt
-      eval f >>= toGlyph
+      case f of
+        MacE x -> macToGlyph x
+        _ -> eval f >>= toGlyph
     _ -> reportErr (locusOf m) UnevaluatedExpression
 
 
@@ -736,7 +762,7 @@ instance Eval ListExpr where
     t <- case ys of
            [] -> return XX
            (z:_) -> typeOf z
-    return $ ListConst t ys :@ loc
+    eval $ ListConst t ys :@ loc
       where
         bar :: Store Expr -> [ListGuard] -> EvalM [Store Expr]
         bar st []     = return [st]
