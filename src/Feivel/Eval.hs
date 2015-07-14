@@ -133,8 +133,9 @@ eMacro :: (ToExpr a, Get b, Eval a, Eval b) => [(Type, Key, Expr)] -> a -> Locus
 eMacro vals mac loc = do
   old <- getState
   ctx <- toStateT loc vals
-  (def, e) <- evalWith mac (ctx `mergeState` old) >>= getVal :: EvalM (Store Expr, Expr)
-  evalWith e (ctx `mergeState` (def `mergeState` old)) >>= eval >>= getVal >>= eval
+  (def, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
+  let newSt = mergeStores [ctx, def, old]
+  evalWith e newSt >>= getVal >>= (`evalWith` newSt)
 
 eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
   => c -> a -> b -> Locus -> EvalM d
@@ -151,7 +152,8 @@ macToGlyph expr = do
     MacConst _ st ex (amb,_) :@ loc -> do
       old <- getState
       ctx <- toStateT loc st
-      f   <- evalWith ex (ctx `mergeState` old `mergeState` amb)
+      let newSt = mergeStores [ctx, old, amb]
+      f <- evalWith ex newSt
       eval f >>= toGlyph
     _ -> reportErr (locusOf m) UnevaluatedExpression
 

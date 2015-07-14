@@ -27,7 +27,7 @@ module Feivel.Store (
   isDefinedKey, getLibPaths, valueOf,
 
   -- Mutate
-  addKey, removeKey, setLibPaths, clearKeys, mergeState, qualify,
+  addKey, removeKey, setLibPaths, clearKeys, mergeState, qualify, mergeStores,
 
   -- Stack
   getStack, push, pop
@@ -145,6 +145,9 @@ qualify foo st = st
 mergeState :: Store a -> Store a -> Store a
 mergeState a b = a
  { keyValues = M.union (keyValues a) (keyValues b) }
+
+mergeStores :: [Store a] -> Store a
+mergeStores = foldr mergeState emptyStore
 
 setLibPaths :: [FilePath] -> Store a -> Store a
 setLibPaths paths st = st {libPaths = paths}

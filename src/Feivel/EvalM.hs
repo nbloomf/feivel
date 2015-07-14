@@ -293,18 +293,10 @@ lookupKey loc key = do
     Left err   -> reportErr loc err
     Right expr -> return expr
 
-
-
-
 mergeState' :: (Store Expr) -> EvalM ()
 mergeState' new = do
   old <- getState
   putState $ mergeState old new
-
-
-
-
-
 
 lookupLibPaths :: EvalM [FilePath]
 lookupLibPaths = do
