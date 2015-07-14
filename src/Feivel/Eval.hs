@@ -171,7 +171,7 @@ eAtIdx m h k loc = do
 
 macToGlyph :: MacExpr -> EvalM String
 macToGlyph expr = do
-  m <- getVal expr :: EvalM MacExpr
+  m <- eval expr >>= getVal :: EvalM MacExpr
   case m of
     MacConst _ st ex (amb,_) :@ loc -> do
       old <- getState
@@ -183,6 +183,17 @@ macToGlyph expr = do
         _ -> eval f >>= toGlyph
     _ -> reportErr (locusOf m) UnevaluatedExpression
 
+evalToGlyph :: Expr -> EvalM String
+evalToGlyph (MacE m) = do
+  expr <- eval m >>= getVal :: EvalM MacExpr 
+  case expr of
+    MacConst _ st ex (amb,_) :@ loc -> do
+      old <- getState
+      ctx <- toStateT loc st
+      let newSt = mergeStores [ctx, old, amb]
+      evalWith ex newSt >>= evalToGlyph
+    _ -> reportErr (locusOf m) UnevaluatedExpression
+evalToGlyph expr = eval expr >>= toGlyph
 
 
 
@@ -351,7 +362,7 @@ instance Eval StrExpr where
 
   eval (StrIntCast n :@ loc) = do
     a <- eval n >>= getVal :: EvalM IntExpr
-    s <- toGlyph a
+    s <- eval a >>= toGlyph
     return $ StrConst (Text s) :@ loc
 
 
@@ -1225,19 +1236,8 @@ instance Eval Doc where
 
   eval (NakedKey k :@ loc) = do
     expr <- lookupKey loc k
-    let foo s = return (DocText (Text s) :@ loc)
-    case expr of
-      DocE   x -> eval x
-      IntE   x -> eval x >>= toGlyph >>= foo
-      StrE   x -> eval x >>= toGlyph >>= foo
-      BoolE  x -> eval x >>= toGlyph >>= foo
-      RatE   x -> eval x >>= toGlyph >>= foo
-      ListE  x -> eval x >>= toGlyph >>= foo
-      MacE   x -> eval x >>= macToGlyph >>= foo
-      MatE   x -> eval x >>= toGlyph >>= foo
-      PolyE  x -> eval x >>= toGlyph >>= foo
-      PermE  x -> eval x >>= toGlyph >>= foo
-      ZZModE x -> eval x >>= toGlyph >>= foo
+    s <- evalToGlyph expr
+    return $ DocText (Text s) :@ loc
 
   eval (DocMacro vals mac :@ loc) = eMacro vals mac loc
 
@@ -1257,18 +1257,9 @@ instance Eval Doc where
     --popTrace
     return result
 
-  eval (NakedExpr expr :@ loc) = case expr of
-    IntE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    StrE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    RatE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    BoolE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    ListE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    MatE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    MacE   e -> eval e >>= macToGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    DocE   e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    PolyE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    PermE  e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
-    ZZModE e -> eval e >>= toGlyph >>= \x -> return (DocText (Text x) :@ loc)
+  eval (NakedExpr expr :@ loc) = do
+    x <- evalToGlyph expr
+    return $ DocText (Text x) :@ loc
 
   eval (Import file Nothing rest :@ _) = do
     oldSt <- getState
