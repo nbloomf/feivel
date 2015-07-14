@@ -20,7 +20,7 @@
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
 module Feivel.EvalM (
-  EvalM, runEvalM, runE, attempt, attemptWith, attemptWith', attemptsWith, testEvalM,
+  EvalM, runEvalM, runE, attempt, attemptWith, attemptWith', attemptsWith,
   tryEvalM,
 
   -- IO and Parsing
@@ -111,13 +111,6 @@ attemptsWith states x = sequence $ map (\state -> attemptWith state x) states
 attempt :: EvalM t -> IO t
 attempt = attemptWith emptyStore
 
-
-testEvalM :: (Show t) => EvalM t -> IO ()
-testEvalM expr = do
-  (result, _) <- runEvalM emptyStore expr
-  case result of
-    Left err -> putStrLn $ show err
-    Right d  -> putStrLn $ show d
 
 tryEvalM :: (PromoteError err) => Locus -> Either err a -> EvalM a
 tryEvalM loc (Left err) = reportErr loc err

@@ -23,7 +23,7 @@
 {-# LANGUAGE OverlappingInstances  #-}
 
 module Feivel.Eval (
- eval, runEvalM, evalToText
+ Eval, eval, runEvalM, evalToText, evalToConst
 ) where
 
 {-----------------------------------------------------------}
@@ -83,20 +83,21 @@ hasSameTypeAs _ _ = ()
 class Eval t where
   eval :: t -> EvalM t
 
-  evalWith :: t -> Store Expr -> EvalM t
-  evalWith t st = do
-    old <- getState
-    putState st
-    u <- eval t
-    putState old
-    return u
+-- eval with a specified store
+evalWith :: (Eval t) => t -> Store Expr -> EvalM t
+evalWith t st = do
+  old <- getState
+  putState st
+  u <- eval t
+  putState old
+  return u
 
+{-
+-- eval each item of a list in sequence
 evalSeq :: (Eval t) => [t] -> EvalM [t]
 evalSeq = sequence . map eval
 
-evalWithSeq :: (Eval t) => [t] -> Store Expr -> EvalM [t]
-evalWithSeq xs st = sequence $ map (`evalWith` st) xs
-
+-- eval each item of a list in parallel
 evalPar :: (Eval t) => [t] -> EvalM [t]
 evalPar xs = do
   let evalLoc x = do
@@ -114,6 +115,7 @@ evalWithPar xs store = do
         putState st
         return y
   sequence $ map evalLoc xs
+-}
 
 instance Eval Integer where eval = return
 instance Eval String  where eval = return
@@ -169,19 +171,6 @@ eAtIdx m h k loc = do
   p <- eval m >>= getVal
   tryEvalM loc $ mEntryOf (i,j) p
 
-macToGlyph :: MacExpr -> EvalM String
-macToGlyph expr = do
-  m <- eval expr >>= getVal :: EvalM MacExpr
-  case m of
-    MacConst _ st ex (amb,_) :@ loc -> do
-      old <- getState
-      ctx <- toStateT loc st
-      let newSt = mergeStores [ctx, old, amb]
-      f <- evalWith ex newSt
-      case f of
-        MacE x -> macToGlyph x
-        _ -> eval f >>= toGlyph
-    _ -> reportErr (locusOf m) UnevaluatedExpression
 
 evalToGlyph :: Expr -> EvalM String
 evalToGlyph (MacE m) = do
@@ -194,6 +183,18 @@ evalToGlyph (MacE m) = do
       evalWith ex newSt >>= evalToGlyph
     _ -> reportErr (locusOf m) UnevaluatedExpression
 evalToGlyph expr = eval expr >>= toGlyph
+
+evalToConst :: Expr -> EvalM Expr
+evalToConst (MacE m) = do
+  expr <- eval m >>= getVal :: EvalM MacExpr 
+  case expr of
+    MacConst _ st ex (amb,_) :@ loc -> do
+      old <- getState
+      ctx <- toStateT loc st
+      let newSt = mergeStores [ctx, old, amb]
+      evalWith ex newSt
+    _ -> reportErr (locusOf m) UnevaluatedExpression
+evalToConst expr = eval expr
 
 
 
@@ -1783,8 +1784,8 @@ lift4 loc f x y z w = do
 {- :Utilities -}
 {--------------}
 
-evalToText :: (Eval t, ToExpr t, Glyph t) => t -> EvalM String
-evalToText t = eval t >>= toGlyph
+evalToText :: (ToExpr t) => t -> EvalM String
+evalToText = evalToGlyph . toExpr
 
 
 

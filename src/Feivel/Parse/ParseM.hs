@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.ParseM (
-  ParseM, runParseM, reportParseErr, testParseM, pAtLocus, pLiftAt, stringParseM,
+  ParseM, runParseM, reportParseErr, pAtLocus, pLiftAt, stringParseM,
 
   -- Constants
   pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath, pPaths, pText,
@@ -56,10 +56,7 @@ runParseM p name str = case runParserT p () name str of
 reportParseErr :: (PromoteError err) => Locus -> err -> ParseM a
 reportParseErr loc err = lift $ Left $ Goof loc (promote err)
 
-testParseM :: (Show a) => ParseM a -> String -> IO ()
-testParseM p str = case runParseM p "" str of
-  Left err -> putStrLn $ show err
-  Right val -> putStrLn $ show val
+
 
 pAtLocus :: ParseM (a,t) -> ParseM (AtLocus a, t)
 pAtLocus p = do
