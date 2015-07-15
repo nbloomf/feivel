@@ -43,5 +43,8 @@ Feature Ideas
 * Type: tuples? (constructor)
 * Type: trees (constructor)
 * Arch: Groupoid class
-* Arch: Does it make more sense to put type info in expression constructors?
 * Arch: type synonyms
+* Long-term refactor:
+  1: move type information to AST
+  2: Implementation of Typed becomes trivial; take out of EvalM
+  3: Take Get out of EvalM
