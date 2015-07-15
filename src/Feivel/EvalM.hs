@@ -17,38 +17,33 @@
 {---------------------------------------------------------------------}
 
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
-{-# OPTIONS_GHC -XFlexibleInstances #-}
+{-# OPTIONS_GHC -XFlexibleInstances    #-}
 
 module Feivel.EvalM (
-  EvalM, runEvalM, runE, attempt, attemptWith, attemptWith', attemptsWith,
-  tryEvalM,
+  EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM,
 
   -- IO and Parsing
-  readAndParseDoc, readAndParseStates, parseDoc, parsePaths, readAndParseDocFromLib, parseAsAt,
+  readAndParseDocFromLib, parseAsAt,
+  readAndParseDoc, readAndParseStates, parsePaths,
 
   -- State
   defineKey, lookupKey, getState, putState, clearState, toState,
-  undefineKeys, undefineKey, isKeyDefined,
-  lookupLibPaths,
-  addKeyToStore,
+  isKeyDefined, undefineKey, lookupLibPaths, mergeStateEvalM, addKeyToStore, 
 
   -- Randomness
   randomElementEvalM, shuffleEvalM, sampleEvalM,
-  observeIntegerUniform, observeBinomial, observeIntegerPoisson,
-
-  -- Call Stack
-  --pushTrace, popTrace, getTrace,
-  
-  mergeState'
+  observeIntegerUniform, observeBinomial, observeIntegerPoisson
 ) where
 
-{------------}
-{- Contents -}
-{-  :EvalM  -}
-{-  :Errors -}
-{-  :Random -}
-{-  :State  -}
-{------------}
+
+{-------------}
+{- Contents  -}
+{-  :EvalM   -}
+{-  :IO      -}
+{-  :Parsing -}
+{-  :Random  -}
+{-  :State   -}
+{-------------}
 
 import Feivel.Error
 import Feivel.Expr (Doc, Expr())
@@ -58,7 +53,6 @@ import Feivel.Store
 import Feivel.Parse (pDoc, pRecords)
 import Feivel.Format
 import Feivel.Parse.ParseM
-
 
 import Control.Monad.Trans.Error
 import Control.Monad.Trans.State.Lazy hiding (state)
@@ -78,6 +72,7 @@ import System.IO
 import System.Directory (getHomeDirectory)
 
 
+
 {----------}
 {- :EvalM -}
 {----------}
@@ -87,8 +82,6 @@ type EvalM = ErrorT Goof (StateT (Store Expr) (RVarT IO))
 runEvalM :: (Store Expr) -> EvalM t -> IO (Either Goof t, Store Expr)
 runEvalM state = sampleRVarT . ($ state) . runStateT . runErrorT
 
-runE :: EvalM t -> IO (Either Goof t, Store Expr)
-runE = runEvalM emptyStore
 
 -- Run an EvalM t and report any errors; if none, inject the result to IO.
 attemptWith :: Store Expr -> EvalM t -> IO t
@@ -97,13 +90,6 @@ attemptWith state x = do
   case result of
     Left err -> hPutStrLn stderr (show err) >> exitWith (ExitFailure 1)
     Right t  -> return t
-
-attemptWith' :: Store Expr -> EvalM t -> IO (t, Store Expr)
-attemptWith' state x = do
-  (result, st) <- runEvalM state x
-  case result of
-    Left err -> hPutStrLn stderr (show err) >> exitWith (ExitFailure 1)
-    Right t  -> return (t, st)
 
 attemptsWith :: [Store Expr] -> EvalM t -> IO [t]
 attemptsWith states x = sequence $ map (\state -> attemptWith state x) states
@@ -122,21 +108,25 @@ tryEvalM _   (Right a)  = return a
 {- :IO -}
 {-------}
 
+-- Read contents of a file, reporting any errors.
+-- In case path is an empty string, read from stdin.
 readPath :: FilePath -> EvalM String
+readPath ""   = liftIO getContents
 readPath path = do
   content <- liftIO $ try $ readFile path :: EvalM (Either IOError String)
   case content of
     Left  err -> reportErr NullLocus err
     Right str -> return str
 
+
+-- Look for a file among a list of paths and read its contents, reporting any errors
+-- (Defaults to fvl.lib/ in home directory)
 findFileInPaths :: FilePath -> [FilePath] -> EvalM (String, FilePath)
 findFileInPaths file [] = do
   home <- liftIO getHomeDirectory
-  let current = home ++ "/fvl.lib/" ++ file
-  content <- liftIO $ try $ readFile current :: EvalM (Either IOError String)
-  case content of
-    Left  err -> reportErr NullLocus err
-    Right str -> return (str, current)
+  let defaultPath = home ++ "/fvl.lib/" ++ file
+  str <- readPath defaultPath
+  return (str, defaultPath)
 
 findFileInPaths file (p:ps) = do
   let current = p ++ file
@@ -145,6 +135,11 @@ findFileInPaths file (p:ps) = do
     Left  _   -> findFileInPaths file ps
     Right str -> return (str, current)
 
+
+
+{------------}
+{- :Parsing -}
+{------------}
 
 -- Message then string being parsed
 parseWith :: ParseM (a,b) -> String -> String -> EvalM a
@@ -157,45 +152,38 @@ parseAsAt p _ str = case runParseM p "" str of
   Left  goof -> throwError goof
   Right x    -> return x
 
-parseDoc :: String -> String -> EvalM Doc
-parseDoc = parseWith pDoc
-
 parsePaths :: String -> EvalM [FilePath]
 parsePaths ""  = return []
 parsePaths str = case runParseM pPaths "" str of
   Left goof -> throwError goof
   Right ps -> return ps
 
-parseStringDoc :: String -> EvalM Doc
-parseStringDoc str = parseWith pDoc "" str
-
 readAndParseDoc :: FilePath -> EvalM Doc
 readAndParseDoc path = do
-  file <- if path == "" then liftIO getContents else readPath path
-  parseDoc path file
+  file <- readPath path
+  parseWith pDoc path file
 
 readAndParseDocFromLib :: FilePath -> EvalM Doc
 readAndParseDocFromLib file = do
   lib <- lookupLibPaths
   (str, path) <- findFileInPaths file lib
-  parseDoc path str
+  parseWith pDoc path str
 
-parseStates :: String -> String -> DataFormat -> EvalM [Store Expr]
-parseStates _ "" _ = return [emptyStore]
-parseStates msg str format = do
-  case runParseM (pRecords format) msg str of
-    Left goof -> throwError goof
-    Right rs -> case sequence $ map fromKeyValLocList rs of
-      Left err  -> reportErr NullLocus err
-      Right sts -> return sts
 
 readAndParseStates :: FilePath -> DataFormat -> EvalM [Store Expr]
 readAndParseStates "" _ = return [emptyStore]
 readAndParseStates path format = do
   file <- readPath path
   parseStates path file format
-
-{- :Library -}
+    where
+      parseStates :: String -> String -> DataFormat -> EvalM [Store Expr]
+      parseStates _ "" _ = return [emptyStore]
+      parseStates msg str format = do
+        case runParseM (pRecords format) msg str of
+          Left goof -> throwError goof
+          Right rs  -> case sequence $ map fromKeyValLocList rs of
+            Left err  -> reportErr NullLocus err
+            Right sts -> return sts
 
 
 
@@ -286,8 +274,8 @@ lookupKey loc key = do
     Left err   -> reportErr loc err
     Right expr -> return expr
 
-mergeState' :: (Store Expr) -> EvalM ()
-mergeState' new = do
+mergeStateEvalM :: (Store Expr) -> EvalM ()
+mergeStateEvalM new = do
   old <- getState
   putState $ mergeState old new
 
@@ -297,31 +285,7 @@ lookupLibPaths = do
   return $ getLibPaths state
 
 
-undefineKeys :: EvalM ()
-undefineKeys = do
-  state <- getState
-  putState $ clearKeys state
-
 undefineKey :: Key -> EvalM ()
 undefineKey k = do
   state <- getState
   putState $ removeKey k state
-{-
-{-
-pushTrace :: String -> Locus -> EvalM ()
-pushTrace str loc = do
-  state <- getState
-  putState $ push str loc state
-
-popTrace :: EvalM ()
-popTrace = do
-  state <- getState
-  putState $ pop state
-
-getTrace :: EvalM [(String, Locus)]
-getTrace = do
-  state <- getState
-  return $ getStack state
--}
--}
-

@@ -1199,7 +1199,7 @@ instance Eval Doc where
     _ <- readAndParseDocFromLib file >>= eval
     newSt <- getState
     putState oldSt
-    mergeState' newSt
+    mergeStateEvalM newSt
     eval rest
 
   eval (Import file (Just prefix) rest :@ _) = do
@@ -1208,7 +1208,7 @@ instance Eval Doc where
     _ <- readAndParseDocFromLib file >>= eval
     newSt <- getState
     putState oldSt
-    mergeState' (qualify prefix newSt)
+    mergeStateEvalM (qualify prefix newSt)
     eval rest
 
   eval (Cat [] :@ loc) = return $ Empty :@ loc
