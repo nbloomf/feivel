@@ -21,7 +21,7 @@
 {-# LANGUAGE FlexibleContexts      #-}
 
 module Feivel.Eval (
- Eval, eval, runEvalM, evalToGlyph
+ Eval, eval, evalToGlyph
 ) where
 
 {-----------------------------------------------------------}
@@ -33,8 +33,8 @@ module Feivel.Eval (
 {-    :Eval:PermExpr   :Eval:ZZModExpr                     -}
 {-                                                         -}
 {-  :Glyph                                                 -}
-{-  :Inject                                                -}
 {-  :Lift                                                  -}
+{-  :Constants                                             -}
 {-----------------------------------------------------------}
 
 import Feivel.Expr
@@ -53,25 +53,6 @@ import Feivel.Inject
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
-
-
-zeroZZ :: Integer
-zeroZZ = 0
-
-zeroQQ :: Rat
-zeroQQ = 0 :/: 1
-
-zeroBB :: Bool
-zeroBB = False
-
-zeroMod :: Integer -> ZZModulo
-zeroMod n = 0 `zzmod` n
-
-suchThat :: (Monad m) => a -> m a
-suchThat = return
-
-hasSameTypeAs :: a -> a -> ()
-hasSameTypeAs _ _ = ()
 
 
 {---------}
@@ -146,6 +127,9 @@ instance Eval Expr where
 {- :Eval:Utilities -}
 {-------------------}
 
+eKey :: (Eval a, Get a) => Key -> Locus -> EvalM a
+eKey key loc = lookupKey loc key >>= getVal >>= eval
+
 eIfThenElse :: (ToExpr a, Get a, Eval a) => BoolExpr -> a -> a -> EvalM a
 eIfThenElse b t f = do
   test  <- eval b >>= getVal
@@ -181,16 +165,14 @@ evalToGlyph x = eval (toExpr x) >>= toGlyph
 instance Eval IntExpr where
   eval (IntConst n :@ loc) = return (IntConst n :@ loc)
 
-  eval (IntVar key :@ loc) = lookupKey loc key >>= get >>= eval
+  {- :Common -}
+  eval (IntVar key :@ loc)        = eKey key loc
+  eval (IntAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (IntIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (IntMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (IntAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
-
-  eval (IntAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (IntIfThenElse b t f :@ _) = eIfThenElse b t f
-
-  eval (IntMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (IntNeg        a :@ loc) = lift1 loc (rNegT        zeroZZ) a
   eval (IntAbs        a :@ loc) = lift1 loc (rAbsT        zeroZZ) a
@@ -273,16 +255,14 @@ instance Eval IntExpr where
 instance Eval StrExpr where
   eval (StrConst s :@ loc) = return (StrConst s :@ loc)
 
-  eval (StrVar key :@ loc) = lookupKey loc key >>= get >>= eval
+  {- :Common -}
+  eval (StrVar key :@ loc)        = eKey key loc
+  eval (StrAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (StrIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (StrMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (StrAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
-
-  eval (StrAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (StrIfThenElse b t f :@ _) = eIfThenElse b t f
-
-  eval (StrMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (Concat   a b :@ loc) = lift2 loc (strCat)   a b
   eval (StrStrip a b :@ loc) = lift2 loc (strStrip) a b
@@ -351,21 +331,14 @@ instance Eval StrExpr where
 instance Eval BoolExpr where
   eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)
 
-  eval (BoolVar key :@ loc) = lookupKey loc key >>= get >>= eval
+  {- :Common -}
+  eval (BoolVar key :@ loc)        = eKey key loc
+  eval (BoolAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (BoolAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [BoolExpr] -> Integer -> Either ListErr BoolExpr
-
-  eval (BoolAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix Bool)
-    x <- tryEvalM loc $ mEntryOf (i,j) p
-    return $ BoolConst x :@ loc
-
-  eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
-
-  eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (IsDefined key :@ loc) = do
     p <- isKeyDefined key
@@ -516,25 +489,18 @@ instance Eval BoolExpr where
 instance Eval RatExpr where
   eval (RatConst p :@ loc) = return $ RatConst p :@ loc
 
-  eval (RatVar key :@ loc) = lookupKey loc key >>= get >>= eval
+  {- :Common -}
+  eval (RatVar key :@ loc)        = eKey key loc
+  eval (RatAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (RatIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (RatMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (RatAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
 
-  eval (RatAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix Rat)
-    x <- tryEvalM loc $ mEntryOf (i,j) p
-    return $ RatConst x :@ loc
-
   eval (RatCast expr :@ loc) = do
     n <- eval expr >>= getVal :: EvalM Integer
     return $ RatConst (n:/:1) :@ loc
-
-  eval (RatIfThenElse b t f :@ _) = eIfThenElse b t f
-
-  eval (RatMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (RatNeg  a :@ loc)   = lift1 loc (rNegT (0:/:1)) a
   eval (RatAbs  a :@ loc)   = lift1 loc (rAbsT (0:/:1)) a
@@ -634,16 +600,14 @@ instance Eval ListExpr where
     ys <- sequence $ map eval xs
     return $ ListConst t ys :@ loc
 
-  eval (ListVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+  {- :Common -}
+  eval (ListVar key :@ loc)        = eKey key loc
+  eval (ListAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (ListMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (ListIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (ListAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
-
-  eval (ListAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (ListMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (ListIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (ListRange a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
@@ -827,21 +791,14 @@ instance Eval MacExpr where
         st <- getState
         return $ MacConst typ vals expr (st,True) :@ loc
 
-
-  eval (MacVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
-
+  {- :Common -}
+  eval (MacVar key :@ loc)        = eKey key loc
   eval (MacIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (MacAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (MacMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (MacAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
-
-  eval (MacAtIdx m h k :@ loc) = do
-    i <- eval h >>= getVal :: EvalM Integer
-    j <- eval k >>= getVal :: EvalM Integer
-    p <- eval m >>= getVal :: EvalM (Matrix MacExpr)
-    tryEvalM loc $ mEntryOf (i,j) p
-
-  eval (MacMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (MacRand ls :@ _) = do
     xs <- eval ls >>= getVal
@@ -858,16 +815,14 @@ instance Eval MatExpr where
     n <- mSeq $ fmap eval m
     return $ MatConst t n :@ loc
 
-  eval (MatVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+  {- :Common -}
+  eval (MatVar key :@ loc)        = eKey key loc
+  eval (MatAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (MatMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (MatIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (MatAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
-
-  eval (MatAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (MatMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (MatIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (MatRand ls :@ loc) = do
     t  <- typeOf ls
@@ -1337,16 +1292,14 @@ instance Eval PolyExpr where
     q <- polySeq $ fmap eval p
     return $ PolyConst t q :@ loc
 
-  eval (PolyVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+  {- :Common -}
+  eval (PolyVar key :@ loc)        = eKey key loc
+  eval (PolyAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (PolyMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (PolyIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (PolyAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
-
-  eval (PolyAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (PolyMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (PolyIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (PolyRand ls :@ loc) = do
     t  <- typeOf ls
@@ -1496,15 +1449,13 @@ instance Eval PermExpr where
     q <- seqPerm $ mapPerm eval p
     return $ PermConst t q :@ loc
 
-  eval (PermVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
-
   eval (PermAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
-  eval (PermAtIdx m h k :@ loc) = eAtIdx m h k loc
-
+  {- Common -}
+  eval (PermVar key :@ loc)        = eKey key loc
+  eval (PermAtIdx m h k :@ loc)    = eAtIdx m h k loc
   eval (PermMacro vals mac :@ loc) = eMacro vals mac loc
-
   eval (PermIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (PermRand ls :@ loc) = do
@@ -1546,16 +1497,14 @@ instance Eval PermExpr where
 instance Eval ZZModExpr where
   eval (ZZModConst a :@ loc) = return $ ZZModConst a :@ loc
 
-  eval (ZZModVar key :@ loc) = lookupKey loc key >>= getVal >>= eval
+  {- :Common -}
+  eval (ZZModVar key :@ loc)        = eKey key loc
+  eval (ZZModAtIdx m h k :@ loc)    = eAtIdx m h k loc
+  eval (ZZModMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (ZZModIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (ZZModAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
-
-  eval (ZZModAtIdx m h k :@ loc) = eAtIdx m h k loc
-
-  eval (ZZModMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (ZZModIfThenElse b t f :@ _) = eIfThenElse b t f
 
   eval (ZZModCast n a :@ loc) = do
     res <- eval a >>= getVal :: EvalM Integer
@@ -1735,6 +1684,29 @@ lift4 loc f x y z w = do
 
 
 
+{--------------}
+{- :Constants -}
+{--------------}
+
+hasSameTypeAs :: a -> a -> ()
+hasSameTypeAs _ _ = ()
+
+suchThat :: (Monad m) => a -> m a
+suchThat = return
+
+
+
+zeroZZ :: Integer
+zeroZZ = 0
+
+zeroQQ :: Rat
+zeroQQ = 0 :/: 1
+
+zeroBB :: Bool
+zeroBB = False
+
+zeroMod :: Integer -> ZZModulo
+zeroMod n = 0 `zzmod` n
 
 
 
