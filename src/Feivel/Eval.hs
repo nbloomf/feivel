@@ -50,7 +50,7 @@ import Feivel.Type
 import Feivel.Typed
 import Feivel.LaTeX
 import Feivel.Parse (pInteger, pRat)
-import Feivel.Glyph
+import Feivel.Get
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -184,11 +184,6 @@ evalToConst (MacE m) = do
       let newSt = mergeStores [ctx, old, amb]
       evalWith ex newSt
     _ -> reportErr (locusOf m) UnevaluatedExpression
-evalToConst (ListE m) = do
-  ListOf u <- typeOf m
-  xs <- eval m >>= getVal :: EvalM [Expr]
-  ys <- sequence $ map evalToConst xs
-  return $ ListE $ ListConst u ys :@ (locusOf m)
 evalToConst expr = eval expr
 
 
@@ -1594,255 +1589,104 @@ instance Eval ZZModExpr where
 
 
 
-toStateT :: Locus -> [(Type, Key, Expr)] -> EvalM (Store Expr)
-toStateT loc vs = do
-  ws <- sequence $ map (checkType loc) vs
-  toState loc ws
-    where
-      checkType :: Locus -> (Type, Key, Expr) -> EvalM (Key, Expr)
-      checkType loc' (t,k,v) = do
-        tv <- typeOf v
-        if tv == t
-          then return (k,v)
-          else reportErr loc' $ TypeMismatch t tv
+
+{----------}
+{- :Glyph -}
+{----------}
+
+class Glyph t where
+  toGlyph :: t -> EvalM String
 
 
-class Get a where
-  get :: Expr -> EvalM a
 
-getVal :: (ToExpr a, Get b) => a -> EvalM b
-getVal x = get (toExpr x)
+{--------------}
+{- :Instances -}
+{--------------}
 
-instance Get Expr where
-  get expr = return expr
-
-
-{----------------}
-{- :Get:IntExpr -}
-{----------------}
-
-instance Get IntExpr where
-  get (IntE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ TypeMismatch ZZ t
-
-instance Get Integer where
-  get expr = do
-    x <- get expr :: EvalM IntExpr
-    case x of
-      IntConst k :@ _ -> return k
-      v -> reportErr (locusOf v) UnevaluatedExpression
+instance Glyph Expr where
+  toGlyph expr = case expr of
+    IntE   x -> toGlyph x
+    StrE   x -> toGlyph x
+    BoolE  x -> toGlyph x
+    RatE   x -> toGlyph x
+    ListE  x -> toGlyph x
+    MatE   x -> toGlyph x
+    DocE   x -> toGlyph x
+    PolyE  x -> toGlyph x
+    PermE  x -> toGlyph x
+    ZZModE x -> toGlyph x
+    MacE   x -> toGlyph x
 
 
-{----------------}
-{- :Get:StrExpr -}
-{----------------}
-
-instance Get StrExpr where
-  get (StrE y) = return y
-  get (DocE y) = do  -- this shouldn't be necessary. why is it?
-    str <- toGlyph y
-    return $ StrConst (Text str) :@ (locusOf y)
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ TypeMismatch SS t
-
-instance Get Text where
-  get expr = do
-    x <- get expr
-    case x of
-      StrConst s :@ _ -> return s
-      v -> reportErr (locusOf v) UnevaluatedExpression
+instance Glyph IntExpr where
+  toGlyph (IntConst n :@ _) = return $ show n
+  toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
 
 
-{-----------------}
-{- :Get:BoolExpr -}
-{-----------------}
-
-instance Get BoolExpr where
-  get (BoolE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ TypeMismatch BB t
-
-instance Get Bool where
-  get expr = do
-    x <- get expr
-    case x of
-      BoolConst b :@ _ -> return b
-      v -> reportErr (locusOf v) UnevaluatedExpression
+instance Glyph StrExpr where
+  toGlyph (StrConst (Text s) :@ _) = return s
+  toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
-{----------------}
-{- :Get:RatExpr -}
-{----------------}
-
-instance Get RatExpr where
-  get (RatE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ TypeMismatch QQ t
-
-instance Get Rat where
-  get expr = do
-    x <- get expr
-    case x of
-      RatConst r :@ _ -> return r
-      v -> reportErr (locusOf v) UnevaluatedExpression
+instance Glyph BoolExpr where
+  toGlyph (BoolConst True  :@ _) = return "#t"
+  toGlyph (BoolConst False :@ _) = return "#f"
+  toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
 
 
-{-----------------}
-{- :Get:ListExpr -}
-{-----------------}
-
-instance Get ListExpr where
-  get (ListE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ ListExpected t
-
-instance (Get a) => Get [a] where
-  get expr = do
-    x <- getList expr
-    sequence $ fmap get x
-    where
-      getList :: Expr -> EvalM [Expr]
-      getList w = do
-        case w of
-          ListE (ListConst _ xs :@ _) -> return xs
-          ListE v -> reportErr (locusOf v) UnevaluatedExpression
-          v -> do
-            t <- typeOf v
-            reportErr (locusOf v) $ ListExpected t
+instance Glyph RatExpr where
+  toGlyph (RatConst x :@ _) = return $ show x
+  toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-{----------------}
-{- :Get:MacExpr -}
-{----------------}
-
-instance Get MacExpr where
-  get (MacE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ MacroExpected t
-
-instance Get (Store Expr, Expr) where
-  get expr = do
-    case expr of
-      MacE (MacConst _ vals y (amb,_) :@ loc) -> do
-        st <- toStateT loc vals
-        return (mergeState st amb, y)
-      MacE v -> reportErr (locusOf v) UnevaluatedExpression
-      v -> do
-        t <- typeOf v
-        reportErr (locusOf v) $ MacroExpected t
+instance Glyph ZZModExpr where
+  toGlyph (ZZModConst a :@ _) = return $ showZZMod a
+  toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-{----------------}
-{- :Get:MatExpr -}
-{----------------}
-
-instance Get MatExpr where
-  get (MatE m) = return m
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ MatrixExpected t
-
-instance (Get a) => Get (Matrix a) where
-  get expr = do
-    x <- getMatrix expr
-    mSeq $ fmap get x
-    where
-      getMatrix :: Expr -> EvalM (Matrix Expr)
-      getMatrix w = do
-        case w of
-          MatE (MatConst _ m :@ _) -> return m
-          MatE v -> reportErr (locusOf v) UnevaluatedExpression
-          v -> do
-            t <- typeOf v
-            reportErr (locusOf v) $ MatrixExpected t
+instance Glyph ListExpr where
+  toGlyph (ListConst _ xs :@ _) = do
+    ys <- sequence $ map toGlyph xs
+    return $ "{" ++ concat (intersperse ";" ys) ++ "}"
+  toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
-{------------}
-{- :Get:Doc -}
-{------------}
-
-instance Get Doc where
-  get (DocE y) = return y
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ TypeMismatch DD t
+instance Glyph MatExpr where
+  toGlyph (MatConst _ m :@ _) = do
+    n <- mSeq $ fmap toGlyph m
+    case mShowStr n of
+      Left err -> reportErr (error "Glyph instance of MatExpr") err
+      Right x  -> return x
+  toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
 
 
-{-----------------}
-{- :Get:PolyExpr -}
-{-----------------}
-
-instance Get PolyExpr where
-  get (PolyE m) = return m
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ PolynomialExpected t
-
-instance (Get a) => Get (Poly a) where
-  get expr = do
-    x <- getPoly expr
-    polySeq $ fmap get x
-    where
-      getPoly :: Expr -> EvalM (Poly Expr)
-      getPoly w = do
-        case w of
-          PolyE (PolyConst _ m :@ _) -> return m
-          PolyE v -> reportErr (locusOf v) UnevaluatedExpression
-          v -> do
-            t <- typeOf v
-            reportErr (locusOf v) $ PolynomialExpected t
+instance Glyph PolyExpr where
+  toGlyph (PolyConst _ px :@ _) = do
+    qx <- polySeq $ mapCoef toGlyph px
+    return $ showStrP qx
+  toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-{-----------------}
-{- :Get:PermExpr -}
-{-----------------}
-
-instance Get PermExpr where
-  get (PermE m) = return m
-  get v = do
-    t <- typeOf v
-    reportErr (locusOf v) $ PermutationExpected t
-
-instance Get (Perm Expr) where
-  get expr = do
-    case expr of
-      PermE (PermConst _ m :@ _) -> return m
-      PermE v -> reportErr (locusOf v) UnevaluatedExpression
-      v -> do
-        t <- typeOf v
-        reportErr (locusOf v) $ PermutationExpected t
-
-instance Get (Perm Integer) where
-  get expr = do
-    x <- get expr :: EvalM (Perm Expr)
-    seqPerm $ mapPerm get x
+instance Glyph PermExpr where
+  toGlyph (PermConst _ px :@ _) = do
+    qx <- seqPerm $ mapPerm toGlyph px
+    return $ showPerm qx
+  toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-{------------------}
-{- :Get:ZZModExpr -}
-{------------------}
-
-instance Get ZZModExpr where
-  get (ZZModE y) = return y
-  get v = do
-        t <- typeOf v
-        reportErr (locusOf v) $ ModularIntegerExpected t
-
-instance Get ZZModulo where
-  get expr = do
-    x <- get expr :: EvalM ZZModExpr
-    case x of
-      ZZModConst k :@ _ -> return k
-      v -> reportErr (locusOf v) UnevaluatedExpression
+instance Glyph MacExpr where
+  toGlyph(MacConst _ st ex (amb,_) :@ loc) = do
+    old <- getState
+    ctx <- toStateT loc st
+    f   <- evalWith ex (mergeStores [ctx, old, amb])
+    eval f >>= toGlyph
+  toGlyph _ = error "toGlyph: MacExpr"
 
 
+instance Glyph Doc where
+  toGlyph (Empty     :@ _) = return ""
+  toGlyph (DocText (Text s) :@ _) = return s
+  toGlyph x = error $ "toGlyph: Doc: " ++ show x
 
 
 

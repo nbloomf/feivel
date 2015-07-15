@@ -21,7 +21,6 @@
 
 module Feivel.Get (Get, get, getVal, toStateT) where
 
-import Feivel.Glyph
 import Feivel.Type
 import Feivel.Error
 import Feivel.Typed
@@ -80,9 +79,9 @@ instance Get Integer where
 
 instance Get StrExpr where
   get (StrE y) = return y
-  get (DocE y) = do  -- this shouldn't be necessary. why is it?
-    str <- toGlyph y
-    return $ StrConst (Text str) :@ (locusOf y)
+  get (DocE (Empty :@ loc)) = return $ StrConst (Text "") :@ loc
+  get (DocE (DocText str :@ loc)) = return $ StrConst str :@ loc
+  get (DocE (Escaped c :@ loc)) = return $ StrConst (Text [c]) :@ loc
   get v = do
     t <- typeOf v
     reportErr (locusOf v) $ TypeMismatch SS t
