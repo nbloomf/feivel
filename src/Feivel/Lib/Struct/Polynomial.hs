@@ -27,7 +27,9 @@ module Feivel.Lib.Struct.Polynomial (
   evalPolyAtPolysP,
 
   variablesP, isUnivariateP, isConstantP, fromRootsP, toScalarP,
-  leadingTermByP, degreeByP, leadingTermByRevLexP, degreeByRevLexP, isRootP
+  leadingTermByP, degreeByP, leadingTermByRevLexP, degreeByRevLexP, isRootP,
+
+  coefficientsP, contentP
 ) where
 
 import qualified Data.Map as Map
@@ -184,6 +186,9 @@ varP x = fromListP [(rOne, varM x)]
 
 {- Query -}
 
+coefficientsP :: Poly a -> [a]
+coefficientsP = map fst . toListP
+
 isZeroP :: Poly a -> Bool
 isZeroP = null . toListP
 
@@ -192,6 +197,7 @@ variablesP = foldr union [] . map (supportM . snd) . toListP
 
 isUnivariateP :: Poly a -> Bool
 isUnivariateP p = case variablesP p of
+  []  -> True
   [_] -> True
   _   -> False
 
@@ -319,6 +325,9 @@ instance (Ringoid a, CRingoid a, URingoid a) => URingoid (Poly a) where
   rInjInt n = do
     k <- rInjInt n
     return $ constP k
+
+contentP :: (Ringoid t, GCDoid t) => Poly t -> Either AlgErr t
+contentP = rGCDs . coefficientsP
 
 
 -- Pretty-print a polynomial over any set

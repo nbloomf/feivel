@@ -1,0 +1,7 @@
+feivel
+<<<
+[define ^int @p := Poly(2.x; 4.y; 6.x^2)]#
+[:int: PolyContent(@p) :]
+>>>
+2
+>>>= 0

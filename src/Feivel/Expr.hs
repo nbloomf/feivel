@@ -279,6 +279,9 @@ data IntExprLeaf
   | MatNumCols MatExpr
   | MatRank    MatExpr
 
+  -- Polynomial
+  | IntContent PolyExpr
+
   -- Stats
   | IntObserveUniform  IntExpr IntExpr
   | IntObserveBinomial IntExpr RatExpr

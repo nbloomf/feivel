@@ -570,6 +570,8 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "NumRows" pMatExpr MatNumRows ZZ
       , pFun1 "NumCols" pMatExpr MatNumCols ZZ
       , pMatRank
+
+      , pFun1 "PolyContent" (pTypedPolyExpr ZZ) IntContent ZZ
     
       , pFun2 "Uniform"  pIntExpr pIntExpr IntObserveUniform ZZ
       , pFun2 "Binomial" pIntExpr pRatExpr IntObserveBinomial ZZ

@@ -260,6 +260,11 @@ instance Eval IntExpr where
       MatOf u -> reportErr loc $ FieldMatrixExpected u
       u -> reportErr loc $ MatrixExpected u
 
+  eval (IntContent p :@ loc) = do
+    q <- eval p >>= getVal :: EvalM (Poly Integer)
+    c <- tryEvalM loc $ contentP q
+    return $ IntConst c :@ loc
+
 
 
 {-----------------}

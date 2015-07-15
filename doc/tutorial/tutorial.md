@@ -318,6 +318,10 @@ These expressions can be used over any type.
 
     The rank (number of linearly independent columns) of a matrix over `TYP`, which should be a field (E.g. `rat` or `bool`).
 
+- `PolyContent(POLY)`
+
+    The content (gcd of coefficients) of an integer polynomial.
+
 
 `str`: Strings
 --------------
