@@ -89,7 +89,7 @@ main = do
   let records = map (setLibPaths paths) records'
 
   -- Evaluate template against all records.
-  results <- attemptsWith records $ evalToText template
+  results <- attemptsWith records $ evalToGlyph template
 
   -- Write results to stdout or a file(s).
   let (outFlag, outName) = outputFlag opts

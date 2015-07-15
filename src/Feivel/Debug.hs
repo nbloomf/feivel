@@ -24,12 +24,15 @@ import Feivel.Eval
 import Feivel.Store
 import Feivel.Expr
 import Feivel.Type
+import Feivel.Main
 
+-- Parse an object
 testParseM :: ParseM (a,b) -> String -> IO a
 testParseM p str = case runParseM p "" str of
   Left err  -> fail $ show err
   Right (val,_) -> return val
 
+-- Eval an object
 testEvalM :: (Eval a) => a -> IO a
 testEvalM expr = do
   (result, _) <- runEvalM emptyStore (eval expr)
@@ -37,24 +40,15 @@ testEvalM expr = do
     Left err -> fail $ show err
     Right d  -> return d
 
+-- Parse and evaluate an object
 testM :: (Eval a) => ParseM (a,t) -> String -> IO a
 testM p str = testParseM p str >>= testEvalM
-
-
-badmac :: String
-badmac = "[:{>int}: Build(Macro(int; Eval(int; @x)); >int @x <- {Macro(int; 0)}) :]"
-
-badmac2 :: String
-badmac2 = "Build(Macro(int; Eval(int; @x)); >int @x <- {Macro(int; 0)})"
-
-badmac3 :: String
-badmac3 = "[[Macro(int; Eval(int; Macro(int; 0)))]]"
 
 -- Parse and evaluate a template
 testDoc :: String -> IO String
 testDoc str = do
   x <- testParseM pDoc str
-  (result, _) <- runEvalM emptyStore (evalToText x)
+  (result, _) <- runEvalM emptyStore (evalToGlyph x)
   case result of
     Left err -> fail $ show err
     Right d  -> return d

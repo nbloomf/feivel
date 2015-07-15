@@ -325,7 +325,7 @@ parseAndEvalIO st input = do
   case runParseM pREPL "" input of
     Left goof -> return (show goof, st)
     Right (x,_) -> do
-      (y, stNew) <- runEvalM st (evalToText x)
+      (y, stNew) <- runEvalM st (evalToGlyph x)
       case y of
         Left goof -> return (show goof, st)
         Right z -> return (z, stNew)

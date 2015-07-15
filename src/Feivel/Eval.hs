@@ -23,7 +23,7 @@
 {-# LANGUAGE OverlappingInstances  #-}
 
 module Feivel.Eval (
- Eval, eval, runEvalM, evalToText, evalToConst
+ Eval, eval, runEvalM, evalToGlyph
 ) where
 
 {-----------------------------------------------------------}
@@ -34,9 +34,9 @@ module Feivel.Eval (
 {-    :Eval:MatExpr    :Eval:Doc         :Eval:PolyExpr    -}
 {-    :Eval:PermExpr   :Eval:ZZModExpr                     -}
 {-                                                         -}
+{-  :Glyph                                                 -}
 {-  :Inject                                                -}
 {-  :Lift                                                  -}
-{-  :Utilities                                             -}
 {-----------------------------------------------------------}
 
 import Feivel.Expr
@@ -170,21 +170,8 @@ eAtIdx m h k loc = do
   p <- eval m >>= getVal
   tryEvalM loc $ mEntryOf (i,j) p
 
-
-evalToGlyph :: Expr -> EvalM String
-evalToGlyph x = eval x >>= toGlyph
-
-evalToConst :: Expr -> EvalM Expr
-evalToConst (MacE m) = do
-  expr <- eval m >>= getVal :: EvalM MacExpr 
-  case expr of
-    MacConst _ st ex (amb,_) :@ loc -> do
-      old <- getState
-      ctx <- toStateT loc st
-      let newSt = mergeStores [ctx, old, amb]
-      evalWith ex newSt
-    _ -> reportErr (locusOf m) UnevaluatedExpression
-evalToConst expr = eval expr
+evalToGlyph :: (ToExpr a) => a -> EvalM String
+evalToGlyph x = eval (toExpr x) >>= toGlyph
 
 
 
@@ -1587,9 +1574,6 @@ instance Eval ZZModExpr where
 
 
 
-
-
-
 {----------}
 {- :Glyph -}
 {----------}
@@ -1597,11 +1581,6 @@ instance Eval ZZModExpr where
 class Glyph t where
   toGlyph :: t -> EvalM String
 
-
-
-{--------------}
-{- :Instances -}
-{--------------}
 
 instance Glyph Expr where
   toGlyph expr = case expr of
@@ -1874,12 +1853,6 @@ lift4 loc f x y z w = do
 
 
 
-{--------------}
-{- :Utilities -}
-{--------------}
-
-evalToText :: (ToExpr t) => t -> EvalM String
-evalToText = evalToGlyph . toExpr
 
 
 

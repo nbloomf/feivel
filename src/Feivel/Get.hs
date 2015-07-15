@@ -19,7 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Feivel.Get (Get, get, getVal, toStateT) where
+module Feivel.Get (
+  Get, get, getVal, toStateT
+) where
 
 import Feivel.Type
 import Feivel.Error
@@ -30,6 +32,20 @@ import Feivel.Expr
 import Feivel.Lib
 import Feivel.Store
 import Feivel.Key
+
+{----------------}
+{- :Get         -}
+{-   :IntExpr   -}
+{-   :RatExpr   -}
+{-   :StrExpr   -}
+{-   :BoolExpr  -}
+{-   :ListExpr  -}
+{-   :MatExpr   -}
+{-   :MacExpr   -}
+{-   :PolyExpr  -}
+{-   :PermExpr  -}
+{-   :ZZModExpr -}
+{----------------}
 
 
 toStateT :: Locus -> [(Type, Key, Expr)] -> EvalM (Store Expr)
@@ -45,6 +61,11 @@ toStateT loc vs = do
           else reportErr loc' $ TypeMismatch t tv
 
 
+
+{--------}
+{- :Get -}
+{--------}
+
 class Get a where
   get :: Expr -> EvalM a
 
@@ -55,9 +76,10 @@ instance Get Expr where
   get expr = return expr
 
 
-{----------------}
-{- :Get:IntExpr -}
-{----------------}
+
+{------------}
+{- :IntExpr -}
+{------------}
 
 instance Get IntExpr where
   get (IntE y) = return y
@@ -73,9 +95,9 @@ instance Get Integer where
       v -> reportErr (locusOf v) UnevaluatedExpression
 
 
-{----------------}
-{- :Get:StrExpr -}
-{----------------}
+{------------}
+{- :StrExpr -}
+{------------}
 
 instance Get StrExpr where
   get (StrE y) = return y
@@ -94,9 +116,9 @@ instance Get Text where
       v -> reportErr (locusOf v) UnevaluatedExpression
 
 
-{-----------------}
-{- :Get:BoolExpr -}
-{-----------------}
+{-------------}
+{- :BoolExpr -}
+{-------------}
 
 instance Get BoolExpr where
   get (BoolE y) = return y
@@ -112,9 +134,9 @@ instance Get Bool where
       v -> reportErr (locusOf v) UnevaluatedExpression
 
 
-{----------------}
-{- :Get:RatExpr -}
-{----------------}
+{------------}
+{- :RatExpr -}
+{------------}
 
 instance Get RatExpr where
   get (RatE y) = return y
@@ -130,9 +152,9 @@ instance Get Rat where
       v -> reportErr (locusOf v) UnevaluatedExpression
 
 
-{-----------------}
-{- :Get:ListExpr -}
-{-----------------}
+{-------------}
+{- :ListExpr -}
+{-------------}
 
 instance Get ListExpr where
   get (ListE y) = return y
@@ -155,9 +177,9 @@ instance (Get a) => Get [a] where
             reportErr (locusOf v) $ ListExpected t
 
 
-{----------------}
-{- :Get:MacExpr -}
-{----------------}
+{------------}
+{- :MacExpr -}
+{------------}
 
 instance Get MacExpr where
   get (MacE y) = return y
@@ -177,9 +199,9 @@ instance Get (Store Expr, Expr) where
         reportErr (locusOf v) $ MacroExpected t
 
 
-{----------------}
-{- :Get:MatExpr -}
-{----------------}
+{------------}
+{- :MatExpr -}
+{------------}
 
 instance Get MatExpr where
   get (MatE m) = return m
@@ -202,9 +224,9 @@ instance (Get a) => Get (Matrix a) where
             reportErr (locusOf v) $ MatrixExpected t
 
 
-{------------}
-{- :Get:Doc -}
-{------------}
+{--------}
+{- :Doc -}
+{--------}
 
 instance Get Doc where
   get (DocE y) = return y
@@ -213,9 +235,9 @@ instance Get Doc where
     reportErr (locusOf v) $ TypeMismatch DD t
 
 
-{-----------------}
-{- :Get:PolyExpr -}
-{-----------------}
+{-------------}
+{- :PolyExpr -}
+{-------------}
 
 instance Get PolyExpr where
   get (PolyE m) = return m
@@ -238,9 +260,9 @@ instance (Get a) => Get (Poly a) where
             reportErr (locusOf v) $ PolynomialExpected t
 
 
-{-----------------}
-{- :Get:PermExpr -}
-{-----------------}
+{-------------}
+{- :PermExpr -}
+{-------------}
 
 instance Get PermExpr where
   get (PermE m) = return m
@@ -263,15 +285,15 @@ instance Get (Perm Integer) where
     seqPerm $ mapPerm get x
 
 
-{------------------}
-{- :Get:ZZModExpr -}
-{------------------}
+{--------------}
+{- :ZZModExpr -}
+{--------------}
 
 instance Get ZZModExpr where
   get (ZZModE y) = return y
   get v = do
-        t <- typeOf v
-        reportErr (locusOf v) $ ModularIntegerExpected t
+    t <- typeOf v
+    reportErr (locusOf v) $ ModularIntegerExpected t
 
 instance Get ZZModulo where
   get expr = do
@@ -279,4 +301,3 @@ instance Get ZZModulo where
     case x of
       ZZModConst k :@ _ -> return k
       v -> reportErr (locusOf v) UnevaluatedExpression
-
