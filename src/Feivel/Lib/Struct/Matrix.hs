@@ -47,7 +47,7 @@ module Feivel.Lib.Struct.Matrix (
   mEScaleT, mEAddT, mESwapT, mEIdT,
 
   gjPivots, gjREForm, mClearAbovePivot, mClearAbovePivots, gjREFactor,
-  mGJForm, mGJFactor, mIsGaussJordanForm
+  mGJForm, mGJFactor, mIsGaussJordanForm, mPivotCols
 
 ) where
 
@@ -84,6 +84,9 @@ import Control.Monad.ListM (foldM1)
 
 type Dim   = (Integer, Integer)
 type Index = (Integer, Integer)
+
+getColIdx :: Index -> Integer
+getColIdx (_,c) = c
 
 data Matrix a
   = Matrix (Array Index a) | Null
@@ -936,6 +939,12 @@ gjPivots :: (Ringoid a, CRingoid a, URingoid a)
 gjPivots m = do
   (_,_,ps) <- gjRowEchelon m
   return ps
+
+mPivotCols :: (Ringoid a, CRingoid a, URingoid a)
+  => Matrix a -> Either AlgErr [Integer]
+mPivotCols m = do
+  ps <- gjPivots m
+  return $ map getColIdx ps
 
 mClearAbovePivot :: (Ringoid a, CRingoid a, URingoid a)
   => Matrix a -> Index -> Either AlgErr (Matrix a, [ElemOp a])

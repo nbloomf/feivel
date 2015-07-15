@@ -777,6 +777,19 @@ instance Eval ListExpr where
         return (ListConst (PermOf SS) (map toExpr us) :@ loc)
       u -> reportErr loc $ PermutationExpected u
 
+  eval (ListPivotColIndices m :@ loc) = do
+    t <- typeOf m
+    case t of
+      MatOf QQ -> do
+        n  <- eval m >>= getVal :: EvalM (Matrix Rat)
+        is <- tryEvalM loc $ mPivotCols n
+        return (ListConst ZZ (map toExpr is) :@ loc)
+      MatOf BB -> do
+        n  <- eval m >>= getVal :: EvalM (Matrix Bool)
+        is <- tryEvalM loc $ mPivotCols n
+        return (ListConst ZZ (map toExpr is) :@ loc)
+      MatOf u -> reportErr loc $ FieldMatrixExpected u
+      t -> reportErr loc $ MatrixExpected t
 
 
 {-----------------}

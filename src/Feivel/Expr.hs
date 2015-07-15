@@ -469,6 +469,8 @@ data ListExprLeaf
 
   -- Permutations
   | ListPermsOf Type ListExpr
+
+  | ListPivotColIndices MatExpr
   deriving (Eq, Show)
 
 data ListGuard

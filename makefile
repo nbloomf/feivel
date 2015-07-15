@@ -5,9 +5,7 @@ feivel: FORCE
 	cabal test
 	cabal install
 
-golden: FORCE
-	@echo "Golden Tests"
-	shelltest --color --execdir test/gold/
+everything: feivel golden tutorial vis
 
 tutorial: doc/tutorial/tutorial.md
 	@echo "Build Tutorial"
@@ -21,6 +19,21 @@ vis: FORCE
 	dot -Tsvg doc/dev/modules.dot > doc/dev/modules.svg
 	rm doc/dev/modules.dot
 
-everything: feivel golden tutorial vis
+
+# Golden Tests
+
+golden: FORCE
+	@echo "Golden Tests"
+	shelltest --color --execdir test/gold/
+
+golden-list: FORCE
+	@echo "Golden List Tests"
+	shelltest --color --execdir test/gold/expr/list
+
+golden-list-int: FORCE
+	@echo "Golden Integer List Tests"
+	shelltest --color --execdir test/gold/expr/list/int
+
+
 
 FORCE:

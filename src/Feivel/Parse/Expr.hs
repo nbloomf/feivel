@@ -854,6 +854,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
       , pListPermsOf
 
       , pListRange
+      , pListPivotColIndices typ
       , pListBuilder
       , pFun2 "Choose" pIntExpr (pTypedListExpr typ) ListChoose (ListOf typ)
       , pListChoices
@@ -909,6 +910,16 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
             (a,b) <- pTuple2 pIntExpr pIntExpr
             return (ListRange a b, ListOf ZZ)
           Left _ -> fail "pListRange"
+
+        pListPivotColIndices ZZ = do
+          try $ keyword "PivotCols"
+          keyword "("
+          t <- pType
+          keyword ";"
+          (m,_) <- pTypedMatExpr t
+          keyword ")"
+          return (ListPivotColIndices m, ListOf ZZ)
+        pListPivotColIndices t = fail "pListPivotColIndices"
     
         pListBuilder = do
           start <- getPosition

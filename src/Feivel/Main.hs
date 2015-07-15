@@ -24,7 +24,6 @@ import Feivel.EvalM
 import Feivel.Format
 import Feivel.GUI
 import Feivel.GUI.Strings
-import Feivel.Parse
 
 import Data.Maybe (fromMaybe)
 
