@@ -23,8 +23,9 @@ module Feivel.Parse.Expr (
     pStrConst, pIntConst, pBoolConst, pRatConst, pZZModConst,
     pListLiteral, pMatLiteral, pPolyLiteral, pPermLiteral,
 
-  pIntExpr, pRatExpr, pStrExpr, pBoolExpr, pZZModExpr,
-  pTypedListExpr, pTypedMatExpr, pTypedPolyExpr, pTypedPermExpr
+  pTypedExpr,
+    pIntExpr, pRatExpr, pStrExpr, pBoolExpr, pZZModExpr,
+    pTypedListExpr, pTypedMatExpr, pTypedPolyExpr, pTypedPermExpr
 ) where
 
 import Feivel.Expr

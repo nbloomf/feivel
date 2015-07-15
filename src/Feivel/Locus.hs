@@ -37,6 +37,7 @@ data Locus = Locus
  deriving (Eq)
 
 instance Show Locus where
+  show NullLocus = "Nowhere"
   show loc = show (startLine loc) ++ ":" ++ show (startCol loc)
 
 
@@ -56,6 +57,7 @@ shortReport loc = path loc ++ ":" ++ show (startLine loc)
 
 
 longReport :: Locus -> String
+longReport NullLocus = "Nowhere!"
 longReport loc = "in " ++ path loc ++
   " from line " ++ show (startLine loc) ++ " column " ++ show (startCol loc) ++
   " to line " ++ show (endLine loc) ++ " column " ++ show (endCol loc)

@@ -37,18 +37,9 @@ testEvalM expr = do
     Left err -> fail $ show err
     Right d  -> return d
 
-testEvalConstM :: (ToExpr a) => a -> IO Expr
-testEvalConstM a = do
-  (result, _) <- runEvalM emptyStore (evalToConst $ toExpr a)
-  case result of
-    Left err -> fail $ show err
-    Right d  -> return d
-
 testM :: (Eval a) => ParseM (a,t) -> String -> IO a
 testM p str = testParseM p str >>= testEvalM
 
-testDoc :: String -> IO Doc
-testDoc = testM pDoc
 
 badmac :: String
 badmac = "[:{>int}: Build(Macro(int; Eval(int; @x)); >int @x <- {Macro(int; 0)}) :]"
@@ -58,3 +49,12 @@ badmac2 = "Build(Macro(int; Eval(int; @x)); >int @x <- {Macro(int; 0)})"
 
 badmac3 :: String
 badmac3 = "[[Macro(int; Eval(int; Macro(int; 0)))]]"
+
+-- Parse and evaluate a template
+testDoc :: String -> IO String
+testDoc str = do
+  x <- testParseM pDoc str
+  (result, _) <- runEvalM emptyStore (evalToText x)
+  case result of
+    Left err -> fail $ show err
+    Right d  -> return d
