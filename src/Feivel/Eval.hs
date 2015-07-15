@@ -246,6 +246,20 @@ instance Eval IntExpr where
     n <- parseAsAt pInteger loc x
     return $ IntConst n :@ loc
 
+  eval (MatRank m :@ loc) = do
+    t <- typeOf m
+    case t of
+      MatOf QQ -> do
+        n <- eval m >>= getVal :: EvalM (Matrix Rat)
+        r <- tryEvalM loc $ mRank n
+        return $ IntConst r :@ loc
+      MatOf BB -> do
+        n <- eval m >>= getVal :: EvalM (Matrix Bool)
+        r <- tryEvalM loc $ mRank n
+        return $ IntConst r :@ loc
+      MatOf u -> reportErr loc $ FieldMatrixExpected u
+      u -> reportErr loc $ MatrixExpected u
+
 
 
 {-----------------}

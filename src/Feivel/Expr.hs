@@ -277,6 +277,7 @@ data IntExprLeaf
   -- Matrix
   | MatNumRows MatExpr
   | MatNumCols MatExpr
+  | MatRank    MatExpr
 
   -- Stats
   | IntObserveUniform  IntExpr IntExpr

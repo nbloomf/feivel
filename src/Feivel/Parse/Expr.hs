@@ -569,6 +569,7 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
 
       , pFun1 "NumRows" pMatExpr MatNumRows ZZ
       , pFun1 "NumCols" pMatExpr MatNumCols ZZ
+      , pMatRank
     
       , pFun2 "Uniform"  pIntExpr pIntExpr IntObserveUniform ZZ
       , pFun2 "Binomial" pIntExpr pRatExpr IntObserveBinomial ZZ
@@ -576,6 +577,15 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
 
       , pFun1 "str" pStrExpr IntCastStr ZZ
       ]
+      where
+        pMatRank = do
+          try $ keyword "MatrixRank"
+          keyword "("
+          t <- pType
+          keyword ";"
+          (m,_) <- pTypedMatExpr t
+          keyword ")"
+          return (MatRank m, ZZ)
 
     intOpTable =
       [ [ Infix (opParser2 IntPow "^") AssocRight

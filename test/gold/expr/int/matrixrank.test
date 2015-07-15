@@ -1,0 +1,10 @@
+feivel
+<<<
+[define [rat] @a := [[1;0;0];[0;1;0];[0;0;1]]]#
+[:int: MatrixRank(rat; @a) :]
+[define [bool] @b := [[#t;#f;#f];[#f;#t;#f];[#f;#f;#t]]]#
+[:int: MatrixRank(bool; @b) :]
+>>>
+3
+3
+>>>= 0

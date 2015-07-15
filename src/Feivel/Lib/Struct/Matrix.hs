@@ -47,8 +47,7 @@ module Feivel.Lib.Struct.Matrix (
   mEScaleT, mEAddT, mESwapT, mEIdT,
 
   gjPivots, gjREForm, mClearAbovePivot, mClearAbovePivots, gjREFactor,
-  mGJForm, mGJFactor, mIsGaussJordanForm, mPivotCols
-
+  mGJForm, mGJFactor, mIsGaussJordanForm, mPivotCols, mRank
 ) where
 
 {--------------------}
@@ -945,6 +944,12 @@ mPivotCols :: (Ringoid a, CRingoid a, URingoid a)
 mPivotCols m = do
   ps <- gjPivots m
   return $ map getColIdx ps
+
+mRank :: (Ringoid a, CRingoid a, URingoid a)
+  => Matrix a -> Either AlgErr Integer
+mRank m = do
+  ps <- gjPivots m
+  return (sum $ map (const 1) ps)
 
 mClearAbovePivot :: (Ringoid a, CRingoid a, URingoid a)
   => Matrix a -> Index -> Either AlgErr (Matrix a, [ElemOp a])

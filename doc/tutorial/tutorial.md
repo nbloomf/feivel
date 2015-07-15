@@ -314,6 +314,10 @@ These expressions can be used over any type.
 
     Cast a string to an integer.
 
+- `MatrixRank(TYP; MAT)`
+
+    The rank (number of linearly independent columns) of a matrix over `TYP`, which should be a field (E.g. `rat` or `bool`).
+
 
 `str`: Strings
 --------------
@@ -423,6 +427,10 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
 - `GetRow(INT; MAT)`, `GetCol(INT; MAT)`
 
     Extract a row or column from the given matrix. INT is the index (counting from 1) of the desired row/column.
+
+- `PivotCols(TYP; MAT)`
+
+    The indices of the pivot columns of a matrix with entries in `TYP`. Returns a list of integers.
 
 
 
