@@ -30,7 +30,7 @@ Feature Ideas
 * Matrix: Smith normal form (uses bezout)
 * Matrix: Shuffle rows/cols by permutation
 * Matrix: Build permutation matrix
-* Polynomial: degree, division algorithm, gcd, bezout, content
+* Polynomial: degree, division algorithm, gcd, bezout
 * Permutation: Choose random permutation (of Sn? of a list?)
 * Permutation: Orbits {{t}}
 * Permutation: Shape {int}
