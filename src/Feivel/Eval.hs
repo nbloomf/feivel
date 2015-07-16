@@ -247,8 +247,7 @@ instance Eval IntExpr where
     return $ IntConst n :@ loc
 
   eval (MatRank m :@ loc) = do
-    let t = typeOf m
-    case t of
+    case typeOf m of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- tryEvalM loc $ mRank n
@@ -310,12 +309,10 @@ instance Eval StrExpr where
     return $ StrConst (Text tab) :@ loc
 
   eval (StrTypeOf e :@ loc) = do
-    let t = typeOf e
-    return $ StrConst (Text $ show t) :@ loc
+    return $ StrConst (Text $ show $ typeOf e) :@ loc
 
   eval (StrFormat LaTeX e :@ loc) = do
-    let t = typeOf e
-    case t of
+    case typeOf e of
       ZZ -> do
         x <- eval e >>= getVal :: EvalM Integer
         return $ StrConst (Text $ latex x) :@ loc
@@ -374,9 +371,7 @@ instance Eval BoolExpr where
     return $ BoolConst (x /= y) :@ loc
 
   eval (BoolLT a b :@ loc) = do
-    let ta = typeOf a
-    let tb = typeOf b
-    case unify ta tb of
+    case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
@@ -393,9 +388,7 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolLEq a b :@ loc) = do
-    let ta = typeOf a
-    let tb = typeOf b
-    case unify ta tb of
+    case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
@@ -412,9 +405,7 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolGT a b :@ loc) = do
-    let ta = typeOf a
-    let tb = typeOf b
-    case unify ta tb of
+    case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
@@ -431,9 +422,7 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolGEq a b :@ loc) = do
-    let ta = typeOf a
-    let tb = typeOf b
-    case unify ta tb of
+    case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
@@ -474,8 +463,7 @@ instance Eval BoolExpr where
     return $ BoolConst q :@ loc
 
   eval (MatIsGJForm m :@ loc) = do
-    let t = typeOf m
-    case t of
+    case typeOf m of
       MatOf QQ -> do
         p <- eval m >>= getVal :: EvalM (Matrix Rat)
         q <- tryEvalM loc $ mIsGaussJordanForm p
@@ -484,7 +472,7 @@ instance Eval BoolExpr where
         p <- eval m >>= getVal :: EvalM (Matrix Bool)
         q <- tryEvalM loc $ mIsGaussJordanForm p
         return $ BoolConst q :@ loc
-      _ -> reportErr loc $ NumericMatrixExpected t
+      t -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
   eval (Neg    a   :@ loc) = lift1 loc (boolNot) a
@@ -546,8 +534,7 @@ instance Eval RatExpr where
 
   {- Mean -}
   eval (RatMean ls :@ loc) = do
-    let t = typeOf ls
-    case t of
+    case typeOf ls of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
@@ -560,8 +547,7 @@ instance Eval RatExpr where
 
   {- Mean Deviation -}
   eval (RatMeanDev ls :@ loc) = do
-    let t = typeOf ls
-    case t of
+    case typeOf ls of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
@@ -574,9 +560,8 @@ instance Eval RatExpr where
 
   {- Standard Deviation -}
   eval (RatStdDev ls d :@ loc) = do
-    let t = typeOf ls
     k <- eval d >>= getVal
-    case t of
+    case typeOf ls of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ ratIntStdDev xs k
@@ -589,10 +574,9 @@ instance Eval RatExpr where
 
   {- Z-Score -}
   eval (RatZScore x ls d :@ loc) = do
-    let t = typeOf ls
     k <- eval d >>= getVal
     y <- eval x >>= getVal
-    case t of
+    case typeOf ls of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ ratIntZScore y xs k
@@ -651,38 +635,31 @@ instance Eval ListExpr where
         return $ ListConst u (xs \\ ys) :@ loc
       _ -> reportErr loc $ ListExpected t
 
-  eval (ListRev _ a :@ loc) = do
-    let t = typeOf a
+  eval (ListRev u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
-    case t of
-      ListOf u -> return $ ListConst u (reverse xs) :@ loc
-      _ -> reportErr loc $ ListExpected t
+    return $ ListConst u (reverse xs) :@ loc
 
-  eval (ListSort _ a :@ loc) = do
-    let t = typeOf a
-    case t of
-      ListOf SS -> do
-        xs <- eval a >>= getVal :: EvalM [Text]
-        return $ ListConst SS (map (\k -> StrE $ StrConst k :@ loc) (sort xs)) :@ loc
-      ListOf ZZ -> do
-        xs <- eval a >>= getVal :: EvalM [Integer]
-        return $ ListConst ZZ (map (\k -> IntE $ IntConst k :@ loc) (sort xs)) :@ loc
-      ListOf QQ -> do
-        xs <- eval a >>= getVal :: EvalM [Rat]
-        return $ ListConst QQ (map (\k -> RatE $ RatConst k :@ loc) (sort xs)) :@ loc
-      ListOf BB -> do
-        xs <- eval a >>= getVal :: EvalM [Bool]
-        return $ ListConst BB (map (\k -> BoolE $ BoolConst k :@ loc) (sort xs)) :@ loc
-      _ -> reportErr loc $ SortableListExpected t
+  eval (ListSort SS a :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Text]
+    return $ ListConst SS (map (\k -> StrE $ StrConst k :@ loc) (sort xs)) :@ loc
+  eval (ListSort ZZ a :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Integer]
+    return $ ListConst ZZ (map (\k -> IntE $ IntConst k :@ loc) (sort xs)) :@ loc
+  eval (ListSort QQ a :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Rat]
+    return $ ListConst QQ (map (\k -> RatE $ RatConst k :@ loc) (sort xs)) :@ loc
+  eval (ListSort BB a :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Bool]
+    return $ ListConst BB (map (\k -> BoolE $ BoolConst k :@ loc) (sort xs)) :@ loc
+  eval (ListSort typ _ :@ loc) = reportErr loc $ SortableListExpected typ
 
   eval (ListRand _ ls :@ loc) = do
-    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     s  <- eval r >>= getVal :: EvalM ListExpr
-    case t of
+    case typeOf ls of
       ListOf (ListOf _) -> return s
-      _ -> reportErr loc $ ListExpected t
+      t -> reportErr loc $ ListExpected t
 
   eval (ListUniq _ a :@ loc) = do
     let t = typeOf a
