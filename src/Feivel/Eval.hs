@@ -615,16 +615,12 @@ instance Eval ListExpr where
   eval (ListRange _ a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
     y <- eval b >>= getVal :: EvalM Integer
-    return $ ListConst ZZ [IntE $ IntConst k :@ loc | k <- [x..y]] :@ loc
+    return (ListConst ZZ [IntE $ IntConst k :@ loc | k <- [x..y]] :@ loc)
 
-  eval (ListCat _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
-    case t of
-      ListOf u -> do
-        xs <- eval a >>= getVal :: EvalM [Expr]
-        ys <- eval b >>= getVal :: EvalM [Expr]
-        return $ ListConst u (xs ++ ys) :@ loc
-      _ -> reportErr loc $ ListExpected t
+  eval (ListCat u a b :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Expr]
+    ys <- eval b >>= getVal :: EvalM [Expr]
+    return (ListConst u (xs ++ ys) :@ loc)
 
   eval (ListToss _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -661,21 +657,14 @@ instance Eval ListExpr where
       ListOf (ListOf _) -> return s
       t -> reportErr loc $ ListExpected t
 
-  eval (ListUniq _ a :@ loc) = do
-    let t = typeOf a
+  eval (ListUniq u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
-    case t of
-      ListOf u -> return $ ListConst u (nub xs) :@ loc
-      _ -> reportErr loc $ ListExpected t 
+    return $ ListConst u (nub xs) :@ loc
 
-  eval (ListShuffle _ ls :@ loc) = do
-    let t = typeOf ls
-    case t of
-      ListOf u -> do
-        xs <- eval ls >>= getVal :: EvalM [Expr]
-        ys <- shuffleEvalM xs
-        return $ ListConst u ys :@ loc
-      u -> reportErr loc $ ListExpected u
+  eval (ListShuffle u ls :@ loc) = do
+    xs <- eval ls >>= getVal :: EvalM [Expr]
+    ys <- shuffleEvalM xs
+    return $ ListConst u ys :@ loc
 
   eval (ListShuffles _ ls :@ loc) = do
     let t = typeOf ls
@@ -729,8 +718,7 @@ instance Eval ListExpr where
             then return [st]
             else return []
 
-  eval (ListFilter _ k g xs :@ loc) = do
-    let ListOf t = typeOf xs
+  eval (ListFilter u k g xs :@ loc) = do
     ys <- eval xs >>= getVal :: EvalM [Expr]
     let foo e = do
           defineKey k e loc
@@ -738,17 +726,15 @@ instance Eval ListExpr where
           undefineKey k
           return x
     zs <- filterM foo ys
-    return (ListConst t zs :@ loc)
+    return (ListConst u zs :@ loc)
 
-  eval (ListMatRow _ k m :@ loc) = do
-    u  <- expectMatrix loc m
+  eval (ListMatRow u k m :@ loc) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListRowOf i n
     return (ListConst u as :@ loc)
 
-  eval (ListMatCol _ k m :@ loc) = do
-    u  <- expectMatrix loc m
+  eval (ListMatCol u k m :@ loc) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListColOf i n
@@ -774,8 +760,7 @@ instance Eval ListExpr where
       u -> reportErr loc $ PermutationExpected u
 
   eval (ListPivotColIndices _ m :@ loc) = do
-    let t = typeOf m
-    case t of
+    case typeOf m of
       MatOf QQ -> do
         n  <- eval m >>= getVal :: EvalM (Matrix Rat)
         is <- tryEvalM loc $ mPivotCols n
@@ -911,51 +896,40 @@ instance Eval MatExpr where
       PolyOver BB -> makeAddMat (constP zeroBB)
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatShuffleRows _ m :@ loc) = do
-    u  <- expectMatrix loc m
+  eval (MatShuffleRows u m :@ loc) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mRowsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mVCats ts
     return $ MatConst u n :@ loc
 
-  eval (MatShuffleCols _ m :@ loc) = do
-    u  <- expectMatrix loc m
+  eval (MatShuffleCols u m :@ loc) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mHCats ts
     return $ MatConst u n :@ loc
 
-  eval (MatHCat _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
+  eval (MatHCat u a b :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mHCat m n
-    case t of
-      MatOf u -> return $ MatConst u x :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return (MatConst u x :@ loc)
 
-  eval (MatVCat _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
+  eval (MatVCat u a b :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mVCat m n
-    case t of
-      MatOf u -> return $ MatConst u x :@ loc
-      _ -> reportErr loc $ MatrixExpected t
+    return $ MatConst u x :@ loc
 
-  eval (MatAdd _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
-    case t of
-      MatOf ZZ -> lift2 loc (rAddT (mCell zeroZZ)) a b
-      MatOf QQ -> lift2 loc (rAddT (mCell zeroQQ)) a b
-      MatOf BB -> lift2 loc (rAddT (mCell zeroBB)) a b
-      MatOf (ZZMod n) -> lift2 loc (rAddT (mCell (zeroMod n))) a b
-      MatOf (PolyOver ZZ) -> lift2 loc (rAddT (mCell $ constP zeroZZ)) a b
-      MatOf (PolyOver QQ) -> lift2 loc (rAddT (mCell $ constP zeroQQ)) a b
-      MatOf (PolyOver BB) -> lift2 loc (rAddT (mCell $ constP zeroBB)) a b
-      _ -> reportErr loc $ NumericMatrixExpected t
+  eval (MatAdd ZZ            a b :@ loc) = lift2 loc (rAddT (mCell zeroZZ))          a b
+  eval (MatAdd QQ            a b :@ loc) = lift2 loc (rAddT (mCell zeroQQ))          a b
+  eval (MatAdd BB            a b :@ loc) = lift2 loc (rAddT (mCell zeroBB))          a b
+  eval (MatAdd (ZZMod n)     a b :@ loc) = lift2 loc (rAddT (mCell (zeroMod n)))     a b
+  eval (MatAdd (PolyOver ZZ) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroZZ)) a b
+  eval (MatAdd (PolyOver QQ) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroQQ)) a b
+  eval (MatAdd (PolyOver BB) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroBB)) a b
+  eval (MatAdd u             _ _ :@ loc) = reportErr loc $ NumericMatrixExpected u
 
   eval (MatNeg _ a :@ loc) = do
     let t = typeOf a
@@ -1661,8 +1635,8 @@ lift3
      , Eval z, ToExpr z, Get c
      , Inject d w, HasLocus w
      , PromoteError err
-  ) => Locus -> (a -> b -> c -> Either err d) -> x -> y -> z -> EvalM w
-lift3 loc f x y z = do
+  ) => Locus -> x -> y -> z -> (a -> b -> c -> Either err d) -> EvalM w
+lift3 loc x y z f = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
   c <- eval z >>= getVal
@@ -1680,8 +1654,8 @@ lift4
      , Eval w, ToExpr w, Get d
      , Inject e u, HasLocus u
      , PromoteError err
-  ) => Locus -> (a -> b -> c -> d -> Either err e) -> x -> y -> z -> w -> EvalM u
-lift4 loc f x y z w = do
+  ) => Locus -> x -> y -> z -> w -> (a -> b -> c -> d -> Either err e) -> EvalM u
+lift4 loc x y z w f = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
   c <- eval z >>= getVal
