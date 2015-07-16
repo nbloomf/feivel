@@ -54,6 +54,8 @@ data Type
 
 
 unify :: Type -> Type -> Either TypeErr Type
+unify XX t = Right t
+unify t XX = Right t
 unify t1 t2 = if t1==t2
   then Right t1
   else Left $ TypeUnificationError t1 t2

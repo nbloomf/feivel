@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.Key (
-  pKey, pTypedKey, pUntypedKey, pToken
+  pKey, pTypedKey, pUntypedKey, pToken, pKeyT
 ) where
 
 import Feivel.Key
@@ -39,6 +39,12 @@ pUntypedKey :: ParseM (Key, Type)
 pUntypedKey = do
   x <- try (char '@') >> pToken
   return (Key x, XX)
+  <?> "key (@foo)"
+
+pKeyT :: Type -> ParseM (Key, Type)
+pKeyT typ = do
+  x <- try (char '@') >> pToken
+  return (Key x, typ)
   <?> "key (@foo)"
 
 pTypedKey :: ParseM (Key, Type)
