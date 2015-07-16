@@ -854,21 +854,21 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
 
       , pFun1 "Rand" (pTypedListExpr (ListOf typ)) ListRand (ListOf typ)
 
-      , pFun1 "Reverse"  (pTypedListExpr typ) ListRev      (ListOf typ)
-      , pFun1 "Sort"     (pTypedListExpr typ) ListSort     (ListOf typ)
-      , pFun1 "Unique"   (pTypedListExpr typ) ListUniq     (ListOf typ)
-      , pFun1 "Shuffle"  (pTypedListExpr typ) ListShuffle  (ListOf typ)
+      , pFun1 "Reverse"  (pTypedListExpr typ) (ListRev typ)     (ListOf typ)
+      , pFun1 "Sort"     (pTypedListExpr typ) (ListSort typ)    (ListOf typ)
+      , pFun1 "Unique"   (pTypedListExpr typ) (ListUniq typ)    (ListOf typ)
+      , pFun1 "Shuffle"  (pTypedListExpr typ) (ListShuffle typ) (ListOf typ)
       , pListShuffles
 
-      , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) ListMatRow (ListOf typ)
-      , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) ListMatCol (ListOf typ)
+      , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) (ListMatRow typ) (ListOf typ)
+      , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) (ListMatCol typ) (ListOf typ)
 
       , pListPermsOf
 
       , pListRange
       , pListPivotColIndices typ
       , pListBuilder
-      , pFun2 "Choose" pIntExpr (pTypedListExpr typ) ListChoose (ListOf typ)
+      , pFun2 "Choose" pIntExpr (pTypedListExpr typ) (ListChoose typ) (ListOf typ)
       , pListChoices
       , pListFilter
       ]
@@ -882,7 +882,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           keyword ";"
           (xs,t) <- pTypedListExpr typ
           keyword ")"
-          return (ListFilter k g xs, t)
+          return (ListFilter typ k g xs, t)
 
         pListChoices = do
           _ <- try $ keyword "Choices"
@@ -893,7 +893,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
               keyword ";"
               (xs,_) <- pTypedListExpr t
               keyword ")"
-              return (ListChoices n xs, ListOf (ListOf t))
+              return (ListChoices typ n xs, ListOf typ)
             _ -> error "pListChoices"
 
         pListShuffles = do
@@ -903,7 +903,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
               keyword "("
               (xs,_) <- pTypedListExpr t
               keyword ")"
-              return (ListShuffles xs, ListOf (ListOf t))
+              return (ListShuffles typ xs, ListOf typ)
             _ -> error "pListShuffles"
 
         pListPermsOf = do
@@ -920,7 +920,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           Right _ -> do
             try $ keyword "Range"
             (a,b) <- pTuple2 pIntExpr pIntExpr
-            return (ListRange a b, ListOf ZZ)
+            return (ListRange ZZ a b, ListOf ZZ)
           Left _ -> fail "pListRange"
 
         pListPivotColIndices ZZ = do
@@ -944,7 +944,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           end <- getPosition
           case unify typ t of
             Left _ -> reportParseErr (locus start end) $ TypeUnificationError typ t
-            Right u -> return (ListBuilder expr gds, ListOf u)
+            Right u -> return (ListBuilder typ expr gds, ListOf u)
             where
               pListBind = do
                 w <- try pType
@@ -959,9 +959,9 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
                 return $ Guard e
     
     listOpTable =
-      [ [ Infix (opParser2 ListCat "++") AssocLeft
+      [ [ Infix (opParser2 (ListCat typ) "++") AssocLeft
         ]
-      , [ Infix (opParser2 ListToss "\\\\") AssocLeft
+      , [ Infix (opParser2 (ListToss typ) "\\\\") AssocLeft
         ]
       ]
 

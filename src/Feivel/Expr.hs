@@ -438,38 +438,36 @@ type ListExpr = AtLocus ListExprLeaf
 data ListExprLeaf
   = ListConst   Type [Expr]
   | ListVar     Key
-  | ListBuilder Expr [ListGuard]
+  | ListBuilder Type Expr [ListGuard]
 
   | ListMacro [(Type, Key, Expr)] MacExpr
   | ListAtPos ListExpr IntExpr
   | ListAtIdx MatExpr  IntExpr IntExpr
-
+  | ListRand  ListExpr
   | ListIfThenElse BoolExpr ListExpr ListExpr
 
   -- Arithmetic
-  | ListCat   ListExpr ListExpr
-  | ListToss  ListExpr ListExpr
-  | ListRev   ListExpr
-  | ListSort  ListExpr
-  | ListUniq  ListExpr
+  | ListCat   Type ListExpr ListExpr
+  | ListToss  Type ListExpr ListExpr
+  | ListRev   Type ListExpr
+  | ListSort  Type ListExpr
+  | ListUniq  Type ListExpr
 
-  | ListFilter Key BoolExpr ListExpr
+  | ListFilter Type Key BoolExpr ListExpr
 
   -- Integer
-  | ListRange IntExpr IntExpr
-
-  | ListRand ListExpr
+  | ListRange Type IntExpr IntExpr
 
   -- Matrices
-  | ListMatRow IntExpr MatExpr
-  | ListMatCol IntExpr MatExpr
+  | ListMatRow Type IntExpr MatExpr
+  | ListMatCol Type IntExpr MatExpr
 
   -- Random
-  | ListShuffle  ListExpr
-  | ListChoose   IntExpr  ListExpr
+  | ListShuffle  Type ListExpr
+  | ListChoose   Type IntExpr  ListExpr
 
-  | ListShuffles ListExpr
-  | ListChoices  IntExpr  ListExpr
+  | ListShuffles Type ListExpr
+  | ListChoices  Type IntExpr  ListExpr
 
   -- Permutations
   | ListPermsOf Type ListExpr

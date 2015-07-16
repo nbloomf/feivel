@@ -628,12 +628,12 @@ instance Eval ListExpr where
   eval (ListAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
 
-  eval (ListRange a b :@ loc) = do
+  eval (ListRange _ a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
     y <- eval b >>= getVal :: EvalM Integer
     return $ ListConst ZZ [IntE $ IntConst k :@ loc | k <- [x..y]] :@ loc
 
-  eval (ListCat a b :@ loc) = do
+  eval (ListCat _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       ListOf u -> do
@@ -642,7 +642,7 @@ instance Eval ListExpr where
         return $ ListConst u (xs ++ ys) :@ loc
       _ -> reportErr loc $ ListExpected t
 
-  eval (ListToss a b :@ loc) = do
+  eval (ListToss _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       ListOf u -> do
@@ -651,14 +651,14 @@ instance Eval ListExpr where
         return $ ListConst u (xs \\ ys) :@ loc
       _ -> reportErr loc $ ListExpected t
 
-  eval (ListRev a :@ loc) = do
+  eval (ListRev _ a :@ loc) = do
     t <- typeOf a
     xs <- eval a >>= getVal :: EvalM [Expr]
     case t of
       ListOf u -> return $ ListConst u (reverse xs) :@ loc
       _ -> reportErr loc $ ListExpected t
 
-  eval (ListSort a :@ loc) = do
+  eval (ListSort _ a :@ loc) = do
     t <- typeOf a
     case t of
       ListOf SS -> do
@@ -684,14 +684,14 @@ instance Eval ListExpr where
       ListOf (ListOf _) -> return s
       _ -> reportErr loc $ ListExpected t
 
-  eval (ListUniq a :@ loc) = do
+  eval (ListUniq _ a :@ loc) = do
     t <- typeOf a
     xs <- eval a >>= getVal :: EvalM [Expr]
     case t of
       ListOf u -> return $ ListConst u (nub xs) :@ loc
       _ -> reportErr loc $ ListExpected t 
 
-  eval (ListShuffle ls :@ loc) = do
+  eval (ListShuffle _ ls :@ loc) = do
     t <- typeOf ls
     case t of
       ListOf u -> do
@@ -700,7 +700,7 @@ instance Eval ListExpr where
         return $ ListConst u ys :@ loc
       u -> reportErr loc $ ListExpected u
 
-  eval (ListShuffles ls :@ loc) = do
+  eval (ListShuffles _ ls :@ loc) = do
     t <- typeOf ls
     case t of
       ListOf u -> do
@@ -709,7 +709,7 @@ instance Eval ListExpr where
         return (ListConst (ListOf u) (map toExpr us) :@ loc)
       u -> reportErr loc $ ListExpected u
 
-  eval (ListChoose n ls :@ loc) = do
+  eval (ListChoose _ n ls :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
     t <- typeOf ls
     case t of
@@ -719,14 +719,14 @@ instance Eval ListExpr where
         return $ ListConst u ys :@ loc
       u -> reportErr loc $ ListExpected u
 
-  eval (ListChoices n ls :@ loc) = do
+  eval (ListChoices _ n ls :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
     ListOf t <- typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     let foos = [toExpr $ ListConst t x :@ loc | x <- combinations (fromIntegral k) xs]
     return $ ListConst (ListOf t) foos :@ loc 
 
-  eval (ListBuilder e gs :@ loc) = do
+  eval (ListBuilder _ e gs :@ loc) = do
     st <- getState
     xs <- bar st gs
     ys <- sequence [evalWith e x >>= getVal | x <- xs]
@@ -752,7 +752,7 @@ instance Eval ListExpr where
             then return [st]
             else return []
 
-  eval (ListFilter k g xs :@ loc) = do
+  eval (ListFilter _ k g xs :@ loc) = do
     ListOf t <- typeOf xs
     ys <- eval xs >>= getVal :: EvalM [Expr]
     let foo e = do
@@ -763,22 +763,22 @@ instance Eval ListExpr where
     zs <- filterM foo ys
     return (ListConst t zs :@ loc)
 
-  eval (ListMatRow k m :@ loc) = do
+  eval (ListMatRow _ k m :@ loc) = do
     u  <- expectMatrix loc m
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListRowOf i n
     return (ListConst u as :@ loc)
 
-  eval (ListMatCol k m :@ loc) = do
+  eval (ListMatCol _ k m :@ loc) = do
     u  <- expectMatrix loc m
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListColOf i n
     return (ListConst u as :@ loc)
 
-  eval (ListPermsOf t xs :@ loc) = do
-    case t of
+  eval (ListPermsOf typ xs :@ loc) = do
+    case typ of
       PermOf ZZ -> do
         as <- eval xs >>= getVal :: EvalM [Integer]
         qs <- tryEvalM loc $ permsOf as

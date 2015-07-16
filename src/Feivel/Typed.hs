@@ -143,48 +143,27 @@ instance Typed ListExpr where
       ListOf (ListOf u) -> return $ ListOf u
       _ -> reportErr loc $ ListMatrixExpected t
 
-  typeOf (ListCat  a b :@ loc) = sameType loc a b
-  typeOf (ListToss a b :@ loc) = sameType loc a b
-
-  typeOf (ListShuffle a :@ _) = typeOf a
-
-  typeOf (ListRev x :@ _) = typeOf x
-  typeOf (ListSort x :@ _) = typeOf x
-  typeOf (ListUniq x :@ _) = typeOf x
-
-  typeOf (ListRange _ _ :@ _) = return $ ListOf ZZ
-
-  typeOf (ListBuilder e _ :@ _) = do
-    t <- typeOf e
-    return $ ListOf t
-
   typeOf (ListRand xs :@ loc) = do
     t <- typeOf xs
     case t of
       ListOf (ListOf u) -> return $ ListOf u
       _ -> reportErr loc $ ListListExpected t
 
-  typeOf (ListChoose _ xs :@ _) = typeOf xs
-
-  typeOf (ListChoices _ xs :@ _) = do
-    t <- typeOf xs
-    return $ ListOf t
-
-  typeOf (ListFilter _ _ xs :@ _) = typeOf xs
-
-  typeOf (ListMatRow _ m :@ loc) = do
-    u <- expectMatrix loc m
-    return (ListOf u)
-
-  typeOf (ListMatCol _ m :@ loc) = do
-    u <- expectMatrix loc m
-    return (ListOf u)
-
-  typeOf (ListShuffles xs :@ _) = do
-    t <- typeOf xs
-    return $ ListOf t
-
-  typeOf (ListPermsOf t _ :@ _) = return (ListOf (PermOf t))
+  typeOf (ListCat      typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListToss     typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListRev      typ _     :@ _) = return (ListOf typ)
+  typeOf (ListSort     typ _     :@ _) = return (ListOf typ)
+  typeOf (ListUniq     typ _     :@ _) = return (ListOf typ)
+  typeOf (ListShuffle  typ _     :@ _) = return (ListOf typ)
+  typeOf (ListFilter   typ _ _ _ :@ _) = return (ListOf typ)
+  typeOf (ListMatRow   typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListMatCol   typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListChoose   typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListShuffles typ _     :@ _) = return (ListOf typ)
+  typeOf (ListChoices  typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListRange    typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListPermsOf  typ _     :@ _) = return (ListOf typ)
+  typeOf (ListBuilder  typ _ _   :@ _) = return (ListOf typ)
 
 
 
