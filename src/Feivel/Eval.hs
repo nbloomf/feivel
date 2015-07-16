@@ -247,7 +247,7 @@ instance Eval IntExpr where
     return $ IntConst n :@ loc
 
   eval (MatRank m :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     case t of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -310,11 +310,11 @@ instance Eval StrExpr where
     return $ StrConst (Text tab) :@ loc
 
   eval (StrTypeOf e :@ loc) = do
-    t <- typeOf e
+    let t = typeOf e
     return $ StrConst (Text $ show t) :@ loc
 
   eval (StrFormat LaTeX e :@ loc) = do
-    t <- typeOf e
+    let t = typeOf e
     case t of
       ZZ -> do
         x <- eval e >>= getVal :: EvalM Integer
@@ -374,8 +374,8 @@ instance Eval BoolExpr where
     return $ BoolConst (x /= y) :@ loc
 
   eval (BoolLT a b :@ loc) = do
-    ta <- typeOf a
-    tb <- typeOf b
+    let ta = typeOf a
+    let tb = typeOf b
     case unify ta tb of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -393,8 +393,8 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolLEq a b :@ loc) = do
-    ta <- typeOf a
-    tb <- typeOf b
+    let ta = typeOf a
+    let tb = typeOf b
     case unify ta tb of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -412,8 +412,8 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolGT a b :@ loc) = do
-    ta <- typeOf a
-    tb <- typeOf b
+    let ta = typeOf a
+    let tb = typeOf b
     case unify ta tb of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -431,8 +431,8 @@ instance Eval BoolExpr where
       Left err -> reportErr loc err
 
   eval (BoolGEq a b :@ loc) = do
-    ta <- typeOf a
-    tb <- typeOf b
+    let ta = typeOf a
+    let tb = typeOf b
     case unify ta tb of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -474,7 +474,7 @@ instance Eval BoolExpr where
     return $ BoolConst q :@ loc
 
   eval (MatIsGJForm m :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     case t of
       MatOf QQ -> do
         p <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -546,7 +546,7 @@ instance Eval RatExpr where
 
   {- Mean -}
   eval (RatMean ls :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
@@ -560,7 +560,7 @@ instance Eval RatExpr where
 
   {- Mean Deviation -}
   eval (RatMeanDev ls :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     case t of
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
@@ -574,7 +574,7 @@ instance Eval RatExpr where
 
   {- Standard Deviation -}
   eval (RatStdDev ls d :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     k <- eval d >>= getVal
     case t of
       ListOf ZZ -> do
@@ -589,7 +589,7 @@ instance Eval RatExpr where
 
   {- Z-Score -}
   eval (RatZScore x ls d :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     k <- eval d >>= getVal
     y <- eval x >>= getVal
     case t of
@@ -652,14 +652,14 @@ instance Eval ListExpr where
       _ -> reportErr loc $ ListExpected t
 
   eval (ListRev _ a :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     xs <- eval a >>= getVal :: EvalM [Expr]
     case t of
       ListOf u -> return $ ListConst u (reverse xs) :@ loc
       _ -> reportErr loc $ ListExpected t
 
   eval (ListSort _ a :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     case t of
       ListOf SS -> do
         xs <- eval a >>= getVal :: EvalM [Text]
@@ -676,7 +676,7 @@ instance Eval ListExpr where
       _ -> reportErr loc $ SortableListExpected t
 
   eval (ListRand _ ls :@ loc) = do
-    t  <- typeOf ls
+    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     s  <- eval r >>= getVal :: EvalM ListExpr
@@ -685,14 +685,14 @@ instance Eval ListExpr where
       _ -> reportErr loc $ ListExpected t
 
   eval (ListUniq _ a :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     xs <- eval a >>= getVal :: EvalM [Expr]
     case t of
       ListOf u -> return $ ListConst u (nub xs) :@ loc
       _ -> reportErr loc $ ListExpected t 
 
   eval (ListShuffle _ ls :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     case t of
       ListOf u -> do
         xs <- eval ls >>= getVal :: EvalM [Expr]
@@ -701,7 +701,7 @@ instance Eval ListExpr where
       u -> reportErr loc $ ListExpected u
 
   eval (ListShuffles _ ls :@ loc) = do
-    t <- typeOf ls
+    let t = typeOf ls
     case t of
       ListOf u -> do
         xs <- eval ls >>= getVal :: EvalM [Expr]
@@ -711,7 +711,7 @@ instance Eval ListExpr where
 
   eval (ListChoose _ n ls :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
-    t <- typeOf ls
+    let t = typeOf ls
     case t of
       ListOf u -> do
         xs <- eval ls >>= getVal :: EvalM [Expr]
@@ -721,7 +721,7 @@ instance Eval ListExpr where
 
   eval (ListChoices _ n ls :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
-    ListOf t <- typeOf ls
+    let ListOf t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     let foos = [toExpr $ ListConst t x :@ loc | x <- combinations (fromIntegral k) xs]
     return $ ListConst (ListOf t) foos :@ loc 
@@ -732,7 +732,7 @@ instance Eval ListExpr where
     ys <- sequence [evalWith e x >>= getVal | x <- xs]
     t <- case ys of
            [] -> return XX
-           (z:_) -> typeOf z
+           (z:_) -> return (typeOf z)
     eval $ ListConst t ys :@ loc
       where
         bar :: Store Expr -> [ListGuard] -> EvalM [Store Expr]
@@ -753,7 +753,7 @@ instance Eval ListExpr where
             else return []
 
   eval (ListFilter _ k g xs :@ loc) = do
-    ListOf t <- typeOf xs
+    let ListOf t = typeOf xs
     ys <- eval xs >>= getVal :: EvalM [Expr]
     let foo e = do
           defineKey k e loc
@@ -797,7 +797,7 @@ instance Eval ListExpr where
       u -> reportErr loc $ PermutationExpected u
 
   eval (ListPivotColIndices _ m :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     case t of
       MatOf QQ -> do
         n  <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -857,7 +857,7 @@ instance Eval MatExpr where
     where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
 
   eval (MatRand _ ls :@ loc) = do
-    t  <- typeOf ls
+    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     s  <- eval r >>= getVal :: EvalM MatExpr
@@ -981,7 +981,7 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatNeg _ a :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     case t of
       MatOf ZZ -> lift1 loc (rNegT (mCell zeroZZ)) a
       MatOf QQ -> lift1 loc (rNegT (mCell zeroQQ)) a
@@ -1005,7 +1005,7 @@ instance Eval MatExpr where
       _ -> reportErr loc $ NumericMatrixExpected t
 
   eval (MatPow _ m n :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     k <- eval n >>= getVal :: EvalM Integer
     let makeMatPow a = do
           q <- eval m >>= getVal
@@ -1034,8 +1034,8 @@ instance Eval MatExpr where
     return $ MatConst u p :@ loc
 
   eval (MatScaleRow _ m a h :@ loc) = do
-    t <- typeOf m
-    u <- typeOf a
+    let t = typeOf m
+    let u = typeOf a
     i <- eval h >>= getVal :: EvalM Integer
     case unify t (MatOf u) of
       Right (MatOf ZZ) -> do
@@ -1057,8 +1057,8 @@ instance Eval MatExpr where
       Left err -> reportErr loc err
 
   eval (MatScaleCol _ m a h :@ loc) = do
-    t <- typeOf m
-    u <- typeOf a
+    let t = typeOf m
+    let u = typeOf a
     i <- eval h >>= getVal :: EvalM Integer
     case unify t (MatOf u) of
       Right (MatOf ZZ) -> do
@@ -1080,8 +1080,8 @@ instance Eval MatExpr where
       Left err -> reportErr loc err
 
   eval (MatAddRow _ m a h k :@ loc) = do
-    t <- typeOf m
-    u <- typeOf a
+    let t = typeOf m
+    let u = typeOf a
     i <- eval h >>= getVal
     j <- eval k >>= getVal
     let makeAddRow zer = do
@@ -1099,8 +1099,8 @@ instance Eval MatExpr where
       Left err -> reportErr loc err
 
   eval (MatAddCol _ m a h k :@ loc) = do
-    t <- typeOf m
-    u <- typeOf a
+    let t = typeOf m
+    let u = typeOf a
     i <- eval h >>= getVal
     j <- eval k >>= getVal
     let makeAddCol zer = do
@@ -1132,7 +1132,7 @@ instance Eval MatExpr where
     return $ MatConst u p :@ loc
 
   eval (MatGJForm _ m :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     case t of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -1145,7 +1145,7 @@ instance Eval MatExpr where
       _ -> reportErr loc $ FieldMatrixExpected t
 
   eval (MatGJFactor _ m :@ loc) = do
-    t <- typeOf m
+    let t = typeOf m
     case t of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -1274,7 +1274,7 @@ instance Eval Doc where
 
   eval (Define t k v rest :@ loc) = do
     w <- eval v
-    tw <- typeOf w
+    let tw = typeOf w
     if t == tw
       then do
         defineKey k w loc
@@ -1334,7 +1334,7 @@ instance Eval PolyExpr where
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
   eval (PolyRand _ ls :@ loc) = do
-    t  <- typeOf ls
+    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     s  <- eval r >>= getVal :: EvalM PolyExpr
@@ -1391,7 +1391,7 @@ instance Eval PolyExpr where
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyNeg _ a :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     case t of
       PolyOver ZZ ->
         lift1 loc (rNegT (constP (0::Integer))) a
@@ -1406,7 +1406,7 @@ instance Eval PolyExpr where
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyPow _ a b :@ loc) = do
-    t <- typeOf a
+    let t = typeOf a
     case t of
       PolyOver ZZ ->
         lift2 loc (rPowT (constP (0::Integer))) a b
@@ -1422,7 +1422,7 @@ instance Eval PolyExpr where
       _ -> reportErr loc $ NumericPolynomialExpected t
 
   eval (PolyFromRoots _ x cs :@ loc) = do
-    t <- typeOf cs
+    let t = typeOf cs
     case t of
       ListOf ZZ -> do
         as <- eval cs >>= getVal :: EvalM [Integer]
@@ -1442,7 +1442,7 @@ instance Eval PolyExpr where
       _ -> reportErr loc $ NumericListExpected t
 
   eval (PolyEvalPoly _ p qs :@ loc) = do
-    t <- typeOf p
+    let t = typeOf p
     case t of
       PolyOver ZZ -> do
         a <- eval p >>= getVal :: EvalM (Poly Integer)
@@ -1491,7 +1491,7 @@ instance Eval PermExpr where
   eval (PermIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (PermRand _ ls :@ loc) = do
-    t  <- typeOf ls
+    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     s  <- eval r >>= getVal :: EvalM PermExpr
@@ -1511,7 +1511,7 @@ instance Eval PermExpr where
       _ -> reportErr loc $ PolynomialExpected t
 
   eval (PermInvert _ p :@ loc) = do
-    t <- typeOf p
+    let t = typeOf p
     case t of
       PermOf ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)

@@ -49,36 +49,36 @@ import Feivel.Lib
 {----------}
 
 class Typed t where
-  typeOf :: t -> EvalM Type
+  typeOf :: t -> Type
 
 
 
 unifyTypesOf :: (Typed a, Typed b) => Locus -> a -> b -> EvalM Type
 unifyTypesOf loc a b = do
-  ta <- typeOf a
-  tb <- typeOf b
+  let ta = typeOf a
+  let tb = typeOf b
   case unify ta tb of
     Left err -> reportErr loc err
     Right t -> return t
 
 expectType :: (Typed a) => Locus -> Type -> a -> EvalM Type
 expectType loc t x = do
-  u <- typeOf x
+  let u = typeOf x
   if t == u
     then return u
     else reportErr loc $ TypeMismatch t u
 
 expectMatrix :: (Typed a) => Locus -> a -> EvalM Type
 expectMatrix loc x = do
-  u <- typeOf x
+  let u = typeOf x
   case u of
     MatOf t -> return t
     _ -> reportErr loc $ MatrixExpected u
 
 sameType :: (Typed a, Typed b) => Locus -> a -> b -> EvalM Type
 sameType loc a b = do
-  ta <- typeOf a
-  tb <- typeOf b
+  let ta = typeOf a
+  let tb = typeOf b
   if ta == tb
     then return ta
     else reportErr loc $ TypeMismatch ta tb
@@ -88,11 +88,11 @@ sameType loc a b = do
 {- :Instances -}
 {--------------}
 
-instance Typed IntExpr  where typeOf _ = return ZZ
-instance Typed StrExpr  where typeOf _ = return SS
-instance Typed BoolExpr where typeOf _ = return BB
-instance Typed RatExpr  where typeOf _ = return QQ
-instance Typed Doc      where typeOf _ = return DD
+instance Typed IntExpr  where typeOf _ = ZZ
+instance Typed StrExpr  where typeOf _ = SS
+instance Typed BoolExpr where typeOf _ = BB
+instance Typed RatExpr  where typeOf _ = QQ
+instance Typed Doc      where typeOf _ = DD
 
 instance Typed Expr where
   typeOf (StrE   x) = typeOf x
@@ -113,29 +113,29 @@ instance Typed Expr where
 {-------------}
 
 instance Typed ListExpr where
-  typeOf (ListConst           typ _     :@ _) = return (ListOf typ)
-  typeOf (ListVar             typ _     :@ _) = return (ListOf typ)
-  typeOf (ListIfThenElse      typ _ _ _ :@ _) = return (ListOf typ)
-  typeOf (ListRand            typ _     :@ _) = return (ListOf typ)
-  typeOf (ListAtPos           typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListAtIdx           typ _ _ _ :@ _) = return (ListOf typ)
-  typeOf (ListMacro           typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListCat             typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListToss            typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListRev             typ _     :@ _) = return (ListOf typ)
-  typeOf (ListSort            typ _     :@ _) = return (ListOf typ)
-  typeOf (ListUniq            typ _     :@ _) = return (ListOf typ)
-  typeOf (ListShuffle         typ _     :@ _) = return (ListOf typ)
-  typeOf (ListFilter          typ _ _ _ :@ _) = return (ListOf typ)
-  typeOf (ListMatRow          typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListMatCol          typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListChoose          typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListShuffles        typ _     :@ _) = return (ListOf typ)
-  typeOf (ListChoices         typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListRange           typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListPermsOf         typ _     :@ _) = return (ListOf typ)
-  typeOf (ListBuilder         typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListPivotColIndices typ _     :@ _) = return (ListOf typ)
+  typeOf (ListConst           typ _     :@ _) = ListOf typ
+  typeOf (ListVar             typ _     :@ _) = ListOf typ
+  typeOf (ListIfThenElse      typ _ _ _ :@ _) = ListOf typ
+  typeOf (ListRand            typ _     :@ _) = ListOf typ
+  typeOf (ListAtPos           typ _ _   :@ _) = ListOf typ
+  typeOf (ListAtIdx           typ _ _ _ :@ _) = ListOf typ
+  typeOf (ListMacro           typ _ _   :@ _) = ListOf typ
+  typeOf (ListCat             typ _ _   :@ _) = ListOf typ
+  typeOf (ListToss            typ _ _   :@ _) = ListOf typ
+  typeOf (ListRev             typ _     :@ _) = ListOf typ
+  typeOf (ListSort            typ _     :@ _) = ListOf typ
+  typeOf (ListUniq            typ _     :@ _) = ListOf typ
+  typeOf (ListShuffle         typ _     :@ _) = ListOf typ
+  typeOf (ListFilter          typ _ _ _ :@ _) = ListOf typ
+  typeOf (ListMatRow          typ _ _   :@ _) = ListOf typ
+  typeOf (ListMatCol          typ _ _   :@ _) = ListOf typ
+  typeOf (ListChoose          typ _ _   :@ _) = ListOf typ
+  typeOf (ListShuffles        typ _     :@ _) = ListOf typ
+  typeOf (ListChoices         typ _ _   :@ _) = ListOf typ
+  typeOf (ListRange           typ _ _   :@ _) = ListOf typ
+  typeOf (ListPermsOf         typ _     :@ _) = ListOf typ
+  typeOf (ListBuilder         typ _ _   :@ _) = ListOf typ
+  typeOf (ListPivotColIndices typ _     :@ _) = ListOf typ
 
 
 
@@ -144,13 +144,13 @@ instance Typed ListExpr where
 {------------}
 
 instance Typed MacExpr where
-  typeOf (MacConst      typ _ _ _ :@ _) = return (MacTo typ)
-  typeOf (MacVar        typ _     :@ _) = return (MacTo typ)
-  typeOf (MacMacro      typ _ _   :@ _) = return (MacTo typ)
-  typeOf (MacAtPos      typ _ _   :@ _) = return (MacTo typ)
-  typeOf (MacAtIdx      typ _ _ _ :@ _) = return (MacTo typ)
-  typeOf (MacRand       typ _     :@ _) = return (MacTo typ)
-  typeOf (MacIfThenElse typ _ _ _ :@ _) = return (MacTo typ)
+  typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacVar        typ _     :@ _) = MacTo typ
+  typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtPos      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtIdx      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacRand       typ _     :@ _) = MacTo typ
+  typeOf (MacIfThenElse typ _ _ _ :@ _) = MacTo typ
 
 
 
@@ -159,41 +159,41 @@ instance Typed MacExpr where
 {------------}
 
 instance Typed MatExpr where
-  typeOf (MatVar         typ _         :@ _) = return (MatOf typ)
-  typeOf (MatMacro       typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatAtPos       typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatAtIdx       typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatIfThenElse  typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatConst       typ _         :@ _) = return (MatOf typ)
-  typeOf (MatId          typ _         :@ _) = return (MatOf typ)
-  typeOf (MatSwapE       typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatScaleE      typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatAddE        typ _ _ _ _   :@ _) = return (MatOf typ)
-  typeOf (MatHCat        typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatVCat        typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatAdd         typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatMul         typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatPow         typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatTrans       typ _         :@ _) = return (MatOf typ)
-  typeOf (MatNeg         typ _         :@ _) = return (MatOf typ)
-  typeOf (MatSwapRows    typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatSwapCols    typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatScaleRow    typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatScaleCol    typ _ _ _     :@ _) = return (MatOf typ)
-  typeOf (MatAddRow      typ _ _ _ _   :@ _) = return (MatOf typ)
-  typeOf (MatAddCol      typ _ _ _ _   :@ _) = return (MatOf typ)
-  typeOf (MatDelRow      typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatDelCol      typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatShuffleRows typ _         :@ _) = return (MatOf typ)
-  typeOf (MatShuffleCols typ _         :@ _) = return (MatOf typ)
-  typeOf (MatGJForm      typ _         :@ _) = return (MatOf typ)
-  typeOf (MatGJFactor    typ _         :@ _) = return (MatOf typ)
-  typeOf (MatGetRow      typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatGetCol      typ _ _       :@ _) = return (MatOf typ)
-  typeOf (MatRowFromList typ _         :@ _) = return (MatOf typ)
-  typeOf (MatColFromList typ _         :@ _) = return (MatOf typ)
-  typeOf (MatRand        typ _         :@ _) = return (MatOf typ)
-  typeOf (MatBuilder     typ _ _ _ _ _ :@ _) = return (MatOf typ)
+  typeOf (MatVar         typ _         :@ _) = MatOf typ
+  typeOf (MatMacro       typ _ _       :@ _) = MatOf typ
+  typeOf (MatAtPos       typ _ _       :@ _) = MatOf typ
+  typeOf (MatAtIdx       typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatIfThenElse  typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatConst       typ _         :@ _) = MatOf typ
+  typeOf (MatId          typ _         :@ _) = MatOf typ
+  typeOf (MatSwapE       typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleE      typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatAddE        typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatHCat        typ _ _       :@ _) = MatOf typ
+  typeOf (MatVCat        typ _ _       :@ _) = MatOf typ
+  typeOf (MatAdd         typ _ _       :@ _) = MatOf typ
+  typeOf (MatMul         typ _ _       :@ _) = MatOf typ
+  typeOf (MatPow         typ _ _       :@ _) = MatOf typ
+  typeOf (MatTrans       typ _         :@ _) = MatOf typ
+  typeOf (MatNeg         typ _         :@ _) = MatOf typ
+  typeOf (MatSwapRows    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatSwapCols    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleRow    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleCol    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatAddRow      typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatAddCol      typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatDelRow      typ _ _       :@ _) = MatOf typ
+  typeOf (MatDelCol      typ _ _       :@ _) = MatOf typ
+  typeOf (MatShuffleRows typ _         :@ _) = MatOf typ
+  typeOf (MatShuffleCols typ _         :@ _) = MatOf typ
+  typeOf (MatGJForm      typ _         :@ _) = MatOf typ
+  typeOf (MatGJFactor    typ _         :@ _) = MatOf typ
+  typeOf (MatGetRow      typ _ _       :@ _) = MatOf typ
+  typeOf (MatGetCol      typ _ _       :@ _) = MatOf typ
+  typeOf (MatRowFromList typ _         :@ _) = MatOf typ
+  typeOf (MatColFromList typ _         :@ _) = MatOf typ
+  typeOf (MatRand        typ _         :@ _) = MatOf typ
+  typeOf (MatBuilder     typ _ _ _ _ _ :@ _) = MatOf typ
 
 
 
@@ -202,20 +202,20 @@ instance Typed MatExpr where
 {-------------}
 
 instance Typed PolyExpr where
-  typeOf (PolyVar        typ _     :@ _) = return (PolyOver typ)
-  typeOf (PolyMacro      typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyConst      typ _     :@ _) = return (PolyOver typ)
-  typeOf (PolyAdd        typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolySub        typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyMul        typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyNeg        typ _     :@ _) = return (PolyOver typ)
-  typeOf (PolyPow        typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyAtPos      typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyAtIdx      typ _ _ _ :@ _) = return (PolyOver typ)
-  typeOf (PolyIfThenElse typ _ _ _ :@ _) = return (PolyOver typ)
-  typeOf (PolyRand       typ _     :@ _) = return (PolyOver typ)
-  typeOf (PolyFromRoots  typ _ _   :@ _) = return (PolyOver typ)
-  typeOf (PolyEvalPoly   typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyVar        typ _     :@ _) = PolyOver typ
+  typeOf (PolyMacro      typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyConst      typ _     :@ _) = PolyOver typ
+  typeOf (PolyAdd        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolySub        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyMul        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyNeg        typ _     :@ _) = PolyOver typ
+  typeOf (PolyPow        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyAtPos      typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyAtIdx      typ _ _ _ :@ _) = PolyOver typ
+  typeOf (PolyIfThenElse typ _ _ _ :@ _) = PolyOver typ
+  typeOf (PolyRand       typ _     :@ _) = PolyOver typ
+  typeOf (PolyFromRoots  typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyEvalPoly   typ _ _   :@ _) = PolyOver typ
 
 
 
@@ -224,15 +224,15 @@ instance Typed PolyExpr where
 {-------------}
 
 instance Typed PermExpr where
-  typeOf (PermVar        typ _     :@ _) = return (PermOf typ)
-  typeOf (PermMacro      typ _ _   :@ _) = return (PermOf typ)
-  typeOf (PermConst      typ _     :@ _) = return (PermOf typ)
-  typeOf (PermAtPos      typ _ _   :@ _) = return (PermOf typ)
-  typeOf (PermAtIdx      typ _ _ _ :@ _) = return (PermOf typ)
-  typeOf (PermIfThenElse typ _ _ _ :@ _) = return (PermOf typ)
-  typeOf (PermRand       typ _     :@ _) = return (PermOf typ)
-  typeOf (PermCompose    typ _ _   :@ _) = return (PermOf typ)
-  typeOf (PermInvert     typ _     :@ _) = return (PermOf typ)
+  typeOf (PermVar        typ _     :@ _) = PermOf typ
+  typeOf (PermMacro      typ _ _   :@ _) = PermOf typ
+  typeOf (PermConst      typ _     :@ _) = PermOf typ
+  typeOf (PermAtPos      typ _ _   :@ _) = PermOf typ
+  typeOf (PermAtIdx      typ _ _ _ :@ _) = PermOf typ
+  typeOf (PermIfThenElse typ _ _ _ :@ _) = PermOf typ
+  typeOf (PermRand       typ _     :@ _) = PermOf typ
+  typeOf (PermCompose    typ _ _   :@ _) = PermOf typ
+  typeOf (PermInvert     typ _     :@ _) = PermOf typ
 
 
 
@@ -241,18 +241,18 @@ instance Typed PermExpr where
 {--------------}
 
 instance Typed ZZModExpr where
-  typeOf (ZZModConst      typ _     :@ _) = return typ
-  typeOf (ZZModVar        typ _     :@ _) = return typ
-  typeOf (ZZModAtPos      typ _ _   :@ _) = return typ
-  typeOf (ZZModAtIdx      typ _ _ _ :@ _) = return typ
-  typeOf (ZZModMacro      typ _ _   :@ _) = return typ
-  typeOf (ZZModIfThenElse typ _ _ _ :@ _) = return typ
-  typeOf (ZZModCast       typ _     :@ _) = return typ
-  typeOf (ZZModNeg        typ _     :@ _) = return typ
-  typeOf (ZZModInv        typ _     :@ _) = return typ
-  typeOf (ZZModAdd        typ _ _   :@ _) = return typ
-  typeOf (ZZModSub        typ _ _   :@ _) = return typ
-  typeOf (ZZModMult       typ _ _   :@ _) = return typ
-  typeOf (ZZModPow        typ _ _   :@ _) = return typ
-  typeOf (ZZModSum        typ _     :@ _) = return typ
-  typeOf (ZZModProd       typ _     :@ _) = return typ
+  typeOf (ZZModConst      typ _     :@ _) = typ
+  typeOf (ZZModVar        typ _     :@ _) = typ
+  typeOf (ZZModAtPos      typ _ _   :@ _) = typ
+  typeOf (ZZModAtIdx      typ _ _ _ :@ _) = typ
+  typeOf (ZZModMacro      typ _ _   :@ _) = typ
+  typeOf (ZZModIfThenElse typ _ _ _ :@ _) = typ
+  typeOf (ZZModCast       typ _     :@ _) = typ
+  typeOf (ZZModNeg        typ _     :@ _) = typ
+  typeOf (ZZModInv        typ _     :@ _) = typ
+  typeOf (ZZModAdd        typ _ _   :@ _) = typ
+  typeOf (ZZModSub        typ _ _   :@ _) = typ
+  typeOf (ZZModMult       typ _ _   :@ _) = typ
+  typeOf (ZZModPow        typ _ _   :@ _) = typ
+  typeOf (ZZModSum        typ _     :@ _) = typ
+  typeOf (ZZModProd       typ _     :@ _) = typ

@@ -55,7 +55,7 @@ toStateT loc vs = do
     where
       checkType :: Locus -> (Type, Key, Expr) -> EvalM (Key, Expr)
       checkType loc' (t,k,v) = do
-        tv <- typeOf v
+        let tv = typeOf v
         if tv == t
           then return (k,v)
           else reportErr loc' $ TypeMismatch t tv
@@ -84,7 +84,7 @@ instance Get Expr where
 instance Get IntExpr where
   get (IntE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ TypeMismatch ZZ t
 
 instance Get Integer where
@@ -105,7 +105,7 @@ instance Get StrExpr where
   get (DocE (DocText str :@ loc)) = return $ StrConst str :@ loc
   get (DocE (Escaped c :@ loc)) = return $ StrConst (Text [c]) :@ loc
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ TypeMismatch SS t
 
 instance Get Text where
@@ -123,7 +123,7 @@ instance Get Text where
 instance Get BoolExpr where
   get (BoolE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ TypeMismatch BB t
 
 instance Get Bool where
@@ -141,7 +141,7 @@ instance Get Bool where
 instance Get RatExpr where
   get (RatE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ TypeMismatch QQ t
 
 instance Get Rat where
@@ -159,7 +159,7 @@ instance Get Rat where
 instance Get ListExpr where
   get (ListE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ ListExpected t
 
 instance (Get a) => Get [a] where
@@ -173,7 +173,7 @@ instance (Get a) => Get [a] where
           ListE (ListConst _ xs :@ _) -> return xs
           ListE v -> reportErr (locusOf v) UnevaluatedExpression
           v -> do
-            t <- typeOf v
+            let t = typeOf v
             reportErr (locusOf v) $ ListExpected t
 
 
@@ -184,7 +184,7 @@ instance (Get a) => Get [a] where
 instance Get MacExpr where
   get (MacE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ MacroExpected t
 
 instance Get (Store Expr, Expr) where
@@ -195,7 +195,7 @@ instance Get (Store Expr, Expr) where
         return (mergeState st amb, y)
       MacE v -> reportErr (locusOf v) UnevaluatedExpression
       v -> do
-        t <- typeOf v
+        let t = typeOf v
         reportErr (locusOf v) $ MacroExpected t
 
 
@@ -206,7 +206,7 @@ instance Get (Store Expr, Expr) where
 instance Get MatExpr where
   get (MatE m) = return m
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ MatrixExpected t
 
 instance (Get a) => Get (Matrix a) where
@@ -220,7 +220,7 @@ instance (Get a) => Get (Matrix a) where
           MatE (MatConst _ m :@ _) -> return m
           MatE v -> reportErr (locusOf v) UnevaluatedExpression
           v -> do
-            t <- typeOf v
+            let t = typeOf v
             reportErr (locusOf v) $ MatrixExpected t
 
 
@@ -231,7 +231,7 @@ instance (Get a) => Get (Matrix a) where
 instance Get Doc where
   get (DocE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ TypeMismatch DD t
 
 
@@ -242,7 +242,7 @@ instance Get Doc where
 instance Get PolyExpr where
   get (PolyE m) = return m
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ PolynomialExpected t
 
 instance (Get a) => Get (Poly a) where
@@ -256,7 +256,7 @@ instance (Get a) => Get (Poly a) where
           PolyE (PolyConst _ m :@ _) -> return m
           PolyE v -> reportErr (locusOf v) UnevaluatedExpression
           v -> do
-            t <- typeOf v
+            let t = typeOf v
             reportErr (locusOf v) $ PolynomialExpected t
 
 
@@ -267,7 +267,7 @@ instance (Get a) => Get (Poly a) where
 instance Get PermExpr where
   get (PermE m) = return m
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ PermutationExpected t
 
 instance Get (Perm Expr) where
@@ -276,7 +276,7 @@ instance Get (Perm Expr) where
       PermE (PermConst _ m :@ _) -> return m
       PermE v -> reportErr (locusOf v) UnevaluatedExpression
       v -> do
-        t <- typeOf v
+        let t = typeOf v
         reportErr (locusOf v) $ PermutationExpected t
 
 instance Get (Perm Integer) where
@@ -292,7 +292,7 @@ instance Get (Perm Integer) where
 instance Get ZZModExpr where
   get (ZZModE y) = return y
   get v = do
-    t <- typeOf v
+    let t = typeOf v
     reportErr (locusOf v) $ ModularIntegerExpected t
 
 instance Get ZZModulo where
