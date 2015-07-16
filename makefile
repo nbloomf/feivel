@@ -42,6 +42,10 @@ golden-list-int: FORCE
 	@echo "Golden Integer List Tests"
 	shelltest --color --execdir test/gold/expr/list/int
 
+golden-poly: FORCE
+	@echo "Golden Polynomial Tests"
+	shelltest --color --execdir test/gold/expr/poly
+
 
 
 FORCE:

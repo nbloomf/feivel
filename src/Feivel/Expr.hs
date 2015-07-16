@@ -552,24 +552,24 @@ type PolyExpr = AtLocus PolyExprLeaf
 
 data PolyExprLeaf
   = PolyConst Type (Poly Expr)
-  | PolyVar   Key
+  | PolyVar   Type Key
 
-  | PolyMacro [(Type, Key, Expr)] MacExpr
-  | PolyAtPos ListExpr IntExpr
-  | PolyAtIdx MatExpr  IntExpr IntExpr
+  | PolyMacro Type [(Type, Key, Expr)] MacExpr
+  | PolyAtPos Type ListExpr IntExpr
+  | PolyAtIdx Type MatExpr  IntExpr IntExpr
 
-  | PolyRand ListExpr
+  | PolyRand Type ListExpr
 
-  | PolyIfThenElse BoolExpr PolyExpr PolyExpr
+  | PolyIfThenElse Type BoolExpr PolyExpr PolyExpr
 
-  | PolyAdd PolyExpr PolyExpr
-  | PolySub PolyExpr PolyExpr
-  | PolyMul PolyExpr PolyExpr
-  | PolyPow PolyExpr IntExpr
-  | PolyNeg PolyExpr
+  | PolyAdd Type PolyExpr PolyExpr
+  | PolySub Type PolyExpr PolyExpr
+  | PolyMul Type PolyExpr PolyExpr
+  | PolyPow Type PolyExpr IntExpr
+  | PolyNeg Type PolyExpr
 
-  | PolyFromRoots Variable ListExpr
-  | PolyEvalPoly  PolyExpr [(Variable, PolyExpr)]
+  | PolyFromRoots Type Variable ListExpr
+  | PolyEvalPoly  Type PolyExpr [(Variable, PolyExpr)]
   deriving (Eq, Show)
 
 

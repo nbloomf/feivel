@@ -1161,22 +1161,22 @@ pTypedPolyExpr :: Type -> ParseM (PolyExpr, Type)
 pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pTypedExpr) (pTypedPolyExpr typ) "polynomial expression"
-      [ pVarExpr PolyVar (PolyOver typ)
+      [ pVarExpr (PolyVar typ) (PolyOver typ)
 
-      , pAtPos (PolyOver typ) PolyAtPos
-      , pAtIdx (PolyOver typ) PolyAtIdx
+      , pAtPos (PolyOver typ) (PolyAtPos typ)
+      , pAtIdx (PolyOver typ) (PolyAtIdx typ)
 
-      , pMacroExpr PolyMacro
+      , pMacroExpr (PolyMacro typ)
 
-      , pIfThenElseExpr (pTypedPolyExpr typ) PolyIfThenElse (PolyOver typ)
+      , pIfThenElseExpr (pTypedPolyExpr typ) (PolyIfThenElse typ) (PolyOver typ)
 
-      , pFun1 "Rand" (pTypedListExpr (PolyOver typ)) PolyRand (PolyOver typ)
+      , pFun1 "Rand" (pTypedListExpr (PolyOver typ)) (PolyRand typ) (PolyOver typ)
 
       , pPolyPow
 
       , pPolyNull
 
-      , pFun2 "FromRoots" (pLiftAt pVar XX) (pTypedListExpr typ) PolyFromRoots (PolyOver typ)
+      , pFun2 "FromRoots" (pLiftAt pVar XX) (pTypedListExpr typ) (PolyFromRoots typ) (PolyOver typ)
 
       , pPolyEvalPoly
       ]
@@ -1188,7 +1188,7 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
           keyword ";"
           xs <- sepBy1 pSubs (keyword ";")
           keyword ")"
-          return (PolyEvalPoly p xs, PolyOver typ)
+          return (PolyEvalPoly typ p xs, PolyOver typ)
             where
               pSubs = do
                 x <- try $ pVar
@@ -1196,19 +1196,19 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
                 (q,_) <- pTypedPolyExpr typ
                 return (x,q)
 
-        pPolyPow = pFun2T "Pow" (pTypedPolyExpr typ) pIntExpr PolyPow
+        pPolyPow = pFun2T "Pow" (pTypedPolyExpr typ) pIntExpr (PolyPow typ)
 
         pPolyNull = do
           try $ keyword "Null"
           return (PolyConst typ nullP, PolyOver typ)
 
     polyOpTable =
-      [ [ Prefix (opParser1 PolyNeg "neg")
+      [ [ Prefix (opParser1 (PolyNeg typ) "neg")
         ]
-      , [ Infix (opParser2 PolyMul "*") AssocLeft
+      , [ Infix (opParser2 (PolyMul typ) "*") AssocLeft
         ]
-      , [ Infix (opParser2 PolyAdd "+") AssocLeft
-        , Infix (opParser2 PolySub "-") AssocLeft
+      , [ Infix (opParser2 (PolyAdd typ) "+") AssocLeft
+        , Infix (opParser2 (PolySub typ) "-") AssocLeft
         ]
       ]
 

@@ -1325,15 +1325,15 @@ instance Eval PolyExpr where
     return $ PolyConst t q :@ loc
 
   {- :Common -}
-  eval (PolyVar key :@ loc)        = eKey key loc
-  eval (PolyAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (PolyMacro vals mac :@ loc) = eMacro vals mac loc
-  eval (PolyIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (PolyVar _ key :@ loc)        = eKey key loc
+  eval (PolyAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (PolyMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (PolyIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (PolyAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (PolyAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
-  eval (PolyRand ls :@ loc) = do
+  eval (PolyRand _ ls :@ loc) = do
     t  <- typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
@@ -1342,7 +1342,7 @@ instance Eval PolyExpr where
       ListOf (PolyOver _) -> return s
       _ -> reportErr loc $ ListExpected t
 
-  eval (PolyAdd a b :@ loc) = do
+  eval (PolyAdd _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       PolyOver ZZ ->
@@ -1358,7 +1358,7 @@ instance Eval PolyExpr where
         return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
-  eval (PolySub a b :@ loc) = do
+  eval (PolySub _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       PolyOver ZZ ->
@@ -1374,7 +1374,7 @@ instance Eval PolyExpr where
         return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
-  eval (PolyMul a b :@ loc) = do
+  eval (PolyMul _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       PolyOver ZZ ->
@@ -1390,7 +1390,7 @@ instance Eval PolyExpr where
         return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
-  eval (PolyNeg a :@ loc) = do
+  eval (PolyNeg _ a :@ loc) = do
     t <- typeOf a
     case t of
       PolyOver ZZ ->
@@ -1405,7 +1405,7 @@ instance Eval PolyExpr where
         return $ PolyConst (ZZMod n) (fmap toExpr y) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
-  eval (PolyPow a b :@ loc) = do
+  eval (PolyPow _ a b :@ loc) = do
     t <- typeOf a
     case t of
       PolyOver ZZ ->
@@ -1421,7 +1421,7 @@ instance Eval PolyExpr where
         return $ PolyConst (ZZMod n) (fmap toExpr z) :@ loc
       _ -> reportErr loc $ NumericPolynomialExpected t
 
-  eval (PolyFromRoots x cs :@ loc) = do
+  eval (PolyFromRoots _ x cs :@ loc) = do
     t <- typeOf cs
     case t of
       ListOf ZZ -> do
@@ -1441,7 +1441,7 @@ instance Eval PolyExpr where
         return (PolyConst (ZZMod n) q :@ loc)
       _ -> reportErr loc $ NumericListExpected t
 
-  eval (PolyEvalPoly p qs :@ loc) = do
+  eval (PolyEvalPoly _ p qs :@ loc) = do
     t <- typeOf p
     case t of
       PolyOver ZZ -> do

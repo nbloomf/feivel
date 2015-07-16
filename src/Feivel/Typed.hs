@@ -268,55 +268,20 @@ instance Typed MatExpr where
 {-------------}
 
 instance Typed PolyExpr where
-  typeOf (PolyVar key :@ loc) = do
-    expr <- lookupKey loc key
-    t <- typeOf expr
-    case t of
-      PolyOver x -> return $ PolyOver x
-      u -> reportErr loc $ PolynomialExpected u
-
-  typeOf (PolyMacro _ x :@ _) = typeOf x
-
-  typeOf (PolyConst t _ :@ _) = return $ PolyOver t
-
-  typeOf (PolyAdd  a b :@ loc) = sameType loc a b
-  typeOf (PolySub  a b :@ loc) = sameType loc a b
-  typeOf (PolyMul  a b :@ loc) = sameType loc a b
-  typeOf (PolyNeg  a :@ _) = typeOf a
-  typeOf (PolyPow  a _ :@ _) = typeOf a
-
-  typeOf (PolyAtPos m _ :@ loc) = do
-    t <- typeOf m
-    case t of
-      MatOf (PolyOver u) -> return $ PolyOver u
-      _ -> reportErr loc $ PolynomialListExpected t
-
-  typeOf (PolyAtIdx m _ _ :@ loc) = do
-    t <- typeOf m
-    case t of
-      ListOf (PolyOver u) -> return $ PolyOver u
-      _ -> reportErr loc $ PolynomialMatrixExpected t
-
-  typeOf (PolyIfThenElse _ t f :@ loc) = do
-    a <- typeOf t
-    b <- typeOf f
-    case unify a b of
-      Right u -> return u
-      Left err -> reportErr loc err
-
-  typeOf (PolyRand xs :@ loc) = do
-    t <- typeOf xs
-    case t of
-      ListOf (PolyOver u) -> return $ PolyOver u
-      _ -> reportErr loc $ PolynomialListExpected t
-
-  typeOf (PolyFromRoots _ cs :@ loc) = do
-    t <- typeOf cs
-    case t of
-      ListOf u -> return (PolyOver u)
-      _ -> reportErr loc $ ListExpected t
-
-  typeOf (PolyEvalPoly p _ :@ _) = typeOf p
+  typeOf (PolyVar        typ _     :@ _) = return (PolyOver typ)
+  typeOf (PolyMacro      typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyConst      typ _     :@ _) = return (PolyOver typ)
+  typeOf (PolyAdd        typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolySub        typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyMul        typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyNeg        typ _     :@ _) = return (PolyOver typ)
+  typeOf (PolyPow        typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyAtPos      typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyAtIdx      typ _ _ _ :@ _) = return (PolyOver typ)
+  typeOf (PolyIfThenElse typ _ _ _ :@ _) = return (PolyOver typ)
+  typeOf (PolyRand       typ _     :@ _) = return (PolyOver typ)
+  typeOf (PolyFromRoots  typ _ _   :@ _) = return (PolyOver typ)
+  typeOf (PolyEvalPoly   typ _ _   :@ _) = return (PolyOver typ)
 
 
 
