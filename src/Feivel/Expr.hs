@@ -168,7 +168,7 @@ instance ToExpr Rat      where toExpr r = RatE   $ RatConst r :@ NullLocus
 instance ToExpr String   where toExpr s = StrE   $ StrConst (Text s) :@ NullLocus
 instance ToExpr Text     where toExpr t = StrE   $ StrConst t :@ NullLocus
 instance ToExpr Bool     where toExpr b = BoolE  $ BoolConst b :@ NullLocus
-instance ToExpr ZZModulo where toExpr a = ZZModE $ ZZModConst a :@ NullLocus
+instance ToExpr ZZModulo where toExpr (ZZModulo a n) = ZZModE $ ZZModConst (ZZMod n) (ZZModulo a n) :@ NullLocus
 
 
 
@@ -404,27 +404,27 @@ data RatExprLeaf
 type ZZModExpr = AtLocus ZZModExprLeaf
 
 data ZZModExprLeaf
-  = ZZModConst ZZModulo
-  | ZZModVar   Key
-  | ZZModCast  Integer IntExpr
+  = ZZModConst Type ZZModulo
+  | ZZModVar   Type Key
+  | ZZModCast  Type IntExpr
 
-  | ZZModMacro [(Type, Key, Expr)] MacExpr
-  | ZZModAtPos ListExpr IntExpr
-  | ZZModAtIdx MatExpr  IntExpr IntExpr
+  | ZZModMacro Type [(Type, Key, Expr)] MacExpr
+  | ZZModAtPos Type ListExpr IntExpr
+  | ZZModAtIdx Type MatExpr  IntExpr IntExpr
 
-  | ZZModIfThenElse BoolExpr ZZModExpr ZZModExpr
+  | ZZModIfThenElse Type BoolExpr ZZModExpr ZZModExpr
  
   -- Arithmetic
-  | ZZModNeg   ZZModExpr
-  | ZZModInv   ZZModExpr
+  | ZZModNeg   Type ZZModExpr
+  | ZZModInv   Type ZZModExpr
  
-  | ZZModAdd   ZZModExpr ZZModExpr
-  | ZZModSub   ZZModExpr ZZModExpr
-  | ZZModMult  ZZModExpr ZZModExpr
-  | ZZModPow   ZZModExpr IntExpr
+  | ZZModAdd   Type ZZModExpr ZZModExpr
+  | ZZModSub   Type ZZModExpr ZZModExpr
+  | ZZModMult  Type ZZModExpr ZZModExpr
+  | ZZModPow   Type ZZModExpr IntExpr
 
-  | ZZModSum   ListExpr
-  | ZZModProd  ListExpr
+  | ZZModSum   Type ListExpr
+  | ZZModProd  Type ListExpr
   deriving (Eq, Show)
 
 
@@ -490,13 +490,13 @@ type MatExpr = AtLocus MatExprLeaf
 
 data MatExprLeaf
   = MatConst Type (Matrix Expr)
-  | MatVar   Key
+  | MatVar   Type Key
 
-  | MatMacro [(Type, Key, Expr)] MacExpr
-  | MatAtPos ListExpr IntExpr
-  | MatAtIdx MatExpr  IntExpr IntExpr
+  | MatMacro Type [(Type, Key, Expr)] MacExpr
+  | MatAtPos Type ListExpr IntExpr
+  | MatAtIdx Type MatExpr  IntExpr IntExpr
 
-  | MatIfThenElse BoolExpr MatExpr MatExpr
+  | MatIfThenElse Type BoolExpr MatExpr MatExpr
 
   | MatBuilder Type Expr Key ListExpr Key ListExpr
 
@@ -510,36 +510,36 @@ data MatExprLeaf
   | MatAddE   Type IntExpr IntExpr IntExpr Expr
 
   -- Arithmetic
-  | MatHCat  MatExpr MatExpr
-  | MatVCat  MatExpr MatExpr
-  | MatAdd   MatExpr MatExpr
-  | MatMul   MatExpr MatExpr
-  | MatPow   MatExpr IntExpr
-  | MatNeg   MatExpr
-  | MatTrans MatExpr
+  | MatHCat  Type MatExpr MatExpr
+  | MatVCat  Type MatExpr MatExpr
+  | MatAdd   Type MatExpr MatExpr
+  | MatMul   Type MatExpr MatExpr
+  | MatPow   Type MatExpr IntExpr
+  | MatNeg   Type MatExpr
+  | MatTrans Type MatExpr
 
   -- Mutation
-  | MatSwapRows MatExpr IntExpr IntExpr
-  | MatSwapCols MatExpr IntExpr IntExpr
-  | MatScaleRow MatExpr Expr IntExpr
-  | MatScaleCol MatExpr Expr IntExpr
-  | MatAddRow   MatExpr Expr IntExpr IntExpr
-  | MatAddCol   MatExpr Expr IntExpr IntExpr
-  | MatDelRow   MatExpr IntExpr
-  | MatDelCol   MatExpr IntExpr
+  | MatSwapRows Type MatExpr IntExpr IntExpr
+  | MatSwapCols Type MatExpr IntExpr IntExpr
+  | MatScaleRow Type MatExpr Expr IntExpr
+  | MatScaleCol Type MatExpr Expr IntExpr
+  | MatAddRow   Type MatExpr Expr IntExpr IntExpr
+  | MatAddCol   Type MatExpr Expr IntExpr IntExpr
+  | MatDelRow   Type MatExpr IntExpr
+  | MatDelCol   Type MatExpr IntExpr
 
-  | MatGetRow   IntExpr MatExpr
-  | MatGetCol   IntExpr MatExpr
+  | MatGetRow   Type IntExpr MatExpr
+  | MatGetCol   Type IntExpr MatExpr
 
   -- Randomness
-  | MatShuffleRows MatExpr
-  | MatShuffleCols MatExpr
+  | MatShuffleRows Type MatExpr
+  | MatShuffleCols Type MatExpr
 
   -- Factorizations
-  | MatGJForm   MatExpr
-  | MatGJFactor MatExpr
+  | MatGJForm   Type MatExpr
+  | MatGJFactor Type MatExpr
 
-  | MatRand ListExpr
+  | MatRand Type ListExpr
   deriving (Eq, Show)
 
 
@@ -606,15 +606,15 @@ type MacExpr = AtLocus MacExprLeaf
 
 data MacExprLeaf
   = MacConst Type [(Type, Key, Expr)] Expr (Store Expr, Bool)
-  | MacVar   Key
+  | MacVar   Type Key
 
-  | MacMacro [(Type, Key, Expr)] MacExpr
-  | MacAtPos ListExpr IntExpr
-  | MacAtIdx MatExpr  IntExpr IntExpr
+  | MacMacro Type [(Type, Key, Expr)] MacExpr
+  | MacAtPos Type ListExpr IntExpr
+  | MacAtIdx Type MatExpr  IntExpr IntExpr
 
-  | MacRand ListExpr
+  | MacRand Type ListExpr
 
-  | MacIfThenElse BoolExpr MacExpr MacExpr
+  | MacIfThenElse Type BoolExpr MacExpr MacExpr
   deriving (Eq, Show)
 
 

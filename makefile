@@ -46,6 +46,13 @@ golden-poly: FORCE
 	@echo "Golden Polynomial Tests"
 	shelltest --color --execdir test/gold/expr/poly
 
+golden-perm: FORCE
+	@echo "Golden Permutation Tests"
+	shelltest --color --execdir test/gold/expr/perm
+
+golden-mod: FORCE
+	@echo "Golden Modular Arithmetic Tests"
+	shelltest --color --execdir test/gold/expr/mod
 
 
 FORCE:

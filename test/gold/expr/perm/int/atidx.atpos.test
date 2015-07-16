@@ -1,0 +1,7 @@
+feivel
+<<<
+[:$int: AtIdx(AtPos({[[id;id];[id;id]]; [[id;(1 2)];[id;id]]}; 2); 1; 2) :]
+>>>
+(1 2)
+>>>= 0
+

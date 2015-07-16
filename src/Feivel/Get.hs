@@ -299,5 +299,5 @@ instance Get ZZModulo where
   get expr = do
     x <- get expr :: EvalM ZZModExpr
     case x of
-      ZZModConst k :@ _ -> return k
+      ZZModConst _ k :@ _ -> return k
       v -> reportErr (locusOf v) UnevaluatedExpression

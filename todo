@@ -45,7 +45,7 @@ Feature Ideas
 * Arch: Groupoid class
 * Arch: type synonyms
 * Arch: Long-term refactor to separate concerns and reduce redundancy
-  1: move type information to AST
+  1: (done) move type information to AST
   2: Implementation of typeOf becomes trivial; take out of EvalM
   3: Rename Typed class to HasType
   4: Take Get out of EvalM

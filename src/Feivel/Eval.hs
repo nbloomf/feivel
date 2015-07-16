@@ -824,15 +824,15 @@ instance Eval MacExpr where
         return $ MacConst typ vals expr (st,True) :@ loc
 
   {- :Common -}
-  eval (MacVar key :@ loc)        = eKey key loc
-  eval (MacIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (MacAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (MacMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (MacVar _ key :@ loc)        = eKey key loc
+  eval (MacIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (MacAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (MacMacro _ vals mac :@ loc) = eMacro vals mac loc
 
-  eval (MacAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (MacAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
 
-  eval (MacRand ls :@ _) = do
+  eval (MacRand _ ls :@ _) = do
     xs <- eval ls >>= getVal
     randomElementEvalM xs
 
@@ -848,15 +848,15 @@ instance Eval MatExpr where
     return $ MatConst t n :@ loc
 
   {- :Common -}
-  eval (MatVar key :@ loc)        = eKey key loc
-  eval (MatAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (MatMacro vals mac :@ loc) = eMacro vals mac loc
-  eval (MatIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (MatVar _ key :@ loc)        = eKey key loc
+  eval (MatAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (MatMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (MatIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (MatAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (MatAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
 
-  eval (MatRand ls :@ loc) = do
+  eval (MatRand _ ls :@ loc) = do
     t  <- typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
@@ -934,7 +934,7 @@ instance Eval MatExpr where
       PolyOver BB -> makeAddMat (constP zeroBB)
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatShuffleRows m :@ loc) = do
+  eval (MatShuffleRows _ m :@ loc) = do
     u  <- expectMatrix loc m
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mRowsOf x
@@ -942,7 +942,7 @@ instance Eval MatExpr where
     n  <- tryEvalM loc $ mVCats ts
     return $ MatConst u n :@ loc
 
-  eval (MatShuffleCols m :@ loc) = do
+  eval (MatShuffleCols _ m :@ loc) = do
     u  <- expectMatrix loc m
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
@@ -950,7 +950,7 @@ instance Eval MatExpr where
     n  <- tryEvalM loc $ mHCats ts
     return $ MatConst u n :@ loc
 
-  eval (MatHCat a b :@ loc) = do
+  eval (MatHCat _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
@@ -959,7 +959,7 @@ instance Eval MatExpr where
       MatOf u -> return $ MatConst u x :@ loc
       _ -> reportErr loc $ MatrixExpected t
 
-  eval (MatVCat a b :@ loc) = do
+  eval (MatVCat _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
@@ -968,7 +968,7 @@ instance Eval MatExpr where
       MatOf u -> return $ MatConst u x :@ loc
       _ -> reportErr loc $ MatrixExpected t
 
-  eval (MatAdd a b :@ loc) = do
+  eval (MatAdd _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       MatOf ZZ -> lift2 loc (rAddT (mCell zeroZZ)) a b
@@ -980,7 +980,7 @@ instance Eval MatExpr where
       MatOf (PolyOver BB) -> lift2 loc (rAddT (mCell $ constP zeroBB)) a b
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatNeg a :@ loc) = do
+  eval (MatNeg _ a :@ loc) = do
     t <- typeOf a
     case t of
       MatOf ZZ -> lift1 loc (rNegT (mCell zeroZZ)) a
@@ -989,13 +989,13 @@ instance Eval MatExpr where
       MatOf (ZZMod n) -> lift1 loc (rNegT (mCell (0`zzmod`n))) a
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatTrans a :@ loc) = do
+  eval (MatTrans _ a :@ loc) = do
     u <- expectMatrix loc a
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
     return $ MatConst u p :@ loc
 
-  eval (MatMul a b :@ loc) = do
+  eval (MatMul _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
     case t of
       MatOf ZZ -> lift2 loc (rMulT (mCell (0::Integer))) a b
@@ -1004,7 +1004,7 @@ instance Eval MatExpr where
       MatOf (ZZMod n) -> lift2 loc (rMulT (mCell (0`zzmod`n))) a b
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatPow m n :@ loc) = do
+  eval (MatPow _ m n :@ loc) = do
     t <- typeOf m
     k <- eval n >>= getVal :: EvalM Integer
     let makeMatPow a = do
@@ -1017,7 +1017,7 @@ instance Eval MatExpr where
       MatOf BB -> makeMatPow (mCell (False))
       _ -> reportErr loc $ NumericMatrixExpected t
 
-  eval (MatSwapRows m a b :@ loc) = do
+  eval (MatSwapRows _ m a b :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
@@ -1025,7 +1025,7 @@ instance Eval MatExpr where
     p <- tryEvalM loc $ mSwapRows i j n
     return $ MatConst u p :@ loc
 
-  eval (MatSwapCols m a b :@ loc) = do
+  eval (MatSwapCols _ m a b :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
@@ -1033,7 +1033,7 @@ instance Eval MatExpr where
     p <- tryEvalM loc $ mSwapCols i j n
     return $ MatConst u p :@ loc
 
-  eval (MatScaleRow m a h :@ loc) = do
+  eval (MatScaleRow _ m a h :@ loc) = do
     t <- typeOf m
     u <- typeOf a
     i <- eval h >>= getVal :: EvalM Integer
@@ -1056,7 +1056,7 @@ instance Eval MatExpr where
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatScaleCol m a h :@ loc) = do
+  eval (MatScaleCol _ m a h :@ loc) = do
     t <- typeOf m
     u <- typeOf a
     i <- eval h >>= getVal :: EvalM Integer
@@ -1079,7 +1079,7 @@ instance Eval MatExpr where
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatAddRow m a h k :@ loc) = do
+  eval (MatAddRow _ m a h k :@ loc) = do
     t <- typeOf m
     u <- typeOf a
     i <- eval h >>= getVal
@@ -1098,7 +1098,7 @@ instance Eval MatExpr where
       Right w  -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatAddCol m a h k :@ loc) = do
+  eval (MatAddCol _ m a h k :@ loc) = do
     t <- typeOf m
     u <- typeOf a
     i <- eval h >>= getVal
@@ -1117,21 +1117,21 @@ instance Eval MatExpr where
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatDelRow m a :@ loc) = do
+  eval (MatDelRow _ m a :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelRow n i
     return $ MatConst u p :@ loc
 
-  eval (MatDelCol m a :@ loc) = do
+  eval (MatDelCol _ m a :@ loc) = do
     u <- expectMatrix loc m
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelCol n i
     return $ MatConst u p :@ loc
 
-  eval (MatGJForm m :@ loc) = do
+  eval (MatGJForm _ m :@ loc) = do
     t <- typeOf m
     case t of
       MatOf QQ -> do
@@ -1144,7 +1144,7 @@ instance Eval MatExpr where
         return $ inject loc p
       _ -> reportErr loc $ FieldMatrixExpected t
 
-  eval (MatGJFactor m :@ loc) = do
+  eval (MatGJFactor _ m :@ loc) = do
     t <- typeOf m
     case t of
       MatOf QQ -> do
@@ -1157,14 +1157,14 @@ instance Eval MatExpr where
         return $ inject loc p
       _ -> reportErr loc $ FieldMatrixExpected t
 
-  eval (MatGetRow k m :@ loc) = do
+  eval (MatGetRow _ k m :@ loc) = do
     u <- expectMatrix loc m
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     r <- tryEvalM loc $ mRowOf i n
     return (MatConst u r :@ loc)
 
-  eval (MatGetCol k m :@ loc) = do
+  eval (MatGetCol _ k m :@ loc) = do
     u <- expectMatrix loc m
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
@@ -1527,30 +1527,30 @@ instance Eval PermExpr where
 {-------------------}
 
 instance Eval ZZModExpr where
-  eval (ZZModConst a :@ loc) = return $ ZZModConst a :@ loc
+  eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc
 
   {- :Common -}
-  eval (ZZModVar key :@ loc)        = eKey key loc
-  eval (ZZModAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (ZZModMacro vals mac :@ loc) = eMacro vals mac loc
-  eval (ZZModIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (ZZModVar _ key :@ loc)        = eKey key loc
+  eval (ZZModAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (ZZModMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (ZZModIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (ZZModAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (ZZModAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
 
-  eval (ZZModCast n a :@ loc) = do
+  eval (ZZModCast (ZZMod n) a :@ loc) = do
     res <- eval a >>= getVal :: EvalM Integer
-    return (ZZModConst (res `zzmod` n) :@ loc)
+    return (ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
 
-  eval (ZZModNeg  a   :@ loc) = lift1 loc (rNegT (0 `zzmod` 0)) a
-  eval (ZZModInv  a   :@ loc) = lift1 loc (rInvT (0 `zzmod` 0)) a
-  eval (ZZModAdd  a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
-  eval (ZZModSub  a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
-  eval (ZZModMult a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
-  eval (ZZModPow  a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
+  eval (ZZModNeg  _ a   :@ loc) = lift1 loc (rNegT (0 `zzmod` 0)) a
+  eval (ZZModInv  _ a   :@ loc) = lift1 loc (rInvT (0 `zzmod` 0)) a
+  eval (ZZModAdd  _ a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
+  eval (ZZModSub  _ a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
+  eval (ZZModMult _ a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
+  eval (ZZModPow  _ a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
 
-  eval (ZZModSum   ls :@ loc) = lift1 loc (rSumT   (0 `zzmod` 0)) ls
-  eval (ZZModProd  ls :@ loc) = lift1 loc (rUProdT (0 `zzmod` 0)) ls
+  eval (ZZModSum   _ ls :@ loc) = lift1 loc (rSumT   (0 `zzmod` 0)) ls
+  eval (ZZModProd  _ ls :@ loc) = lift1 loc (rUProdT (0 `zzmod` 0)) ls
 
 
 
@@ -1599,7 +1599,7 @@ instance Glyph RatExpr where
 
 
 instance Glyph ZZModExpr where
-  toGlyph (ZZModConst a :@ _) = return $ showZZMod a
+  toGlyph (ZZModConst _ a :@ _) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 

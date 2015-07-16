@@ -58,7 +58,7 @@ instance Inject Rat RatExpr where
   inject loc x = RatConst x :@ loc
 
 instance Inject ZZModulo ZZModExpr where
-  inject loc x = ZZModConst x :@ loc
+  inject loc (ZZModulo a n) = ZZModConst (ZZMod n) (ZZModulo a n) :@ loc
 
 
 

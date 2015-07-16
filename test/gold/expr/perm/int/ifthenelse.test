@@ -1,0 +1,9 @@
+feivel
+<<<
+[:$int: if #t then (1 2) else (2 3) :]
+[:$int: if #f then (1 2) else (2 3) :]
+>>>
+(1 2)
+(2 3)
+>>>= 0
+

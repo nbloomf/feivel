@@ -39,7 +39,7 @@ import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 
-import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod, Text(..))
+import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod, Text(..), idPerm)
 
 import Text.Parsec.Expr
 import Text.ParserCombinators.Parsec hiding (try)
@@ -623,36 +623,36 @@ pZZModConst n = pAtLocus (pZZModConst' n)
 pZZModConst' :: Integer -> ParseM (ZZModExprLeaf, Type)
 pZZModConst' n = do
   a <- pInteger
-  return (ZZModConst (a `zzmod` n), ZZMod n)
+  return (ZZModConst (ZZMod n) (a `zzmod` n), ZZMod n)
 
 pZZModExpr :: Integer -> ParseM (ZZModExpr, Type)
 pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
     pZZModTerm = pTerm (pZZModConst' n) (pZZModExpr n) "integer expression"
-      [ pVarExpr ZZModVar (ZZMod n)
-      , pMacroExpr ZZModMacro
+      [ pVarExpr (ZZModVar (ZZMod n)) (ZZMod n)
+      , pMacroExpr (ZZModMacro (ZZMod n))
 
-      , pAtPos (ZZMod n) ZZModAtPos
-      , pAtIdx (ZZMod n) ZZModAtIdx
+      , pAtPos (ZZMod n) (ZZModAtPos (ZZMod n))
+      , pAtIdx (ZZMod n) (ZZModAtIdx (ZZMod n))
     
-      , pIfThenElseExpr (pZZModExpr n) ZZModIfThenElse (ZZMod n)
+      , pIfThenElseExpr (pZZModExpr n) (ZZModIfThenElse (ZZMod n)) (ZZMod n)
 
-      , pFun1 "int" pIntExpr (ZZModCast n) (ZZMod n)
+      , pFun1 "int" pIntExpr (ZZModCast (ZZMod n)) (ZZMod n)
 
-      , pFun2 "Pow" (pZZModExpr n) pIntExpr ZZModPow (ZZMod n)
+      , pFun2 "Pow" (pZZModExpr n) pIntExpr (ZZModPow (ZZMod n)) (ZZMod n)
 
-      , pFun1 "Sum"    (pTypedListExpr (ZZMod n)) ZZModSum   (ZZMod n)
-      , pFun1 "Prod"   (pTypedListExpr (ZZMod n)) ZZModProd  (ZZMod n)
+      , pFun1 "Sum"    (pTypedListExpr (ZZMod n)) (ZZModSum (ZZMod n))   (ZZMod n)
+      , pFun1 "Prod"   (pTypedListExpr (ZZMod n)) (ZZModProd (ZZMod n))  (ZZMod n)
       ]
 
     zzModOpTable =
-      [ [ Infix (opParser2 ZZModMult "*") AssocLeft
+      [ [ Infix (opParser2 (ZZModMult (ZZMod n)) "*") AssocLeft
         ]
-      , [ Prefix (opParser1 ZZModNeg "neg")
-        , Prefix (opParser1 ZZModInv "inv")
+      , [ Prefix (opParser1 (ZZModNeg (ZZMod n)) "neg")
+        , Prefix (opParser1 (ZZModInv (ZZMod n)) "inv")
         ]
-      , [ Infix (opParser2 ZZModAdd "+") AssocLeft
-        , Infix (opParser2 ZZModSub "-") AssocLeft
+      , [ Infix (opParser2 (ZZModAdd (ZZMod n)) "+") AssocLeft
+        , Infix (opParser2 (ZZModSub (ZZMod n)) "-") AssocLeft
         ]
       ]
 
@@ -999,27 +999,27 @@ pTypedMatExpr :: Type -> ParseM (MatExpr, Type)
 pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm (pMatLiteralOf typ pTypedExpr) (pTypedMatExpr typ) "matrix expression"
-      [ pVarExpr MatVar (MatOf typ)
+      [ pVarExpr (MatVar typ) (MatOf typ)
 
-      , pAtPos (MatOf typ) MatAtPos
-      , pAtIdx (MatOf typ) MatAtIdx
+      , pAtPos (MatOf typ) (MatAtPos typ)
+      , pAtIdx (MatOf typ) (MatAtIdx typ)
 
-      , pMacroExpr MatMacro
+      , pMacroExpr (MatMacro typ)
 
-      , pIfThenElseExpr (pTypedMatExpr typ) MatIfThenElse (MatOf typ)
+      , pIfThenElseExpr (pTypedMatExpr typ) (MatIfThenElse typ) (MatOf typ)
 
-      , pFun1 "Transpose" (pTypedMatExpr typ) MatTrans (MatOf typ)
+      , pFun1 "Transpose" (pTypedMatExpr typ) (MatTrans typ) (MatOf typ)
 
-      , pFun1 "ShuffleRows" (pTypedMatExpr typ) MatShuffleRows (MatOf typ)
-      , pFun1 "ShuffleCols" (pTypedMatExpr typ) MatShuffleCols (MatOf typ)
+      , pFun1 "ShuffleRows" (pTypedMatExpr typ) (MatShuffleRows typ) (MatOf typ)
+      , pFun1 "ShuffleCols" (pTypedMatExpr typ) (MatShuffleCols typ) (MatOf typ)
 
       , pFun1 "RowFromList" (pTypedListExpr typ) (MatRowFromList typ) (MatOf typ)
       , pFun1 "ColFromList" (pTypedListExpr typ) (MatColFromList typ) (MatOf typ)
 
-      , pFun1 "Rand" (pTypedListExpr (MatOf typ)) MatRand (MatOf typ)
+      , pFun1 "Rand" (pTypedListExpr (MatOf typ)) (MatRand typ) (MatOf typ)
 
-      , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) MatGetRow (MatOf typ)
-      , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) MatGetCol (MatOf typ)
+      , pFun2 "GetRow" pIntExpr (pTypedMatExpr typ) (MatGetRow typ) (MatOf typ)
+      , pFun2 "GetCol" pIntExpr (pTypedMatExpr typ) (MatGetCol typ) (MatOf typ)
 
       , pMatBuilder
 
@@ -1028,19 +1028,19 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
       , pMatScaleE
       , pMatAddE
 
-      , pFun2T "Pow" (pTypedMatExpr typ) pIntExpr MatPow
+      , pFun2T "Pow" (pTypedMatExpr typ) pIntExpr (MatPow typ)
 
-      , pFun3T "SwapRows" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapRows
-      , pFun3T "SwapCols" (pTypedMatExpr typ) pIntExpr pIntExpr MatSwapCols
-      , pFun3T "ScaleRow" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleRow
-      , pFun3T "ScaleCol" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr MatScaleCol
-      , pFun4T "AddRow"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddRow
-      , pFun4T "AddCol"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr MatAddCol
-      , pFun2T "DelRow"   (pTypedMatExpr typ) pIntExpr MatDelRow
-      , pFun2T "DelCol"   (pTypedMatExpr typ) pIntExpr MatDelCol
+      , pFun3T "SwapRows" (pTypedMatExpr typ) pIntExpr pIntExpr (MatSwapRows typ)
+      , pFun3T "SwapCols" (pTypedMatExpr typ) pIntExpr pIntExpr (MatSwapCols typ)
+      , pFun3T "ScaleRow" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr (MatScaleRow typ)
+      , pFun3T "ScaleCol" (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr (MatScaleCol typ)
+      , pFun4T "AddRow"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr (MatAddRow typ)
+      , pFun4T "AddCol"   (pTypedMatExpr typ) (pTypedExpr typ) pIntExpr pIntExpr (MatAddCol typ)
+      , pFun2T "DelRow"   (pTypedMatExpr typ) pIntExpr (MatDelRow typ)
+      , pFun2T "DelCol"   (pTypedMatExpr typ) pIntExpr (MatDelCol typ)
 
-      , pFun1T "GJForm"   (pTypedMatExpr typ) MatGJForm
-      , pFun1T "GJFactor" (pTypedMatExpr typ) MatGJFactor
+      , pFun1T "GJForm"   (pTypedMatExpr typ) (MatGJForm typ)
+      , pFun1T "GJFactor" (pTypedMatExpr typ) (MatGJFactor typ)
       ]
       where
         pMatId = do
@@ -1101,14 +1101,14 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
           return (MatBuilder typ e kr lr kc lc, MatOf typ)
     
     matOpTable =
-      [ [ Prefix (opParser1 MatNeg "neg")
+      [ [ Prefix (opParser1 (MatNeg typ) "neg")
         ]
-      , [ Infix (opParser2 MatMul "*") AssocLeft
+      , [ Infix (opParser2 (MatMul typ) "*") AssocLeft
         ]
-      , [ Infix (opParser2 MatAdd "+") AssocLeft
+      , [ Infix (opParser2 (MatAdd typ) "+") AssocLeft
         ]
-      , [ Infix (opParser2 MatHCat "hcat") AssocLeft
-        , Infix (opParser2 MatVCat "vcat") AssocLeft
+      , [ Infix (opParser2 (MatHCat typ) "hcat") AssocLeft
+        , Infix (opParser2 (MatVCat typ) "vcat") AssocLeft
         ]
       ]
 
@@ -1225,7 +1225,7 @@ pPermConst :: Type -> ParseM (PermExpr, Type)
 pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
 
 pPermLiteralOf :: Type -> (Type -> ParseM (Expr, Type)) -> ParseM (PermExprLeaf, Type)
-pPermLiteralOf typ p = do
+pPermLiteralOf typ p = (string "id" >> return (PermConst typ idPerm, PermOf typ)) <|> do
   start <- getPosition
   ts <- many1 pCycle
   end <- getPosition
@@ -1295,16 +1295,16 @@ pTypedMacExpr :: Type -> ParseM (MacExpr, Type)
 pTypedMacExpr typ = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm (pMacConst' typ) pMacExpr "macro expression"
-      [ pVarExpr MacVar (MacTo typ)
+      [ pVarExpr (MacVar typ) (MacTo typ)
 
-      , pAtPos (MacTo typ) MacAtPos
-      , pAtIdx (MacTo typ) MacAtIdx
+      , pAtPos (MacTo typ) (MacAtPos typ)
+      , pAtIdx (MacTo typ) (MacAtIdx typ)
 
-      , pMacroExpr MacMacro
+      , pMacroExpr (MacMacro typ)
 
-      , pFun1 "Rand" (pTypedListExpr (MacTo typ)) MacRand (MacTo typ)
+      , pFun1 "Rand" (pTypedListExpr (MacTo typ)) (MacRand typ) (MacTo typ)
 
-      , pIfThenElseExpr (pTypedMacExpr typ) MacIfThenElse (MacTo typ)
+      , pIfThenElseExpr (pTypedMacExpr typ) (MacIfThenElse typ) (MacTo typ)
       ]
 
     macOpTable = []
