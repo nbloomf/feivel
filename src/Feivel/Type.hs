@@ -54,41 +54,9 @@ data Type
 
 
 unify :: Type -> Type -> Either TypeErr Type
-unify XX t  = Right t
-unify t  XX = Right t
-
-unify DD DD = Right DD
-unify ZZ ZZ = Right ZZ
-unify SS SS = Right SS
-unify BB BB = Right BB
-unify QQ QQ = Right QQ
-
-unify (ListOf a) (ListOf b) = do
-  t <- unify a b
-  return (ListOf t)
-
-unify (MatOf a) (MatOf b) = do
-  t <- unify a b
-  return (MatOf t)
-
-unify (PolyOver a) (PolyOver b) = do
-  t <- unify a b
-  return (PolyOver t)
-
-unify (ZZMod n) (ZZMod m) = 
-  if n == m
-    then return (ZZMod n)
-    else Left $ TypeUnificationError (ZZMod n) (ZZMod m)
-
-unify (PermOf a) (PermOf b) = do
-  t <- unify a b
-  return (PermOf t)
-
-unify (MacTo a) (MacTo b) = do
-  t <- unify a b
-  return (MacTo t)
-
-unify a b = Left $ TypeUnificationError a b
+unify t1 t2 = if t1==t2
+  then Right t1
+  else Left $ TypeUnificationError t1 t2
 
 
 unifyAll :: [Type] -> Either TypeErr Type
