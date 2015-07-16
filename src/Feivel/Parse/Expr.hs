@@ -1243,22 +1243,22 @@ pTypedPermExpr :: Type -> ParseM (PermExpr, Type)
 pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm (pPermLiteralOf typ pTypedExpr) (pTypedPermExpr typ) "permutation expression"
-      [ pVarExpr PermVar (PermOf typ)
+      [ pVarExpr (PermVar typ) (PermOf typ)
 
-      , pAtPos (PermOf typ) PermAtPos
-      , pAtIdx (PermOf typ) PermAtIdx
+      , pAtPos (PermOf typ) (PermAtPos typ)
+      , pAtIdx (PermOf typ) (PermAtIdx typ)
 
-      , pMacroExpr PermMacro
+      , pMacroExpr (PermMacro typ)
 
-      , pIfThenElseExpr (pTypedPermExpr typ) PermIfThenElse (PermOf typ)
+      , pIfThenElseExpr (pTypedPermExpr typ) (PermIfThenElse typ) (PermOf typ)
 
-      , pFun1 "Rand" (pTypedListExpr (PermOf typ)) PermRand (PermOf typ)
+      , pFun1 "Rand" (pTypedListExpr (PermOf typ)) (PermRand typ) (PermOf typ)
       ]
 
     permOpTable =
-      [ [ Prefix (opParser1 PermInvert "inv")
+      [ [ Prefix (opParser1 (PermInvert typ) "inv")
         ]
-      , [ Infix (opParser2 PermCompose "o") AssocLeft
+      , [ Infix (opParser2 (PermCompose typ) "o") AssocLeft
         ]
       ]
 

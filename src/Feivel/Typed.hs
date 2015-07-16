@@ -290,45 +290,15 @@ instance Typed PolyExpr where
 {-------------}
 
 instance Typed PermExpr where
-  typeOf (PermVar key :@ loc) = do
-    expr <- lookupKey loc key
-    t <- typeOf expr
-    case t of
-      PermOf x -> return $ PermOf x
-      u -> reportErr loc $ PermutationExpected u
-
-  typeOf (PermMacro _ x :@ _) = typeOf x
-
-  typeOf (PermConst t _ :@ _) = return $ PermOf t
-
-  typeOf (PermAtPos m _ :@ loc) = do
-    t <- typeOf m
-    case t of
-      MatOf (PermOf u) -> return $ PermOf u
-      _ -> reportErr loc $ PermutationListExpected t
-
-  typeOf (PermAtIdx m _ _ :@ loc) = do
-    t <- typeOf m
-    case t of
-      ListOf (PermOf u) -> return $ PermOf u
-      _ -> reportErr loc $ PermutationMatrixExpected t
-
-  typeOf (PermIfThenElse _ t f :@ loc) = do
-    a <- typeOf t
-    b <- typeOf f
-    case unify a b of
-      Right u -> return u
-      Left err -> reportErr loc err
-
-  typeOf (PermRand xs :@ loc) = do
-    t <- typeOf xs
-    case t of
-      ListOf (PermOf u) -> return $ PermOf u
-      _ -> reportErr loc $ PermutationListExpected t
-
-  typeOf (PermCompose p q :@ loc) = sameType loc p q
-
-  typeOf (PermInvert p :@ _) = typeOf p
+  typeOf (PermVar        typ _     :@ _) = return (PermOf typ)
+  typeOf (PermMacro      typ _ _   :@ _) = return (PermOf typ)
+  typeOf (PermConst      typ _     :@ _) = return (PermOf typ)
+  typeOf (PermAtPos      typ _ _   :@ _) = return (PermOf typ)
+  typeOf (PermAtIdx      typ _ _ _ :@ _) = return (PermOf typ)
+  typeOf (PermIfThenElse typ _ _ _ :@ _) = return (PermOf typ)
+  typeOf (PermRand       typ _     :@ _) = return (PermOf typ)
+  typeOf (PermCompose    typ _ _   :@ _) = return (PermOf typ)
+  typeOf (PermInvert     typ _     :@ _) = return (PermOf typ)
 
 
 

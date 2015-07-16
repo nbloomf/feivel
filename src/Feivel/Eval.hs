@@ -1481,16 +1481,16 @@ instance Eval PermExpr where
     q <- seqPerm $ mapPerm eval p
     return $ PermConst t q :@ loc
 
-  eval (PermAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (PermAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
   {- Common -}
-  eval (PermVar key :@ loc)        = eKey key loc
-  eval (PermAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (PermMacro vals mac :@ loc) = eMacro vals mac loc
-  eval (PermIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (PermVar _ key :@ loc)        = eKey key loc
+  eval (PermAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (PermMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (PermIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (PermRand ls :@ loc) = do
+  eval (PermRand _ ls :@ loc) = do
     t  <- typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
@@ -1499,7 +1499,7 @@ instance Eval PermExpr where
       ListOf (PermOf _) -> return s
       _ -> reportErr loc $ ListExpected t
 
-  eval (PermCompose p q :@ loc) = do
+  eval (PermCompose _ p q :@ loc) = do
     t <- unifyTypesOf loc p q
     case t of
       PermOf ZZ -> do
@@ -1510,7 +1510,7 @@ instance Eval PermExpr where
         return (PermConst ZZ s :@ loc)
       _ -> reportErr loc $ PolynomialExpected t
 
-  eval (PermInvert p :@ loc) = do
+  eval (PermInvert _ p :@ loc) = do
     t <- typeOf p
     case t of
       PermOf ZZ -> do

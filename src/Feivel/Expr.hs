@@ -582,18 +582,18 @@ type PermExpr = AtLocus PermExprLeaf
 
 data PermExprLeaf
   = PermConst Type (Perm Expr)
-  | PermVar   Key
+  | PermVar   Type Key
 
-  | PermMacro [(Type, Key, Expr)] MacExpr
-  | PermAtPos ListExpr IntExpr
-  | PermAtIdx MatExpr  IntExpr IntExpr
+  | PermMacro Type [(Type, Key, Expr)] MacExpr
+  | PermAtPos Type ListExpr IntExpr
+  | PermAtIdx Type MatExpr  IntExpr IntExpr
 
-  | PermRand ListExpr
+  | PermRand Type ListExpr
 
-  | PermIfThenElse BoolExpr PermExpr PermExpr
+  | PermIfThenElse Type BoolExpr PermExpr PermExpr
 
-  | PermCompose PermExpr PermExpr
-  | PermInvert  PermExpr
+  | PermCompose Type PermExpr PermExpr
+  | PermInvert  Type PermExpr
   deriving (Eq, Show)
 
 
