@@ -113,57 +113,29 @@ instance Typed Expr where
 {-------------}
 
 instance Typed ListExpr where
-  typeOf (ListVar key :@ loc) = do
-    expr <- lookupKey loc key
-    t <- typeOf expr
-    case t of
-      ListOf x -> return $ ListOf x
-      u -> reportErr loc $ ListExpected u
-
-  typeOf (ListMacro _ x :@ _) = typeOf x
-
-  typeOf (ListConst t _ :@ _) = return $ ListOf t
-
-  typeOf (ListIfThenElse _ t f :@ loc) = do
-    a <- typeOf t
-    b <- typeOf f
-    case unify a b of
-      Right u -> return u
-      Left err -> reportErr loc err
-
-  typeOf (ListAtPos x _ :@ loc) = do
-    t <- typeOf x
-    case t of
-      MatOf (ListOf u) -> return $ ListOf u
-      _ -> reportErr loc $ ListListExpected t
-
-  typeOf (ListAtIdx x _ _ :@ loc) = do
-    t <- typeOf x
-    case t of
-      ListOf (ListOf u) -> return $ ListOf u
-      _ -> reportErr loc $ ListMatrixExpected t
-
-  typeOf (ListRand xs :@ loc) = do
-    t <- typeOf xs
-    case t of
-      ListOf (ListOf u) -> return $ ListOf u
-      _ -> reportErr loc $ ListListExpected t
-
-  typeOf (ListCat      typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListToss     typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListRev      typ _     :@ _) = return (ListOf typ)
-  typeOf (ListSort     typ _     :@ _) = return (ListOf typ)
-  typeOf (ListUniq     typ _     :@ _) = return (ListOf typ)
-  typeOf (ListShuffle  typ _     :@ _) = return (ListOf typ)
-  typeOf (ListFilter   typ _ _ _ :@ _) = return (ListOf typ)
-  typeOf (ListMatRow   typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListMatCol   typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListChoose   typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListShuffles typ _     :@ _) = return (ListOf typ)
-  typeOf (ListChoices  typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListRange    typ _ _   :@ _) = return (ListOf typ)
-  typeOf (ListPermsOf  typ _     :@ _) = return (ListOf typ)
-  typeOf (ListBuilder  typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListConst           typ _     :@ _) = return (ListOf typ)
+  typeOf (ListVar             typ _     :@ _) = return (ListOf typ)
+  typeOf (ListIfThenElse      typ _ _ _ :@ _) = return (ListOf typ)
+  typeOf (ListRand            typ _     :@ _) = return (ListOf typ)
+  typeOf (ListAtPos           typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListAtIdx           typ _ _ _ :@ _) = return (ListOf typ)
+  typeOf (ListMacro           typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListCat             typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListToss            typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListRev             typ _     :@ _) = return (ListOf typ)
+  typeOf (ListSort            typ _     :@ _) = return (ListOf typ)
+  typeOf (ListUniq            typ _     :@ _) = return (ListOf typ)
+  typeOf (ListShuffle         typ _     :@ _) = return (ListOf typ)
+  typeOf (ListFilter          typ _ _ _ :@ _) = return (ListOf typ)
+  typeOf (ListMatRow          typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListMatCol          typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListChoose          typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListShuffles        typ _     :@ _) = return (ListOf typ)
+  typeOf (ListChoices         typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListRange           typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListPermsOf         typ _     :@ _) = return (ListOf typ)
+  typeOf (ListBuilder         typ _ _   :@ _) = return (ListOf typ)
+  typeOf (ListPivotColIndices typ _     :@ _) = return (ListOf typ)
 
 
 

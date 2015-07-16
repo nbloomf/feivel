@@ -843,16 +843,16 @@ pTypedListExpr :: Type -> ParseM (ListExpr, Type)
 pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm (pListLiteralOf typ pTypedExpr) (pTypedListExpr typ) "list expression"
-      [ pVarExpr ListVar (ListOf typ)
+      [ pVarExpr (ListVar typ) (ListOf typ)
 
-      , pMacroExpr ListMacro
+      , pMacroExpr (ListMacro typ)
 
-      , pAtPos (ListOf typ) ListAtPos
-      , pAtIdx (ListOf typ) ListAtIdx
+      , pAtPos (ListOf typ) (ListAtPos typ)
+      , pAtIdx (ListOf typ) (ListAtIdx typ)
 
-      , pIfThenElseExpr (pTypedListExpr typ) ListIfThenElse (ListOf typ)
+      , pIfThenElseExpr (pTypedListExpr typ) (ListIfThenElse typ) (ListOf typ)
 
-      , pFun1 "Rand" (pTypedListExpr (ListOf typ)) ListRand (ListOf typ)
+      , pFun1 "Rand" (pTypedListExpr (ListOf typ)) (ListRand typ) (ListOf typ)
 
       , pFun1 "Reverse"  (pTypedListExpr typ) (ListRev typ)     (ListOf typ)
       , pFun1 "Sort"     (pTypedListExpr typ) (ListSort typ)    (ListOf typ)
@@ -930,7 +930,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           keyword ";"
           (m,_) <- pTypedMatExpr t
           keyword ")"
-          return (ListPivotColIndices m, ListOf ZZ)
+          return (ListPivotColIndices ZZ m, ListOf ZZ)
         pListPivotColIndices t = fail "pListPivotColIndices"
     
         pListBuilder = do

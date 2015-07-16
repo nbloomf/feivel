@@ -620,12 +620,12 @@ instance Eval ListExpr where
     return $ ListConst t ys :@ loc
 
   {- :Common -}
-  eval (ListVar key :@ loc)        = eKey key loc
-  eval (ListAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (ListMacro vals mac :@ loc) = eMacro vals mac loc
-  eval (ListIfThenElse b t f :@ _) = eIfThenElse b t f
+  eval (ListVar _ key :@ loc)        = eKey key loc
+  eval (ListAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
+  eval (ListMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (ListIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (ListAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (ListAtPos _ a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
 
   eval (ListRange _ a b :@ loc) = do
@@ -675,7 +675,7 @@ instance Eval ListExpr where
         return $ ListConst BB (map (\k -> BoolE $ BoolConst k :@ loc) (sort xs)) :@ loc
       _ -> reportErr loc $ SortableListExpected t
 
-  eval (ListRand ls :@ loc) = do
+  eval (ListRand _ ls :@ loc) = do
     t  <- typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
@@ -796,7 +796,7 @@ instance Eval ListExpr where
         return (ListConst (PermOf SS) (map toExpr us) :@ loc)
       u -> reportErr loc $ PermutationExpected u
 
-  eval (ListPivotColIndices m :@ loc) = do
+  eval (ListPivotColIndices _ m :@ loc) = do
     t <- typeOf m
     case t of
       MatOf QQ -> do

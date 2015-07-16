@@ -437,14 +437,14 @@ type ListExpr = AtLocus ListExprLeaf
 
 data ListExprLeaf
   = ListConst   Type [Expr]
-  | ListVar     Key
+  | ListVar     Type Key
   | ListBuilder Type Expr [ListGuard]
 
-  | ListMacro [(Type, Key, Expr)] MacExpr
-  | ListAtPos ListExpr IntExpr
-  | ListAtIdx MatExpr  IntExpr IntExpr
-  | ListRand  ListExpr
-  | ListIfThenElse BoolExpr ListExpr ListExpr
+  | ListMacro      Type [(Type, Key, Expr)] MacExpr
+  | ListAtPos      Type ListExpr IntExpr
+  | ListAtIdx      Type MatExpr  IntExpr IntExpr
+  | ListRand       Type ListExpr
+  | ListIfThenElse Type BoolExpr ListExpr ListExpr
 
   -- Arithmetic
   | ListCat   Type ListExpr ListExpr
@@ -472,7 +472,7 @@ data ListExprLeaf
   -- Permutations
   | ListPermsOf Type ListExpr
 
-  | ListPivotColIndices MatExpr
+  | ListPivotColIndices Type MatExpr
   deriving (Eq, Show)
 
 data ListGuard
