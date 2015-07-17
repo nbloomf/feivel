@@ -174,11 +174,11 @@ instance Eval IntExpr where
   eval (IntAtPos a t :@ loc) = lift2 loc (foo) a t
     where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
 
-  eval (IntNeg        a :@ loc) = lift1 loc (rNegT        zeroZZ) a
-  eval (IntAbs        a :@ loc) = lift1 loc (rAbsT        zeroZZ) a
-  eval (IntSqPart     a :@ loc) = lift1 loc (rSqPartT     zeroZZ) a
-  eval (IntSqFreePart a :@ loc) = lift1 loc (rSqFreePartT zeroZZ) a
-  eval (IntRad        a :@ loc) = lift1 loc (rRadT        zeroZZ) a
+  eval (IntNeg        a :@ loc) = lift1 loc a (rNegT        zeroZZ)
+  eval (IntAbs        a :@ loc) = lift1 loc a (rAbsT        zeroZZ)
+  eval (IntSqPart     a :@ loc) = lift1 loc a (rSqPartT     zeroZZ)
+  eval (IntSqFreePart a :@ loc) = lift1 loc a (rSqFreePartT zeroZZ)
+  eval (IntRad        a :@ loc) = lift1 loc a (rRadT        zeroZZ)
 
   eval (IntAdd  a b :@ loc) = lift2 loc (rAddT zeroZZ) a b
   eval (IntSub  a b :@ loc) = lift2 loc (rSubT zeroZZ) a b
@@ -193,10 +193,10 @@ instance Eval IntExpr where
 
   eval (IntChoose a b :@ loc) = lift2 loc (rChooseT zeroZZ) a b
 
-  eval (RatNumer  p :@ loc) = lift1 loc (ratNum) p
-  eval (RatDenom  p :@ loc) = lift1 loc (ratDen) p
-  eval (RatFloor  p :@ loc) = lift1 loc (ratFlr) p
-  eval (StrLength s :@ loc) = lift1 loc (strLen) s
+  eval (RatNumer  p :@ loc) = lift1 loc p (ratNum)
+  eval (RatDenom  p :@ loc) = lift1 loc p (ratDen)
+  eval (RatFloor  p :@ loc) = lift1 loc p (ratFlr)
+  eval (StrLength s :@ loc) = lift1 loc s (strLen)
 
   eval (MatNumRows m :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
@@ -217,12 +217,12 @@ instance Eval IntExpr where
     xs <- eval ls >>= getVal :: EvalM [Expr]
     return $ IntConst (fromIntegral $ length xs) :@ loc
 
-  eval (IntSum   ls :@ loc) = lift1 loc (rSumT   zeroZZ) ls
-  eval (IntProd  ls :@ loc) = lift1 loc (rUProdT zeroZZ) ls
-  eval (IntMaxim ls :@ loc) = lift1 loc (rMaximT zeroZZ) ls
-  eval (IntMinim ls :@ loc) = lift1 loc (rMinimT zeroZZ) ls
-  eval (IntGCDiv ls :@ loc) = lift1 loc (rGCDsT  zeroZZ) ls
-  eval (IntLCMul ls :@ loc) = lift1 loc (rLCMsT  zeroZZ) ls
+  eval (IntSum   ls :@ loc) = lift1 loc ls (rSumT   zeroZZ)
+  eval (IntProd  ls :@ loc) = lift1 loc ls (rUProdT zeroZZ)
+  eval (IntMaxim ls :@ loc) = lift1 loc ls (rMaximT zeroZZ)
+  eval (IntMinim ls :@ loc) = lift1 loc ls (rMinimT zeroZZ)
+  eval (IntGCDiv ls :@ loc) = lift1 loc ls (rGCDsT  zeroZZ)
+  eval (IntLCMul ls :@ loc) = lift1 loc ls (rLCMsT  zeroZZ)
 
   eval (IntObserveUniform a b :@ loc) = do
     x  <- eval a >>= getVal
@@ -285,13 +285,13 @@ instance Eval StrExpr where
   eval (Concat   a b :@ loc) = lift2 loc (strCat)   a b
   eval (StrStrip a b :@ loc) = lift2 loc (strStrip) a b
 
-  eval (ToUpper   a :@ loc) = lift1 loc (strUpper)  a
-  eval (ToLower   a :@ loc) = lift1 loc (strLower)  a
-  eval (Reverse   a :@ loc) = lift1 loc (strRev)    a
-  eval (Rot13     a :@ loc) = lift1 loc (strRot13)  a
-  eval (StrHex    n :@ loc) = lift1 loc (strHex)    n
-  eval (StrRoman  n :@ loc) = lift1 loc (strRoman)  n
-  eval (StrBase36 n :@ loc) = lift1 loc (strBase36) n
+  eval (ToUpper   a :@ loc) = lift1 loc a (strUpper)
+  eval (ToLower   a :@ loc) = lift1 loc a (strLower)
+  eval (Reverse   a :@ loc) = lift1 loc a (strRev)
+  eval (Rot13     a :@ loc) = lift1 loc a (strRot13)
+  eval (StrHex    n :@ loc) = lift1 loc n (strHex)
+  eval (StrRoman  n :@ loc) = lift1 loc n (strRoman)
+  eval (StrBase36 n :@ loc) = lift1 loc n (strBase36)
 
   eval (StrDecimal p k :@ loc) = do
     x <- eval p >>= getVal
@@ -475,13 +475,13 @@ instance Eval BoolExpr where
       t -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
-  eval (Neg    a   :@ loc) = lift1 loc (boolNot) a
+  eval (Neg    a   :@ loc) = lift1 loc a (boolNot)
   eval (Conj   a b :@ loc) = lift2 loc (boolAnd) a b
   eval (Disj   a b :@ loc) = lift2 loc (boolOr)  a b
   eval (Imp    a b :@ loc) = lift2 loc (boolImp) a b
 
   -- Int
-  eval (IntSqFree a :@ loc) = lift1 loc (rIsSqFreeT zeroZZ) a
+  eval (IntSqFree a :@ loc) = lift1 loc a (rIsSqFreeT zeroZZ)
   eval (IntDiv a b :@ loc)  = lift2 loc (rDividesT  zeroZZ) a b
 
   -- Str
@@ -509,8 +509,8 @@ instance Eval RatExpr where
     n <- eval expr >>= getVal :: EvalM Integer
     return $ RatConst (n:/:1) :@ loc
 
-  eval (RatNeg  a :@ loc)   = lift1 loc (rNegT (0:/:1)) a
-  eval (RatAbs  a :@ loc)   = lift1 loc (rAbsT (0:/:1)) a
+  eval (RatNeg  a :@ loc)   = lift1 loc a (rNegT zeroQQ)
+  eval (RatAbs  a :@ loc)   = lift1 loc a (rAbsT zeroQQ)
 
   eval (RatAdd  a b :@ loc) = lift2 loc (rAddT (0:/:1)) a b
   eval (RatSub  a b :@ loc) = lift2 loc (rSubT (0:/:1)) a b
@@ -527,10 +527,10 @@ instance Eval RatExpr where
     r  <- randomElementEvalM xs
     return $ RatConst r :@ loc
 
-  eval (RatSum   ls :@ loc) = lift1 loc (rSumT   (0:/:1)) ls
-  eval (RatProd  ls :@ loc) = lift1 loc (rUProdT (0:/:1)) ls
-  eval (RatMaxim ls :@ loc) = lift1 loc (rMaximT (0:/:1)) ls
-  eval (RatMinim ls :@ loc) = lift1 loc (rMinimT (0:/:1)) ls
+  eval (RatSum   ls :@ loc) = lift1 loc ls (rSumT   (0:/:1))
+  eval (RatProd  ls :@ loc) = lift1 loc ls (rUProdT (0:/:1))
+  eval (RatMaxim ls :@ loc) = lift1 loc ls (rMaximT (0:/:1))
+  eval (RatMinim ls :@ loc) = lift1 loc ls (rMinimT (0:/:1))
 
   {- Mean -}
   eval (RatMean ls :@ loc) = do
@@ -823,7 +823,7 @@ instance Eval MatExpr where
     return (MatConst t m :@ loc)
 
   eval (MatId u n :@ loc) = do
-    let makeIdMat x = lift1 loc (mEIdT x) n
+    let makeIdMat x = lift1 loc n (mEIdT x)
     case u of
       ZZ          -> makeIdMat zeroZZ
       QQ          -> makeIdMat zeroQQ
@@ -907,7 +907,7 @@ instance Eval MatExpr where
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatNeg u a :@ loc) = do
-    let negMat x = lift1 loc (rNegT (mCell x)) a
+    let negMat x = lift1 loc a (rNegT (mCell x))
     case u of
       ZZ          -> negMat zeroZZ
       QQ          -> negMat zeroQQ
@@ -1041,14 +1041,14 @@ instance Eval MatExpr where
     return $ MatConst u p :@ loc
 
   eval (MatGJForm u m :@ loc) = do
-    let gjFormMat x = lift1 loc (mGJFormT x) m
+    let gjFormMat x = lift1 loc m (mGJFormT x)
     case u of
       QQ -> gjFormMat zeroQQ
       BB -> gjFormMat zeroBB
       _  -> reportErr loc $ FieldTypeExpected u
 
   eval (MatGJFactor u m :@ loc) = do
-    let gjFactorMat x = lift1 loc (mGJFactorT x) m
+    let gjFactorMat x = lift1 loc m (mGJFactorT x)
     case u of
       QQ -> gjFactorMat zeroQQ
       BB -> gjFactorMat zeroBB
@@ -1279,11 +1279,11 @@ instance Eval PolyExpr where
     let t = typeOf a
     case t of
       PolyOver ZZ ->
-        lift1 loc (rNegT (constP (0::Integer))) a
+        lift1 loc a (rNegT (constP (0::Integer)))
       PolyOver QQ ->
-        lift1 loc (rNegT (constP (0:/:1))) a
+        lift1 loc a (rNegT (constP (0:/:1)))
       PolyOver BB ->
-        lift1 loc (rNegT (constP False)) a
+        lift1 loc a (rNegT (constP False))
       PolyOver (ZZMod n) -> do
         x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
         let y = rNeg x
@@ -1427,15 +1427,15 @@ instance Eval ZZModExpr where
     res <- eval a >>= getVal :: EvalM Integer
     return (ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
 
-  eval (ZZModNeg  _ a   :@ loc) = lift1 loc (rNegT (0 `zzmod` 0)) a
-  eval (ZZModInv  _ a   :@ loc) = lift1 loc (rInvT (0 `zzmod` 0)) a
+  eval (ZZModNeg  _ a   :@ loc) = lift1 loc a (rNegT (0 `zzmod` 0))
+  eval (ZZModInv  _ a   :@ loc) = lift1 loc a (rInvT (0 `zzmod` 0))
   eval (ZZModAdd  _ a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
   eval (ZZModSub  _ a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
   eval (ZZModMult _ a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
   eval (ZZModPow  _ a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
 
-  eval (ZZModSum   _ ls :@ loc) = lift1 loc (rSumT   (0 `zzmod` 0)) ls
-  eval (ZZModProd  _ ls :@ loc) = lift1 loc (rUProdT (0 `zzmod` 0)) ls
+  eval (ZZModSum   _ ls :@ loc) = lift1 loc ls (rSumT   (0 `zzmod` 0))
+  eval (ZZModProd  _ ls :@ loc) = lift1 loc ls (rUProdT (0 `zzmod` 0))
 
 
 
@@ -1542,8 +1542,8 @@ lift1
   :: ( Eval x, ToExpr x, Get a
      , Put b, Get y
      , PromoteError err
-  ) => Locus -> (a -> Either err b) -> x -> EvalM y
-lift1 loc f x = do
+  ) => Locus -> x -> (a -> Either err b) -> EvalM y
+lift1 loc x f = do
   a <- eval x >>= getVal
   b <- tryEvalM loc $ f a
   getVal (put loc b)
