@@ -48,7 +48,7 @@ Feature Ideas
   1: (done) move type information to AST
   2: (done) Implementation of typeOf becomes trivial; take out of EvalM
   3: use of typeOf in Eval is now more complicated than necessary. Fix it.
-  4: Rearrange order of args in lift1 and lift2 (lifted function should come last.)
+  4: (done) Rearrange order of args in lift1 and lift2 (lifted function should come last.)
   5: Rename Typed class to HasType
   6: Take Get out of EvalM; separate get and getVal
   7: Parser no longer needs to return explicit type info, so don't

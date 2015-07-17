@@ -171,7 +171,7 @@ instance Eval IntExpr where
   eval (IntIfThenElse b t f :@ _) = eIfThenElse b t f
   eval (IntMacro vals mac :@ loc) = eMacro vals mac loc
 
-  eval (IntAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (IntAtPos a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
 
   eval (IntNeg        a :@ loc) = lift1 loc a (rNegT        zeroZZ)
@@ -180,18 +180,18 @@ instance Eval IntExpr where
   eval (IntSqFreePart a :@ loc) = lift1 loc a (rSqFreePartT zeroZZ)
   eval (IntRad        a :@ loc) = lift1 loc a (rRadT        zeroZZ)
 
-  eval (IntAdd  a b :@ loc) = lift2 loc (rAddT zeroZZ) a b
-  eval (IntSub  a b :@ loc) = lift2 loc (rSubT zeroZZ) a b
-  eval (IntMult a b :@ loc) = lift2 loc (rMulT zeroZZ) a b
-  eval (IntMod  a b :@ loc) = lift2 loc (rRemT zeroZZ) a b
-  eval (IntMin  a b :@ loc) = lift2 loc (rMinT zeroZZ) a b
-  eval (IntMax  a b :@ loc) = lift2 loc (rMaxT zeroZZ) a b
-  eval (IntGCD  a b :@ loc) = lift2 loc (rGCDT zeroZZ) a b
-  eval (IntLCM  a b :@ loc) = lift2 loc (rLCMT zeroZZ) a b
-  eval (IntQuo  a b :@ loc) = lift2 loc (rQuoT zeroZZ) a b
-  eval (IntPow  a b :@ loc) = lift2 loc (rPowT zeroZZ) a b
+  eval (IntAdd  a b :@ loc) = lift2 loc a b (rAddT zeroZZ)
+  eval (IntSub  a b :@ loc) = lift2 loc a b (rSubT zeroZZ)
+  eval (IntMult a b :@ loc) = lift2 loc a b (rMulT zeroZZ)
+  eval (IntMod  a b :@ loc) = lift2 loc a b (rRemT zeroZZ)
+  eval (IntMin  a b :@ loc) = lift2 loc a b (rMinT zeroZZ)
+  eval (IntMax  a b :@ loc) = lift2 loc a b (rMaxT zeroZZ)
+  eval (IntGCD  a b :@ loc) = lift2 loc a b (rGCDT zeroZZ)
+  eval (IntLCM  a b :@ loc) = lift2 loc a b (rLCMT zeroZZ)
+  eval (IntQuo  a b :@ loc) = lift2 loc a b (rQuoT zeroZZ)
+  eval (IntPow  a b :@ loc) = lift2 loc a b (rPowT zeroZZ)
 
-  eval (IntChoose a b :@ loc) = lift2 loc (rChooseT zeroZZ) a b
+  eval (IntChoose a b :@ loc) = lift2 loc a b (rChooseT zeroZZ)
 
   eval (RatNumer  p :@ loc) = lift1 loc p (ratNum)
   eval (RatDenom  p :@ loc) = lift1 loc p (ratDen)
@@ -279,11 +279,11 @@ instance Eval StrExpr where
   eval (StrIfThenElse b t f :@ _) = eIfThenElse b t f
   eval (StrMacro vals mac :@ loc) = eMacro vals mac loc
 
-  eval (StrAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (StrAtPos a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
 
-  eval (Concat   a b :@ loc) = lift2 loc (strCat)   a b
-  eval (StrStrip a b :@ loc) = lift2 loc (strStrip) a b
+  eval (Concat   a b :@ loc) = lift2 loc a b (strCat)
+  eval (StrStrip a b :@ loc) = lift2 loc a b (strStrip)
 
   eval (ToUpper   a :@ loc) = lift1 loc a (strUpper)
   eval (ToLower   a :@ loc) = lift1 loc a (strLower)
@@ -353,7 +353,7 @@ instance Eval BoolExpr where
   eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
   eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
 
-  eval (BoolAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (BoolAtPos a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [BoolExpr] -> Integer -> Either ListErr BoolExpr
 
   eval (IsDefined key :@ loc) = do
@@ -475,17 +475,17 @@ instance Eval BoolExpr where
       t -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
-  eval (Neg    a   :@ loc) = lift1 loc a (boolNot)
-  eval (Conj   a b :@ loc) = lift2 loc (boolAnd) a b
-  eval (Disj   a b :@ loc) = lift2 loc (boolOr)  a b
-  eval (Imp    a b :@ loc) = lift2 loc (boolImp) a b
+  eval (Neg    a   :@ loc) = lift1 loc a   (boolNot)
+  eval (Conj   a b :@ loc) = lift2 loc a b (boolAnd)
+  eval (Disj   a b :@ loc) = lift2 loc a b (boolOr)
+  eval (Imp    a b :@ loc) = lift2 loc a b (boolImp)
 
   -- Int
-  eval (IntSqFree a :@ loc) = lift1 loc a (rIsSqFreeT zeroZZ)
-  eval (IntDiv a b :@ loc)  = lift2 loc (rDividesT  zeroZZ) a b
+  eval (IntSqFree a :@ loc) = lift1 loc a   (rIsSqFreeT zeroZZ)
+  eval (IntDiv a b :@ loc)  = lift2 loc a b (rDividesT  zeroZZ)
 
   -- Str
-  eval (Matches a b :@ loc) = lift2 loc (strMatch) a b
+  eval (Matches a b :@ loc) = lift2 loc a b (strMatch)
 
 
 
@@ -502,7 +502,7 @@ instance Eval RatExpr where
   eval (RatIfThenElse b t f :@ _) = eIfThenElse b t f
   eval (RatMacro vals mac :@ loc) = eMacro vals mac loc
 
-  eval (RatAtPos a t :@ loc) = lift2 loc (foo) a t
+  eval (RatAtPos a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
 
   eval (RatCast expr :@ loc) = do
@@ -512,15 +512,15 @@ instance Eval RatExpr where
   eval (RatNeg  a :@ loc)   = lift1 loc a (rNegT zeroQQ)
   eval (RatAbs  a :@ loc)   = lift1 loc a (rAbsT zeroQQ)
 
-  eval (RatAdd  a b :@ loc) = lift2 loc (rAddT (0:/:1)) a b
-  eval (RatSub  a b :@ loc) = lift2 loc (rSubT (0:/:1)) a b
-  eval (RatMult a b :@ loc) = lift2 loc (rMulT (0:/:1)) a b
-  eval (RatMin  a b :@ loc) = lift2 loc (rMinT (0:/:1)) a b
-  eval (RatMax  a b :@ loc) = lift2 loc (rMaxT (0:/:1)) a b
-  eval (RatPow  a b :@ loc) = lift2 loc (rPowT (0:/:1)) a b
-  eval (RatQuot a b :@ loc) = lift2 loc (rDivT (0:/:1)) a b
+  eval (RatAdd  a b :@ loc) = lift2 loc a b (rAddT zeroQQ)
+  eval (RatSub  a b :@ loc) = lift2 loc a b (rSubT zeroQQ)
+  eval (RatMult a b :@ loc) = lift2 loc a b (rMulT zeroQQ)
+  eval (RatMin  a b :@ loc) = lift2 loc a b (rMinT zeroQQ)
+  eval (RatMax  a b :@ loc) = lift2 loc a b (rMaxT zeroQQ)
+  eval (RatPow  a b :@ loc) = lift2 loc a b (rPowT zeroQQ)
+  eval (RatQuot a b :@ loc) = lift2 loc a b (rDivT zeroQQ)
 
-  eval (RatSqrt p k :@ loc) = lift2 loc (ratSqt) p k
+  eval (RatSqrt p k :@ loc) = lift2 loc p k (ratSqt)
 
   eval (RatRand ls :@ loc) = do
     xs <- eval ls >>= getVal
@@ -609,7 +609,7 @@ instance Eval ListExpr where
   eval (ListMacro _ vals mac :@ loc) = eMacro vals mac loc
   eval (ListIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (ListAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (ListAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
 
   eval (ListRange _ a b :@ loc) = do
@@ -780,7 +780,7 @@ instance Eval MacExpr where
   eval (MacAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
   eval (MacMacro _ vals mac :@ loc) = eMacro vals mac loc
 
-  eval (MacAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (MacAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
 
   eval (MacRand _ ls :@ _) = do
@@ -804,7 +804,7 @@ instance Eval MatExpr where
   eval (MatMacro _ vals mac :@ loc) = eMacro vals mac loc
   eval (MatIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (MatAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (MatAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
 
   eval (MatRand _ ls :@ _) = do
@@ -895,7 +895,7 @@ instance Eval MatExpr where
     return $ MatConst u x :@ loc
 
   eval (MatAdd u a b :@ loc) = do
-    let addMat x = lift2 loc (rAddT (mCell x)) a b
+    let addMat x = lift2 loc a b (rAddT (mCell x))
     case u of
       ZZ          -> addMat zeroZZ
       QQ          -> addMat zeroQQ
@@ -925,7 +925,7 @@ instance Eval MatExpr where
     return (MatConst u p :@ loc)
 
   eval (MatMul u a b :@ loc) = do
-    let mulMat x = lift2 loc (rMulT (mCell x)) a b
+    let mulMat x = lift2 loc a b (rMulT (mCell x))
     case u of
       ZZ          -> mulMat zeroZZ
       QQ          -> mulMat zeroQQ
@@ -937,7 +937,7 @@ instance Eval MatExpr where
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatPow u m n :@ loc) = do
-    let powMat x = lift2 loc (rPosPowT (mCell x)) m n
+    let powMat x = lift2 loc m n (rPosPowT (mCell x))
     case u of
       ZZ          -> powMat zeroZZ
       QQ          -> powMat zeroQQ
@@ -1227,7 +1227,7 @@ instance Eval PolyExpr where
   eval (PolyMacro _ vals mac :@ loc) = eMacro vals mac loc
   eval (PolyIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (PolyAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (PolyAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
   eval (PolyRand _ ls :@ loc) = do
@@ -1240,7 +1240,7 @@ instance Eval PolyExpr where
       _ -> reportErr loc $ ListExpected t
 
   eval (PolyAdd u a b :@ loc) = do
-    let addPoly x = lift2 loc (rAddT (constP x)) a b
+    let addPoly x = lift2 loc a b (rAddT (constP x))
     case u of
       ZZ          -> addPoly zeroZZ
       QQ          -> addPoly zeroQQ
@@ -1252,7 +1252,7 @@ instance Eval PolyExpr where
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (PolySub u a b :@ loc) = do
-    let subPoly x = lift2 loc (rSubT (constP x)) a b
+    let subPoly x = lift2 loc a b (rSubT (constP x))
     case u of
       ZZ          -> subPoly zeroZZ
       QQ          -> subPoly zeroQQ
@@ -1264,7 +1264,7 @@ instance Eval PolyExpr where
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyMul u a b :@ loc) = do
-    let mulPoly x = lift2 loc (rMulT (constP x)) a b
+    let mulPoly x = lift2 loc a b (rMulT (constP x))
     case u of
       ZZ          -> mulPoly zeroZZ
       QQ          -> mulPoly zeroQQ
@@ -1294,11 +1294,11 @@ instance Eval PolyExpr where
     let t = typeOf a
     case t of
       PolyOver ZZ ->
-        lift2 loc (rPowT (constP (0::Integer))) a b
+        lift2 loc a b (rPowT (constP (0::Integer)))
       PolyOver QQ ->
-        lift2 loc (rPowT (constP (0:/:1))) a b
+        lift2 loc a b (rPowT (constP (0:/:1)))
       PolyOver BB ->
-        lift2 loc (rPowT (constP False)) a b
+        lift2 loc a b (rPowT (constP False))
       PolyOver (ZZMod n) -> do
         x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
         y <- eval b >>= getVal :: EvalM Integer
@@ -1366,7 +1366,7 @@ instance Eval PermExpr where
     q <- seqPerm $ mapPerm eval p
     return $ PermConst t q :@ loc
 
-  eval (PermAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (PermAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
   {- Common -}
@@ -1420,19 +1420,19 @@ instance Eval ZZModExpr where
   eval (ZZModMacro _ vals mac :@ loc) = eMacro vals mac loc
   eval (ZZModIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
-  eval (ZZModAtPos _ a t :@ loc) = lift2 loc (foo) a t
+  eval (ZZModAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
 
   eval (ZZModCast (ZZMod n) a :@ loc) = do
     res <- eval a >>= getVal :: EvalM Integer
     return (ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
 
-  eval (ZZModNeg  _ a   :@ loc) = lift1 loc a (rNegT (0 `zzmod` 0))
-  eval (ZZModInv  _ a   :@ loc) = lift1 loc a (rInvT (0 `zzmod` 0))
-  eval (ZZModAdd  _ a b :@ loc) = lift2 loc (rAddT (0 `zzmod` 0)) a b
-  eval (ZZModSub  _ a b :@ loc) = lift2 loc (rSubT (0 `zzmod` 0)) a b
-  eval (ZZModMult _ a b :@ loc) = lift2 loc (rMulT (0 `zzmod` 0)) a b
-  eval (ZZModPow  _ a b :@ loc) = lift2 loc (rPowT (0 `zzmod` 0)) a b
+  eval (ZZModNeg  _ a   :@ loc) = lift1 loc a   (rNegT (0 `zzmod` 0))
+  eval (ZZModInv  _ a   :@ loc) = lift1 loc a   (rInvT (0 `zzmod` 0))
+  eval (ZZModAdd  _ a b :@ loc) = lift2 loc a b (rAddT (0 `zzmod` 0))
+  eval (ZZModSub  _ a b :@ loc) = lift2 loc a b (rSubT (0 `zzmod` 0))
+  eval (ZZModMult _ a b :@ loc) = lift2 loc a b (rMulT (0 `zzmod` 0))
+  eval (ZZModPow  _ a b :@ loc) = lift2 loc a b (rPowT (0 `zzmod` 0))
 
   eval (ZZModSum   _ ls :@ loc) = lift1 loc ls (rSumT   (0 `zzmod` 0))
   eval (ZZModProd  _ ls :@ loc) = lift1 loc ls (rUProdT (0 `zzmod` 0))
@@ -1554,8 +1554,8 @@ lift2
      , Eval y, ToExpr y, Get b
      , Put c, Get z
      , PromoteError err
-  ) => Locus -> (a -> b -> Either err c) -> x -> y -> EvalM z
-lift2 loc f x y = do
+  ) => Locus -> x -> y -> (a -> b -> Either err c) -> EvalM z
+lift2 loc x y f = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
   c <- tryEvalM loc $ f a b
