@@ -94,6 +94,7 @@ data TypeErr
   = TypeMismatch          Type Type -- expected, received
 
   | NumericTypeExpected   Type
+  | FieldTypeExpected     Type
 
   | ListExpected          Type
   | NumericListExpected   Type
@@ -138,6 +139,9 @@ instance Show TypeErr where
 
   show (NumericTypeExpected u) =
     "A numeric type was expected, but this expression has type " ++ show u ++ "."
+
+  show (FieldTypeExpected u) =
+    "A field type was expected, but this expression has type " ++ show u ++ "."
 
 
   show (ListExpected t) =

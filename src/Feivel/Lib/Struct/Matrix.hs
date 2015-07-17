@@ -40,6 +40,7 @@ module Feivel.Lib.Struct.Matrix (
   mShowStr, tabulateWithM,
 
   mAddRow, mAddCol, mScaleRow, mScaleCol,
+  mScaleRowT, mScaleColT,
 
   mSeq, mAny, mAll, mCombine, mConvolve,
 
@@ -47,7 +48,8 @@ module Feivel.Lib.Struct.Matrix (
   mEScaleT, mEAddT, mESwapT, mEIdT,
 
   gjPivots, gjREForm, mClearAbovePivot, mClearAbovePivots, gjREFactor,
-  mGJForm, mGJFactor, mIsGaussJordanForm, mPivotCols, mRank
+  mGJForm, mGJFactor, mIsGaussJordanForm, mPivotCols, mRank,
+  mGJFormT, mGJFactorT
 ) where
 
 {--------------------}
@@ -614,6 +616,10 @@ mScaleRow c h m = do
         | otherwise = (i,j) `mEntryOf` m
   mFromMapM dm foo
 
+mScaleRowT :: (Ringoid a, CRingoid a)
+  => a -> a -> Integer -> Matrix a -> Either AlgErr (Matrix a)
+mScaleRowT _ = mScaleRow
+
 mScaleCol :: (Ringoid a, CRingoid a)
   => a -> Integer -> Matrix a -> Either AlgErr (Matrix a)
 mScaleCol _ _ Null = Right Null
@@ -627,6 +633,10 @@ mScaleCol c h m = do
               Right x -> return x
         | otherwise = (i,j) `mEntryOf` m
   mFromMapM dm foo
+
+mScaleColT :: (Ringoid a, CRingoid a)
+  => a -> a -> Integer -> Matrix a -> Either AlgErr (Matrix a)
+mScaleColT _ = mScaleCol
 
 mAddRow :: (Ringoid a, CRingoid a)
   => a -> Integer -> Integer -> Matrix a -> Either AlgErr (Matrix a)
@@ -979,6 +989,10 @@ mGJForm m = do
   (n,_,_) <- mGaussJordan m
   return n
 
+mGJFormT :: (Ringoid a, CRingoid a, URingoid a)
+  => a -> Matrix a -> Either AlgErr (Matrix a)
+mGJFormT _ = mGJForm
+
 mGJFactor :: (Ringoid a, CRingoid a, URingoid a)
   => Matrix a -> Either AlgErr (Matrix a)
 mGJFactor m = do
@@ -986,3 +1000,7 @@ mGJFactor m = do
   (_,ops,_) <- mGaussJordan m
   ps <- sequence $ map (eOpMatrix r) ops
   rProd $ reverse ps
+
+mGJFactorT :: (Ringoid a, CRingoid a, URingoid a)
+  => a -> Matrix a -> Either AlgErr (Matrix a)
+mGJFactorT _ = mGJFactor
