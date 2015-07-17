@@ -108,6 +108,7 @@ mCell x = Matrix $ array ((1,1),(1,1)) [((1,1),x)]
 
 -- This should be only one of two constructors which call ``array''.
 mRowMajorFromList :: Integer -> Integer -> [a] -> Either AlgErr (Matrix a)
+mRowMajorFromList _ _ [] = Right Null
 mRowMajorFromList r c as
   | r <= 0 || c <= 0 = Left (NullMatrix "mRowMajorFromList")
   | otherwise = do

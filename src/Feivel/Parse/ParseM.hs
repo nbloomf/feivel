@@ -58,17 +58,17 @@ reportParseErr loc err = lift $ Left $ Goof loc (promote err)
 
 
 
-pAtLocus :: ParseM (a,t) -> ParseM (AtLocus a, t)
+pAtLocus :: ParseM a -> ParseM (AtLocus a)
 pAtLocus p = do
   start <- getPosition
-  (x,t) <- p
+  x <- p
   end <- getPosition
-  return (x :@ (locus start end), t)
+  return (x :@ (locus start end))
 
-pLiftAt :: ParseM a -> t -> ParseM (a,t)
+pLiftAt :: ParseM a -> t -> ParseM a
 pLiftAt p t = do
   x <- p
-  return (x,t)
+  return x
 
 
 

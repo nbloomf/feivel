@@ -76,6 +76,3 @@ pTypeZZMod = do
   _ <- try $ string "mod"
   n <- pNatural
   return $ ZZMod n
-
-pTypeT :: ParseM (Type, Type)
-pTypeT = pType >>= (\t -> return (t,t))

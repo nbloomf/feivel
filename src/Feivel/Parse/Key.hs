@@ -32,8 +32,8 @@ pToken :: ParseM String
 pToken = many1 $ oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ "-_.")
 
 
-pKey :: ParseM (Key, Type)
-pKey = pUntypedKey
+pKey :: ParseM Key
+pKey = fmap fst pUntypedKey
 
 pUntypedKey :: ParseM (Key, Type)
 pUntypedKey = do

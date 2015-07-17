@@ -324,7 +324,7 @@ parseAndEvalIO :: Store Expr -> String -> IO (String, Store Expr)
 parseAndEvalIO st input = do
   case runParseM pREPL "" input of
     Left goof -> return (show goof, st)
-    Right (x,_) -> do
+    Right x   -> do
       (y, stNew) <- runEvalM st (evalToGlyph x)
       case y of
         Left goof -> return (show goof, st)

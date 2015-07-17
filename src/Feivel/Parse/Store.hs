@@ -73,7 +73,7 @@ pTypeKeyValFile = do
         char ':' >> spaces
         k <- pToken
         char ':' >> spaces
-        (e,_) <- pTypedConst t
+        e <- pTypedConst t
         _ <- char ';'
         end <- getPosition
         _ <- many $ char ' '

@@ -28,10 +28,10 @@ import Feivel.Main
 import Feivel.GUI
 
 -- Parse an object
-testParseM :: ParseM (a,b) -> String -> IO a
+testParseM :: ParseM a -> String -> IO a
 testParseM p str = case runParseM p "" str of
   Left err  -> fail $ show err
-  Right (val,_) -> return val
+  Right val -> return val
 
 -- Eval an object
 testEvalM :: (Eval a) => a -> IO a
@@ -42,7 +42,7 @@ testEvalM expr = do
     Right d  -> return d
 
 -- Parse and evaluate an object
-testM :: (Eval a) => ParseM (a,t) -> String -> IO a
+testM :: (Eval a) => ParseM a -> String -> IO a
 testM p str = testParseM p str >>= testEvalM
 
 -- Parse and evaluate a template
