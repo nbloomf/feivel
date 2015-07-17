@@ -130,14 +130,14 @@ instance Eval Expr where
 eKey :: (Eval a, Get a) => Key -> Locus -> EvalM a
 eKey key loc = lookupKey loc key >>= getVal >>= eval
 
-eIfThenElse :: (ToExpr a, Get a, Eval a) => BoolExpr -> a -> a -> EvalM a
+eIfThenElse :: (ToExpr a, Get a, Eval a) => Expr -> a -> a -> EvalM a
 eIfThenElse b t f = do
   test  <- eval b >>= getVal
   true  <- eval t >>= getVal
   false <- eval f >>= getVal
   if test then (eval true) else (eval false)
 
-eMacro :: (Get b, Eval b) => [(Type, Key, Expr)] -> MacExpr -> Locus -> EvalM b
+eMacro :: (Get b, Eval b) => [(Type, Key, Expr)] -> Expr -> Locus -> EvalM b
 eMacro vals mac loc = do
   old <- getState
   ctx <- toStateT loc vals

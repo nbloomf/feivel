@@ -98,29 +98,29 @@ pVarExpr h t = do
   k <- pKey
   return (h k)
 
-pAtPos :: Type -> (ListExpr -> IntExpr -> b) -> ParseM b
-pAtPos typ fun = pFun2 "AtPos" (pTypedListExpr typ) pIntExpr fun typ
+pAtPos :: Type -> (Expr -> IntExpr -> b) -> ParseM b
+pAtPos typ fun = pFun2 "AtPos" (pTypedExpr (ListOf typ)) pIntExpr fun typ
 
-pAtIdx :: Type -> (MatExpr -> IntExpr -> IntExpr -> b) -> ParseM b
-pAtIdx typ fun = pFun3 "AtIdx" (pTypedMatExpr typ) pIntExpr pIntExpr fun typ
+pAtIdx :: Type -> (Expr -> IntExpr -> IntExpr -> b) -> ParseM b
+pAtIdx typ fun = pFun3 "AtIdx" (pTypedExpr (MatOf typ)) pIntExpr pIntExpr fun typ
 
-pIfThenElseExpr :: ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b
+pIfThenElseExpr :: ParseM a -> (Expr -> a -> a -> b) -> t -> ParseM b
 pIfThenElseExpr p h t = do
   keyword "if"
-  b  <- pBoolExpr
+  b  <- pTypedExpr BB
   keyword "then"
   tr <- p
   keyword "else"
   fa <- p
   return (h b tr fa)
 
-pMacroExpr :: ([(Type, Key, Expr)] -> MacExpr -> a) -> ParseM a
+pMacroExpr :: ([(Type, Key, Expr)] -> Expr -> a) -> ParseM a
 pMacroExpr f = do
   try $ keyword "Eval"
   keyword "("
   t <- pType
   keyword ";"
-  e <- pTypedMacExpr t
+  e <- pTypedExpr (MacTo t)
   vals <- option [] $ many1 (keyword ";" >> pTypeKeyExpr)
   keyword ")"
   return (f vals e)
@@ -241,7 +241,7 @@ pDoc = choice $ map pAtLocus
   where
     pEval = do
       try (char '[' >> keyword "eval")
-      e <- pTypedMacExpr DD
+      e <- pTypedExpr (MacTo DD)
       vals <- option [] pVals
       _ <- option () (try (keyword "endeval")) >> char ']'
       return (DocMacro vals e)
@@ -523,7 +523,7 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
 pIntConst :: ParseM IntExpr
 pIntConst = pAtLocus pIntConst'
 
-pIntConst' :: ParseM IntExprLeaf
+pIntConst' :: ParseM (IntExprLeaf Expr)
 pIntConst' = pConst pInteger IntConst ZZ
 
 pIntExpr :: ParseM IntExpr
@@ -542,32 +542,32 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "SquareFreePart" pIntExpr IntSqFreePart ZZ
       , pFun1 "Rad"            pIntExpr IntRad        ZZ
 
-      , pFun1 "Length" pListExpr           ListLen  ZZ
-      , pFun1 "Rand"   (pTypedListExpr ZZ) IntRand  ZZ
-      , pFun1 "Sum"    (pTypedListExpr ZZ) IntSum   ZZ
-      , pFun1 "Prod"   (pTypedListExpr ZZ) IntProd  ZZ
-      , pFun1 "Min"    (pTypedListExpr ZZ) IntMinim ZZ
-      , pFun1 "Max"    (pTypedListExpr ZZ) IntMaxim ZZ
-      , pFun1 "GCD"    (pTypedListExpr ZZ) IntGCDiv ZZ
-      , pFun1 "LCM"    (pTypedListExpr ZZ) IntLCMul ZZ
+      , pFun1 "Length" (pTypedExpr (ListOf XX)) ListLen  ZZ
+      , pFun1 "Rand"   (pTypedExpr (ListOf ZZ)) IntRand  ZZ
+      , pFun1 "Sum"    (pTypedExpr (ListOf ZZ)) IntSum   ZZ
+      , pFun1 "Prod"   (pTypedExpr (ListOf ZZ)) IntProd  ZZ
+      , pFun1 "Min"    (pTypedExpr (ListOf ZZ)) IntMinim ZZ
+      , pFun1 "Max"    (pTypedExpr (ListOf ZZ)) IntMaxim ZZ
+      , pFun1 "GCD"    (pTypedExpr (ListOf ZZ)) IntGCDiv ZZ
+      , pFun1 "LCM"    (pTypedExpr (ListOf ZZ)) IntLCMul ZZ
     
-      , pFun1 "Numerator"   pRatExpr  RatNumer ZZ
-      , pFun1 "Denominator" pRatExpr  RatDenom ZZ
-      , pFun1 "Floor"       pRatExpr  RatFloor ZZ
+      , pFun1 "Numerator"   (pTypedExpr QQ)  RatNumer ZZ
+      , pFun1 "Denominator" (pTypedExpr QQ)  RatDenom ZZ
+      , pFun1 "Floor"       (pTypedExpr QQ)  RatFloor ZZ
     
-      , pFun1 "StrLen" pStrExpr  StrLength ZZ
+      , pFun1 "StrLen" (pTypedExpr SS)  StrLength ZZ
 
-      , pFun1 "NumRows" pMatExpr MatNumRows ZZ
-      , pFun1 "NumCols" pMatExpr MatNumCols ZZ
+      , pFun1 "NumRows" (pTypedExpr (MatOf XX)) MatNumRows ZZ
+      , pFun1 "NumCols" (pTypedExpr (MatOf XX)) MatNumCols ZZ
       , pMatRank
 
-      , pFun1 "PolyContent" (pTypedPolyExpr ZZ) IntContent ZZ
+      , pFun1 "PolyContent" (pTypedExpr (PolyOver ZZ)) IntContent ZZ
     
       , pFun2 "Uniform"  pIntExpr pIntExpr IntObserveUniform ZZ
-      , pFun2 "Binomial" pIntExpr pRatExpr IntObserveBinomial ZZ
-      , pFun1 "Poisson"  pRatExpr IntObservePoisson ZZ
+      , pFun2 "Binomial" pIntExpr (pTypedExpr QQ) IntObserveBinomial ZZ
+      , pFun1 "Poisson"  (pTypedExpr QQ) IntObservePoisson ZZ
 
-      , pFun1 "str" pStrExpr IntCastStr ZZ
+      , pFun1 "str" (pTypedExpr SS) IntCastStr ZZ
       ]
       where
         pMatRank = do
@@ -575,7 +575,7 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
           keyword "("
           t <- pType
           keyword ";"
-          m <- pTypedMatExpr t
+          m <- pTypedExpr (MatOf t)
           keyword ")"
           return (MatRank m)
 

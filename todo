@@ -47,18 +47,19 @@ Feature Ideas
 * Refactor: Typed and Get know too much about EvalM
   1: (done) move type information to AST
   2: (done) Implementation of typeOf becomes trivial; take out of EvalM
-  3: use of typeOf in Eval is now more complicated than necessary. Fix it.
-  4: (done) Rearrange order of args in lift1 and lift2 (lifted function should come last.)
-  5: Rename Typed class to HasType
-  6: Take Get out of EvalM; separate get and getVal
-  7: Parser no longer needs to return explicit type info, so don't
-  8: data Typed t = t :# Type
+  3: (done) Rearrange order of args in lift1 and lift2 (lifted function should come last.)
+  4: (done) Parser no longer needs to return explicit type info, so don't
+  5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
+  6: Rename Typed class to HasType
+  7: Take Get out of EvalM; separate get and getVal
+  8: Clean up parsers (Fun and FunT are now the same?)
+  9: data Typed t = t :# Type (maybe. how to handle function types)
 * Refactor: Eval has lots of repetitive code
   1: (done) Make inject have type a -> Expr, and use getVal in liftN
   2: Separate put and putVal
   3: use RankNTypes to make dispatch helper functions
 * Refactor: Eval is too big
-  1: Replace different expression types in grammar with just Expr
+  1: (started) Replace different expression types in grammar with just Expr
   2: Parameterize IntExpr et. al.; e.g. IntExprLeaf a = blah & IntExpr a = AtLocus (IntExprLeaf a)
   3: Move grammar types to own modules; e.g. Expr = IntE (IntExpr Expr)
   4: Move parsers to own modules
