@@ -94,11 +94,19 @@ instance Typed Bool     where typeOf _              = BB
 instance Typed Rat      where typeOf _              = QQ
 instance Typed ZZModulo where typeOf (ZZModulo _ n) = ZZMod n
 
-instance Typed (Poly Integer) where typeOf _ = PolyOver ZZ
-instance Typed (Poly Rat)     where typeOf _ = PolyOver QQ
-instance Typed (Poly Bool)    where typeOf _ = PolyOver BB
+instance (Typed a) => Typed (Poly a) where
+  typeOf x = case coefficientsP x of
+    (c:_) -> PolyOver (typeOf c)
+    []    -> PolyOver XX
 
-instance Typed (Matrix Integer) where typeOf _ = MatOf ZZ
+instance (Typed a) => Typed (Matrix a) where
+  typeOf x = case toListM x of
+    (a:_) -> MatOf (typeOf a)
+    []    -> MatOf XX
+
+instance (Typed a) => Typed [a] where
+  typeOf (x:_) = typeOf x
+  typeOf []    = XX
 
 
 instance Typed IntExpr  where typeOf _ = ZZ
