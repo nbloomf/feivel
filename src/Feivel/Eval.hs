@@ -811,10 +811,7 @@ instance Eval MatExpr where
     let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM MatExpr
-    case t of
-      ListOf (MatOf _) -> return s
-      _ -> reportErr loc $ ListExpected t
+    eval r >>= getVal
 
   eval (MatRowFromList t xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
@@ -928,14 +925,17 @@ instance Eval MatExpr where
     p <- tryEvalM loc $ mTranspose m
     return (MatConst u p :@ loc)
 
-  eval (MatMul _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
-    case t of
-      MatOf ZZ -> lift2 loc (rMulT (mCell (0::Integer))) a b
-      MatOf QQ -> lift2 loc (rMulT (mCell (0:/:1))) a b
-      MatOf BB -> lift2 loc (rMulT (mCell False)) a b
-      MatOf (ZZMod n) -> lift2 loc (rMulT (mCell (0`zzmod`n))) a b
-      _ -> reportErr loc $ NumericMatrixExpected t
+  eval (MatMul u a b :@ loc) = do
+    let mulMat x = lift2 loc (rMulT (mCell x)) a b
+    case u of
+      ZZ          -> mulMat zeroZZ
+      QQ          -> mulMat zeroQQ
+      BB          -> mulMat zeroBB
+      (ZZMod n)   -> mulMat (zeroMod n)
+      PolyOver ZZ -> mulMat (constP zeroZZ)
+      PolyOver QQ -> mulMat (constP zeroQQ)
+      PolyOver BB -> mulMat (constP zeroBB)
+      _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatPow _ m n :@ loc) = do
     let t = typeOf m
