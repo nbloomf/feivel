@@ -651,11 +651,7 @@ instance Eval ListExpr where
 
   eval (ListRand _ ls :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM ListExpr
-    case typeOf ls of
-      ListOf (ListOf _) -> return s
-      t -> reportErr loc $ ListExpected t
+    randomElementEvalM xs >>= getVal :: EvalM ListExpr
 
   eval (ListUniq u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
@@ -666,31 +662,24 @@ instance Eval ListExpr where
     ys <- shuffleEvalM xs
     return $ ListConst u ys :@ loc
 
-  eval (ListShuffles _ ls :@ loc) = do
-    let t = typeOf ls
-    case t of
-      ListOf u -> do
-        xs <- eval ls >>= getVal :: EvalM [Expr]
-        let us = [ListConst (ListOf u) ys :@ loc | ys <- permutations xs]
-        return (ListConst (ListOf u) (map toExpr us) :@ loc)
-      u -> reportErr loc $ ListExpected u
-
-  eval (ListChoose _ n ls :@ loc) = do
-    k <- eval n >>= getVal :: EvalM Integer
-    let t = typeOf ls
-    case t of
-      ListOf u -> do
-        xs <- eval ls >>= getVal :: EvalM [Expr]
-        ys <- sampleEvalM (fromIntegral k) xs
-        return $ ListConst u ys :@ loc
-      u -> reportErr loc $ ListExpected u
-
-  eval (ListChoices _ n ls :@ loc) = do
-    k <- eval n >>= getVal :: EvalM Integer
-    let ListOf t = typeOf ls
+  eval (ListShuffles (ListOf u) ls :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    let foos = [toExpr $ ListConst t x :@ loc | x <- combinations (fromIntegral k) xs]
-    return $ ListConst (ListOf t) foos :@ loc 
+    let us = [ListE $ ListConst (ListOf u) ys :@ loc | ys <- permutations xs]
+    return (ListConst (ListOf u) us :@ loc)
+  eval (ListShuffles u _ :@ loc) = reportErr loc $ ListExpected u
+
+  eval (ListChoose u n ls :@ loc) = do
+    k  <- eval n >>= getVal :: EvalM Integer
+    xs <- eval ls >>= getVal :: EvalM [Expr]
+    ys <- sampleEvalM (fromIntegral k) xs
+    return (ListConst u ys :@ loc)
+
+  eval (ListChoices (ListOf u) n ls :@ loc) = do
+    k  <- eval n  >>= getVal :: EvalM Integer
+    xs <- eval ls >>= getVal :: EvalM [Expr]
+    let foos = [ListE $ ListConst u x :@ loc | x <- combinations (fromIntegral k) xs]
+    return $ ListConst (ListOf u) foos :@ loc
+  eval (ListChoices u _ _ :@ loc) = reportErr loc $ ListExpected u
 
   eval (ListBuilder _ e gs :@ loc) = do
     st <- getState
@@ -760,17 +749,17 @@ instance Eval ListExpr where
       u -> reportErr loc $ PermutationExpected u
 
   eval (ListPivotColIndices _ m :@ loc) = do
+    let pivotIndices x = do
+          n  <- eval m >>= getVal
+          suchThat $ n `hasSameTypeAs` x
+          is <- tryEvalM loc $ mPivotCols n
+          return (ListConst ZZ (map toExpr is) :@ loc)
     case typeOf m of
-      MatOf QQ -> do
-        n  <- eval m >>= getVal :: EvalM (Matrix Rat)
-        is <- tryEvalM loc $ mPivotCols n
-        return (ListConst ZZ (map toExpr is) :@ loc)
-      MatOf BB -> do
-        n  <- eval m >>= getVal :: EvalM (Matrix Bool)
-        is <- tryEvalM loc $ mPivotCols n
-        return (ListConst ZZ (map toExpr is) :@ loc)
-      MatOf u -> reportErr loc $ FieldMatrixExpected u
-      t -> reportErr loc $ MatrixExpected t
+      MatOf QQ -> pivotIndices (mCell zeroQQ)
+      MatOf BB -> pivotIndices (mCell zeroBB)
+      MatOf u  -> reportErr loc $ FieldMatrixExpected u
+      t        -> reportErr loc $ MatrixExpected t
+
 
 
 {-----------------}
@@ -830,13 +819,17 @@ instance Eval MatExpr where
   eval (MatRowFromList t xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mRowFromList as
-    return $ MatConst t m :@ loc
+    return (MatConst t m :@ loc)
 
   eval (MatColFromList t xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mColFromList as
-    return $ MatConst t m :@ loc
+    return (MatConst t m :@ loc)
 
+  eval (MatId ZZ n :@ loc) = lift1 loc (mEIdT zeroZZ) n
+  eval (MatId QQ n :@ loc) = lift1 loc (mEIdT zeroQQ) n
+  eval (MatId BB n :@ loc) = lift1 loc (mEIdT zeroBB) n
+{-
   eval (MatId t n :@ loc) = do
     k <- eval n >>= getVal :: EvalM Integer
     let makeIdMat a = do
@@ -847,6 +840,7 @@ instance Eval MatExpr where
       QQ -> makeIdMat (0:/:1)
       BB -> makeIdMat False
       _  -> reportErr loc $ NumericMatrixExpected t
+-}
 
   eval (MatSwapE t n h k :@ loc) = do
     m <- eval n >>= getVal
