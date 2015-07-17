@@ -740,8 +740,8 @@ mEAdd n (h,k) a = do
   (n,n) `mFromMap` foo
 
 mEAddT :: (Ringoid a, URingoid a)
-  => a -> Integer -> Index -> a -> Either AlgErr (Matrix a)
-mEAddT _ = mEAdd
+  => a -> Integer -> Integer -> Integer -> a -> Either AlgErr (Matrix a)
+mEAddT _ n i j r = mEAdd n (i,j) r
 
 
 

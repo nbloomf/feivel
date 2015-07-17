@@ -93,6 +93,8 @@ instance Show Type where
 data TypeErr
   = TypeMismatch          Type Type -- expected, received
 
+  | NumericTypeExpected   Type
+
   | ListExpected          Type
   | NumericListExpected   Type
   | SortableListExpected  Type
@@ -133,6 +135,9 @@ instance Show TypeErr where
   show (TypeMismatch ex re) =
     "An expression of type " ++ show ex ++ " was expected, but this expression has type "
      ++ show re ++ "."
+
+  show (NumericTypeExpected u) =
+    "A numeric type was expected, but this expression has type " ++ show u ++ "."
 
 
   show (ListExpected t) =

@@ -53,3 +53,6 @@ Feature Ideas
   6: Take Get out of EvalM
   7: Parser no longer needs to return explicit type info, so don't
   8: data Typed t = t :# Type
+* Arch: Long-term refactor (may not work?)
+  1: Make inject have type a -> Expr, and use getVal in liftN
+  2: use RankNTypes to make dispatch helper functions

@@ -826,83 +826,65 @@ instance Eval MatExpr where
     m  <- tryEvalM loc $ mColFromList as
     return (MatConst t m :@ loc)
 
-  eval (MatId ZZ n :@ loc) = lift1 loc (mEIdT zeroZZ) n
-  eval (MatId QQ n :@ loc) = lift1 loc (mEIdT zeroQQ) n
-  eval (MatId BB n :@ loc) = lift1 loc (mEIdT zeroBB) n
-{-
-  eval (MatId t n :@ loc) = do
-    k <- eval n >>= getVal :: EvalM Integer
-    let makeIdMat a = do
-          x <- tryEvalM loc $ mEIdT a k
-          return $ inject loc x
-    case t of
-      ZZ -> makeIdMat (0::Integer)
-      QQ -> makeIdMat (0:/:1)
-      BB -> makeIdMat False
-      _  -> reportErr loc $ NumericMatrixExpected t
--}
+  eval (MatId u n :@ loc) = do
+    let makeIdMat x = lift1 loc (mEIdT x) n
+    case u of
+      ZZ          -> makeIdMat zeroZZ
+      QQ          -> makeIdMat zeroQQ
+      BB          -> makeIdMat zeroBB
+      ZZMod n     -> makeIdMat (zeroMod n)
+      PolyOver ZZ -> makeIdMat (constP zeroZZ)
+      PolyOver QQ -> makeIdMat (constP zeroQQ)
+      _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatSwapE t n h k :@ loc) = do
-    m <- eval n >>= getVal
-    i <- eval h >>= getVal
-    j <- eval k >>= getVal
-    let makeSwapMat a = do
-          x <- tryEvalM loc $ mESwapT a m i j
-          return $ inject loc x
-    case t of
-      ZZ -> makeSwapMat zeroZZ
-      QQ -> makeSwapMat zeroQQ
-      BB -> makeSwapMat zeroBB
-      ZZMod d -> makeSwapMat (zeroMod d)
+  eval (MatSwapE u n h k :@ loc) = do
+    let makeSwapMat x = lift3 loc n h k (mESwapT x)
+    case u of
+      ZZ          -> makeSwapMat zeroZZ
+      QQ          -> makeSwapMat zeroQQ
+      BB          -> makeSwapMat zeroBB
+      ZZMod n     -> makeSwapMat (zeroMod n)
       PolyOver ZZ -> makeSwapMat (constP zeroZZ)
-      _  -> reportErr loc $ NumericMatrixExpected t
+      PolyOver QQ -> makeSwapMat (constP zeroQQ)
+      _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatScaleE t n h x :@ loc) = do
-    m <- eval n >>= getVal
-    k <- eval h >>= getVal
-    let makeScaleMat a = do
-          w <- eval x >>= getVal
-          y <- tryEvalM loc $ mEScaleT a m k w
-          return $ inject loc y
-    case t of
-      ZZ -> makeScaleMat zeroZZ
-      QQ -> makeScaleMat zeroQQ
-      BB -> makeScaleMat zeroBB
-      ZZMod d -> makeScaleMat (zeroMod d)
+  eval (MatScaleE u n h r :@ loc) = do
+    let makeScaleMat x = lift3 loc n h r (mEScaleT x)
+    case u of
+      ZZ          -> makeScaleMat zeroZZ
+      QQ          -> makeScaleMat zeroQQ
+      BB          -> makeScaleMat zeroBB
+      ZZMod n     -> makeScaleMat (zeroMod n)
       PolyOver ZZ -> makeScaleMat (constP zeroZZ)
-      _  -> reportErr loc $ NumericMatrixExpected t
+      PolyOver QQ -> makeScaleMat (constP zeroQQ)
+      PolyOver BB -> makeScaleMat (constP zeroBB)
+      _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatAddE t n h k x :@ loc) = do
-    m <- eval n >>= getVal
-    i <- eval h >>= getVal
-    j <- eval k >>= getVal
-    let makeAddMat a = do
-          w <- eval x >>= getVal
-          y <- tryEvalM loc $ mEAddT a m (i,j) w
-          return $ inject loc y
-    case t of
-      ZZ -> makeAddMat zeroZZ
-      QQ -> makeAddMat zeroQQ
-      BB -> makeAddMat zeroBB
-      ZZMod d -> makeAddMat (0`zzmod`d)
+  eval (MatAddE u n h k r :@ loc) = do
+    let makeAddMat x = lift4 loc n h k r (mEAddT x)
+    case u of
+      ZZ          -> makeAddMat zeroZZ
+      QQ          -> makeAddMat zeroQQ
+      BB          -> makeAddMat zeroBB
+      ZZMod n     -> makeAddMat (zeroMod n)
       PolyOver ZZ -> makeAddMat (constP zeroZZ)
       PolyOver QQ -> makeAddMat (constP zeroQQ)
       PolyOver BB -> makeAddMat (constP zeroBB)
-      _ -> reportErr loc $ NumericMatrixExpected t
+      _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatShuffleRows u m :@ loc) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mRowsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mVCats ts
-    return $ MatConst u n :@ loc
+    return (MatConst u n :@ loc)
 
   eval (MatShuffleCols u m :@ loc) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mHCats ts
-    return $ MatConst u n :@ loc
+    return (MatConst u n :@ loc)
 
   eval (MatHCat u a b :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
@@ -916,29 +898,35 @@ instance Eval MatExpr where
     x <- tryEvalM loc $ mVCat m n
     return $ MatConst u x :@ loc
 
-  eval (MatAdd ZZ            a b :@ loc) = lift2 loc (rAddT (mCell zeroZZ))          a b
-  eval (MatAdd QQ            a b :@ loc) = lift2 loc (rAddT (mCell zeroQQ))          a b
-  eval (MatAdd BB            a b :@ loc) = lift2 loc (rAddT (mCell zeroBB))          a b
-  eval (MatAdd (ZZMod n)     a b :@ loc) = lift2 loc (rAddT (mCell (zeroMod n)))     a b
-  eval (MatAdd (PolyOver ZZ) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroZZ)) a b
-  eval (MatAdd (PolyOver QQ) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroQQ)) a b
-  eval (MatAdd (PolyOver BB) a b :@ loc) = lift2 loc (rAddT (mCell $ constP zeroBB)) a b
-  eval (MatAdd u             _ _ :@ loc) = reportErr loc $ NumericMatrixExpected u
+  eval (MatAdd u a b :@ loc) = do
+    let addMat x = lift2 loc (rAddT (mCell x)) a b
+    case u of
+      ZZ          -> addMat zeroZZ
+      QQ          -> addMat zeroQQ
+      BB          -> addMat zeroBB
+      ZZMod n     -> addMat (zeroMod n)
+      PolyOver ZZ -> addMat (constP zeroZZ)
+      PolyOver QQ -> addMat (constP zeroQQ)
+      PolyOver BB -> addMat (constP zeroBB)
+      _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatNeg _ a :@ loc) = do
-    let t = typeOf a
-    case t of
-      MatOf ZZ -> lift1 loc (rNegT (mCell zeroZZ)) a
-      MatOf QQ -> lift1 loc (rNegT (mCell zeroQQ)) a
-      MatOf BB -> lift1 loc (rNegT (mCell zeroBB)) a
-      MatOf (ZZMod n) -> lift1 loc (rNegT (mCell (0`zzmod`n))) a
-      _ -> reportErr loc $ NumericMatrixExpected t
+  eval (MatNeg u a :@ loc) = do
+    let negMat x = lift1 loc (rNegT (mCell x)) a
+    case u of
+      ZZ          -> negMat zeroZZ
+      QQ          -> negMat zeroQQ
+      BB          -> negMat zeroBB
+      ZZMod n     -> negMat (zeroMod n)
+      PolyOver ZZ -> negMat (constP zeroZZ)
+      PolyOver QQ -> negMat (constP zeroQQ)
+      PolyOver BB -> negMat (constP zeroBB)
+      _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatTrans _ a :@ loc) = do
     u <- expectMatrix loc a
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
-    return $ MatConst u p :@ loc
+    return (MatConst u p :@ loc)
 
   eval (MatMul _ a b :@ loc) = do
     t <- unifyTypesOf loc a b
@@ -1622,7 +1610,6 @@ lift2 loc f x y = do
   return $ inject loc c
 
 
-{- Saved for future use
 lift3
   :: ( Eval x, ToExpr x, Get a
      , Eval y, ToExpr y, Get b
@@ -1637,10 +1624,8 @@ lift3 loc x y z f = do
   case f a b c of
     Left err -> reportErr loc err
     Right d  -> return $ inject loc d
--}
 
 
-{- Saved for future use
 lift4
   :: ( Eval x, ToExpr x, Get a
      , Eval y, ToExpr y, Get b
@@ -1657,7 +1642,6 @@ lift4 loc x y z w f = do
   case f a b c d of
     Left err -> reportErr loc err
     Right e  -> return $ inject loc e
--}
 
 
 
@@ -1687,4 +1671,16 @@ zeroMod n = 0 `zzmod` n
 
 
 
-
+{-
+dispatchMatrixRingType
+  :: Locus -> Type -> (forall a. (Ringoid a, URingoid a, Inject (Matrix a) MatExpr) => a -> EvalM MatExpr) -> EvalM MatExpr
+dispatchMatrixRingType loc u fun = case u of
+  ZZ          -> fun zeroZZ
+  QQ          -> fun zeroQQ
+  BB          -> fun zeroBB
+  ZZMod n     -> fun (zeroMod n)
+  PolyOver ZZ -> fun (constP zeroZZ)
+  PolyOver QQ -> fun (constP zeroQQ)
+  PolyOver BB -> fun (constP zeroBB)
+  _           -> reportErr loc $ NumericTypeExpected u
+-}

@@ -19,6 +19,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
+{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances  #-}
 
 module Feivel.Inject (
   Inject, inject
@@ -42,8 +44,9 @@ instance (HasLocus a) => Inject a a where
   inject _ a = a
 
 
-instance Inject Integer IntExpr where
-  inject loc x = IntConst x :@ loc
+
+--instance Inject Integer IntExpr where
+--  inject loc x = IntConst x :@ loc
 
 instance Inject String StrExpr where
   inject loc x = StrConst (Text x) :@ loc
