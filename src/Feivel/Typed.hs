@@ -88,6 +88,17 @@ sameType loc a b = do
 {- :Instances -}
 {--------------}
 
+instance Typed Integer  where typeOf _              = ZZ
+instance Typed Text     where typeOf _              = SS
+instance Typed Bool     where typeOf _              = BB
+instance Typed Rat      where typeOf _              = QQ
+instance Typed ZZModulo where typeOf (ZZModulo _ n) = ZZMod n
+
+instance Typed (Poly Integer) where typeOf _ = PolyOver ZZ
+instance Typed (Poly Rat)     where typeOf _ = PolyOver QQ
+instance Typed (Poly Bool)    where typeOf _ = PolyOver BB
+
+
 instance Typed IntExpr  where typeOf _ = ZZ
 instance Typed StrExpr  where typeOf _ = SS
 instance Typed BoolExpr where typeOf _ = BB

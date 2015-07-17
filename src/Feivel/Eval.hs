@@ -49,7 +49,7 @@ import Feivel.Typed
 import Feivel.LaTeX
 import Feivel.Parse (pInteger, pRat)
 import Feivel.Get
-import Feivel.Inject
+import Feivel.Put
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -734,18 +734,18 @@ instance Eval ListExpr where
       PermOf ZZ -> do
         as <- eval xs >>= getVal :: EvalM [Integer]
         qs <- tryEvalM loc $ permsOf as
-        let us = map (inject loc) qs :: [PermExpr]
-        return (ListConst (PermOf ZZ) (map toExpr us) :@ loc)
+        let us = map (put loc) qs :: [Expr]
+        return (ListConst (PermOf ZZ) us :@ loc)
       PermOf SS -> do
         as <- eval xs >>= getVal :: EvalM [Text]
         qs <- tryEvalM loc $ permsOf as
-        let us = map (inject loc) qs :: [PermExpr]
-        return (ListConst (PermOf SS) (map toExpr us) :@ loc)
+        let us = map (put loc) qs :: [Expr]
+        return (ListConst (PermOf SS) us :@ loc)
       PermOf QQ -> do
         as <- eval xs >>= getVal :: EvalM [Rat]
         qs <- tryEvalM loc $ permsOf as
-        let us = map (inject loc) qs :: [PermExpr]
-        return (ListConst (PermOf SS) (map toExpr us) :@ loc)
+        let us = map (put loc) qs :: [Expr]
+        return (ListConst (PermOf SS) us :@ loc)
       u -> reportErr loc $ PermutationExpected u
 
   eval (ListPivotColIndices _ m :@ loc) = do
@@ -943,7 +943,7 @@ instance Eval MatExpr where
     let makeMatPow a = do
           q <- eval m >>= getVal
           p <- tryEvalM loc $ rPosPowT a q k
-          return $ inject loc p
+          getVal (put loc p)
     case t of
       MatOf ZZ -> makeMatPow (mCell (0::Integer))
       MatOf QQ -> makeMatPow (mCell (0:/:1))
@@ -975,17 +975,17 @@ instance Eval MatExpr where
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
         p <- tryEvalM loc $ mScaleRow r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
         p <- tryEvalM loc $ mScaleRow r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
         p <- tryEvalM loc $ mScaleRow r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -998,17 +998,17 @@ instance Eval MatExpr where
         n <- eval m >>= getVal :: EvalM (Matrix Integer)
         r <- eval a >>= getVal :: EvalM Integer
         p <- tryEvalM loc $ mScaleCol r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right (MatOf QQ) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- eval a >>= getVal :: EvalM Rat
         p <- tryEvalM loc $ mScaleCol r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right (MatOf BB) -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- eval a >>= getVal :: EvalM Bool
         p <- tryEvalM loc $ mScaleCol r i n
-        return $ inject loc p
+        getVal (put loc p)
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
@@ -1022,7 +1022,7 @@ instance Eval MatExpr where
           r <- eval a >>= getVal
           suchThat $ r `hasSameTypeAs` zer
           p <- tryEvalM loc $ mAddRow r i j n
-          return $ inject loc p
+          getVal (put loc p)
     case unify t (MatOf u) of
       Right (MatOf ZZ) -> makeAddRow zeroZZ
       Right (MatOf QQ) -> makeAddRow zeroQQ
@@ -1041,7 +1041,7 @@ instance Eval MatExpr where
           r <- eval a >>= getVal
           suchThat $ r `hasSameTypeAs` zer
           p <- tryEvalM loc $ mAddCol r i j n
-          return $ inject loc p
+          getVal (put loc p)
     case unify t (MatOf u) of
       Right (MatOf ZZ) -> makeAddCol zeroZZ
       Right (MatOf QQ) -> makeAddCol zeroQQ
@@ -1070,11 +1070,11 @@ instance Eval MatExpr where
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         p <- tryEvalM loc $ mGJForm n
-        return $ inject loc p
+        getVal (put loc p)
       MatOf BB -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         p <- tryEvalM loc $ mGJForm n
-        return $ inject loc p
+        getVal (put loc p)
       _ -> reportErr loc $ FieldMatrixExpected t
 
   eval (MatGJFactor _ m :@ loc) = do
@@ -1083,11 +1083,11 @@ instance Eval MatExpr where
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         p <- tryEvalM loc $ mGJFactor n
-        return $ inject loc p
+        getVal (put loc p)
       MatOf BB -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         p <- tryEvalM loc $ mGJFactor n
-        return $ inject loc p
+        getVal (put loc p)
       _ -> reportErr loc $ FieldMatrixExpected t
 
   eval (MatGetRow _ k m :@ loc) = do
@@ -1576,7 +1576,7 @@ instance Glyph MacExpr where
 
 
 instance Glyph Doc where
-  toGlyph (Empty     :@ _) = return ""
+  toGlyph (Empty            :@ _) = return ""
   toGlyph (DocText (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
 
@@ -1588,42 +1588,41 @@ instance Glyph Doc where
 
 lift1
   :: ( Eval x, ToExpr x, Get a
-     , Inject b y, HasLocus y
+     , Put b, Get y
      , PromoteError err
   ) => Locus -> (a -> Either err b) -> x -> EvalM y
 lift1 loc f x = do
   a <- eval x >>= getVal
   b <- tryEvalM loc $ f a
-  return $ inject loc b
+  getVal (put loc b)
 
 
 lift2
   :: ( Eval x, ToExpr x, Get a
      , Eval y, ToExpr y, Get b
-     , Inject c z, HasLocus z
+     , Put c, Get z
      , PromoteError err
   ) => Locus -> (a -> b -> Either err c) -> x -> y -> EvalM z
 lift2 loc f x y = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
   c <- tryEvalM loc $ f a b
-  return $ inject loc c
+  getVal (put loc c)
 
 
 lift3
   :: ( Eval x, ToExpr x, Get a
      , Eval y, ToExpr y, Get b
      , Eval z, ToExpr z, Get c
-     , Inject d w, HasLocus w
+     , Put d, Get w
      , PromoteError err
   ) => Locus -> x -> y -> z -> (a -> b -> c -> Either err d) -> EvalM w
 lift3 loc x y z f = do
   a <- eval x >>= getVal
   b <- eval y >>= getVal
   c <- eval z >>= getVal
-  case f a b c of
-    Left err -> reportErr loc err
-    Right d  -> return $ inject loc d
+  d <- tryEvalM loc $ f a b c
+  getVal (put loc d)
 
 
 lift4
@@ -1631,7 +1630,7 @@ lift4
      , Eval y, ToExpr y, Get b
      , Eval z, ToExpr z, Get c
      , Eval w, ToExpr w, Get d
-     , Inject e u, HasLocus u
+     , Put e, Get u
      , PromoteError err
   ) => Locus -> x -> y -> z -> w -> (a -> b -> c -> d -> Either err e) -> EvalM u
 lift4 loc x y z w f = do
@@ -1639,9 +1638,8 @@ lift4 loc x y z w f = do
   b <- eval y >>= getVal
   c <- eval z >>= getVal
   d <- eval w >>= getVal
-  case f a b c d of
-    Left err -> reportErr loc err
-    Right e  -> return $ inject loc e
+  e <- tryEvalM loc $ f a b c d
+  getVal (put loc e)
 
 
 
