@@ -40,7 +40,7 @@ class Put a where
 
 
 
-instance Put IntExpr where
+instance Put (IntExpr Expr) where
   put loc (x :@ _) = IntE (x :@ loc)
 
 instance Put (ZZModExpr Expr) where
@@ -49,7 +49,7 @@ instance Put (ZZModExpr Expr) where
 instance Put (PermExpr Expr) where
   put loc (x :@ _) = PermE (x :@ loc)
 
-instance Put ListExpr where
+instance Put (ListExpr Expr) where
   put loc (x :@ _) = ListE (x :@ loc)
 
 instance Put (PolyExpr Expr) where
@@ -64,10 +64,10 @@ instance Put (MacExpr Expr) where
 instance Put (RatExpr Expr) where
   put loc (x :@ _) = RatE (x :@ loc)
 
-instance Put BoolExpr where
+instance Put (BoolExpr Expr) where
   put loc (x :@ _) = BoolE (x :@ loc)
 
-instance Put StrExpr where
+instance Put (StrExpr Expr) where
   put loc (x :@ _) = StrE (x :@ loc)
 
 

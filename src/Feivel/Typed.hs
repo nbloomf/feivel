@@ -109,11 +109,11 @@ instance (Typed a) => Typed [a] where
   typeOf []    = XX
 
 
-instance Typed IntExpr  where typeOf _ = ZZ
-instance Typed StrExpr  where typeOf _ = SS
-instance Typed BoolExpr where typeOf _ = BB
+instance Typed (IntExpr  Expr) where typeOf _ = ZZ
+instance Typed (StrExpr Expr)  where typeOf _ = SS
+instance Typed (BoolExpr Expr) where typeOf _ = BB
 instance Typed (RatExpr Expr)  where typeOf _ = QQ
-instance Typed Doc      where typeOf _ = DD
+instance Typed (Doc     Expr)  where typeOf _ = DD
 
 instance Typed Expr where
   typeOf (StrE   x) = typeOf x
@@ -133,7 +133,7 @@ instance Typed Expr where
 {- :ListExpr -}
 {-------------}
 
-instance Typed ListExpr where
+instance Typed (ListExpr Expr) where
   typeOf (ListConst           typ _     :@ _) = ListOf typ
   typeOf (ListVar             typ _     :@ _) = ListOf typ
   typeOf (ListIfThenElse      typ _ _ _ :@ _) = ListOf typ

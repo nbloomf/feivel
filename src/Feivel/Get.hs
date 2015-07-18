@@ -81,7 +81,7 @@ instance Get Expr where
 {- :IntExpr -}
 {------------}
 
-instance Get IntExpr where
+instance Get (IntExpr Expr) where
   get (IntE y) = return y
   get v = do
     let t = typeOf v
@@ -89,7 +89,7 @@ instance Get IntExpr where
 
 instance Get Integer where
   get expr = do
-    x <- get expr :: EvalM IntExpr
+    x <- get expr :: EvalM (IntExpr Expr)
     case x of
       IntConst k :@ _ -> return k
       v -> reportErr (locusOf v) UnevaluatedExpression
@@ -99,7 +99,7 @@ instance Get Integer where
 {- :StrExpr -}
 {------------}
 
-instance Get StrExpr where
+instance Get (StrExpr Expr) where
   get (StrE y) = return y
   get (DocE (Empty :@ loc)) = return $ StrConst (Text "") :@ loc
   get (DocE (DocText str :@ loc)) = return $ StrConst str :@ loc
@@ -110,7 +110,7 @@ instance Get StrExpr where
 
 instance Get Text where
   get expr = do
-    x <- get expr
+    x <- get expr :: EvalM (StrExpr Expr)
     case x of
       StrConst s :@ _ -> return s
       v -> reportErr (locusOf v) UnevaluatedExpression
@@ -120,7 +120,7 @@ instance Get Text where
 {- :BoolExpr -}
 {-------------}
 
-instance Get BoolExpr where
+instance Get (BoolExpr Expr) where
   get (BoolE y) = return y
   get v = do
     let t = typeOf v
@@ -128,7 +128,7 @@ instance Get BoolExpr where
 
 instance Get Bool where
   get expr = do
-    x <- get expr :: EvalM BoolExpr
+    x <- get expr :: EvalM (BoolExpr Expr)
     case x of
       BoolConst b :@ _ -> return b
       v -> reportErr (locusOf v) UnevaluatedExpression
@@ -156,7 +156,7 @@ instance Get Rat where
 {- :ListExpr -}
 {-------------}
 
-instance Get ListExpr where
+instance Get (ListExpr Expr) where
   get (ListE y) = return y
   get v = do
     let t = typeOf v
@@ -228,7 +228,7 @@ instance (Get a) => Get (Matrix a) where
 {- :Doc -}
 {--------}
 
-instance Get Doc where
+instance Get (Doc Expr) where
   get (DocE y) = return y
   get v = do
     let t = typeOf v

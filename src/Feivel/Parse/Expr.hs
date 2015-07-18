@@ -162,7 +162,7 @@ pTypedArgPair fun pA pB con typ = do
 {- :Doc -}
 {--------}
 
-pBrackDoc :: ParseM Doc
+pBrackDoc :: ParseM (Doc Expr)
 pBrackDoc = do
   _ <- try $ char '['
   d <- pDoc
@@ -178,7 +178,7 @@ pBrackDocE = do
   whitespace
   return (DocE d)
 
-pREPL :: ParseM Doc
+pREPL :: ParseM (Doc Expr)
 pREPL = do
   x <- choice $ map pAtLocus
          [ pDefineREPL
@@ -209,7 +209,7 @@ pREPL = do
       return (Import path qual (Empty :@ NullLocus))
 
 
-pDoc :: ParseM Doc
+pDoc :: ParseM (Doc Expr)
 pDoc = choice $ map pAtLocus
   [ eof >> return Empty
   , lookAhead (char ']') >> return Empty
@@ -300,7 +300,7 @@ pDoc = choice $ map pAtLocus
 
     pIfThenElse = do
       try (char '[' >> keyword "if")
-      test  <- pBoolExpr
+      test  <- pTypedExpr BB
       true  <- keyword "then" >> pBrackDoc
       false <- keyword "else" >> pBrackDoc
       option () (try (keyword "endif"))
@@ -316,7 +316,7 @@ pDoc = choice $ map pAtLocus
       return (Cond cases auto)
       where
         pCondCase = do
-          s <- try (keyword "case") >> pBoolExpr
+          s <- try (keyword "case") >> (pTypedExpr BB)
           t <- pBrackDoc
           return (s,t)
 
@@ -325,7 +325,7 @@ pDoc = choice $ map pAtLocus
       typ <- pType
       spaces
       k <- pKey
-      r <- keyword "in"  >> pTypedListExpr typ
+      r <- keyword "in"  >> (pTypedExpr (ListOf typ))
       t <- keyword "say" >> pBrackDoc
       b <- option Nothing $ (try (keyword "sepby")) >> pBrackDoc >>= (return . Just)
       option () (try (keyword "endfor"))
@@ -343,7 +343,7 @@ pDoc = choice $ map pAtLocus
 
     pBail = do
       try (char '[' >> keyword "bail")
-      message <- pStrExpr
+      message <- pTypedExpr SS
       option () (try (keyword "endbail"))
       _ <- whitespace >> char ']'
       return (Bail message)
@@ -360,7 +360,7 @@ pDoc = choice $ map pAtLocus
       try (char '[' >> keyword "select")
       ty <- pType
       k <- spaced pKey
-      r <- keyword "from" >> pTypedListExpr ty
+      r <- keyword "from" >> (pTypedExpr $ ListOf ty)
       t <- keyword "in"   >> pBrackDoc
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
@@ -459,13 +459,13 @@ pTypedConst _ = error "pTypedConst"
 {- :StrExpr -}
 {------------}
 
-pStrConst :: ParseM StrExpr
+pStrConst :: ParseM (StrExpr Expr)
 pStrConst = pAtLocus pStrConst'
 
-pStrConst' :: ParseM StrExprLeaf
+pStrConst' :: ParseM (StrExprLeaf Expr)
 pStrConst' = pConst pText StrConst SS
 
-pStrExpr :: ParseM StrExpr
+pStrExpr :: ParseM (StrExpr Expr)
 pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm pStrConst' pStrExpr "string expression"
@@ -483,13 +483,13 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
       , pFun1 "ToLower" pStrExpr ToLower SS
       , pFun1 "Rot13"   pStrExpr Rot13   SS
 
-      , pFun1 "Rand"    (pTypedListExpr SS) StrRand SS
+      , pFun1 "Rand"    (pTypedExpr $ ListOf SS) StrRand SS
 
-      , pFun1 "int" pIntExpr StrIntCast SS
+      , pFun1 "int" (pTypedExpr ZZ) StrIntCast SS
     
-      , pFun1 "Hex"    pIntExpr StrHex SS
-      , pFun1 "Roman"  pIntExpr StrRoman SS
-      , pFun1 "Base36" pIntExpr StrBase36 SS
+      , pFun1 "Hex"    (pTypedExpr ZZ) StrHex SS
+      , pFun1 "Roman"  (pTypedExpr ZZ) StrRoman SS
+      , pFun1 "Base36" (pTypedExpr ZZ) StrBase36 SS
     
       , pFun2 "Decimal" (pTypedExpr QQ) (pTypedExpr ZZ) StrDecimal SS
     
@@ -520,13 +520,13 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
 {- :IntExpr -}
 {------------}
 
-pIntConst :: ParseM IntExpr
+pIntConst :: ParseM (IntExpr Expr)
 pIntConst = pAtLocus pIntConst'
 
 pIntConst' :: ParseM (IntExprLeaf Expr)
 pIntConst' = pConst pInteger IntConst ZZ
 
-pIntExpr :: ParseM IntExpr
+pIntExpr :: ParseM (IntExpr Expr)
 pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pIntTerm = pTerm pIntConst' pIntExpr "integer expression"
@@ -652,13 +652,13 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
 {- :BoolExpr -}
 {-------------}
 
-pBoolConst :: ParseM BoolExpr
+pBoolConst :: ParseM (BoolExpr Expr)
 pBoolConst = pAtLocus pBoolConst'
 
 pBoolConst' :: ParseM (BoolExprLeaf Expr)
 pBoolConst' = pConst pBool BoolConst BB
 
-pBoolExpr :: ParseM BoolExpr
+pBoolExpr :: ParseM (BoolExpr Expr)
 pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
     pBoolTerm = pTerm pBoolConst' pBoolExpr "boolean expression"
@@ -809,23 +809,23 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
 {- :ListExpr -}
 {-------------}
 
-pListLiteral :: Type -> ParseM ListExpr
+pListLiteral :: Type -> ParseM (ListExpr Expr)
 pListLiteral typ = pAtLocus $ pListLiteralOf typ pTypedExpr
 
-pListConst :: Type -> ParseM ListExpr
+pListConst :: Type -> ParseM (ListExpr Expr)
 pListConst typ = pAtLocus $ pListLiteralOf typ pTypedConst
 
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM ListExprLeaf
+pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr)
 pListLiteralOf typ p = do
     start <- getPosition
     xs <- pBraceList (p typ)
     end <- getPosition
     return (ListConst typ xs)
 
-pListExpr :: ParseM ListExpr
+pListExpr :: ParseM (ListExpr Expr)
 pListExpr = pTypedListExpr XX
 
-pTypedListExpr :: Type -> ParseM ListExpr
+pTypedListExpr :: Type -> ParseM (ListExpr Expr)
 pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm (pListLiteralOf typ pTypedExpr) (pTypedListExpr typ) "list expression"
@@ -838,7 +838,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
 
       , pIfThenElseExpr (pTypedListExpr typ) (ListIfThenElse typ) (ListOf typ)
 
-      , pFun1 "Rand" (pTypedListExpr (ListOf typ)) (ListRand typ) (ListOf typ)
+      , pFun1 "Rand" (pTypedExpr $ ListOf (ListOf typ)) (ListRand typ) (ListOf typ)
 
       , pFun1 "Reverse"  (pTypedListExpr typ) (ListRev typ)     (ListOf typ)
       , pFun1 "Sort"     (pTypedListExpr typ) (ListSort typ)    (ListOf typ)
@@ -846,15 +846,15 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
       , pFun1 "Shuffle"  (pTypedListExpr typ) (ListShuffle typ) (ListOf typ)
       , pListShuffles
 
-      , pFun2 "GetRow" pIntExpr (pTypedExpr $ MatOf typ) (ListMatRow typ) (ListOf typ)
-      , pFun2 "GetCol" pIntExpr (pTypedExpr $ MatOf typ) (ListMatCol typ) (ListOf typ)
+      , pFun2 "GetRow" (pTypedExpr ZZ) (pTypedExpr $ MatOf typ) (ListMatRow typ) (ListOf typ)
+      , pFun2 "GetCol" (pTypedExpr ZZ) (pTypedExpr $ MatOf typ) (ListMatCol typ) (ListOf typ)
 
       , pListPermsOf
 
       , pListRange
       , pListPivotColIndices typ
       , pListBuilder
-      , pFun2 "Choose" pIntExpr (pTypedListExpr typ) (ListChoose typ) (ListOf typ)
+      , pFun2 "Choose" (pTypedExpr ZZ) (pTypedListExpr typ) (ListChoose typ) (ListOf typ)
       , pListChoices
       , pListFilter
       ]
@@ -864,7 +864,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           keyword "("
           k <- pKey
           keyword ";"
-          g <- pBoolExpr
+          g <- pTypedExpr BB
           keyword ";"
           xs <- pTypedListExpr typ
           keyword ")"
@@ -875,7 +875,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
           case typ of
             ListOf t -> do
               keyword "("
-              n <- pIntExpr
+              n <- pTypedExpr ZZ
               keyword ";"
               xs <- pTypedListExpr t
               keyword ")"
@@ -905,7 +905,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
         pListRange = case unify typ ZZ of
           Right _ -> do
             try $ keyword "Range"
-            (a,b) <- pTuple2 pIntExpr pIntExpr
+            (a,b) <- pTuple2 (pTypedExpr ZZ) (pTypedExpr ZZ)
             return (ListRange ZZ a b)
           Left _ -> fail "pListRange"
 
@@ -939,7 +939,7 @@ pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
                 return $ Bind k ls
           
               pListGuard = do
-                e <- try pBoolExpr
+                e <- try (pTypedExpr BB)
                 return $ Guard e
     
     listOpTable =

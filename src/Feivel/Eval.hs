@@ -162,7 +162,7 @@ evalToGlyph x = eval (toExpr x) >>= toGlyph
 {- :Eval:IntExpr -}
 {-----------------}
 
-instance Eval IntExpr where
+instance Eval (IntExpr Expr) where
   eval (IntConst n :@ loc) = return (IntConst n :@ loc)
 
   {- :Common -}
@@ -172,7 +172,7 @@ instance Eval IntExpr where
   eval (IntMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (IntAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
+    where foo = listAtPos :: [IntExpr Expr] -> Integer -> Either ListErr (IntExpr Expr)
 
   eval (IntNeg        a :@ loc) = lift1 loc a (rNegT        zeroZZ)
   eval (IntAbs        a :@ loc) = lift1 loc a (rAbsT        zeroZZ)
@@ -270,7 +270,7 @@ instance Eval IntExpr where
 {- :Eval:StrExpr -}
 {-----------------}
 
-instance Eval StrExpr where
+instance Eval (StrExpr Expr) where
   eval (StrConst s :@ loc) = return (StrConst s :@ loc)
 
   {- :Common -}
@@ -280,7 +280,7 @@ instance Eval StrExpr where
   eval (StrMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (StrAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
+    where foo = listAtPos :: [StrExpr Expr] -> Integer -> Either ListErr (StrExpr Expr)
 
   eval (Concat   a b :@ loc) = lift2 loc a b (strCat)
   eval (StrStrip a b :@ loc) = lift2 loc a b (strStrip)
@@ -334,7 +334,7 @@ instance Eval StrExpr where
       _ -> error "StrFormat LaTeX"
 
   eval (StrIntCast n :@ loc) = do
-    a <- eval n >>= getVal :: EvalM IntExpr
+    a <- eval n >>= getVal :: EvalM (IntExpr Expr)
     s <- eval a >>= toGlyph
     return $ StrConst (Text s) :@ loc
 
@@ -344,7 +344,7 @@ instance Eval StrExpr where
 {- :Eval:BoolExpr -}
 {------------------}
 
-instance Eval BoolExpr where
+instance Eval (BoolExpr Expr) where
   eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)
 
   {- :Common -}
@@ -354,7 +354,7 @@ instance Eval BoolExpr where
   eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (BoolAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [BoolExpr] -> Integer -> Either ListErr BoolExpr
+    where foo = listAtPos :: [BoolExpr Expr] -> Integer -> Either ListErr (BoolExpr Expr)
 
   eval (IsDefined key :@ loc) = do
     p <- isKeyDefined key
@@ -598,7 +598,7 @@ instance Eval (RatExpr Expr) where
 {- :Eval:ListExpr -}
 {------------------}
 
-instance Eval ListExpr where
+instance Eval (ListExpr Expr) where
   eval (ListConst t xs :@ loc) = do
     ys <- sequence $ map eval xs
     return $ ListConst t ys :@ loc
@@ -610,7 +610,7 @@ instance Eval ListExpr where
   eval (ListIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (ListAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
+    where foo = listAtPos :: [ListExpr Expr] -> Integer -> Either ListErr (ListExpr Expr)
 
   eval (ListRange _ a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
@@ -651,7 +651,7 @@ instance Eval ListExpr where
 
   eval (ListRand _ ls :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    randomElementEvalM xs >>= getVal :: EvalM ListExpr
+    randomElementEvalM xs >>= getVal :: EvalM (ListExpr Expr)
 
   eval (ListUniq u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
@@ -690,13 +690,13 @@ instance Eval ListExpr where
            (z:_) -> return (typeOf z)
     eval $ ListConst t ys :@ loc
       where
-        bar :: Store Expr -> [ListGuard] -> EvalM [Store Expr]
+        bar :: Store Expr -> [ListGuard Expr] -> EvalM [Store Expr]
         bar st []     = return [st]
         bar st (h:hs) = do
           xs <- foo st h
           fmap concat $ sequence $ [bar x hs | x <- xs]
         
-        foo :: Store Expr -> ListGuard -> EvalM [Store Expr]
+        foo :: Store Expr -> (ListGuard Expr) -> EvalM [Store Expr]
         foo st (Bind key ls) = do
           xs <- eval ls >>= getVal :: EvalM [Expr]
           sequence [addKeyToStore key x (locusOf x) st | x <- xs]
@@ -1086,7 +1086,7 @@ instance Eval (MatExpr Expr) where
 {- :Eval:Doc -}
 {-------------}
 
-instance Eval Doc where
+instance Eval (Doc Expr) where
   eval (Empty :@ loc)     = return (Empty :@ loc)
   eval (DocText s :@ loc) = return (DocText s :@ loc)
   eval (Escaped c :@ loc) = return (DocText (Text [c]) :@ loc)
@@ -1458,17 +1458,17 @@ instance Glyph Expr where
     MacE   x -> toGlyph x
 
 
-instance Glyph IntExpr where
+instance Glyph (IntExpr Expr) where
   toGlyph (IntConst n :@ _) = return $ show n
   toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
 
 
-instance Glyph StrExpr where
+instance Glyph (StrExpr Expr) where
   toGlyph (StrConst (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
-instance Glyph BoolExpr where
+instance Glyph (BoolExpr Expr) where
   toGlyph (BoolConst True  :@ _) = return "#t"
   toGlyph (BoolConst False :@ _) = return "#f"
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
@@ -1484,7 +1484,7 @@ instance Glyph (ZZModExpr Expr) where
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-instance Glyph ListExpr where
+instance Glyph (ListExpr Expr) where
   toGlyph (ListConst _ xs :@ _) = do
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
@@ -1523,7 +1523,7 @@ instance Glyph (MacExpr Expr) where
   toGlyph _ = error "toGlyph: MacExpr"
 
 
-instance Glyph Doc where
+instance Glyph (Doc Expr) where
   toGlyph (Empty            :@ _) = return ""
   toGlyph (DocText (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
