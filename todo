@@ -66,4 +66,4 @@ Feature Ideas
   5: Move parsers to own modules
   6: Split parameters on grammar types with class constraints, e.g. IntExprType t => blah
        (recover type safety with modularity)
-  7: Move eval instances to own modules (will cause orphan instances)
+  7: (started) Move eval instances to own modules (will cause orphan instances)

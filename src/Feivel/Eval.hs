@@ -55,6 +55,8 @@ import Feivel.Eval.Eval
 import Feivel.Eval.Util
 
 import Feivel.Eval.ZZMod
+import Feivel.Eval.Perm
+import Feivel.Eval.Rat
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -121,10 +123,6 @@ instance Eval Expr where
 {-------------------}
 {- :Eval:Utilities -}
 {-------------------}
-
-
-
-
 
 evalToGlyph :: (ToExpr a) => a -> EvalM String
 evalToGlyph x = eval (toExpr x) >>= toGlyph
@@ -462,108 +460,6 @@ instance Eval (BoolExpr Expr) where
 
 
 
-{-----------------}
-{- :Eval:RatExpr -}
-{-----------------}
-
-instance Eval (RatExpr Expr) where
-  eval (RatConst p :@ loc) = return $ RatConst p :@ loc
-
-  {- :Common -}
-  eval (RatVar key :@ loc)        = eKey key loc
-  eval (RatAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (RatIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (RatMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (RatAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [RatExpr Expr] -> Integer -> Either ListErr (RatExpr Expr)
-
-  eval (RatCast expr :@ loc) = do
-    n <- eval expr >>= getVal :: EvalM Integer
-    return $ RatConst (n:/:1) :@ loc
-
-  eval (RatNeg  a :@ loc)   = lift1 loc a (rNegT zeroQQ)
-  eval (RatAbs  a :@ loc)   = lift1 loc a (rAbsT zeroQQ)
-
-  eval (RatAdd  a b :@ loc) = lift2 loc a b (rAddT zeroQQ)
-  eval (RatSub  a b :@ loc) = lift2 loc a b (rSubT zeroQQ)
-  eval (RatMult a b :@ loc) = lift2 loc a b (rMulT zeroQQ)
-  eval (RatMin  a b :@ loc) = lift2 loc a b (rMinT zeroQQ)
-  eval (RatMax  a b :@ loc) = lift2 loc a b (rMaxT zeroQQ)
-  eval (RatPow  a b :@ loc) = lift2 loc a b (rPowT zeroQQ)
-  eval (RatQuot a b :@ loc) = lift2 loc a b (rDivT zeroQQ)
-
-  eval (RatSqrt p k :@ loc) = lift2 loc p k (ratSqt)
-
-  eval (RatRand ls :@ loc) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ RatConst r :@ loc
-
-  eval (RatSum   ls :@ loc) = lift1 loc ls (rSumT   (0:/:1))
-  eval (RatProd  ls :@ loc) = lift1 loc ls (rUProdT (0:/:1))
-  eval (RatMaxim ls :@ loc) = lift1 loc ls (rMaximT (0:/:1))
-  eval (RatMinim ls :@ loc) = lift1 loc ls (rMinimT (0:/:1))
-
-  {- Mean -}
-  eval (RatMean ls :@ loc) = do
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
-        return $ RatConst m :@ loc
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ rMeanT (0:/:1) xs
-        return $ RatConst m :@ loc
-      u -> reportErr loc $ NumericListExpected u
-
-  {- Mean Deviation -}
-  eval (RatMeanDev ls :@ loc) = do
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
-        return $ RatConst m :@ loc
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ rMeanDevT (0:/:1) xs
-        return $ RatConst m :@ loc
-      u -> reportErr loc $ NumericListExpected u
-
-  {- Standard Deviation -}
-  eval (RatStdDev ls d :@ loc) = do
-    k <- eval d >>= getVal
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ ratIntStdDev xs k
-        return $ RatConst m :@ loc
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ ratStdDev xs k
-        return $ RatConst m :@ loc
-      u -> reportErr loc $ NumericListExpected u
-
-  {- Z-Score -}
-  eval (RatZScore x ls d :@ loc) = do
-    k <- eval d >>= getVal
-    y <- eval x >>= getVal
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ ratIntZScore y xs k
-        return $ RatConst m :@ loc
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ ratZScore y xs k
-        return $ RatConst m :@ loc
-      u -> reportErr loc $ NumericListExpected u
-
-  eval (RatCastStr str :@ loc) = do
-    Text x <- eval str >>= getVal
-    n <- parseAsAt pRat loc x
-    return $ RatConst n :@ loc
 
 
 
@@ -1330,54 +1226,6 @@ instance Eval (PolyExpr Expr) where
 
 
 
-{------------------}
-{- :Eval:PermExpr -}
-{------------------}
-
-instance Eval (PermExpr Expr) where
-  eval (PermConst t p :@ loc) = do
-    q <- seqPerm $ mapPerm eval p
-    return $ PermConst t q :@ loc
-
-  eval (PermAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PermExpr Expr] -> Integer -> Either ListErr (PermExpr Expr)
-
-  {- Common -}
-  eval (PermVar _ key :@ loc)        = eKey key loc
-  eval (PermAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (PermMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (PermIfThenElse _ b t f :@ _) = eIfThenElse b t f
-
-  eval (PermRand _ ls :@ loc) = do
-    xs <- eval ls >>= getVal :: EvalM [Expr]
-    r  <- randomElementEvalM xs
-    eval r >>= getVal
-
-  eval (PermCompose _ p q :@ loc) = do
-    t <- unifyTypesOf loc p q
-    case t of
-      PermOf ZZ -> do
-        a <- eval p >>= getVal :: EvalM (Perm Integer)
-        b <- eval q >>= getVal :: EvalM (Perm Integer)
-        let c = compose a b
-        let s = mapPerm toExpr c
-        return (PermConst ZZ s :@ loc)
-      _ -> reportErr loc $ PolynomialExpected t
-
-  eval (PermInvert _ p :@ loc) = do
-    let t = typeOf p
-    case t of
-      PermOf ZZ -> do
-        a <- eval p >>= getVal :: EvalM (Perm Integer)
-        let c = inverse a
-        let s = mapPerm toExpr c
-        return (PermConst ZZ s :@ loc)
-      _ -> reportErr loc $ PolynomialExpected t
-
-
-
-
-
 {----------}
 {- :Glyph -}
 {----------}
@@ -1474,29 +1322,7 @@ instance Glyph (Doc Expr) where
 
 
 
-{--------------}
-{- :Constants -}
-{--------------}
 
-hasSameTypeAs :: a -> a -> ()
-hasSameTypeAs _ _ = ()
-
-suchThat :: (Monad m) => a -> m a
-suchThat = return
-
-
-
-zeroZZ :: Integer
-zeroZZ = 0
-
-zeroQQ :: Rat
-zeroQQ = 0 :/: 1
-
-zeroBB :: Bool
-zeroBB = False
-
-zeroMod :: Integer -> ZZModulo
-zeroMod n = 0 `zzmod` n
 
 
 

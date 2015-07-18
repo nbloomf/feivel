@@ -29,7 +29,7 @@ import Feivel.Key
 import Feivel.Store
 import Feivel.Expr
 import Feivel.Type
-import Feivel.Lib (Matrix, mEntryOf)
+import Feivel.Lib
 
 -- eval with a specified store
 evalWith :: (Eval t) => t -> Store Expr -> EvalM t
@@ -66,3 +66,27 @@ eMacro vals mac loc = do
   (defaultVals, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
   let newSt = mergeStores [ctx, defaultVals, old]
   evalWith e newSt >>= getVal >>= (`evalWith` newSt)
+
+{--------------}
+{- :Constants -}
+{--------------}
+
+hasSameTypeAs :: a -> a -> ()
+hasSameTypeAs _ _ = ()
+
+suchThat :: (Monad m) => a -> m a
+suchThat = return
+
+
+
+zeroZZ :: Integer
+zeroZZ = 0
+
+zeroQQ :: Rat
+zeroQQ = 0 :/: 1
+
+zeroBB :: Bool
+zeroBB = False
+
+zeroMod :: Integer -> ZZModulo
+zeroMod n = 0 `zzmod` n
