@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGAUGE TypeSynonymInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 
@@ -37,6 +37,12 @@ import Feivel.Error
 {------------------}
 {- :Eval:PolyExpr -}
 {------------------}
+
+instance (Glyph Expr) => Glyph (PolyExpr Expr) where
+  toGlyph (PolyConst _ px :@ _) = do
+    qx <- polySeq $ mapCoef toGlyph px
+    return $ showStrP qx
+  toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 instance (Eval Expr) => Eval (PolyExpr Expr) where
   eval (PolyConst t p :@ loc) = do

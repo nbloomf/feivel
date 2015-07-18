@@ -39,6 +39,10 @@ import Feivel.Parse (pInteger)
 {- :Eval:IntExpr -}
 {-----------------}
 
+instance Glyph (IntExpr Expr) where
+  toGlyph (IntConst n :@ _) = return $ show n
+  toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
+
 instance (Eval Expr) => Eval (IntExpr Expr) where
   eval (IntConst n :@ loc) = return (IntConst n :@ loc)
 

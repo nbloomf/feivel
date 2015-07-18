@@ -38,6 +38,12 @@ import Feivel.Error
 {- :Eval:PermExpr -}
 {------------------}
 
+instance (Glyph Expr) => Glyph (PermExpr Expr) where
+  toGlyph (PermConst _ px :@ _) = do
+    qx <- seqPerm $ mapPerm toGlyph px
+    return $ showPerm qx
+  toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
+
 instance (Eval Expr) => Eval (PermExpr Expr) where
   eval (PermConst t p :@ loc) = do
     q <- seqPerm $ mapPerm eval p

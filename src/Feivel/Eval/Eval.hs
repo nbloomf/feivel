@@ -38,6 +38,10 @@ instance Eval Text    where eval = return
 instance Eval Rat     where eval = return
 instance Eval Bool    where eval = return
 
+class Glyph t where
+  toGlyph :: t -> EvalM String
+
+
 
 lift1
   :: ( Eval x, ToExpr x, Get a

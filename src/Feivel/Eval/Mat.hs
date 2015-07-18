@@ -39,6 +39,14 @@ import Feivel.Error
 {- :Eval:MatExpr -}
 {-----------------}
 
+instance (Glyph Expr) => Glyph (MatExpr Expr) where
+  toGlyph (MatConst _ m :@ _) = do
+    n <- mSeq $ fmap toGlyph m
+    case mShowStr n of
+      Left err -> reportErr (error "Glyph instance of MatExpr") err
+      Right x  -> return x
+  toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
+
 instance (Eval Expr) => Eval (MatExpr Expr) where
   eval (MatConst t m :@ loc) = do
     n <- mSeq $ fmap eval m

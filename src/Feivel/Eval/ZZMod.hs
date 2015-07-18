@@ -37,6 +37,10 @@ import Feivel.Type
 {- :Eval:ZZModExpr -}
 {-------------------}
 
+instance (Glyph Expr) => Glyph (ZZModExpr Expr) where
+  toGlyph (ZZModConst _ a :@ _) = return $ showZZMod a
+  toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
+
 instance (Eval Expr) => Eval (ZZModExpr Expr) where
   eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc
 

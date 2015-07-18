@@ -38,6 +38,11 @@ import Feivel.Error
 {- :Eval:BoolExpr -}
 {------------------}
 
+instance Glyph (BoolExpr Expr) where
+  toGlyph (BoolConst True  :@ _) = return "#t"
+  toGlyph (BoolConst False :@ _) = return "#f"
+  toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
+
 instance (Eval Expr) => Eval (BoolExpr Expr) where
   eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)
 
