@@ -27,7 +27,7 @@ module Feivel.Eval (
 {-----------------------------------------------------------}
 {- Contents                                                -}
 {-  :Eval              :Eval:Expr        :Eval:Utilities   -}
-{-    :Eval:IntExpr    :Eval:StrExpr     :Eval:BoolExpr    -}
+{-                     :Eval:StrExpr                       -}
 {-                     :Eval:ListExpr    :Eval:MacExpr     -}
 {-                     :Eval:Doc                           -}
 {-                                                         -}
@@ -58,6 +58,8 @@ import Feivel.Eval.Perm  ()
 import Feivel.Eval.Rat   ()
 import Feivel.Eval.Poly  ()
 import Feivel.Eval.Mat   ()
+import Feivel.Eval.Bool  ()
+import Feivel.Eval.Int   ()
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
@@ -94,11 +96,7 @@ evalWithPar xs store = do
   sequence $ map evalLoc xs
 -}
 
-instance Eval Integer where eval = return
-instance Eval String  where eval = return
-instance Eval Text    where eval = return
-instance Eval Rat     where eval = return
-instance Eval Bool    where eval = return
+
 
 
 
@@ -128,113 +126,6 @@ instance Eval Expr where
 evalToGlyph :: (ToExpr a) => a -> EvalM String
 evalToGlyph x = eval (toExpr x) >>= toGlyph
 
-
-
-{-----------------}
-{- :Eval:IntExpr -}
-{-----------------}
-
-instance Eval (IntExpr Expr) where
-  eval (IntConst n :@ loc) = return (IntConst n :@ loc)
-
-  {- :Common -}
-  eval (IntVar key :@ loc)        = eKey key loc
-  eval (IntAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (IntIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (IntMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (IntAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [IntExpr Expr] -> Integer -> Either ListErr (IntExpr Expr)
-
-  eval (IntNeg        a :@ loc) = lift1 loc a (rNegT        zeroZZ)
-  eval (IntAbs        a :@ loc) = lift1 loc a (rAbsT        zeroZZ)
-  eval (IntSqPart     a :@ loc) = lift1 loc a (rSqPartT     zeroZZ)
-  eval (IntSqFreePart a :@ loc) = lift1 loc a (rSqFreePartT zeroZZ)
-  eval (IntRad        a :@ loc) = lift1 loc a (rRadT        zeroZZ)
-
-  eval (IntAdd  a b :@ loc) = lift2 loc a b (rAddT zeroZZ)
-  eval (IntSub  a b :@ loc) = lift2 loc a b (rSubT zeroZZ)
-  eval (IntMult a b :@ loc) = lift2 loc a b (rMulT zeroZZ)
-  eval (IntMod  a b :@ loc) = lift2 loc a b (rRemT zeroZZ)
-  eval (IntMin  a b :@ loc) = lift2 loc a b (rMinT zeroZZ)
-  eval (IntMax  a b :@ loc) = lift2 loc a b (rMaxT zeroZZ)
-  eval (IntGCD  a b :@ loc) = lift2 loc a b (rGCDT zeroZZ)
-  eval (IntLCM  a b :@ loc) = lift2 loc a b (rLCMT zeroZZ)
-  eval (IntQuo  a b :@ loc) = lift2 loc a b (rQuoT zeroZZ)
-  eval (IntPow  a b :@ loc) = lift2 loc a b (rPowT zeroZZ)
-
-  eval (IntChoose a b :@ loc) = lift2 loc a b (rChooseT zeroZZ)
-
-  eval (RatNumer  p :@ loc) = lift1 loc p (ratNum)
-  eval (RatDenom  p :@ loc) = lift1 loc p (ratDen)
-  eval (RatFloor  p :@ loc) = lift1 loc p (ratFlr)
-  eval (StrLength s :@ loc) = lift1 loc s (strLen)
-
-  eval (MatNumRows m :@ loc) = do
-    n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    k <- tryEvalM loc $ mNumRows n
-    return $ IntConst k :@ loc
-
-  eval (MatNumCols m :@ loc) = do
-    n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    k <- tryEvalM loc $ mNumCols n
-    return $ IntConst k :@ loc
-
-  eval (IntRand ls :@ loc) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ IntConst r :@ loc
-
-  eval (ListLen ls :@ loc) = do
-    xs <- eval ls >>= getVal :: EvalM [Expr]
-    return $ IntConst (fromIntegral $ length xs) :@ loc
-
-  eval (IntSum   ls :@ loc) = lift1 loc ls (rSumT   zeroZZ)
-  eval (IntProd  ls :@ loc) = lift1 loc ls (rUProdT zeroZZ)
-  eval (IntMaxim ls :@ loc) = lift1 loc ls (rMaximT zeroZZ)
-  eval (IntMinim ls :@ loc) = lift1 loc ls (rMinimT zeroZZ)
-  eval (IntGCDiv ls :@ loc) = lift1 loc ls (rGCDsT  zeroZZ)
-  eval (IntLCMul ls :@ loc) = lift1 loc ls (rLCMsT  zeroZZ)
-
-  eval (IntObserveUniform a b :@ loc) = do
-    x  <- eval a >>= getVal
-    y  <- eval b >>= getVal
-    t <- observeIntegerUniform loc (x,y)
-    return $ IntConst t :@ loc
-
-  eval (IntObserveBinomial n p :@ loc) = do
-    m <- eval n >>= getVal
-    q <- eval p >>= getVal
-    t <- observeBinomial loc m (toDouble q)
-    return $ IntConst t :@ loc
-
-  eval (IntObservePoisson lambda :@ loc) = do
-    q <- eval lambda >>= getVal
-    t <- observeIntegerPoisson loc (toDouble q)
-    return $ IntConst t :@ loc
-
-  eval (IntCastStr str :@ loc) = do
-    Text x <- eval str >>= getVal
-    n <- parseAsAt pInteger loc x
-    return $ IntConst n :@ loc
-
-  eval (MatRank m :@ loc) = do
-    case typeOf m of
-      MatOf QQ -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Rat)
-        r <- tryEvalM loc $ mRank n
-        return $ IntConst r :@ loc
-      MatOf BB -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Bool)
-        r <- tryEvalM loc $ mRank n
-        return $ IntConst r :@ loc
-      MatOf u -> reportErr loc $ FieldMatrixExpected u
-      u -> reportErr loc $ MatrixExpected u
-
-  eval (IntContent p :@ loc) = do
-    q <- eval p >>= getVal :: EvalM (Poly Integer)
-    c <- tryEvalM loc $ contentP q
-    return $ IntConst c :@ loc
 
 
 
@@ -311,153 +202,6 @@ instance Eval (StrExpr Expr) where
     return $ StrConst (Text s) :@ loc
 
 
-
-{------------------}
-{- :Eval:BoolExpr -}
-{------------------}
-
-instance Eval (BoolExpr Expr) where
-  eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)
-
-  {- :Common -}
-  eval (BoolVar key :@ loc)        = eKey key loc
-  eval (BoolAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
-
-  eval (BoolAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [BoolExpr Expr] -> Integer -> Either ListErr (BoolExpr Expr)
-
-  eval (IsDefined key :@ loc) = do
-    p <- isKeyDefined key
-    return $ BoolConst p :@ loc
-
-  eval (BoolEq a b :@ loc) = do
-    x <- eval a >>= getVal :: EvalM Expr
-    y <- eval b >>= getVal :: EvalM Expr
-    return $ BoolConst (x == y) :@ loc
-
-  eval (BoolNEq a b :@ loc) = do
-    x <- eval a >>= getVal :: EvalM Expr
-    y <- eval b >>= getVal :: EvalM Expr
-    return $ BoolConst (x /= y) :@ loc
-
-  eval (BoolLT a b :@ loc) = do
-    case unify (typeOf a) (typeOf b) of
-      Right ZZ -> do
-        x <- eval a >>= getVal :: EvalM Integer
-        y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x < y) :@ loc
-      Right SS -> do
-        x <- eval a >>= getVal :: EvalM Text
-        y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x < y) :@ loc
-      Right QQ -> do
-        x <- eval a >>= getVal :: EvalM Rat
-        y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x < y) :@ loc
-      Right u -> reportErr loc $ SortableExpected u
-      Left err -> reportErr loc err
-
-  eval (BoolLEq a b :@ loc) = do
-    case unify (typeOf a) (typeOf b) of
-      Right ZZ -> do
-        x <- eval a >>= getVal :: EvalM Integer
-        y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x <= y) :@ loc
-      Right SS -> do
-        x <- eval a >>= getVal :: EvalM Text
-        y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x <= y) :@ loc
-      Right QQ -> do
-        x <- eval a >>= getVal :: EvalM Rat
-        y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x <= y) :@ loc
-      Right u -> reportErr loc $ SortableExpected u
-      Left err -> reportErr loc err
-
-  eval (BoolGT a b :@ loc) = do
-    case unify (typeOf a) (typeOf b) of
-      Right ZZ -> do
-        x <- eval a >>= getVal :: EvalM Integer
-        y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x > y) :@ loc
-      Right SS -> do
-        x <- eval a >>= getVal :: EvalM Text
-        y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x > y) :@ loc
-      Right QQ -> do
-        x <- eval a >>= getVal :: EvalM Rat
-        y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x > y) :@ loc
-      Right u -> reportErr loc $ SortableExpected u
-      Left err -> reportErr loc err
-
-  eval (BoolGEq a b :@ loc) = do
-    case unify (typeOf a) (typeOf b) of
-      Right ZZ -> do
-        x <- eval a >>= getVal :: EvalM Integer
-        y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x >= y) :@ loc
-      Right SS -> do
-        x <- eval a >>= getVal :: EvalM Text
-        y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x >= y) :@ loc
-      Right QQ -> do
-        x <- eval a >>= getVal :: EvalM Rat
-        y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x >= y) :@ loc
-      Right u -> reportErr loc $ SortableExpected u
-      Left err -> reportErr loc err
-
-  eval (BoolRand ls :@ loc) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ BoolConst r :@ loc
-
-  eval (ListElem x xs :@ loc) = do
-    a <- eval x >>= getVal :: EvalM Expr
-    as <- eval xs >>= getVal :: EvalM [Expr]
-    return $ BoolConst (elem a as) :@ loc
-
-  eval (ListIsEmpty xs :@ loc) = do
-    as <- eval xs >>= getVal :: EvalM [Expr]
-    return $ BoolConst (null as) :@ loc
-
-  eval (MatIsRow m :@ loc) = do
-    p <- eval m >>= getVal :: EvalM (Matrix Expr)
-    q <- tryEvalM loc $ mIsRow p
-    return $ BoolConst q :@ loc
-
-  eval (MatIsCol m :@ loc) = do
-    p <- eval m >>= getVal :: EvalM (Matrix Expr)
-    q <- tryEvalM loc $ mIsCol p
-    return $ BoolConst q :@ loc
-
-  eval (MatIsGJForm m :@ loc) = do
-    case typeOf m of
-      MatOf QQ -> do
-        p <- eval m >>= getVal :: EvalM (Matrix Rat)
-        q <- tryEvalM loc $ mIsGaussJordanForm p
-        return $ BoolConst q :@ loc
-      MatOf BB -> do
-        p <- eval m >>= getVal :: EvalM (Matrix Bool)
-        q <- tryEvalM loc $ mIsGaussJordanForm p
-        return $ BoolConst q :@ loc
-      t -> reportErr loc $ NumericMatrixExpected t
-
-  -- Bool
-  eval (Neg    a   :@ loc) = lift1 loc a   (boolNot)
-  eval (Conj   a b :@ loc) = lift2 loc a b (boolAnd)
-  eval (Disj   a b :@ loc) = lift2 loc a b (boolOr)
-  eval (Imp    a b :@ loc) = lift2 loc a b (boolImp)
-
-  -- Int
-  eval (IntSqFree a :@ loc) = lift1 loc a   (rIsSqFreeT zeroZZ)
-  eval (IntDiv a b :@ loc)  = lift2 loc a b (rDividesT  zeroZZ)
-
-  -- Str
-  eval (Matches a b :@ loc) = lift2 loc a b (strMatch)
 
 
 

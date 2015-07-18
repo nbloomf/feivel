@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Eval.Eval where
 
 import Feivel.EvalM
@@ -24,9 +27,16 @@ import Feivel.Get
 import Feivel.Put
 import Feivel.Locus
 import Feivel.Error
+import Feivel.Lib
 
 class Eval t where
   eval :: t -> EvalM t
+
+instance Eval Integer where eval = return
+instance Eval String  where eval = return
+instance Eval Text    where eval = return
+instance Eval Rat     where eval = return
+instance Eval Bool    where eval = return
 
 
 lift1
