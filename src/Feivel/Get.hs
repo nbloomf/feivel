@@ -128,7 +128,7 @@ instance Get BoolExpr where
 
 instance Get Bool where
   get expr = do
-    x <- get expr
+    x <- get expr :: EvalM BoolExpr
     case x of
       BoolConst b :@ _ -> return b
       v -> reportErr (locusOf v) UnevaluatedExpression

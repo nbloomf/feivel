@@ -655,7 +655,7 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
 pBoolConst :: ParseM BoolExpr
 pBoolConst = pAtLocus pBoolConst'
 
-pBoolConst' :: ParseM BoolExprLeaf
+pBoolConst' :: ParseM (BoolExprLeaf Expr)
 pBoolConst' = pConst pBool BoolConst BB
 
 pBoolExpr :: ParseM BoolExpr
@@ -672,16 +672,16 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
     
       , pFun1 "IsDefined" pKey IsDefined BB
 
-      , pFun1 "IsSquareFree" pIntExpr IntSqFree BB
+      , pFun1 "IsSquareFree" (pTypedExpr ZZ) IntSqFree BB
 
-      , pFun1 "Rand" (pTypedListExpr BB) BoolRand BB
+      , pFun1 "Rand" (pTypedExpr $ ListOf BB) BoolRand BB
 
-      , pTypedArgPair "Elem" pTypedExpr pTypedListExpr ListElem (const BB)
-      , pTypedArg "IsEmpty" pTypedListExpr ListIsEmpty (const BB)
+      , pTypedArgPair "Elem" pTypedExpr (pTypedExpr . ListOf) ListElem (const BB)
+      , pTypedArg "IsEmpty" (pTypedExpr . ListOf) ListIsEmpty (const BB)
 
-      , pFun1 "IsRow" pMatExpr MatIsRow BB
-      , pFun1 "IsCol" pMatExpr MatIsCol BB
-      , pTypedArg "IsGJForm" pTypedMatExpr MatIsGJForm (const BB)
+      , pFun1 "IsRow" (pTypedExpr $ MatOf XX) MatIsRow BB
+      , pFun1 "IsCol" (pTypedExpr $ MatOf XX) MatIsCol BB
+      , pTypedArg "IsGJForm" (pTypedExpr . MatOf) MatIsGJForm (const BB)
 
       , pTypedArgPair "Equal"    pTypedExpr pTypedExpr BoolEq  (const BB)
       , pTypedArgPair "NotEqual" pTypedExpr pTypedExpr BoolNEq (const BB)
@@ -690,8 +690,8 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
       , pTypedArgPair "GT"       pTypedExpr pTypedExpr BoolGT  (const BB)
       , pTypedArgPair "GEq"      pTypedExpr pTypedExpr BoolGEq (const BB)
 
-      , pFun2 "Matches" pStrExpr pText    Matches BB
-      , pFun2 "Divides" pIntExpr pIntExpr IntDiv  BB
+      , pFun2 "Matches" (pTypedExpr SS) pText    Matches BB
+      , pFun2 "Divides" (pTypedExpr ZZ) (pTypedExpr ZZ) IntDiv  BB
       ]
 
     boolOpTable =

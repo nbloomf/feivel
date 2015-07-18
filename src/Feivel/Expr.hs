@@ -299,26 +299,26 @@ data IntExprLeaf a
 {- :BoolExpr -}
 {-------------}
 
-type BoolExpr = AtLocus BoolExprLeaf
+type BoolExpr = AtLocus (BoolExprLeaf Expr)
 
-data BoolExprLeaf
+data BoolExprLeaf a
   = BoolConst Bool
   | BoolVar   Key
   | IsDefined Key
 
-  | BoolMacro [(Type, Key, Expr)] Expr -- MacTo BB
-  | BoolAtPos Expr Expr      -- ListOf BB, ZZ
-  | BoolAtIdx Expr Expr Expr -- MatOf BB, ZZ, ZZ
+  | BoolMacro [(Type, Key, a)] a -- Expr, MacTo BB
+  | BoolAtPos a a      -- ListOf BB, ZZ
+  | BoolAtIdx a a a -- MatOf BB, ZZ, ZZ
 
-  | BoolIfThenElse Expr BoolExpr BoolExpr -- BB
+  | BoolIfThenElse a BoolExpr BoolExpr -- BB
 
-  | BoolEq  Expr Expr
-  | BoolNEq Expr Expr
+  | BoolEq  a a
+  | BoolNEq a a
 
-  | BoolLT  Expr Expr
-  | BoolLEq Expr Expr
-  | BoolGT  Expr Expr
-  | BoolGEq Expr Expr
+  | BoolLT  a a
+  | BoolLEq a a
+  | BoolGT  a a
+  | BoolGEq a a
 
   -- Arithmetic
   | Conj BoolExpr BoolExpr
@@ -327,22 +327,22 @@ data BoolExprLeaf
   | Neg  BoolExpr
 
   -- String
-  | Matches StrExpr Text
+  | Matches a Text -- SS
 
   -- Integer
-  | IntDiv    IntExpr IntExpr
-  | IntSqFree IntExpr
+  | IntDiv    a a -- ZZ, ZZ
+  | IntSqFree a      -- ZZ
 
-  | BoolRand ListExpr
+  | BoolRand a -- ListOf BB
 
   -- List
-  | ListElem    Expr ListExpr
-  | ListIsEmpty ListExpr
+  | ListElem    a a -- XX, ListOf XX
+  | ListIsEmpty a -- ListOf XX
 
   -- Matrix
-  | MatIsRow    MatExpr
-  | MatIsCol    MatExpr
-  | MatIsGJForm MatExpr
+  | MatIsRow    a -- MatOf XX
+  | MatIsCol    a -- MatOf XX
+  | MatIsGJForm a -- MatOf XX
   deriving (Eq, Show)
 
 
