@@ -18,9 +18,7 @@
 
 module Feivel.Expr.List where
 
-import Feivel.Type
-import Feivel.Key
-import Feivel.Locus
+import Feivel.Expr.Util
 
 {-------------}
 {- :ListExpr -}

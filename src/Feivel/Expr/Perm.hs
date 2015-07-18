@@ -18,10 +18,7 @@
 
 module Feivel.Expr.Perm where
 
-import Feivel.Type
-import Feivel.Key
-import Feivel.Locus
-import Feivel.Lib (Perm)
+import Feivel.Expr.Util
 
 {-------------}
 {- :PermExpr -}

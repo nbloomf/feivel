@@ -16,25 +16,16 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Expr.Mac where
+module Feivel.Expr.Util (
+  module Feivel.Type,
+  module Feivel.Key,
+  module Feivel.Locus,
+  module Feivel.Store,
+  Text, Perm, Rat, ZZModulo, Poly, Variable, Matrix, Format
+) where
 
-import Feivel.Expr.Util
-
-{------------}
-{- :MacExpr -}
-{------------}
-
-type MacExpr a = AtLocus (MacExprLeaf a)
-
-data MacExprLeaf a
-  = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
-  | MacVar   Type Key
-
-  | MacMacro Type [(Type, Key, a)] a -- MacTo (MacTo typ)
-  | MacAtPos Type a a -- ListOf (MacTo typ), ZZ
-  | MacAtIdx Type a a a -- MatOf (MacTo typ), ZZ, ZZ
-
-  | MacRand Type a -- ListOf (MacTo typ)
-
-  | MacIfThenElse Type a (MacExpr a) (MacExpr a) -- BB
-  deriving (Eq, Show)
+import Feivel.Type
+import Feivel.Key
+import Feivel.Locus
+import Feivel.Store
+import Feivel.Lib (Text, Perm, Rat, ZZModulo, Poly, Variable, Matrix, Format)

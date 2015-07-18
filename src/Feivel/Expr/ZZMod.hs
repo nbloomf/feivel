@@ -18,10 +18,7 @@
 
 module Feivel.Expr.ZZMod where
 
-import Feivel.Type
-import Feivel.Key
-import Feivel.Locus
-import Feivel.Lib (ZZModulo)
+import Feivel.Expr.Util
 
 {--------------}
 {- :ZZModExpr -}

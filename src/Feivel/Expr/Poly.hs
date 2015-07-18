@@ -18,10 +18,7 @@
 
 module Feivel.Expr.Poly where
 
-import Feivel.Type
-import Feivel.Key
-import Feivel.Locus
-import Feivel.Lib
+import Feivel.Expr.Util
 
 {-------------}
 {- :PolyExpr -}
