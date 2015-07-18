@@ -493,7 +493,7 @@ instance Eval BoolExpr where
 {- :Eval:RatExpr -}
 {-----------------}
 
-instance Eval RatExpr where
+instance Eval (RatExpr Expr) where
   eval (RatConst p :@ loc) = return $ RatConst p :@ loc
 
   {- :Common -}
@@ -503,7 +503,7 @@ instance Eval RatExpr where
   eval (RatMacro vals mac :@ loc) = eMacro vals mac loc
 
   eval (RatAtPos a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
+    where foo = listAtPos :: [RatExpr Expr] -> Integer -> Either ListErr (RatExpr Expr)
 
   eval (RatCast expr :@ loc) = do
     n <- eval expr >>= getVal :: EvalM Integer
@@ -793,7 +793,7 @@ instance Eval (MacExpr Expr) where
 {- :Eval:MatExpr -}
 {-----------------}
 
-instance Eval MatExpr where
+instance Eval (MatExpr Expr) where
   eval (MatConst t m :@ loc) = do
     n <- mSeq $ fmap eval m
     return $ MatConst t n :@ loc
@@ -805,7 +805,7 @@ instance Eval MatExpr where
   eval (MatIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (MatAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
+    where foo = listAtPos :: [MatExpr Expr] -> Integer -> Either ListErr (MatExpr Expr)
 
   eval (MatRand _ ls :@ _) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
@@ -1474,7 +1474,7 @@ instance Glyph BoolExpr where
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
 
 
-instance Glyph RatExpr where
+instance Glyph (RatExpr Expr) where
   toGlyph (RatConst x :@ _) = return $ show x
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
@@ -1491,7 +1491,7 @@ instance Glyph ListExpr where
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
-instance Glyph MatExpr where
+instance Glyph (MatExpr Expr) where
   toGlyph (MatConst _ m :@ _) = do
     n <- mSeq $ fmap toGlyph m
     case mShowStr n of

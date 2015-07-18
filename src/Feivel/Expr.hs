@@ -52,6 +52,8 @@ import Feivel.Expr.ZZMod
 import Feivel.Expr.Perm
 import Feivel.Expr.Mac
 import Feivel.Expr.Poly
+import Feivel.Expr.Rat
+import Feivel.Expr.Mat
 
 {------------------}
 {- Contents       -}
@@ -60,9 +62,7 @@ import Feivel.Expr.Poly
 {-     :StrExpr   -}
 {-     :IntExpr   -}
 {-     :BoolExpr  -}
-{-     :RatExpr   -}
 {-     :ListExpr  -}
-{-     :MatExpr   -}
 {-  :ExprErr      -}
 {------------------}
 
@@ -120,12 +120,12 @@ data Expr
   | BoolE BoolExpr
   | StrE  StrExpr
   | IntE  IntExpr
-  | RatE  RatExpr
+  | RatE  (RatExpr Expr)
  
   | ZZModE (ZZModExpr Expr)
  
   | ListE  ListExpr
-  | MatE   MatExpr
+  | MatE   (MatExpr  Expr)
   | PolyE  (PolyExpr Expr)
   | PermE  (PermExpr Expr)
   | MacE   (MacExpr  Expr)
@@ -155,10 +155,10 @@ instance ToExpr Doc       where toExpr = DocE
 instance ToExpr BoolExpr  where toExpr = BoolE
 instance ToExpr StrExpr   where toExpr = StrE
 instance ToExpr IntExpr   where toExpr = IntE
-instance ToExpr RatExpr   where toExpr = RatE
+instance ToExpr (RatExpr   Expr) where toExpr = RatE
 instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr ListExpr  where toExpr = ListE
-instance ToExpr MatExpr   where toExpr = MatE
+instance ToExpr (MatExpr  Expr) where toExpr = MatE
 instance ToExpr (PolyExpr Expr) where toExpr = PolyE
 instance ToExpr (PermExpr Expr) where toExpr = PermE
 instance ToExpr (MacExpr  Expr) where toExpr = MacE
@@ -204,13 +204,13 @@ data StrExprLeaf
   | StrBase36   IntExpr
 
   -- Rational
-  | StrDecimal RatExpr IntExpr
+  | StrDecimal Expr Expr -- QQ, ZZ
 
   -- List
   | StrRand ListExpr
 
   -- Matrix
-  | StrTab MatExpr
+  | StrTab Expr -- MatOf XX
 
   -- General
   | StrFormat Format Expr
@@ -346,62 +346,6 @@ data BoolExprLeaf a
 
 
 
-{------------}
-{- :RatExpr -}
-{------------}
-
-type RatExpr = AtLocus (RatExprLeaf Expr)
-
-data RatExprLeaf a
-  = RatConst Rat
-  | RatVar   Key
-  | RatCast  a -- ZZ
-
-  | RatMacro [(Type, Key, Expr)] Expr -- MacTo QQ
-  | RatAtPos a a -- ListOf QQ, ZZ
-  | RatAtIdx a a a -- MatOf QQ, ZZ, ZZ
-
-  | RatIfThenElse a RatExpr RatExpr -- BB
- 
-  -- Arithmetic
-  | RatNeg   RatExpr
-  | RatAbs   RatExpr
- 
-  | RatAdd   RatExpr RatExpr
-  | RatSub   RatExpr RatExpr
-  | RatMult  RatExpr RatExpr
-  | RatQuot  RatExpr RatExpr
-  | RatMin   RatExpr RatExpr
-  | RatMax   RatExpr RatExpr
-
-  | RatPow   RatExpr a -- ZZ
-
-  -- List
-  | RatRand  a -- ListOf QQ
-  | RatSum   a -- ListOf QQ
-  | RatProd  a -- ListOf QQ
-  | RatMaxim a -- ListOf QQ
-  | RatMinim a -- ListOf QQ
-
-  -- Stats
-  | RatMean    a -- ListOf XX
-  | RatMeanDev a -- ListOf XX
-  | RatStdDev  a a -- ListOf XX, ZZ
-  | RatZScore  RatExpr a a -- ListOf XX, ZZ
-
-  -- Approximations
-  | RatSqrt  RatExpr a -- ZZ
-
-  -- Casting
-  | RatCastStr a -- SS
-  deriving (Eq, Show)
-
-
-
-
-
-
-
 {-------------}
 {- :ListExpr -}
 {-------------}
@@ -432,8 +376,8 @@ data ListExprLeaf
   | ListRange Type IntExpr IntExpr
 
   -- Matrices
-  | ListMatRow Type IntExpr MatExpr
-  | ListMatCol Type IntExpr MatExpr
+  | ListMatRow Type IntExpr Expr -- MatOf typ
+  | ListMatCol Type IntExpr Expr -- MatOf typ
 
   -- Random
   | ListShuffle  Type ListExpr
@@ -445,7 +389,7 @@ data ListExprLeaf
   -- Permutations
   | ListPermsOf Type ListExpr
 
-  | ListPivotColIndices Type MatExpr
+  | ListPivotColIndices Type Expr -- MatOf XX
   deriving (Eq, Show)
 
 data ListGuard
@@ -455,65 +399,7 @@ data ListGuard
 
 
 
-{------------}
-{- :MatExpr -}
-{------------}
 
-type MatExpr = AtLocus MatExprLeaf
-
-data MatExprLeaf
-  = MatConst Type (Matrix Expr)
-  | MatVar   Type Key
-
-  | MatMacro Type [(Type, Key, Expr)] Expr -- MacTo (MatOf typ)
-  | MatAtPos Type Expr Expr -- ListOf (MatOf typ), ZZ
-  | MatAtIdx Type Expr Expr Expr -- MatOf (MatOf typ), ZZ, ZZ
-
-  | MatIfThenElse Type Expr MatExpr MatExpr -- BB
-
-  | MatBuilder Type Expr Key ListExpr Key ListExpr
-
-  | MatRowFromList Type ListExpr
-  | MatColFromList Type ListExpr
-
-  -- Special Values
-  | MatId     Type IntExpr
-  | MatSwapE  Type IntExpr IntExpr IntExpr
-  | MatScaleE Type IntExpr IntExpr Expr
-  | MatAddE   Type IntExpr IntExpr IntExpr Expr
-
-  -- Arithmetic
-  | MatHCat  Type MatExpr MatExpr
-  | MatVCat  Type MatExpr MatExpr
-  | MatAdd   Type MatExpr MatExpr
-  | MatMul   Type MatExpr MatExpr
-  | MatPow   Type MatExpr IntExpr
-  | MatNeg   Type MatExpr
-  | MatTrans Type MatExpr
-
-  -- Mutation
-  | MatSwapRows Type MatExpr IntExpr IntExpr
-  | MatSwapCols Type MatExpr IntExpr IntExpr
-  | MatScaleRow Type MatExpr Expr IntExpr
-  | MatScaleCol Type MatExpr Expr IntExpr
-  | MatAddRow   Type MatExpr Expr IntExpr IntExpr
-  | MatAddCol   Type MatExpr Expr IntExpr IntExpr
-  | MatDelRow   Type MatExpr IntExpr
-  | MatDelCol   Type MatExpr IntExpr
-
-  | MatGetRow   Type IntExpr MatExpr
-  | MatGetCol   Type IntExpr MatExpr
-
-  -- Randomness
-  | MatShuffleRows Type MatExpr
-  | MatShuffleCols Type MatExpr
-
-  -- Factorizations
-  | MatGJForm   Type MatExpr
-  | MatGJFactor Type MatExpr
-
-  | MatRand Type ListExpr
-  deriving (Eq, Show)
 
 
 

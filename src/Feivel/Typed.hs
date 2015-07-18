@@ -112,7 +112,7 @@ instance (Typed a) => Typed [a] where
 instance Typed IntExpr  where typeOf _ = ZZ
 instance Typed StrExpr  where typeOf _ = SS
 instance Typed BoolExpr where typeOf _ = BB
-instance Typed RatExpr  where typeOf _ = QQ
+instance Typed (RatExpr Expr)  where typeOf _ = QQ
 instance Typed Doc      where typeOf _ = DD
 
 instance Typed Expr where
@@ -179,7 +179,7 @@ instance Typed (MacExpr Expr) where
 {- :MatExpr -}
 {------------}
 
-instance Typed MatExpr where
+instance Typed (MatExpr Expr) where
   typeOf (MatVar         typ _         :@ _) = MatOf typ
   typeOf (MatMacro       typ _ _       :@ _) = MatOf typ
   typeOf (MatAtPos       typ _ _       :@ _) = MatOf typ
