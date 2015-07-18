@@ -1361,13 +1361,13 @@ instance Eval PolyExpr where
 {- :Eval:PermExpr -}
 {------------------}
 
-instance Eval PermExpr where
+instance Eval (PermExpr Expr) where
   eval (PermConst t p :@ loc) = do
     q <- seqPerm $ mapPerm eval p
     return $ PermConst t q :@ loc
 
   eval (PermAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
+    where foo = listAtPos :: [PermExpr Expr] -> Integer -> Either ListErr (PermExpr Expr)
 
   {- Common -}
   eval (PermVar _ key :@ loc)        = eKey key loc
@@ -1376,13 +1376,9 @@ instance Eval PermExpr where
   eval (PermIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (PermRand _ ls :@ loc) = do
-    let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM PermExpr
-    case t of
-      ListOf (PermOf _) -> return s
-      _ -> reportErr loc $ ListExpected t
+    eval r >>= getVal
 
   eval (PermCompose _ p q :@ loc) = do
     t <- unifyTypesOf loc p q
@@ -1511,7 +1507,7 @@ instance Glyph PolyExpr where
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-instance Glyph PermExpr where
+instance Glyph (PermExpr Expr) where
   toGlyph (PermConst _ px :@ _) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx

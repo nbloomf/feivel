@@ -1194,13 +1194,13 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
 {- :PermExpr -}
 {-------------}
 
-pPermLiteral :: Type -> ParseM PermExpr
+pPermLiteral :: Type -> ParseM (PermExpr Expr)
 pPermLiteral typ = pAtLocus $ pPermLiteralOf typ pTypedConst
 
-pPermConst :: Type -> ParseM PermExpr
+pPermConst :: Type -> ParseM (PermExpr Expr)
 pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
 
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PermExprLeaf
+pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr)
 pPermLiteralOf typ p = (string "id" >> return (PermConst typ idPerm)) <|> do
   start <- getPosition
   ts <- many1 pCycle
@@ -1215,7 +1215,7 @@ pPermLiteralOf typ p = (string "id" >> return (PermConst typ idPerm)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> ParseM PermExpr
+pTypedPermExpr :: Type -> ParseM (PermExpr Expr)
 pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm (pPermLiteralOf typ pTypedExpr) (pTypedPermExpr typ) "permutation expression"
@@ -1228,7 +1228,7 @@ pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
 
       , pIfThenElseExpr (pTypedPermExpr typ) (PermIfThenElse typ) (PermOf typ)
 
-      , pFun1 "Rand" (pTypedListExpr (PermOf typ)) (PermRand typ) (PermOf typ)
+      , pFun1 "Rand" (pTypedExpr $ ListOf (PermOf typ)) (PermRand typ) (PermOf typ)
       ]
 
     permOpTable =

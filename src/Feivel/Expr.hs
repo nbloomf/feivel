@@ -49,6 +49,7 @@ import Feivel.Lib
 import Feivel.Store
 
 import Feivel.Expr.ZZMod
+import Feivel.Expr.Perm
 
 {------------------}
 {- Contents       -}
@@ -128,7 +129,7 @@ data Expr
   | ListE  ListExpr
   | MatE   MatExpr
   | PolyE  PolyExpr
-  | PermE  PermExpr
+  | PermE  (PermExpr Expr)
   | MacE   MacExpr
   deriving (Eq, Show)
 
@@ -161,7 +162,7 @@ instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr ListExpr  where toExpr = ListE
 instance ToExpr MatExpr   where toExpr = MatE
 instance ToExpr PolyExpr  where toExpr = PolyE
-instance ToExpr PermExpr  where toExpr = PermE
+instance ToExpr (PermExpr Expr)  where toExpr = PermE
 instance ToExpr MacExpr   where toExpr = MacE
 
 -- Not a fan of "no locus" here
@@ -544,30 +545,6 @@ data PolyExprLeaf
 
   | PolyFromRoots Type Variable ListExpr
   | PolyEvalPoly  Type PolyExpr [(Variable, PolyExpr)]
-  deriving (Eq, Show)
-
-
-
-{-------------}
-{- :PermExpr -}
-{-------------}
-
-type PermExpr = AtLocus PermExprLeaf
-
-data PermExprLeaf
-  = PermConst Type (Perm Expr)
-  | PermVar   Type Key
-
-  | PermMacro Type [(Type, Key, Expr)] Expr -- MacTo (PermOf typ)
-  | PermAtPos Type Expr Expr -- ListOf (PermOf typ), ZZ
-  | PermAtIdx Type Expr Expr Expr -- MatOf (PermOf typ), ZZ, ZZ
-
-  | PermRand Type ListExpr
-
-  | PermIfThenElse Type Expr PermExpr PermExpr -- BB
-
-  | PermCompose Type PermExpr PermExpr
-  | PermInvert  Type PermExpr
   deriving (Eq, Show)
 
 

@@ -244,7 +244,7 @@ instance Typed PolyExpr where
 {- :PermExpr -}
 {-------------}
 
-instance Typed PermExpr where
+instance Typed (PermExpr a) where
   typeOf (PermVar        typ _     :@ _) = PermOf typ
   typeOf (PermMacro      typ _ _   :@ _) = PermOf typ
   typeOf (PermConst      typ _     :@ _) = PermOf typ

@@ -264,7 +264,7 @@ instance (Get a) => Get (Poly a) where
 {- :PermExpr -}
 {-------------}
 
-instance Get PermExpr where
+instance Get (PermExpr Expr) where
   get (PermE m) = return m
   get v = do
     let t = typeOf v
