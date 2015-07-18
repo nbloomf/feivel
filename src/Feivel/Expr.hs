@@ -48,6 +48,8 @@ import Feivel.Locus
 import Feivel.Lib
 import Feivel.Store
 
+import Feivel.Expr.ZZMod
+
 {------------------}
 {- Contents       -}
 {-   :Doc         -}
@@ -121,7 +123,7 @@ data Expr
   | IntE  IntExpr
   | RatE  RatExpr
  
-  | ZZModE ZZModExpr
+  | ZZModE (ZZModExpr Expr)
  
   | ListE  ListExpr
   | MatE   MatExpr
@@ -155,7 +157,7 @@ instance ToExpr BoolExpr  where toExpr = BoolE
 instance ToExpr StrExpr   where toExpr = StrE
 instance ToExpr IntExpr   where toExpr = IntE
 instance ToExpr RatExpr   where toExpr = RatE
-instance ToExpr ZZModExpr where toExpr = ZZModE
+instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr ListExpr  where toExpr = ListE
 instance ToExpr MatExpr   where toExpr = MatE
 instance ToExpr PolyExpr  where toExpr = PolyE
@@ -397,35 +399,7 @@ data RatExprLeaf a
 
 
 
-{--------------}
-{- :ZZModExpr -}
-{--------------}
 
-type ZZModExpr = AtLocus (ZZModExprLeaf Expr)
-
-data ZZModExprLeaf a
-  = ZZModConst Type ZZModulo
-  | ZZModVar   Type Key
-  | ZZModCast  Type Expr
-
-  | ZZModMacro Type [(Type, Key, Expr)] a -- MacTo ZZModulo
-  | ZZModAtPos Type a a   -- ListOf ZZModulo, ZZ
-  | ZZModAtIdx Type a a a -- MatOf ZZModulo, ZZ, ZZ
-
-  | ZZModIfThenElse Type Expr ZZModExpr ZZModExpr -- BB
- 
-  -- Arithmetic
-  | ZZModNeg   Type ZZModExpr
-  | ZZModInv   Type ZZModExpr
- 
-  | ZZModAdd   Type ZZModExpr ZZModExpr
-  | ZZModSub   Type ZZModExpr ZZModExpr
-  | ZZModMult  Type ZZModExpr ZZModExpr
-  | ZZModPow   Type ZZModExpr a -- ZZ
-
-  | ZZModSum   Type a -- ListOf ZZModulo
-  | ZZModProd  Type a -- ListOf ZZModulo
-  deriving (Eq, Show)
 
 
 

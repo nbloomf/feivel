@@ -289,7 +289,7 @@ instance Get (Perm Integer) where
 {- :ZZModExpr -}
 {--------------}
 
-instance Get ZZModExpr where
+instance Get (ZZModExpr Expr) where
   get (ZZModE y) = return y
   get v = do
     let t = typeOf v
@@ -297,7 +297,7 @@ instance Get ZZModExpr where
 
 instance Get ZZModulo where
   get expr = do
-    x <- get expr :: EvalM ZZModExpr
+    x <- get expr :: EvalM (ZZModExpr Expr)
     case x of
       ZZModConst _ k :@ _ -> return k
       v -> reportErr (locusOf v) UnevaluatedExpression

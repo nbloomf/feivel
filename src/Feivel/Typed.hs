@@ -261,7 +261,7 @@ instance Typed PermExpr where
 {- :ZZModExpr -}
 {--------------}
 
-instance Typed ZZModExpr where
+instance Typed (ZZModExpr a) where
   typeOf (ZZModConst      typ _     :@ _) = typ
   typeOf (ZZModVar        typ _     :@ _) = typ
   typeOf (ZZModAtPos      typ _ _   :@ _) = typ

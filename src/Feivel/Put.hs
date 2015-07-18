@@ -43,7 +43,7 @@ class Put a where
 instance Put IntExpr where
   put loc (x :@ _) = IntE (x :@ loc)
 
-instance Put ZZModExpr where
+instance Put (ZZModExpr Expr) where
   put loc (x :@ _) = ZZModE (x :@ loc)
 
 instance Put PermExpr where

@@ -607,7 +607,7 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
 {- :ZZModExpr -}
 {--------------}
 
-pZZModConst :: Integer -> ParseM ZZModExpr
+pZZModConst :: Integer -> ParseM (ZZModExpr Expr)
 pZZModConst n = pAtLocus (pZZModConst' n)
 
 pZZModConst' :: Integer -> ParseM (ZZModExprLeaf Expr)
@@ -615,7 +615,7 @@ pZZModConst' n = do
   a <- pInteger
   return (ZZModConst (ZZMod n) (a `zzmod` n))
 
-pZZModExpr :: Integer -> ParseM ZZModExpr
+pZZModExpr :: Integer -> ParseM (ZZModExpr Expr)
 pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
     pZZModTerm = pTerm (pZZModConst' n) (pZZModExpr n) "integer expression"

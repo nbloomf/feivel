@@ -1411,7 +1411,7 @@ instance Eval PermExpr where
 {- :Eval:ZZModExpr -}
 {-------------------}
 
-instance Eval ZZModExpr where
+instance Eval (ZZModExpr Expr) where
   eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc
 
   {- :Common -}
@@ -1421,7 +1421,7 @@ instance Eval ZZModExpr where
   eval (ZZModIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (ZZModAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
+    where foo = listAtPos :: [ZZModExpr Expr] -> Integer -> Either ListErr (ZZModExpr Expr)
 
   eval (ZZModCast (ZZMod n) a :@ loc) = do
     res <- eval a >>= getVal :: EvalM Integer
@@ -1483,7 +1483,7 @@ instance Glyph RatExpr where
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-instance Glyph ZZModExpr where
+instance Glyph (ZZModExpr Expr) where
   toGlyph (ZZModConst _ a :@ _) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
