@@ -183,8 +183,8 @@ data StrExprLeaf
   | StrVar   Key
 
   | StrMacro [(Type, Key, Expr)] Expr -- MacTo SS
-  | StrAtPos Expr IntExpr -- ListOf SS
-  | StrAtIdx Expr  IntExpr IntExpr -- MatOf SS
+  | StrAtPos Expr Expr -- ListOf SS, ZZ
+  | StrAtIdx Expr Expr Expr -- MatOf SS, ZZ, ZZ
  
   | StrIfThenElse Expr StrExpr StrExpr -- BB
 
@@ -232,8 +232,8 @@ data IntExprLeaf a
   | IntVar   Key
 
   | IntMacro [(Type, Key, Expr)] a -- MacTo ZZ
-  | IntAtPos a IntExpr             -- ListOf ZZ
-  | IntAtIdx a IntExpr IntExpr     -- MatOf ZZ
+  | IntAtPos a a   -- ListOf ZZ, ZZ
+  | IntAtIdx a a a -- MatOf ZZ, ZZ, ZZ
  
   | IntIfThenElse a IntExpr IntExpr -- BB
  
@@ -305,8 +305,8 @@ data BoolExprLeaf
   | IsDefined Key
 
   | BoolMacro [(Type, Key, Expr)] Expr -- MacTo BB
-  | BoolAtPos Expr IntExpr -- ListOf BB
-  | BoolAtIdx Expr  IntExpr IntExpr -- MatOf BB
+  | BoolAtPos Expr Expr      -- ListOf BB, ZZ
+  | BoolAtIdx Expr Expr Expr -- MatOf BB, ZZ, ZZ
 
   | BoolIfThenElse Expr BoolExpr BoolExpr -- BB
 
@@ -349,18 +349,18 @@ data BoolExprLeaf
 {- :RatExpr -}
 {------------}
 
-type RatExpr = AtLocus RatExprLeaf
+type RatExpr = AtLocus (RatExprLeaf Expr)
 
-data RatExprLeaf
+data RatExprLeaf a
   = RatConst Rat
   | RatVar   Key
-  | RatCast  IntExpr
+  | RatCast  a -- ZZ
 
   | RatMacro [(Type, Key, Expr)] Expr -- MacTo QQ
-  | RatAtPos Expr IntExpr -- ListOf QQ
-  | RatAtIdx Expr  IntExpr IntExpr -- MatOf QQ
+  | RatAtPos a a -- ListOf QQ, ZZ
+  | RatAtIdx a a a -- MatOf QQ, ZZ, ZZ
 
-  | RatIfThenElse Expr RatExpr RatExpr -- BB
+  | RatIfThenElse a RatExpr RatExpr -- BB
  
   -- Arithmetic
   | RatNeg   RatExpr
@@ -373,26 +373,26 @@ data RatExprLeaf
   | RatMin   RatExpr RatExpr
   | RatMax   RatExpr RatExpr
 
-  | RatPow   RatExpr IntExpr
+  | RatPow   RatExpr a -- ZZ
 
   -- List
-  | RatRand  ListExpr
-  | RatSum   ListExpr
-  | RatProd  ListExpr
-  | RatMaxim ListExpr
-  | RatMinim ListExpr
+  | RatRand  a -- ListOf QQ
+  | RatSum   a -- ListOf QQ
+  | RatProd  a -- ListOf QQ
+  | RatMaxim a -- ListOf QQ
+  | RatMinim a -- ListOf QQ
 
   -- Stats
-  | RatMean    ListExpr
-  | RatMeanDev ListExpr
-  | RatStdDev  ListExpr IntExpr
-  | RatZScore  RatExpr  ListExpr IntExpr
+  | RatMean    a -- ListOf XX
+  | RatMeanDev a -- ListOf XX
+  | RatStdDev  a a -- ListOf XX, ZZ
+  | RatZScore  RatExpr a a -- ListOf XX, ZZ
 
   -- Approximations
-  | RatSqrt  RatExpr IntExpr
+  | RatSqrt  RatExpr a -- ZZ
 
   -- Casting
-  | RatCastStr StrExpr
+  | RatCastStr a -- SS
   deriving (Eq, Show)
 
 
@@ -401,16 +401,16 @@ data RatExprLeaf
 {- :ZZModExpr -}
 {--------------}
 
-type ZZModExpr = AtLocus ZZModExprLeaf
+type ZZModExpr = AtLocus (ZZModExprLeaf Expr)
 
-data ZZModExprLeaf
+data ZZModExprLeaf a
   = ZZModConst Type ZZModulo
   | ZZModVar   Type Key
-  | ZZModCast  Type IntExpr
+  | ZZModCast  Type Expr
 
-  | ZZModMacro Type [(Type, Key, Expr)] Expr -- MacTo ZZModulo
-  | ZZModAtPos Type Expr IntExpr -- ListOf ZZModulo
-  | ZZModAtIdx Type Expr  IntExpr IntExpr -- MatOf ZZModulo
+  | ZZModMacro Type [(Type, Key, Expr)] a -- MacTo ZZModulo
+  | ZZModAtPos Type a a   -- ListOf ZZModulo, ZZ
+  | ZZModAtIdx Type a a a -- MatOf ZZModulo, ZZ, ZZ
 
   | ZZModIfThenElse Type Expr ZZModExpr ZZModExpr -- BB
  
@@ -421,10 +421,10 @@ data ZZModExprLeaf
   | ZZModAdd   Type ZZModExpr ZZModExpr
   | ZZModSub   Type ZZModExpr ZZModExpr
   | ZZModMult  Type ZZModExpr ZZModExpr
-  | ZZModPow   Type ZZModExpr IntExpr
+  | ZZModPow   Type ZZModExpr a -- ZZ
 
-  | ZZModSum   Type ListExpr
-  | ZZModProd  Type ListExpr
+  | ZZModSum   Type a -- ListOf ZZModulo
+  | ZZModProd  Type a -- ListOf ZZModulo
   deriving (Eq, Show)
 
 
@@ -441,8 +441,8 @@ data ListExprLeaf
   | ListBuilder Type Expr [ListGuard]
 
   | ListMacro      Type [(Type, Key, Expr)] Expr -- MacTo (ListOf typ)
-  | ListAtPos      Type Expr IntExpr -- ListOf (ListOf typ)
-  | ListAtIdx      Type Expr  IntExpr IntExpr -- MatOf (ListOf typ)
+  | ListAtPos      Type Expr Expr -- ListOf (ListOf typ), ZZ
+  | ListAtIdx      Type Expr Expr Expr -- MatOf (ListOf typ), ZZ, ZZ
   | ListRand       Type ListExpr
   | ListIfThenElse Type Expr ListExpr ListExpr -- BB
 
@@ -493,8 +493,8 @@ data MatExprLeaf
   | MatVar   Type Key
 
   | MatMacro Type [(Type, Key, Expr)] Expr -- MacTo (MatOf typ)
-  | MatAtPos Type Expr IntExpr -- ListOf (MatOf typ)
-  | MatAtIdx Type Expr  IntExpr IntExpr -- MatOf (MatOf typ)
+  | MatAtPos Type Expr Expr -- ListOf (MatOf typ), ZZ
+  | MatAtIdx Type Expr Expr Expr -- MatOf (MatOf typ), ZZ, ZZ
 
   | MatIfThenElse Type Expr MatExpr MatExpr -- BB
 
@@ -555,8 +555,8 @@ data PolyExprLeaf
   | PolyVar   Type Key
 
   | PolyMacro Type [(Type, Key, Expr)] Expr -- MacTo (PolyOver typ)
-  | PolyAtPos Type Expr IntExpr -- ListOf (PolyOver typ)
-  | PolyAtIdx Type Expr  IntExpr IntExpr -- MatOf (PolyOver typ)
+  | PolyAtPos Type Expr Expr -- ListOf (PolyOver typ), ZZ
+  | PolyAtIdx Type Expr Expr Expr -- MatOf (PolyOver typ), ZZ, ZZ
 
   | PolyRand Type ListExpr
 
@@ -585,8 +585,8 @@ data PermExprLeaf
   | PermVar   Type Key
 
   | PermMacro Type [(Type, Key, Expr)] Expr -- MacTo (PermOf typ)
-  | PermAtPos Type Expr IntExpr -- ListOf (PermOf typ)
-  | PermAtIdx Type Expr  IntExpr IntExpr -- MatOf (PermOf typ)
+  | PermAtPos Type Expr Expr -- ListOf (PermOf typ), ZZ
+  | PermAtIdx Type Expr Expr Expr -- MatOf (PermOf typ), ZZ, ZZ
 
   | PermRand Type ListExpr
 
@@ -609,8 +609,8 @@ data MacExprLeaf
   | MacVar   Type Key
 
   | MacMacro Type [(Type, Key, Expr)] Expr -- MacTo (MacTo typ)
-  | MacAtPos Type Expr IntExpr -- ListOf (MacTo typ)
-  | MacAtIdx Type Expr  IntExpr IntExpr -- MatOf (MacTo typ)
+  | MacAtPos Type Expr Expr -- ListOf (MacTo typ), ZZ
+  | MacAtIdx Type Expr Expr Expr -- MatOf (MacTo typ), ZZ, ZZ
 
   | MacRand Type ListExpr
 

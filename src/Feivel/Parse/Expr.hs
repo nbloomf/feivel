@@ -98,11 +98,11 @@ pVarExpr h t = do
   k <- pKey
   return (h k)
 
-pAtPos :: Type -> (Expr -> IntExpr -> b) -> ParseM b
-pAtPos typ fun = pFun2 "AtPos" (pTypedExpr (ListOf typ)) pIntExpr fun typ
+pAtPos :: Type -> (Expr -> Expr -> b) -> ParseM b
+pAtPos typ fun = pFun2 "AtPos" (pTypedExpr (ListOf typ)) (pTypedExpr ZZ) fun typ
 
-pAtIdx :: Type -> (Expr -> IntExpr -> IntExpr -> b) -> ParseM b
-pAtIdx typ fun = pFun3 "AtIdx" (pTypedExpr (MatOf typ)) pIntExpr pIntExpr fun typ
+pAtIdx :: Type -> (Expr -> Expr -> Expr -> b) -> ParseM b
+pAtIdx typ fun = pFun3 "AtIdx" (pTypedExpr (MatOf typ)) (pTypedExpr ZZ) (pTypedExpr ZZ) fun typ
 
 pIfThenElseExpr :: ParseM a -> (Expr -> a -> a -> b) -> t -> ParseM b
 pIfThenElseExpr p h t = do
@@ -610,7 +610,7 @@ pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
 pZZModConst :: Integer -> ParseM ZZModExpr
 pZZModConst n = pAtLocus (pZZModConst' n)
 
-pZZModConst' :: Integer -> ParseM ZZModExprLeaf
+pZZModConst' :: Integer -> ParseM (ZZModExprLeaf Expr)
 pZZModConst' n = do
   a <- pInteger
   return (ZZModConst (ZZMod n) (a `zzmod` n))
@@ -627,12 +627,12 @@ pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
     
       , pIfThenElseExpr (pZZModExpr n) (ZZModIfThenElse (ZZMod n)) (ZZMod n)
 
-      , pFun1 "int" pIntExpr (ZZModCast (ZZMod n)) (ZZMod n)
+      , pFun1 "int" (pTypedExpr ZZ) (ZZModCast (ZZMod n)) (ZZMod n)
 
-      , pFun2 "Pow" (pZZModExpr n) pIntExpr (ZZModPow (ZZMod n)) (ZZMod n)
+      , pFun2 "Pow" (pZZModExpr n) (pTypedExpr ZZ) (ZZModPow (ZZMod n)) (ZZMod n)
 
-      , pFun1 "Sum"    (pTypedListExpr (ZZMod n)) (ZZModSum (ZZMod n))   (ZZMod n)
-      , pFun1 "Prod"   (pTypedListExpr (ZZMod n)) (ZZModProd (ZZMod n))  (ZZMod n)
+      , pFun1 "Sum"    (pTypedExpr $ ListOf (ZZMod n)) (ZZModSum (ZZMod n))   (ZZMod n)
+      , pFun1 "Prod"   (pTypedExpr $ ListOf (ZZMod n)) (ZZModProd (ZZMod n))  (ZZMod n)
       ]
 
     zzModOpTable =
@@ -714,7 +714,7 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
 pRatConst :: ParseM RatExpr
 pRatConst = pAtLocus pRatConst'
 
-pRatConst' :: ParseM RatExprLeaf
+pRatConst' :: ParseM (RatExprLeaf Expr)
 pRatConst' = pConst pRat RatConst QQ
 
 pRatExpr :: ParseM RatExpr
@@ -729,21 +729,21 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
 
       , pIfThenElseExpr pRatExpr RatIfThenElse QQ
 
-      , pFun1 "Rand"   (pTypedListExpr QQ) RatRand  QQ
-      , pFun1 "Sum"    (pTypedListExpr QQ) RatSum   QQ
-      , pFun1 "Prod"   (pTypedListExpr QQ) RatProd  QQ
-      , pFun1 "Min"    (pTypedListExpr QQ) RatMinim QQ
-      , pFun1 "Max"    (pTypedListExpr QQ) RatMaxim QQ
+      , pFun1 "Rand"   (pTypedExpr (ListOf QQ)) RatRand  QQ
+      , pFun1 "Sum"    (pTypedExpr (ListOf QQ)) RatSum   QQ
+      , pFun1 "Prod"   (pTypedExpr (ListOf QQ)) RatProd  QQ
+      , pFun1 "Min"    (pTypedExpr (ListOf QQ)) RatMinim QQ
+      , pFun1 "Max"    (pTypedExpr (ListOf QQ)) RatMaxim QQ
 
-      , pFun1 "int" pIntExpr RatCast QQ
-      , pFun2 "Pow" pRatExpr pIntExpr RatPow QQ
+      , pFun1 "int" (pTypedExpr ZZ) RatCast QQ
+      , pFun2 "Pow" pRatExpr (pTypedExpr ZZ) RatPow QQ
       , pMean
-      , pFun2 "Sqrt" pRatExpr pIntExpr RatSqrt QQ
+      , pFun2 "Sqrt" pRatExpr (pTypedExpr ZZ) RatSqrt QQ
       , pMeanDev
       , pStdDev
       , pZScore
 
-      , pFun1 "str" pStrExpr RatCastStr QQ
+      , pFun1 "str" (pTypedExpr SS) RatCastStr QQ
       ]
       where
         pMean = do
@@ -751,7 +751,7 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
           keyword "("
           t <- pType
           keyword ";"
-          ks <- pTypedListExpr t
+          ks <- pTypedExpr (ListOf t)
           keyword ")"
           return (RatMean ks)
 
@@ -760,7 +760,7 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
           keyword "("
           t <- pType
           keyword ";"
-          ks <- pTypedListExpr t
+          ks <- pTypedExpr (ListOf t)
           keyword ")"
           return (RatMeanDev ks)
 
@@ -769,9 +769,9 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
           keyword "("
           t <- pType
           keyword ";"
-          ks <- pTypedListExpr t
+          ks <- pTypedExpr (ListOf t)
           keyword ";"
-          n <- pIntExpr
+          n <- pTypedExpr ZZ
           keyword ")"
           return (RatStdDev ks n)
 
@@ -782,9 +782,9 @@ pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
           keyword ";"
           p <- pRatExpr
           keyword ";"
-          ks <- pTypedListExpr t
+          ks <- pTypedExpr (ListOf t)
           keyword ";"
-          n <- pIntExpr
+          n <- pTypedExpr ZZ
           keyword ")"
           return (RatZScore p ks n)
     

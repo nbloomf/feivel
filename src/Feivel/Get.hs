@@ -138,7 +138,7 @@ instance Get Bool where
 {- :RatExpr -}
 {------------}
 
-instance Get RatExpr where
+instance Get (RatExpr) where
   get (RatE y) = return y
   get v = do
     let t = typeOf v
@@ -146,7 +146,7 @@ instance Get RatExpr where
 
 instance Get Rat where
   get expr = do
-    x <- get expr
+    x <- get expr :: EvalM RatExpr
     case x of
       RatConst r :@ _ -> return r
       v -> reportErr (locusOf v) UnevaluatedExpression

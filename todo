@@ -63,3 +63,5 @@ Feature Ideas
   2: Parameterize IntExpr et. al.; e.g. IntExprLeaf a = blah & IntExpr a = AtLocus (IntExprLeaf a)
   3: Move grammar types to own modules; e.g. Expr = IntE (IntExpr Expr)
   4: Move parsers to own modules
+  5: Split parameters on grammar types with class constraints, e.g. IntExprType t => blah
+       (recover type safety with modularity)
