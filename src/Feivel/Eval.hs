@@ -51,6 +51,11 @@ import Feivel.Parse (pInteger, pRat)
 import Feivel.Get
 import Feivel.Put
 
+import Feivel.Eval.Eval
+import Feivel.Eval.Util
+
+import Feivel.Eval.ZZMod
+
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
 
@@ -59,17 +64,7 @@ import Control.Monad (filterM)
 {- :Eval -}
 {---------}
 
-class Eval t where
-  eval :: t -> EvalM t
 
--- eval with a specified store
-evalWith :: (Eval t) => t -> Store Expr -> EvalM t
-evalWith t st = do
-  old <- getState
-  putState st
-  u <- eval t
-  putState old
-  return u
 
 {-
 -- eval each item of a list in sequence
@@ -127,31 +122,9 @@ instance Eval Expr where
 {- :Eval:Utilities -}
 {-------------------}
 
-eKey :: (Eval a, Get a) => Key -> Locus -> EvalM a
-eKey key loc = lookupKey loc key >>= getVal >>= eval
 
-eIfThenElse :: (ToExpr a, Get a, Eval a) => Expr -> a -> a -> EvalM a
-eIfThenElse b t f = do
-  test  <- eval b >>= getVal
-  true  <- eval t >>= getVal
-  false <- eval f >>= getVal
-  if test then (eval true) else (eval false)
 
-eMacro :: (Get b, Eval b) => [(Type, Key, Expr)] -> Expr -> Locus -> EvalM b
-eMacro vals mac loc = do
-  old <- getState
-  ctx <- toStateT loc vals
-  (defaultVals, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
-  let newSt = mergeStores [ctx, defaultVals, old]
-  evalWith e newSt >>= getVal >>= (`evalWith` newSt)
 
-eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
-  => c -> a -> b -> Locus -> EvalM d
-eAtIdx m h k loc = do
-  i <- eval h >>= getVal
-  j <- eval k >>= getVal
-  p <- eval m >>= getVal
-  tryEvalM loc $ mEntryOf (i,j) p
 
 evalToGlyph :: (ToExpr a) => a -> EvalM String
 evalToGlyph x = eval (toExpr x) >>= toGlyph
@@ -1403,36 +1376,6 @@ instance Eval (PermExpr Expr) where
 
 
 
-{-------------------}
-{- :Eval:ZZModExpr -}
-{-------------------}
-
-instance Eval (ZZModExpr Expr) where
-  eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc
-
-  {- :Common -}
-  eval (ZZModVar _ key :@ loc)        = eKey key loc
-  eval (ZZModAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (ZZModMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (ZZModIfThenElse _ b t f :@ _) = eIfThenElse b t f
-
-  eval (ZZModAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [ZZModExpr Expr] -> Integer -> Either ListErr (ZZModExpr Expr)
-
-  eval (ZZModCast (ZZMod n) a :@ loc) = do
-    res <- eval a >>= getVal :: EvalM Integer
-    return (ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
-
-  eval (ZZModNeg  _ a   :@ loc) = lift1 loc a   (rNegT (0 `zzmod` 0))
-  eval (ZZModInv  _ a   :@ loc) = lift1 loc a   (rInvT (0 `zzmod` 0))
-  eval (ZZModAdd  _ a b :@ loc) = lift2 loc a b (rAddT (0 `zzmod` 0))
-  eval (ZZModSub  _ a b :@ loc) = lift2 loc a b (rSubT (0 `zzmod` 0))
-  eval (ZZModMult _ a b :@ loc) = lift2 loc a b (rMulT (0 `zzmod` 0))
-  eval (ZZModPow  _ a b :@ loc) = lift2 loc a b (rPowT (0 `zzmod` 0))
-
-  eval (ZZModSum   _ ls :@ loc) = lift1 loc ls (rSumT   (0 `zzmod` 0))
-  eval (ZZModProd  _ ls :@ loc) = lift1 loc ls (rUProdT (0 `zzmod` 0))
-
 
 
 {----------}
@@ -1528,66 +1471,6 @@ instance Glyph (Doc Expr) where
   toGlyph (DocText (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
 
-
-
-{---------}
-{- :Lift -}
-{---------}
-
-lift1
-  :: ( Eval x, ToExpr x, Get a
-     , Put b, Get y
-     , PromoteError err
-  ) => Locus -> x -> (a -> Either err b) -> EvalM y
-lift1 loc x f = do
-  a <- eval x >>= getVal
-  b <- tryEvalM loc $ f a
-  getVal (put loc b)
-
-
-lift2
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
-     , Put c, Get z
-     , PromoteError err
-  ) => Locus -> x -> y -> (a -> b -> Either err c) -> EvalM z
-lift2 loc x y f = do
-  a <- eval x >>= getVal
-  b <- eval y >>= getVal
-  c <- tryEvalM loc $ f a b
-  getVal (put loc c)
-
-
-lift3
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
-     , Eval z, ToExpr z, Get c
-     , Put d, Get w
-     , PromoteError err
-  ) => Locus -> x -> y -> z -> (a -> b -> c -> Either err d) -> EvalM w
-lift3 loc x y z f = do
-  a <- eval x >>= getVal
-  b <- eval y >>= getVal
-  c <- eval z >>= getVal
-  d <- tryEvalM loc $ f a b c
-  getVal (put loc d)
-
-
-lift4
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
-     , Eval z, ToExpr z, Get c
-     , Eval w, ToExpr w, Get d
-     , Put e, Get u
-     , PromoteError err
-  ) => Locus -> x -> y -> z -> w -> (a -> b -> c -> d -> Either err e) -> EvalM u
-lift4 loc x y z w f = do
-  a <- eval x >>= getVal
-  b <- eval y >>= getVal
-  c <- eval z >>= getVal
-  d <- eval w >>= getVal
-  e <- tryEvalM loc $ f a b c d
-  getVal (put loc e)
 
 
 
