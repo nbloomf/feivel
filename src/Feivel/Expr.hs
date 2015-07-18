@@ -50,6 +50,8 @@ import Feivel.Store
 
 import Feivel.Expr.ZZMod
 import Feivel.Expr.Perm
+import Feivel.Expr.Mac
+import Feivel.Expr.Poly
 
 {------------------}
 {- Contents       -}
@@ -59,12 +61,8 @@ import Feivel.Expr.Perm
 {-     :IntExpr   -}
 {-     :BoolExpr  -}
 {-     :RatExpr   -}
-{-     :ZZModExpr -}
 {-     :ListExpr  -}
 {-     :MatExpr   -}
-{-     :PolyExpr  -}
-{-     :PermExpr  -}
-{-     :MacExpr   -}
 {-  :ExprErr      -}
 {------------------}
 
@@ -128,9 +126,9 @@ data Expr
  
   | ListE  ListExpr
   | MatE   MatExpr
-  | PolyE  PolyExpr
+  | PolyE  (PolyExpr Expr)
   | PermE  (PermExpr Expr)
-  | MacE   MacExpr
+  | MacE   (MacExpr  Expr)
   deriving (Eq, Show)
 
 instance HasLocus Expr where
@@ -161,9 +159,9 @@ instance ToExpr RatExpr   where toExpr = RatE
 instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr ListExpr  where toExpr = ListE
 instance ToExpr MatExpr   where toExpr = MatE
-instance ToExpr PolyExpr  where toExpr = PolyE
-instance ToExpr (PermExpr Expr)  where toExpr = PermE
-instance ToExpr MacExpr   where toExpr = MacE
+instance ToExpr (PolyExpr Expr) where toExpr = PolyE
+instance ToExpr (PermExpr Expr) where toExpr = PermE
+instance ToExpr (MacExpr  Expr) where toExpr = MacE
 
 -- Not a fan of "no locus" here
 instance ToExpr Integer  where toExpr k = IntE   $ IntConst k :@ NullLocus
@@ -515,57 +513,6 @@ data MatExprLeaf
   | MatGJFactor Type MatExpr
 
   | MatRand Type ListExpr
-  deriving (Eq, Show)
-
-
-
-{-------------}
-{- :PolyExpr -}
-{-------------}
-
-type PolyExpr = AtLocus PolyExprLeaf
-
-data PolyExprLeaf
-  = PolyConst Type (Poly Expr)
-  | PolyVar   Type Key
-
-  | PolyMacro Type [(Type, Key, Expr)] Expr -- MacTo (PolyOver typ)
-  | PolyAtPos Type Expr Expr -- ListOf (PolyOver typ), ZZ
-  | PolyAtIdx Type Expr Expr Expr -- MatOf (PolyOver typ), ZZ, ZZ
-
-  | PolyRand Type ListExpr
-
-  | PolyIfThenElse Type Expr PolyExpr PolyExpr -- BB
-
-  | PolyAdd Type PolyExpr PolyExpr
-  | PolySub Type PolyExpr PolyExpr
-  | PolyMul Type PolyExpr PolyExpr
-  | PolyPow Type PolyExpr IntExpr
-  | PolyNeg Type PolyExpr
-
-  | PolyFromRoots Type Variable ListExpr
-  | PolyEvalPoly  Type PolyExpr [(Variable, PolyExpr)]
-  deriving (Eq, Show)
-
-
-
-{------------}
-{- :MacExpr -}
-{------------}
-
-type MacExpr = AtLocus MacExprLeaf
-
-data MacExprLeaf
-  = MacConst Type [(Type, Key, Expr)] Expr (Store Expr, Bool)
-  | MacVar   Type Key
-
-  | MacMacro Type [(Type, Key, Expr)] Expr -- MacTo (MacTo typ)
-  | MacAtPos Type Expr Expr -- ListOf (MacTo typ), ZZ
-  | MacAtIdx Type Expr Expr Expr -- MatOf (MacTo typ), ZZ, ZZ
-
-  | MacRand Type ListExpr
-
-  | MacIfThenElse Type Expr MacExpr MacExpr -- BB
   deriving (Eq, Show)
 
 

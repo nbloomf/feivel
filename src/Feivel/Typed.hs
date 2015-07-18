@@ -164,7 +164,7 @@ instance Typed ListExpr where
 {- :MacExpr -}
 {------------}
 
-instance Typed MacExpr where
+instance Typed (MacExpr Expr) where
   typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
   typeOf (MacVar        typ _     :@ _) = MacTo typ
   typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
@@ -222,7 +222,7 @@ instance Typed MatExpr where
 {- :PolyExpr -}
 {-------------}
 
-instance Typed PolyExpr where
+instance Typed (PolyExpr Expr) where
   typeOf (PolyVar        typ _     :@ _) = PolyOver typ
   typeOf (PolyMacro      typ _ _   :@ _) = PolyOver typ
   typeOf (PolyConst      typ _     :@ _) = PolyOver typ

@@ -766,7 +766,7 @@ instance Eval ListExpr where
 {- :Eval:MacExpr -}
 {-----------------}
 
-instance Eval MacExpr where
+instance Eval (MacExpr Expr) where
   eval (MacConst typ vals expr (amb,p) :@ loc) = do
     if p == True
       then return $ MacConst typ vals expr (amb,True) :@ loc
@@ -781,7 +781,7 @@ instance Eval MacExpr where
   eval (MacMacro _ vals mac :@ loc) = eMacro vals mac loc
 
   eval (MacAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
+    where foo = listAtPos :: [MacExpr Expr] -> Integer -> Either ListErr (MacExpr Expr)
 
   eval (MacRand _ ls :@ _) = do
     xs <- eval ls >>= getVal
@@ -1216,7 +1216,7 @@ instance Eval Doc where
 {- :Eval:PolyExpr -}
 {------------------}
 
-instance Eval PolyExpr where
+instance Eval (PolyExpr Expr) where
   eval (PolyConst t p :@ loc) = do
     q <- polySeq $ fmap eval p
     return $ PolyConst t q :@ loc
@@ -1228,13 +1228,13 @@ instance Eval PolyExpr where
   eval (PolyIfThenElse _ b t f :@ _) = eIfThenElse b t f
 
   eval (PolyAtPos _ a t :@ loc) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
+    where foo = listAtPos :: [PolyExpr Expr] -> Integer -> Either ListErr (PolyExpr Expr)
 
   eval (PolyRand _ ls :@ loc) = do
     let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM PolyExpr
+    s  <- eval r >>= getVal :: EvalM (PolyExpr Expr)
     case t of
       ListOf (PolyOver _) -> return s
       _ -> reportErr loc $ ListExpected t
@@ -1500,7 +1500,7 @@ instance Glyph MatExpr where
   toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
 
 
-instance Glyph PolyExpr where
+instance Glyph (PolyExpr Expr) where
   toGlyph (PolyConst _ px :@ _) = do
     qx <- polySeq $ mapCoef toGlyph px
     return $ showStrP qx
@@ -1514,7 +1514,7 @@ instance Glyph (PermExpr Expr) where
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-instance Glyph MacExpr where
+instance Glyph (MacExpr Expr) where
   toGlyph(MacConst _ st ex (amb,_) :@ loc) = do
     old <- getState
     ctx <- toStateT loc st

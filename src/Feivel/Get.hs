@@ -181,7 +181,7 @@ instance (Get a) => Get [a] where
 {- :MacExpr -}
 {------------}
 
-instance Get MacExpr where
+instance Get (MacExpr Expr) where
   get (MacE y) = return y
   get v = do
     let t = typeOf v
@@ -239,7 +239,7 @@ instance Get Doc where
 {- :PolyExpr -}
 {-------------}
 
-instance Get PolyExpr where
+instance Get (PolyExpr Expr) where
   get (PolyE m) = return m
   get v = do
     let t = typeOf v

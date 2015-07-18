@@ -1096,13 +1096,13 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
 {- :PolyExpr -}
 {-------------}
 
-pPolyLiteral :: Type -> ParseM PolyExpr
+pPolyLiteral :: Type -> ParseM (PolyExpr Expr)
 pPolyLiteral typ = pAtLocus $ pPolyLiteralOf typ pTypedExpr
 
-pPolyConst :: Type -> ParseM PolyExpr
+pPolyConst :: Type -> ParseM (PolyExpr Expr)
 pPolyConst typ = pAtLocus $ pPolyLiteralOf typ pTypedConst
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PolyExprLeaf
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr)
 pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("
@@ -1130,10 +1130,10 @@ pPolyLiteralOf typ p = do
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyExpr :: ParseM PolyExpr
+pPolyExpr :: ParseM (PolyExpr Expr)
 pPolyExpr = pTypedPolyExpr XX
 
-pTypedPolyExpr :: Type -> ParseM PolyExpr
+pTypedPolyExpr :: Type -> ParseM (PolyExpr Expr)
 pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pTypedExpr) (pTypedPolyExpr typ) "polynomial expression"
@@ -1146,13 +1146,13 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
 
       , pIfThenElseExpr (pTypedPolyExpr typ) (PolyIfThenElse typ) (PolyOver typ)
 
-      , pFun1 "Rand" (pTypedListExpr (PolyOver typ)) (PolyRand typ) (PolyOver typ)
+      , pFun1 "Rand" (pTypedExpr $ ListOf (PolyOver typ)) (PolyRand typ) (PolyOver typ)
 
       , pPolyPow
 
       , pPolyNull
 
-      , pFun2 "FromRoots" (pLiftAt pVar XX) (pTypedListExpr typ) (PolyFromRoots typ) (PolyOver typ)
+      , pFun2 "FromRoots" (pLiftAt pVar XX) (pTypedExpr $ ListOf typ) (PolyFromRoots typ) (PolyOver typ)
 
       , pPolyEvalPoly
       ]
@@ -1172,7 +1172,7 @@ pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
                 q <- pTypedPolyExpr typ
                 return (x,q)
 
-        pPolyPow = pFun2T "Pow" (pTypedPolyExpr typ) pIntExpr (PolyPow typ)
+        pPolyPow = pFun2T "Pow" (pTypedPolyExpr typ) (pTypedExpr ZZ) (PolyPow typ)
 
         pPolyNull = do
           try $ keyword "Null"
@@ -1244,10 +1244,10 @@ pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
 {- :MacExpr -}
 {------------}
 
-pMacConst :: Type -> ParseM MacExpr
+pMacConst :: Type -> ParseM (MacExpr Expr)
 pMacConst typ = pAtLocus $ pMacConst' typ
 
-pMacConst' :: Type -> ParseM MacExprLeaf
+pMacConst' :: Type -> ParseM (MacExprLeaf Expr)
 pMacConst' typ = do
   start <- getPosition
   try $ keyword "Macro"
@@ -1263,11 +1263,11 @@ pMacConst' typ = do
     Right u -> return (MacConst u vals body (emptyStore, False))
 
 
-pMacExpr :: ParseM MacExpr
+pMacExpr :: ParseM (MacExpr Expr)
 pMacExpr = pTypedMacExpr XX
 
 
-pTypedMacExpr :: Type -> ParseM MacExpr
+pTypedMacExpr :: Type -> ParseM (MacExpr Expr)
 pTypedMacExpr typ = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm (pMacConst' typ) pMacExpr "macro expression"
@@ -1278,7 +1278,7 @@ pTypedMacExpr typ = spaced $ buildExpressionParser macOpTable pMacTerm
 
       , pMacroExpr (MacMacro typ)
 
-      , pFun1 "Rand" (pTypedListExpr (MacTo typ)) (MacRand typ) (MacTo typ)
+      , pFun1 "Rand" (pTypedExpr $ ListOf (MacTo typ)) (MacRand typ) (MacTo typ)
 
       , pIfThenElseExpr (pTypedMacExpr typ) (MacIfThenElse typ) (MacTo typ)
       ]

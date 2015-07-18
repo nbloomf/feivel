@@ -52,13 +52,13 @@ instance Put (PermExpr Expr) where
 instance Put ListExpr where
   put loc (x :@ _) = ListE (x :@ loc)
 
-instance Put PolyExpr where
+instance Put (PolyExpr Expr) where
   put loc (x :@ _) = PolyE (x :@ loc)
 
 instance Put MatExpr where
   put loc (x :@ _) = MatE (x :@ loc)
 
-instance Put MacExpr where
+instance Put (MacExpr Expr) where
   put loc (x :@ _) = MacE (x :@ loc)
 
 instance Put RatExpr where
