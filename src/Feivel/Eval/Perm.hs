@@ -53,7 +53,7 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
 
   eval (PermCompose t p q :@ loc) = do
     case t of
-      PermOf ZZ -> do
+      ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
         b <- eval q >>= getVal :: EvalM (Perm Integer)
         let c = compose a b
@@ -61,10 +61,9 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
         return (PermConst ZZ s :@ loc)
       _ -> reportErr loc $ PolynomialExpected t
 
-  eval (PermInvert _ p :@ loc) = do
-    let t = typeOf p
+  eval (PermInvert t p :@ loc) = do
     case t of
-      PermOf ZZ -> do
+      ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
         let c = inverse a
         let s = mapPerm (put loc) c
