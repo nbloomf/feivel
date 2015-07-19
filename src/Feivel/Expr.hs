@@ -20,6 +20,8 @@
 
 module Feivel.Expr (
   module Feivel.Expr.Expr,
+  module Feivel.Expr.Put,
+  module Feivel.Expr.Get,
 
   -- Errors
   ExprErr(..)
@@ -27,6 +29,8 @@ module Feivel.Expr (
 
 
 import Feivel.Expr.Expr
+import Feivel.Expr.Put
+import Feivel.Expr.Get
 
 
 data ExprErr

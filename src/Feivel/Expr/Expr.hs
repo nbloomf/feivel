@@ -115,3 +115,6 @@ instance Typed Expr where
   typeOf (PolyE  x) = typeOf x
   typeOf (PermE  x) = typeOf x
   typeOf (ZZModE x) = typeOf x
+
+instance HasLocus Text where
+  locusOf _ = NullLocus

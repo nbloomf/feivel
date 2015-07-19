@@ -23,8 +23,6 @@ module Feivel.Eval.Eval where
 
 import Feivel.EvalM
 import Feivel.Expr
-import Feivel.Get
-import Feivel.Put
 import Feivel.Locus
 import Feivel.Error
 import Feivel.Lib
@@ -44,7 +42,7 @@ class Glyph t where
 
 
 lift1
-  :: ( Eval x, ToExpr x, Get a
+  :: ( Eval x, ToExpr x, Get a, HasLocus x
      , Put b, Get y
      , PromoteError err
   ) => Locus -> x -> (a -> Either err b) -> EvalM y
@@ -55,8 +53,8 @@ lift1 loc x f = do
 
 
 lift2
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
+  :: ( Eval x, ToExpr x, Get a, HasLocus x
+     , Eval y, ToExpr y, Get b, HasLocus y
      , Put c, Get z
      , PromoteError err
   ) => Locus -> x -> y -> (a -> b -> Either err c) -> EvalM z
@@ -68,9 +66,9 @@ lift2 loc x y f = do
 
 
 lift3
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
-     , Eval z, ToExpr z, Get c
+  :: ( Eval x, ToExpr x, Get a, HasLocus x
+     , Eval y, ToExpr y, Get b, HasLocus y
+     , Eval z, ToExpr z, Get c, HasLocus z
      , Put d, Get w
      , PromoteError err
   ) => Locus -> x -> y -> z -> (a -> b -> c -> Either err d) -> EvalM w
@@ -83,10 +81,10 @@ lift3 loc x y z f = do
 
 
 lift4
-  :: ( Eval x, ToExpr x, Get a
-     , Eval y, ToExpr y, Get b
-     , Eval z, ToExpr z, Get c
-     , Eval w, ToExpr w, Get d
+  :: ( Eval x, ToExpr x, Get a, HasLocus x
+     , Eval y, ToExpr y, Get b, HasLocus y
+     , Eval z, ToExpr z, Get c, HasLocus z
+     , Eval w, ToExpr w, Get d, HasLocus w
      , Put e, Get u
      , PromoteError err
   ) => Locus -> x -> y -> z -> w -> (a -> b -> c -> d -> Either err e) -> EvalM u

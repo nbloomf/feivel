@@ -20,7 +20,7 @@
 {-# OPTIONS_GHC -XFlexibleInstances    #-}
 
 module Feivel.EvalM (
-  EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM,
+  EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM, getVal,
 
   -- IO and Parsing
   readAndParseDocFromLib, parseAsAt,
@@ -46,16 +46,16 @@ module Feivel.EvalM (
 {-------------}
 
 import Feivel.Error
-import Feivel.Expr (Doc, Expr())
+import Feivel.Expr (Doc, Expr(), get, Get, ToExpr, toExpr)
 import Feivel.Key (Key)
-import Feivel.Locus (Locus(NullLocus))
+import Feivel.Locus (Locus(NullLocus), locusOf, HasLocus)
 import Feivel.Store
 import Feivel.Parse (pDoc, pRecords)
 import Feivel.Format
 import Feivel.Parse.ParseM
 
 import Control.Monad.Trans.Error
-import Control.Monad.Trans.State.Lazy hiding (state)
+import qualified Control.Monad.Trans.State.Lazy as MTS
 import Control.Monad.State.Lazy (lift)
 
 import Data.RVar (sampleRVarT)
@@ -71,16 +71,17 @@ import System.Exit (exitWith, ExitCode(ExitFailure))
 import System.IO
 import System.Directory (getHomeDirectory)
 
-
+getVal :: (ToExpr a, Get b, HasLocus a) => a -> EvalM b
+getVal x = tryEvalM (locusOf x) $ get (toExpr x)
 
 {----------}
 {- :EvalM -}
 {----------}
 
-type EvalM = ErrorT Goof (StateT (Store Expr) (RVarT IO))
+type EvalM = ErrorT Goof (MTS.StateT (Store Expr) (RVarT IO))
 
 runEvalM :: (Store Expr) -> EvalM t -> IO (Either Goof t, Store Expr)
-runEvalM state = sampleRVarT . ($ state) . runStateT . runErrorT
+runEvalM state = sampleRVarT . ($ state) . MTS.runStateT . runErrorT
 
 
 -- Run an EvalM t and report any errors; if none, inject the result to IO.
@@ -231,10 +232,10 @@ observeIntegerPoisson loc lambda = do
 {- Primitives -}
 
 getState :: EvalM (Store Expr)
-getState = lift get
+getState = lift MTS.get
 
 putState :: (Store Expr) -> EvalM ()
-putState st = lift $ put st
+putState st = lift $ MTS.put st
 
 clearState :: EvalM ()
 clearState = putState emptyStore

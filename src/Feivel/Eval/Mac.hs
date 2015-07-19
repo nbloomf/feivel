@@ -28,7 +28,7 @@ import Feivel.Eval.Util
 instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
   toGlyph(MacConst _ st ex (amb,_) :@ loc) = do
     old <- getState
-    ctx <- toStateT loc st
+    ctx <- tryEvalM loc $ toStateT st
     f   <- evalWith ex (mergeStores [ctx, old, amb])
     eval f >>= toGlyph
   toGlyph _ = error "toGlyph: MacExpr"

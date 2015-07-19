@@ -19,13 +19,12 @@
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 
-module Feivel.Put (
+module Feivel.Expr.Put (
   Put, put
 ) where
 
-import Feivel.Expr
-import Feivel.Locus
-import Feivel.Type
+import Feivel.Expr.Expr
+import Feivel.Expr.Util
 import Feivel.Lib
 
 

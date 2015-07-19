@@ -21,8 +21,6 @@
 module Feivel.Eval.Util (
   module Feivel.EvalM,
   module Feivel.Eval.Eval,
-  module Feivel.Get,
-  module Feivel.Put,
   module Feivel.Locus,
   module Feivel.Key,
   module Feivel.Type,
@@ -43,8 +41,6 @@ module Feivel.Eval.Util (
 
 import Feivel.EvalM
 import Feivel.Eval.Eval
-import Feivel.Get
-import Feivel.Put
 import Feivel.Locus
 import Feivel.Key
 import Feivel.Store
@@ -74,7 +70,7 @@ eKey :: (Eval a, Get a) => Key -> Locus -> EvalM a
 eKey key loc = lookupKey loc key >>= getVal >>= eval
 
 
-eIfThenElse :: (ToExpr a, Get a, Eval a, Eval b, ToExpr b) => b -> a -> a -> EvalM a
+eIfThenElse :: (ToExpr a, Get a, Eval a, Eval b, ToExpr b, HasLocus a, HasLocus b) => b -> a -> a -> EvalM a
 eIfThenElse b t f = do
   test  <- eval b >>= getVal
   true  <- eval t >>= getVal
@@ -82,7 +78,7 @@ eIfThenElse b t f = do
   if test then (eval true) else (eval false)
 
 
-eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
+eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c, HasLocus a, HasLocus b, HasLocus c)
   => c -> a -> b -> Locus -> EvalM d
 eAtIdx m h k loc = do
   i <- eval h >>= getVal
@@ -94,7 +90,7 @@ eAtIdx m h k loc = do
 eMacro :: (Get b, Eval b, Eval Expr) => [(Type, Key, Expr)] -> Expr -> Locus -> EvalM b
 eMacro vals mac loc = do
   old <- getState
-  ctx <- toStateT loc vals
+  ctx <- tryEvalM loc $ toStateT vals
   (defaultVals, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
   let newSt = mergeStores [ctx, defaultVals, old]
   evalWith e newSt >>= getVal >>= (`evalWith` newSt)

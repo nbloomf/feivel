@@ -21,11 +21,11 @@ module Feivel.Expr.Util (
   module Feivel.Key,
   module Feivel.Locus,
   module Feivel.Store,
-  Text, Perm, Rat, ZZModulo, Poly, Variable, Matrix, Format
+  Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format
 ) where
 
 import Feivel.Type
 import Feivel.Key
 import Feivel.Locus
 import Feivel.Store
-import Feivel.Lib (Text, Perm, Rat, ZZModulo, Poly, Variable, Matrix, Format)
+import Feivel.Lib (Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format)

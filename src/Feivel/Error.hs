@@ -30,7 +30,7 @@ import Feivel.Lib.String (StrErr())
 import Feivel.Lib.List (ListErr())
 import Feivel.Lib.Bool (BoolErr())
 import Feivel.Type (TypeErr())
-import Feivel.Expr (ExprErr())
+import Feivel.Expr (ExprErr(), GetErr())
 
 import Text.Parsec.Error (ParseError(), errorPos)
 import Control.Monad.Trans.Error
@@ -58,6 +58,7 @@ data Err
   | ErrRand  RandErr
   | ErrREPL  REPLErr
   | ErrAlg   AlgErr
+  | ErrGet   GetErr
 
 instance Show Err where
   show Success      = "Success!"
@@ -78,6 +79,7 @@ instance Show Err where
   show (ErrExpr  x) = show x
   show (ErrType  x) = show x
   show (ErrRand  x) = show x
+  show (ErrGet   x) = show x
 
 
 
@@ -95,6 +97,7 @@ instance PromoteError ParseError where promote = ErrParse
 instance PromoteError TypeErr    where promote = ErrType
 instance PromoteError RandErr    where promote = ErrRand
 instance PromoteError REPLErr    where promote = ErrREPL
+instance PromoteError GetErr     where promote = ErrGet
 
 
 
