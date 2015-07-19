@@ -21,7 +21,8 @@ module Feivel.Parse.Util (
 
   pTuple2, pTuple4,
 
-  pFun1, pFun2, pFun3, pFun4, pFun1T, pFun2T, pFun3T, pFun4T
+  pFun1,  pFun2, pFun3, pFun4,
+  pFun1T, pFun2T
 ) where
 
 import Feivel.Type
@@ -88,99 +89,57 @@ pTuple4 pA pB pC pD = do
   keyword ")"
   return (a,b,c,d)
 
-pTuple2C :: (Type -> ParseM (a, Type)) -> ParseM (a, Type)
-pTuple2C pA = do
-  try $ keyword "("
-  t <- pType
-  keyword ";"
-  (a,u) <- pA t
-  keyword ")"
-  return (a,u)
 
-pTuple2T :: ParseM a -> ParseM b -> ParseM (a,b)
-pTuple2T pA pB = do
-  try $ keyword "("
-  a <- pA
-  keyword ";"
-  b <- pB
-  keyword ")"
-  return (a,b)
+{--------------}
+{- :Functions -}
+{--------------}
 
-pTuple3T :: ParseM a -> ParseM b -> ParseM c -> ParseM (a,b,c)
-pTuple3T pA pB pC = do
-  try $ keyword "("
-  a <- pA
-  keyword ";"
-  b <- pB
-  keyword ";"
-  c <- pC
-  keyword ")"
-  return (a,b,c)
-
-pTuple4T :: ParseM a -> ParseM b -> ParseM c -> ParseM d -> ParseM (a,b,c,d)
-pTuple4T pA pB pC pD = do
-  try $ keyword "("
-  a <- pA
-  keyword ";"
-  b <- pB
-  keyword ";"
-  c <- pC
-  keyword ";"
-  d <- pD
-  keyword ")"
-  return (a,b,c,d)
-
-
-{- Functions -}
-
-pFun1 :: String -> ParseM a -> (a -> b) -> t -> ParseM b
-pFun1 fun pA f t = do
+pFun1 :: String -> ParseM a -> (a -> b) -> ParseM b
+pFun1 fun pA f = do
   try $ keyword fun
   keyword "("
   a <- pA
   keyword ")"
   return (f a)
 
-pFun2 :: String -> ParseM a -> ParseM b -> (a -> b -> c) -> t -> ParseM c
-pFun2 fun pA pB f t = do
+pFun2 :: String -> ParseM a -> ParseM b -> (a -> b -> c) -> ParseM c
+pFun2 fun pA pB f = do
   try $ keyword fun
   (a,b) <- pTuple2 pA pB
   return (f a b)
 
-pFun3 :: String -> ParseM a -> ParseM b -> ParseM c -> (a -> b -> c -> d) -> t -> ParseM d
-pFun3 fun pA pB pC f t = do
+pFun3 :: String -> ParseM a -> ParseM b -> ParseM c -> (a -> b -> c -> d) -> ParseM d
+pFun3 fun pA pB pC f = do
   try $ keyword fun
   (a,b,c) <- pTuple3 pA pB pC
   return (f a b c)
 
-pFun4 :: String -> ParseM a -> ParseM b -> ParseM c -> ParseM d -> (a -> b -> c -> d -> e) -> t -> ParseM e
-pFun4 fun pA pB pC pD f t = do
+pFun4 :: String -> ParseM a -> ParseM b -> ParseM c -> ParseM d -> (a -> b -> c -> d -> e) -> ParseM e
+pFun4 fun pA pB pC pD f = do
   try $ keyword fun
   (a,b,c,d) <- pTuple4 pA pB pC pD
   return (f a b c d)
 
-pFun1T :: String -> ParseM a -> (a -> b) -> ParseM b
+{- :TypedFunctions -}
+
+pFun1T :: String -> (Type -> ParseM a) -> (a -> b) -> ParseM b
 pFun1T fun pA f = do
   try $ keyword fun
   keyword "("
-  a <- pA
+  t <- pType
+  keyword ";"
+  a <- pA t
   keyword ")"
   return (f a)
 
-pFun2T :: String -> ParseM a -> ParseM b -> (a -> b -> c) -> ParseM c
+pFun2T :: String -> (Type -> ParseM a) -> (Type -> ParseM b) -> (a -> b -> c) -> ParseM c
 pFun2T fun pA pB f = do
   try $ keyword fun
-  (a,b) <- pTuple2T pA pB
+  keyword "("
+  t <- pType
+  keyword ";"
+  a <- pA t
+  keyword ";"
+  b <- pB t
+  keyword ")"
   return (f a b)
-
-pFun3T :: String -> ParseM a -> ParseM b -> ParseM c -> (a -> b -> c -> d) -> ParseM d
-pFun3T fun pA pB pC f = do
-  try $ keyword fun
-  (a,b,c) <- pTuple3T pA pB pC
-  return (f a b c)
-
-pFun4T :: String -> ParseM a -> ParseM b -> ParseM c -> ParseM d -> (a -> b -> c -> d -> e) -> ParseM e
-pFun4T fun pA pB pC pD f = do
-  try $ keyword fun
-  (a,b,c,d) <- pTuple4T pA pB pC pD
-  return (f a b c d)

@@ -48,7 +48,7 @@ Feature Ideas
   5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
   6: Rename Typed class to HasType
   7: Take Get out of EvalM; separate get and getVal
-  8: Clean up parsers (Fun and FunT are now the same?)
+  8: (started) Clean up parsers (Fun and FunT are now the same?)
   9: data Typed t = t :# Type (maybe. how to handle function types)
 * Refactor: Eval has lots of repetitive code
   2: Separate put and putVal
