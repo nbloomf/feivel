@@ -59,13 +59,10 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
     ys <- eval b >>= getVal :: EvalM [Expr]
     return (ListConst u (xs ++ ys) :@ loc)
 
-  eval (ListToss t a b :@ loc) = do
-    case t of
-      ListOf u -> do
-        xs <- eval a >>= getVal :: EvalM [Expr]
-        ys <- eval b >>= getVal :: EvalM [Expr]
-        return $ ListConst u (xs \\ ys) :@ loc
-      _ -> reportErr loc $ ListExpected t
+  eval (ListToss u a b :@ loc) = do
+    xs <- eval a >>= getVal :: EvalM [Expr]
+    ys <- eval b >>= getVal :: EvalM [Expr]
+    return $ ListConst u (xs \\ ys) :@ loc
 
   eval (ListRev u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
