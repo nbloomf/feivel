@@ -20,9 +20,6 @@ module Feivel.Expr.Perm where
 
 import Feivel.Expr.Util
 
-{-------------}
-{- :PermExpr -}
-{-------------}
 
 type PermExpr a = AtLocus (PermExprLeaf a)
 

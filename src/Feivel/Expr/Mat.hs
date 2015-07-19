@@ -20,9 +20,6 @@ module Feivel.Expr.Mat where
 
 import Feivel.Expr.Util
 
-{------------}
-{- :MatExpr -}
-{------------}
 
 type MatExpr a = AtLocus (MatExprLeaf a)
 

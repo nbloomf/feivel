@@ -20,9 +20,6 @@ module Feivel.Expr.Bool where
 
 import Feivel.Expr.Util
 
-{-------------}
-{- :BoolExpr -}
-{-------------}
 
 type BoolExpr a = AtLocus (BoolExprLeaf a)
 

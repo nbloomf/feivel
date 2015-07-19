@@ -20,29 +20,17 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 
-module Feivel.Eval.Poly where
+module Feivel.Eval.Poly () where
 
-import Feivel.EvalM
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Locus
-import Feivel.Lib
-import Feivel.Get
-import Feivel.Put
-import Feivel.Typed
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Error
 
-{------------------}
-{- :Eval:PolyExpr -}
-{------------------}
 
 instance (Glyph Expr) => Glyph (PolyExpr Expr) where
   toGlyph (PolyConst _ px :@ _) = do
     qx <- polySeq $ mapCoef toGlyph px
     return $ showStrP qx
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (PolyExpr Expr) where
   eval (PolyConst t p :@ loc) = do

@@ -22,27 +22,13 @@
 
 module Feivel.Eval.Str where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
-import Feivel.LaTeX
-import Feivel.Parse (pInteger)
 
-{-----------------}
-{- :Eval:StrExpr -}
-{-----------------}
 
 instance (Glyph Expr) => Glyph (StrExpr Expr) where
   toGlyph (StrConst (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
+
 
 instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
   eval (StrConst s :@ loc) = return (StrConst s :@ loc)

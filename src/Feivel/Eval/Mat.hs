@@ -20,24 +20,10 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.Mat where
+module Feivel.Eval.Mat () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Put
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
 
-{-----------------}
-{- :Eval:MatExpr -}
-{-----------------}
 
 instance (Glyph Expr) => Glyph (MatExpr Expr) where
   toGlyph (MatConst _ m :@ _) = do
@@ -46,6 +32,7 @@ instance (Glyph Expr) => Glyph (MatExpr Expr) where
       Left err -> reportErr (error "Glyph instance of MatExpr") err
       Right x  -> return x
   toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (MatExpr Expr) where
   eval (MatConst t m :@ loc) = do

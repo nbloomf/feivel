@@ -20,26 +20,15 @@
 {-# LANGUAGE FlexibleInstances    #-}
 {-# LANGUAGE FlexibleContexts     #-}
 
-module Feivel.Eval.ZZMod where
+module Feivel.Eval.ZZMod () where
 
-import Feivel.Expr
-import Feivel.Locus
-import Feivel.Error
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Get
-import Feivel.Put
-import Feivel.Lib
-import Feivel.EvalM
-import Feivel.Type
 
-{-------------------}
-{- :Eval:ZZModExpr -}
-{-------------------}
 
 instance (Glyph Expr) => Glyph (ZZModExpr Expr) where
   toGlyph (ZZModConst _ a :@ _) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (ZZModExpr Expr) where
   eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc

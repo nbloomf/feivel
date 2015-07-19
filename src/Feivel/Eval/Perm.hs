@@ -20,29 +20,17 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Feivel.Eval.Perm where
+module Feivel.Eval.Perm () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
 
-{------------------}
-{- :Eval:PermExpr -}
-{------------------}
 
 instance (Glyph Expr) => Glyph (PermExpr Expr) where
   toGlyph (PermConst _ px :@ _) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (PermExpr Expr) where
   eval (PermConst t p :@ loc) = do

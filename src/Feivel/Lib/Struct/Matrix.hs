@@ -71,10 +71,11 @@ module Feivel.Lib.Struct.Matrix (
 
 import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.Monad
+import Feivel.Lib.Write.LaTeX
 
 import GHC.Arr
 import Control.Monad.Instances ()
-import Data.List (groupBy, findIndex, intercalate, genericLength, isPrefixOf)
+import Data.List (groupBy, findIndex, intercalate, genericLength, isPrefixOf, intersperse)
 import Control.Monad (foldM, zipWithM)
 import Control.Monad.ListM (foldM1)
 
@@ -1005,3 +1006,10 @@ mGJFactor m = do
 mGJFactorT :: (Ringoid a, CRingoid a, URingoid a)
   => a -> Matrix a -> Either AlgErr (Matrix a)
 mGJFactorT _ = mGJFactor
+
+
+instance (LaTeX a) => LaTeX (Matrix a) where
+  latex m = "\\begin{bmatrix} " ++ foo ++ " \\end{bmatrix}"
+    where
+      foo = concat $ intersperse " \\\\ " $ map (concat . intersperse " & " . map latex) $ mToRowList m
+

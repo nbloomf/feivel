@@ -20,28 +20,16 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.Bool where
+module Feivel.Eval.Bool () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
 
-{------------------}
-{- :Eval:BoolExpr -}
-{------------------}
 
 instance Glyph (BoolExpr Expr) where
   toGlyph (BoolConst True  :@ _) = return "#t"
   toGlyph (BoolConst False :@ _) = return "#f"
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (BoolExpr Expr) where
   eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)

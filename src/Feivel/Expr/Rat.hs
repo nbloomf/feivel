@@ -20,9 +20,6 @@ module Feivel.Expr.Rat where
 
 import Feivel.Expr.Util
 
-{------------}
-{- :RatExpr -}
-{------------}
 
 type RatExpr a = AtLocus (RatExprLeaf a)
 

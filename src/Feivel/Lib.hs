@@ -26,7 +26,8 @@ module Feivel.Lib (
   module Feivel.Lib.Struct.Polynomial,
   module Feivel.Lib.Pair,
   module Feivel.Lib.Struct.Permutation,
-  module Feivel.Lib.Data.ZZMod
+  module Feivel.Lib.Data.ZZMod,
+  module Feivel.Lib.Write.LaTeX
 ) where
 
 import Feivel.Lib.Algebra.Ring
@@ -39,3 +40,4 @@ import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Pair
 import Feivel.Lib.Struct.Permutation
 import Feivel.Lib.Data.ZZMod
+import Feivel.Lib.Write.LaTeX

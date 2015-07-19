@@ -42,6 +42,7 @@ import Control.Monad.Instances ()
 import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.AlgErr ()
 import Feivel.Lib.Canon
+import Feivel.Lib.Write.LaTeX
 
 {----------}
 {- :Types -}
@@ -108,6 +109,15 @@ instance Canon Rat where
         | h > 0 && k < 0 = (-h) :/: (-k)
         | h < 0 && k > 0 = h :/: k
         | otherwise      = (-h) :/: (-k)
+
+
+instance LaTeX Rat where
+  latex p = foo $ canon p
+    where
+      foo (a:/:b)
+       | a == 0    = "0"
+       | b == 1    = show a
+       | otherwise = "\\frac{" ++ show a ++ "}{" ++ show b ++ "}"
 
 
 digits :: Integer -> Rat -> String

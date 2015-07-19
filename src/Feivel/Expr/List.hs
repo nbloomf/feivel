@@ -20,9 +20,6 @@ module Feivel.Expr.List where
 
 import Feivel.Expr.Util
 
-{-------------}
-{- :ListExpr -}
-{-------------}
 
 type ListExpr a = AtLocus (ListExprLeaf a)
 

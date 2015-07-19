@@ -20,9 +20,6 @@ module Feivel.Expr.ZZMod where
 
 import Feivel.Expr.Util
 
-{--------------}
-{- :ZZModExpr -}
-{--------------}
 
 type ZZModExpr a = AtLocus (ZZModExprLeaf a)
 

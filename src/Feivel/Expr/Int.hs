@@ -20,9 +20,6 @@ module Feivel.Expr.Int where
 
 import Feivel.Expr.Util
 
-{------------}
-{- :IntExpr -}
-{------------}
 
 type IntExpr a = AtLocus (IntExprLeaf a)
 

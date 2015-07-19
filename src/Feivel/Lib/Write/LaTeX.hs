@@ -19,11 +19,8 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
-module Feivel.LaTeX where
+module Feivel.Lib.Write.LaTeX where
 
-import Feivel.Lib
-
-import Data.List (intersperse)
 
 class LaTeX t where
   latex :: t -> String
@@ -33,27 +30,3 @@ instance LaTeX Integer where
 
 instance LaTeX String where
   latex = id
-
-instance LaTeX Rat where
-  latex p = foo $ canon p
-    where
-      foo (a:/:b)
-       | a == 0    = "0"
-       | b == 1    = show a
-       | otherwise = "\\frac{" ++ show a ++ "}{" ++ show b ++ "}"
-
-instance LaTeX (Poly Integer) where
-  latex = showByOUP "" revlexM latex
-
-instance LaTeX (Poly Rat) where
-  latex = showByOUP "" revlexM latex
-
-instance LaTeX (Matrix Integer) where
-  latex m = "\\begin{bmatrix} " ++ foo ++ " \\end{bmatrix}"
-    where
-      foo = concat $ intersperse " \\\\ " $ map (concat . intersperse " & " . map latex) $ mToRowList m
-
-instance LaTeX (Matrix Rat) where
-  latex m = "\\begin{bmatrix} " ++ foo ++ " \\end{bmatrix}"
-    where
-      foo = concat $ intersperse " \\\\ " $ map (concat . intersperse " & " . map latex) $ mToRowList m

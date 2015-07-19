@@ -20,35 +20,22 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.Doc where
+module Feivel.Eval.Doc (evalToGlyph) where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
-import Feivel.Parse (pInteger)
-import Feivel.Store
 
 import Data.List (intersperse)
 
-{-------------}
-{- :Eval:Doc -}
-{-------------}
 
 evalToGlyph :: (Eval Expr, Glyph Expr, ToExpr a) => a -> EvalM String
 evalToGlyph x = eval (toExpr x) >>= toGlyph
+
 
 instance Glyph (Doc Expr) where
   toGlyph (Empty            :@ _) = return ""
   toGlyph (DocText (Text s) :@ _) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
+
 
 instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
   eval (Empty :@ loc)     = return (Empty :@ loc)

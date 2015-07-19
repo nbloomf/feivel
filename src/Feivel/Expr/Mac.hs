@@ -20,9 +20,6 @@ module Feivel.Expr.Mac where
 
 import Feivel.Expr.Util
 
-{------------}
-{- :MacExpr -}
-{------------}
 
 type MacExpr a = AtLocus (MacExprLeaf a)
 

@@ -20,35 +20,20 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.List where
+module Feivel.Eval.List () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
-import Feivel.Parse (pInteger)
-import Feivel.Store
-import Feivel.Put
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
 
-{------------------}
-{- :Eval:ListExpr -}
-{------------------}
 
 instance (Glyph Expr) => Glyph (ListExpr Expr) where
   toGlyph (ListConst _ xs :@ _) = do
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (ListExpr Expr) where
   eval (ListConst t xs :@ loc) = do

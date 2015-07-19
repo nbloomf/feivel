@@ -43,6 +43,7 @@ import Feivel.Lib.Pair
 import Feivel.Lib.Canon
 import Feivel.Lib.Monad
 import Feivel.Lib.AlgErr ()
+import Feivel.Lib.Write.LaTeX
 
 
 
@@ -61,6 +62,10 @@ natAdd (Nat a) (Nat b) = Nat (a+b)
 
 newtype Variable = Var { unVar :: String }
   deriving (Eq, Ord, Show)
+
+
+instance (LaTeX a, Ringoid a, ORingoid a, URingoid a) => LaTeX (Poly a) where
+  latex = showByOUP "" revlexM latex
 
 
 

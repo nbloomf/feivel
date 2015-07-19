@@ -20,28 +20,15 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.Int where
+module Feivel.Eval.Int () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
-import Feivel.Parse (pInteger)
 
-{-----------------}
-{- :Eval:IntExpr -}
-{-----------------}
 
 instance Glyph (IntExpr Expr) where
   toGlyph (IntConst n :@ _) = return $ show n
   toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (IntExpr Expr) where
   eval (IntConst n :@ loc) = return (IntConst n :@ loc)

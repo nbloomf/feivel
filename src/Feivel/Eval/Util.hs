@@ -18,7 +18,29 @@
 
 {-# LANGUAGE FlexibleContexts #-}
 
-module Feivel.Eval.Util where
+module Feivel.Eval.Util (
+  module Feivel.EvalM,
+  module Feivel.Eval.Eval,
+  module Feivel.Get,
+  module Feivel.Put,
+  module Feivel.Locus,
+  module Feivel.Key,
+  module Feivel.Type,
+  module Feivel.Lib,
+  module Feivel.Expr,
+  module Feivel.Typed,
+  module Feivel.Error,
+  module Feivel.Store,
+  pInteger, pRat,
+
+  -- Utilities
+  eKey, eIfThenElse, eAtIdx, eMacro, evalWith,
+
+  -- Constants
+  suchThat, hasSameTypeAs,
+  zeroZZ, zeroQQ, zeroBB, zeroMod
+) where
+
 
 import Feivel.EvalM
 import Feivel.Eval.Eval
@@ -27,9 +49,18 @@ import Feivel.Put
 import Feivel.Locus
 import Feivel.Key
 import Feivel.Store
+import Feivel.Typed
+import Feivel.Error
 import Feivel.Expr
 import Feivel.Type
 import Feivel.Lib
+import Feivel.Parse (pInteger, pRat)
+
+
+
+{--------------}
+{- :Utilities -}
+{--------------}
 
 -- eval with a specified store
 evalWith :: (Eval t) => t -> Store Expr -> EvalM t
@@ -40,8 +71,10 @@ evalWith t st = do
   putState old
   return u
 
+
 eKey :: (Eval a, Get a) => Key -> Locus -> EvalM a
 eKey key loc = lookupKey loc key >>= getVal >>= eval
+
 
 eIfThenElse :: (ToExpr a, Get a, Eval a, Eval b, ToExpr b) => b -> a -> a -> EvalM a
 eIfThenElse b t f = do
@@ -49,6 +82,7 @@ eIfThenElse b t f = do
   true  <- eval t >>= getVal
   false <- eval f >>= getVal
   if test then (eval true) else (eval false)
+
 
 eAtIdx :: (ToExpr a, ToExpr b, ToExpr c, Get (Matrix d), Eval a, Eval b, Eval c)
   => c -> a -> b -> Locus -> EvalM d
@@ -66,6 +100,8 @@ eMacro vals mac loc = do
   (defaultVals, e) <- evalWith mac (mergeStores [ctx, old]) >>= getVal :: EvalM (Store Expr, Expr)
   let newSt = mergeStores [ctx, defaultVals, old]
   evalWith e newSt >>= getVal >>= (`evalWith` newSt)
+
+
 
 {--------------}
 {- :Constants -}

@@ -20,28 +20,15 @@
 {-# LANGUAGE FlexibleContexts     #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 
-module Feivel.Eval.Rat where
+module Feivel.Eval.Rat () where
 
-import Feivel.EvalM
-import Feivel.Expr
-import Feivel.Lib
-import Feivel.Put
-import Feivel.Get
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Locus
-import Feivel.Parse (pRat)
-import Feivel.Error
-import Feivel.Type
-import Feivel.Typed
 
-{-----------------}
-{- :Eval:RatExpr -}
-{-----------------}
 
 instance Glyph (RatExpr Expr) where
   toGlyph (RatConst x :@ _) = return $ show x
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
+
 
 instance (Eval Expr) => Eval (RatExpr Expr) where
   eval (RatConst p :@ loc) = return $ RatConst p :@ loc

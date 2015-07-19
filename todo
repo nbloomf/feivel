@@ -45,26 +45,15 @@ Feature Ideas
 * Arch: Groupoid class
 * Arch: type synonyms
 * Refactor: Typed and Get know too much about EvalM
-  1: (done) move type information to AST
-  2: (done) Implementation of typeOf becomes trivial; take out of EvalM
-  3: (done) Rearrange order of args in lift1 and lift2 (lifted function should come last.)
-  4: (done) Parser no longer needs to return explicit type info, so don't
   5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
   6: Rename Typed class to HasType
   7: Take Get out of EvalM; separate get and getVal
   8: Clean up parsers (Fun and FunT are now the same?)
   9: data Typed t = t :# Type (maybe. how to handle function types)
 * Refactor: Eval has lots of repetitive code
-  1: (done) Make inject have type a -> Expr, and use getVal in liftN
   2: Separate put and putVal
   3: use RankNTypes to make dispatch helper functions
 * Refactor: Eval is too big
-  1: (done) Replace different expression types in grammar with just Expr
-  2: (done) Parameterize IntExpr et. al.; e.g. IntExprLeaf a = blah & IntExpr a = AtLocus (IntExprLeaf a)
-  3: (done) Move grammar types to own modules; e.g. Expr = IntE (IntExpr Expr)
-  4: Clean up AST modules
   5: Move parsers to own modules
   6: Split parameters on grammar types with class constraints, e.g. IntExprType t => blah
        (recover type safety with modularity)
-  7: (done) Move eval instances to own modules (will cause orphan instances)
-  8: Clean up newly split eval modules

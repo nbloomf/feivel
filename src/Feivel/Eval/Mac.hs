@@ -20,25 +20,10 @@
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
 
-module Feivel.Eval.Mac where
+module Feivel.Eval.Mac () where
 
-import Feivel.EvalM
-import Feivel.Eval.Eval
 import Feivel.Eval.Util
-import Feivel.Expr
-import Feivel.Type
-import Feivel.Key
-import Feivel.Get
-import Feivel.Typed
-import Feivel.Lib
-import Feivel.Locus
-import Feivel.Error
-import Feivel.Parse (pInteger)
-import Feivel.Store
 
-{-----------------}
-{- :Eval:MacExpr -}
-{-----------------}
 
 instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
   toGlyph(MacConst _ st ex (amb,_) :@ loc) = do
@@ -47,6 +32,7 @@ instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
     f   <- evalWith ex (mergeStores [ctx, old, amb])
     eval f >>= toGlyph
   toGlyph _ = error "toGlyph: MacExpr"
+
 
 instance (Eval Expr) => Eval (MacExpr Expr) where
   eval (MacConst typ vals expr (amb,p) :@ loc) = do

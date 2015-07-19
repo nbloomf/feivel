@@ -20,9 +20,6 @@ module Feivel.Expr.Doc where
 
 import Feivel.Expr.Util
 
-{--------}
-{- :Doc -}
-{--------}
 
 type Doc a = AtLocus (DocLeaf a)
 
