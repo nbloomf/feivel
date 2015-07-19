@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Mac where
 
 import Feivel.Expr.Util
@@ -35,3 +38,15 @@ data MacExprLeaf a
 
   | MacIfThenElse Type a (MacExpr a) (MacExpr a) -- BB
   deriving (Eq, Show)
+
+
+
+instance Typed (MacExpr a) where
+  typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacVar        typ _     :@ _) = MacTo typ
+  typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtPos      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtIdx      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacRand       typ _     :@ _) = MacTo typ
+  typeOf (MacIfThenElse typ _ _ _ :@ _) = MacTo typ
+

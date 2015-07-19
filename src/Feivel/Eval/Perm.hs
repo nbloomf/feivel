@@ -51,14 +51,13 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
     r  <- randomElementEvalM xs
     eval r >>= getVal
 
-  eval (PermCompose _ p q :@ loc) = do
-    t <- unifyTypesOf loc p q
+  eval (PermCompose t p q :@ loc) = do
     case t of
       PermOf ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
         b <- eval q >>= getVal :: EvalM (Perm Integer)
         let c = compose a b
-        let s = mapPerm toExpr c
+        let s = mapPerm (put loc) c
         return (PermConst ZZ s :@ loc)
       _ -> reportErr loc $ PolynomialExpected t
 
@@ -68,6 +67,6 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
       PermOf ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
         let c = inverse a
-        let s = mapPerm toExpr c
+        let s = mapPerm (put loc) c
         return (PermConst ZZ s :@ loc)
       _ -> reportErr loc $ PolynomialExpected t

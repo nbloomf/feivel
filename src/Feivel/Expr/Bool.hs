@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Bool where
 
 import Feivel.Expr.Util
@@ -66,3 +69,5 @@ data BoolExprLeaf a
   | MatIsCol    a -- MatOf XX
   | MatIsGJForm a -- MatOf XX
   deriving (Eq, Show)
+
+instance Typed (BoolExpr a) where typeOf _ = BB

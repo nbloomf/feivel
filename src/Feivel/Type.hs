@@ -16,9 +16,14 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Type (
-  Type(..), TypeErr(..), unify, unifyAll
+  Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf
 ) where
+
+import Feivel.Lib (Rat, Text, ZZModulo(..), Matrix, Poly, coefficientsP, toListM)
 
 import Control.Monad (foldM)
 import Control.Monad.Instances ()
@@ -32,6 +37,9 @@ import Control.Monad.Instances ()
 {---------}
 {- :Type -}
 {---------}
+
+class Typed t where
+  typeOf :: t -> Type
 
 data Type
   = XX -- Type Variable
@@ -223,3 +231,24 @@ instance Show TypeErr where
 
   show (TypeUnificationError a b) =
     "Cannot unify types: " ++ show a ++ " and " ++ show b ++ "."
+
+instance Typed Integer  where typeOf _              = ZZ
+instance Typed Text     where typeOf _              = SS
+instance Typed Bool     where typeOf _              = BB
+instance Typed Rat      where typeOf _              = QQ
+instance Typed ZZModulo where typeOf (ZZModulo _ n) = ZZMod n
+
+instance (Typed a) => Typed (Poly a) where
+  typeOf x = case coefficientsP x of
+    (c:_) -> PolyOver (typeOf c)
+    []    -> PolyOver XX
+
+instance (Typed a) => Typed (Matrix a) where
+  typeOf x = case toListM x of
+    (a:_) -> MatOf (typeOf a)
+    []    -> MatOf XX
+
+instance (Typed a) => Typed [a] where
+  typeOf (x:_) = typeOf x
+  typeOf []    = XX
+

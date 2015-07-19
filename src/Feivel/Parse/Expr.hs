@@ -920,7 +920,7 @@ pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
 
       , pMatBuilder
 
-      , pFun2 "MatId" pType (pTypedExpr ZZ) MatId
+      , pFun2 "Id"    pType (pTypedExpr ZZ) MatId
       , pFun4 "SwapE" pType (pTypedExpr ZZ) (pTypedExpr ZZ) (pTypedExpr ZZ) MatSwapE
       , pMatScaleE
       , pMatAddE

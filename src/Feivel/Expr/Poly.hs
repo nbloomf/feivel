@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Poly where
 
 import Feivel.Expr.Util
@@ -48,3 +51,19 @@ data PolyExprLeaf a
   | PolyEvalPoly  Type (PolyExpr a) [(Variable, PolyExpr a)]
   deriving (Eq, Show)
 
+
+instance Typed (PolyExpr a) where
+  typeOf (PolyVar        typ _     :@ _) = PolyOver typ
+  typeOf (PolyMacro      typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyConst      typ _     :@ _) = PolyOver typ
+  typeOf (PolyAdd        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolySub        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyMul        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyNeg        typ _     :@ _) = PolyOver typ
+  typeOf (PolyPow        typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyAtPos      typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyAtIdx      typ _ _ _ :@ _) = PolyOver typ
+  typeOf (PolyIfThenElse typ _ _ _ :@ _) = PolyOver typ
+  typeOf (PolyRand       typ _     :@ _) = PolyOver typ
+  typeOf (PolyFromRoots  typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyEvalPoly   typ _ _   :@ _) = PolyOver typ

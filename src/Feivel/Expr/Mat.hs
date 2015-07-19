@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Mat where
 
 import Feivel.Expr.Util
@@ -76,3 +79,44 @@ data MatExprLeaf a
 
   | MatRand Type a -- ListOf (MatOf typ)
   deriving (Eq, Show)
+
+
+
+instance Typed (MatExpr a) where
+  typeOf (MatVar         typ _         :@ _) = MatOf typ
+  typeOf (MatMacro       typ _ _       :@ _) = MatOf typ
+  typeOf (MatAtPos       typ _ _       :@ _) = MatOf typ
+  typeOf (MatAtIdx       typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatIfThenElse  typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatConst       typ _         :@ _) = MatOf typ
+  typeOf (MatId          typ _         :@ _) = MatOf typ
+  typeOf (MatSwapE       typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleE      typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatAddE        typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatHCat        typ _ _       :@ _) = MatOf typ
+  typeOf (MatVCat        typ _ _       :@ _) = MatOf typ
+  typeOf (MatAdd         typ _ _       :@ _) = MatOf typ
+  typeOf (MatMul         typ _ _       :@ _) = MatOf typ
+  typeOf (MatPow         typ _ _       :@ _) = MatOf typ
+  typeOf (MatTrans       typ _         :@ _) = MatOf typ
+  typeOf (MatNeg         typ _         :@ _) = MatOf typ
+  typeOf (MatSwapRows    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatSwapCols    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleRow    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatScaleCol    typ _ _ _     :@ _) = MatOf typ
+  typeOf (MatAddRow      typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatAddCol      typ _ _ _ _   :@ _) = MatOf typ
+  typeOf (MatDelRow      typ _ _       :@ _) = MatOf typ
+  typeOf (MatDelCol      typ _ _       :@ _) = MatOf typ
+  typeOf (MatShuffleRows typ _         :@ _) = MatOf typ
+  typeOf (MatShuffleCols typ _         :@ _) = MatOf typ
+  typeOf (MatGJForm      typ _         :@ _) = MatOf typ
+  typeOf (MatGJFactor    typ _         :@ _) = MatOf typ
+  typeOf (MatGetRow      typ _ _       :@ _) = MatOf typ
+  typeOf (MatGetCol      typ _ _       :@ _) = MatOf typ
+  typeOf (MatRowFromList typ _         :@ _) = MatOf typ
+  typeOf (MatColFromList typ _         :@ _) = MatOf typ
+  typeOf (MatRand        typ _         :@ _) = MatOf typ
+  typeOf (MatBuilder     typ _ _ _ _ _ :@ _) = MatOf typ
+
+

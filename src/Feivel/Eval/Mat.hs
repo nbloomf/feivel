@@ -159,8 +159,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> negMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatTrans _ a :@ loc) = do
-    u <- expectMatrix loc a
+  eval (MatTrans u a :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
     return (MatConst u p :@ loc)
@@ -189,16 +188,14 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> powMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatSwapRows _ m a b :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatSwapRows u m a b :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     j <- eval b >>= getVal
     p <- tryEvalM loc $ mSwapRows i j n
     return $ MatConst u p :@ loc
 
-  eval (MatSwapCols _ m a b :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatSwapCols u m a b :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     j <- eval b >>= getVal
@@ -267,15 +264,13 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatDelRow _ m a :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatDelRow u m a :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelRow n i
     return $ MatConst u p :@ loc
 
-  eval (MatDelCol _ m a :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatDelCol u m a :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelCol n i
@@ -295,15 +290,13 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       BB -> gjFactorMat zeroBB
       _  -> reportErr loc $ FieldTypeExpected u
 
-  eval (MatGetRow _ k m :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatGetRow u k m :@ loc) = do
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     r <- tryEvalM loc $ mRowOf i n
     return (MatConst u r :@ loc)
 
-  eval (MatGetCol _ k m :@ loc) = do
-    u <- expectMatrix loc m
+  eval (MatGetCol u k m :@ loc) = do
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     c <- tryEvalM loc $ mColOf i n

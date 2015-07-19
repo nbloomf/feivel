@@ -45,6 +45,9 @@ Feature Ideas
 * Arch: Groupoid class
 * Arch: type synonyms
 * Refactor: Typed and Get know too much about EvalM
+  1: Get and Put should live in Expr/ and have their own error types.
+  2: (done) Typed class should live in Type module, instances in Expr/
+  3: Rename Expr subfolder to Grammar
   5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
   6: Rename Typed class to HasType
   7: Take Get out of EvalM; separate get and getVal

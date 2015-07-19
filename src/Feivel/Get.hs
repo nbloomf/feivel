@@ -25,7 +25,6 @@ module Feivel.Get (
 
 import Feivel.Type
 import Feivel.Error
-import Feivel.Typed
 import Feivel.Locus
 import Feivel.EvalM
 import Feivel.Expr

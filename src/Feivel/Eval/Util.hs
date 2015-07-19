@@ -28,7 +28,6 @@ module Feivel.Eval.Util (
   module Feivel.Type,
   module Feivel.Lib,
   module Feivel.Expr,
-  module Feivel.Typed,
   module Feivel.Error,
   module Feivel.Store,
   pInteger, pRat,
@@ -49,7 +48,6 @@ import Feivel.Put
 import Feivel.Locus
 import Feivel.Key
 import Feivel.Store
-import Feivel.Typed
 import Feivel.Error
 import Feivel.Expr
 import Feivel.Type

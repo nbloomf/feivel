@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Int where
 
 import Feivel.Expr.Util
@@ -86,3 +89,5 @@ data IntExprLeaf a
   -- Casts
   | IntCastStr a -- SS
   deriving (Eq, Show)
+
+instance Typed (IntExpr a) where typeOf _ = ZZ

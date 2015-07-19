@@ -27,7 +27,6 @@ import Feivel.Expr
 import Feivel.Locus
 import Feivel.Type
 import Feivel.Lib
-import Feivel.Typed
 
 
 

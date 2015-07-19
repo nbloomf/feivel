@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Doc where
 
 import Feivel.Expr.Util
@@ -58,3 +61,5 @@ data DocLeaf a
  | Bail      a -- SS
  | ShowState
  deriving (Eq, Show)
+
+instance Typed (Doc a) where typeOf _ = DD

@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.ZZMod where
 
 import Feivel.Expr.Util
@@ -46,3 +49,22 @@ data ZZModExprLeaf a
   | ZZModSum   Type a -- ListOf ZZModulo
   | ZZModProd  Type a -- ListOf ZZModulo
   deriving (Eq, Show)
+
+
+
+instance Typed (ZZModExpr a) where
+  typeOf (ZZModConst      typ _     :@ _) = typ
+  typeOf (ZZModVar        typ _     :@ _) = typ
+  typeOf (ZZModAtPos      typ _ _   :@ _) = typ
+  typeOf (ZZModAtIdx      typ _ _ _ :@ _) = typ
+  typeOf (ZZModMacro      typ _ _   :@ _) = typ
+  typeOf (ZZModIfThenElse typ _ _ _ :@ _) = typ
+  typeOf (ZZModCast       typ _     :@ _) = typ
+  typeOf (ZZModNeg        typ _     :@ _) = typ
+  typeOf (ZZModInv        typ _     :@ _) = typ
+  typeOf (ZZModAdd        typ _ _   :@ _) = typ
+  typeOf (ZZModSub        typ _ _   :@ _) = typ
+  typeOf (ZZModMult       typ _ _   :@ _) = typ
+  typeOf (ZZModPow        typ _ _   :@ _) = typ
+  typeOf (ZZModSum        typ _     :@ _) = typ
+  typeOf (ZZModProd       typ _     :@ _) = typ

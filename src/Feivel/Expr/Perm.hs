@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Perm where
 
 import Feivel.Expr.Util
@@ -38,3 +41,16 @@ data PermExprLeaf a
   | PermCompose Type (PermExpr a) (PermExpr a)
   | PermInvert  Type (PermExpr a)
   deriving (Eq, Show)
+
+
+
+instance Typed (PermExpr a) where
+  typeOf (PermVar        typ _     :@ _) = PermOf typ
+  typeOf (PermMacro      typ _ _   :@ _) = PermOf typ
+  typeOf (PermConst      typ _     :@ _) = PermOf typ
+  typeOf (PermAtPos      typ _ _   :@ _) = PermOf typ
+  typeOf (PermAtIdx      typ _ _ _ :@ _) = PermOf typ
+  typeOf (PermIfThenElse typ _ _ _ :@ _) = PermOf typ
+  typeOf (PermRand       typ _     :@ _) = PermOf typ
+  typeOf (PermCompose    typ _ _   :@ _) = PermOf typ
+  typeOf (PermInvert     typ _     :@ _) = PermOf typ

@@ -16,6 +16,9 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
+
 module Feivel.Expr.Rat where
 
 import Feivel.Expr.Util
@@ -66,3 +69,5 @@ data RatExprLeaf a
   -- Casting
   | RatCastStr a -- SS
   deriving (Eq, Show)
+
+instance Typed (RatExpr a)  where typeOf _ = QQ

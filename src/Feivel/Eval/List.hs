@@ -59,8 +59,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
     ys <- eval b >>= getVal :: EvalM [Expr]
     return (ListConst u (xs ++ ys) :@ loc)
 
-  eval (ListToss _ a b :@ loc) = do
-    t <- unifyTypesOf loc a b
+  eval (ListToss t a b :@ loc) = do
     case t of
       ListOf u -> do
         xs <- eval a >>= getVal :: EvalM [Expr]
@@ -190,7 +189,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
           n  <- eval m >>= getVal
           suchThat $ n `hasSameTypeAs` x
           is <- tryEvalM loc $ mPivotCols n
-          return (ListConst ZZ (map toExpr is) :@ loc)
+          return (ListConst ZZ (map (put loc) is) :@ loc)
     case typeOf m of
       MatOf QQ -> pivotIndices (mCell zeroQQ)
       MatOf BB -> pivotIndices (mCell zeroBB)
