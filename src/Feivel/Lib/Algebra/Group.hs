@@ -24,7 +24,11 @@ import Feivel.Lib.AlgErr
 class Groupoid t where
   gOp :: t -> t -> Either AlgErr t
 
-  gId :: t
+  gId   :: t
   gIsId :: t -> Bool
 
-  gIdOf :: t -> Either AlgErr t
+  gLIdOf :: t -> Either AlgErr t
+  gRIdOf :: t -> Either AlgErr t
+
+
+class CGroupoid t

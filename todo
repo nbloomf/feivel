@@ -44,20 +44,19 @@ Feature Ideas
 * Type: trees (constructor)
 * Arch: Groupoid class
 * Arch: type synonyms
-* Refactor: Typed and Get know too much about EvalM
-  4: Move Error up the hierarchy of dependencies
-  5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
-  6: Rename Typed class to HasType
-  8: (started) Clean up parsers (Fun and FunT are now the same?)
-  9: data Typed t = t :# Type (maybe. how to handle function types)
-* Refactor: Eval has lots of repetitive code
-  2: Separate put and putVal
-  3: use RankNTypes to make dispatch helper functions
-* Refactor: Eval is too big
-  5: Make IntExpr et. al. newtypes (needed for recursive type def,
+* Refactor: Want to enforce grammar with type constraints
+  1: Make IntExpr et. al. newtypes (needed for recursive type def,
      which is needed for class constraints on grammar)
-  6: Split parameters on grammar types with class constraints,
+  2: Split parameters on grammar types with class constraints,
      e.g. IntExprType t => blah (recover type safety with modularity)
-* CL option: --expr=typ (default is doc)
+* Refactor: General
+  1: Move Error up the hierarchy of dependencies
+  2: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
+  3: Rename Typed class to HasType
+  4: (started) Clean up parsers (Fun and FunT are now the same?)
+  5: data Typed t = t :# Type (maybe. how to handle function types)
+  6: Separate put and putVal
+  7: use RankNTypes to make dispatch helper functions
+* CL option: --type blah (default is doc) to specify parser
 * pure :: a -> Bool (randomness or side-effect free)
 * verifyType :: a -> Either SomeErr Bool?
