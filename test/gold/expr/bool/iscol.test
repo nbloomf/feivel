@@ -1,0 +1,8 @@
+feivel
+<<<
+[:bool: IsCol(int; [[1;2]]) :]
+[:bool: IsCol(int; [[1];[2]]) :]
+>>>
+#f
+#t
+>>>= 0

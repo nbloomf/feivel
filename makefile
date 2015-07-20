@@ -34,6 +34,10 @@ golden-rat: FORCE
 	@echo "Golden Rational Tests"
 	shelltest --color --execdir test/gold/expr/rat
 
+golden-bool: FORCE
+	@echo "Golden Rational Tests"
+	shelltest --color --execdir test/gold/expr/bool
+
 golden-list: FORCE
 	@echo "Golden List Tests"
 	shelltest --color --execdir test/gold/expr/list

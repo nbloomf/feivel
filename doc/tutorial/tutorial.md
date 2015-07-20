@@ -296,6 +296,10 @@ These expressions can be used over any type.
 
     Returns `#t` if `EXPR` is an element of `LIST` and `#f` otherwise, using the same equality test that `Equal` uses. `EXPR` should have type `TYP` and `LIST` should have type `{TYP}`.
 
+- `IsRow(TYP; MAT)`, `IsCol(TYP; MAT)`
+
+    Determine whether a matrix has a single row or column.
+
 
 `int`: Integers
 ---------------

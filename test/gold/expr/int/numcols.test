@@ -1,6 +1,6 @@
 feivel
 <<<
-[:int: NumCols([[1;2]]) :]
+[:int: NumCols(int; [[1;2]]) :]
 >>>
 2
 >>>= 0

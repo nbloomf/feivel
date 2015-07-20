@@ -17,7 +17,7 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.ParseM (
-  ParseM, runParseM, reportParseErr, pAtLocus, pLiftAt, stringParseM,
+  ParseM, runParseM, reportParseErr, pAtLocus, stringParseM,
 
   -- Constants
   pNatural, pInteger, pRatInteger, pRat, pBool, pString, pVar, pFormat, pPath, pPaths, pText,
@@ -69,13 +69,6 @@ pAtLocus p = do
   x <- p
   end <- getPosition
   return (x :@ (locus start end))
-
-pLiftAt :: ParseM a -> t -> ParseM a
-pLiftAt p t = do
-  x <- p
-  return x
-
-
 
 
 

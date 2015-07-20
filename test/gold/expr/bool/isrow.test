@@ -1,0 +1,8 @@
+feivel
+<<<
+[:bool: IsRow(int; [[1;2]]) :]
+[:bool: IsRow(int; [[1];[2]]) :]
+>>>
+#t
+#f
+>>>= 0

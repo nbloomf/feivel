@@ -64,9 +64,9 @@ pIntExpr pE = spaced $ buildExpressionParser intOpTable pIntTerm
     
       , pFun1 "StrLen" (pE SS)  StrLength
 
-      , pFun1  "NumRows"    (pE (MatOf XX)) MatNumRows
-      , pFun1  "NumCols"    (pE (MatOf XX)) MatNumCols
-      , pFun1T "MatrixRank" (pE . MatOf)    MatRank
+      , pFun1T "NumRows"    (pE . MatOf) MatNumRows
+      , pFun1T "NumCols"    (pE . MatOf) MatNumCols
+      , pFun1T "MatrixRank" (pE . MatOf) MatRank
 
       , pFun1 "PolyContent" (pE (PolyOver ZZ)) IntContent
     

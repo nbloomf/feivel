@@ -1,6 +1,6 @@
 feivel
 <<<
-[:int: NumRows([[1;2]]) :]
+[:int: NumRows(int; [[1;2]]) :]
 >>>
 1
 >>>= 0

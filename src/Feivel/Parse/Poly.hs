@@ -86,7 +86,7 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
 
       , pPolyNull
 
-      , pFun2 "FromRoots" (pLiftAt pVar XX) (pE $ ListOf typ) (PolyFromRoots typ)
+      , pFun2 "FromRoots" pVar (pE $ ListOf typ) (PolyFromRoots typ)
 
       , pPolyEvalPoly
       ]

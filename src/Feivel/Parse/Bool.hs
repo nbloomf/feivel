@@ -55,8 +55,8 @@ pBoolExpr pE = spaced $ buildExpressionParser boolOpTable pBoolTerm
       , pFun2T "Elem" pE (pE . ListOf) ListElem
       , pFun1T "IsEmpty" (pE . ListOf) ListIsEmpty
 
-      , pFun1 "IsRow" (pE $ MatOf XX) MatIsRow
-      , pFun1 "IsCol" (pE $ MatOf XX) MatIsCol
+      , pFun1T "IsRow"    (pE . MatOf) MatIsRow
+      , pFun1T "IsCol"    (pE . MatOf) MatIsCol
       , pFun1T "IsGJForm" (pE . MatOf) MatIsGJForm
 
       , pFun2T "Equal"    pE pE BoolEq

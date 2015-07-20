@@ -19,7 +19,6 @@
 module Feivel.Grammar.Util (
   module Feivel.Grammar.Type,
   module Feivel.Store,
-  module Feivel.Store,
   Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format
 ) where
 
