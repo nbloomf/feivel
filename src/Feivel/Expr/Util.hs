@@ -17,14 +17,14 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Expr.Util (
-  module Feivel.Type,
+  module Feivel.Expr.Type,
   module Feivel.Key,
   module Feivel.Locus,
   module Feivel.Store,
   Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format
 ) where
 
-import Feivel.Type
+import Feivel.Expr.Type
 import Feivel.Key
 import Feivel.Locus
 import Feivel.Store

@@ -35,7 +35,6 @@ import Feivel.Parse.Type
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Locus
-import Feivel.Type
 import Feivel.Error
 import Feivel.Store (emptyStore)
 

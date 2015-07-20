@@ -19,7 +19,7 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 {-# OPTIONS_GHC -XFlexibleInstances    #-}
 
-module Feivel.EvalM (
+module Feivel.Eval.EvalM (
   EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM, getVal,
 
   -- IO and Parsing
@@ -50,9 +50,7 @@ import Feivel.Expr (Doc, Expr(), get, Get, ToExpr, toExpr)
 import Feivel.Key (Key)
 import Feivel.Locus (Locus(NullLocus), locusOf, HasLocus)
 import Feivel.Store
-import Feivel.Parse (pDoc, pRecords)
-import Feivel.Format
-import Feivel.Parse.ParseM
+import Feivel.Parse (pDoc, pRecords, runParseM, DataFormat(..), ParseM, pPaths)
 
 import Control.Monad.Trans.Error
 import qualified Control.Monad.Trans.State.Lazy as MTS

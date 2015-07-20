@@ -19,11 +19,9 @@
 module Feivel.Debug where
 
 import Feivel.Parse
-import Feivel.EvalM
 import Feivel.Eval
 import Feivel.Store
 import Feivel.Expr
-import Feivel.Type
 import Feivel.Main
 import Feivel.GUI
 

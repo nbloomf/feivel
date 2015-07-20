@@ -19,11 +19,10 @@
 {-# LANGUAGE FlexibleContexts #-}
 
 module Feivel.Eval.Util (
-  module Feivel.EvalM,
+  module Feivel.Eval.EvalM,
   module Feivel.Eval.Eval,
   module Feivel.Locus,
   module Feivel.Key,
-  module Feivel.Type,
   module Feivel.Lib,
   module Feivel.Expr,
   module Feivel.Error,
@@ -39,14 +38,13 @@ module Feivel.Eval.Util (
 ) where
 
 
-import Feivel.EvalM
+import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
 import Feivel.Locus
 import Feivel.Key
 import Feivel.Store
 import Feivel.Error
 import Feivel.Expr
-import Feivel.Type
 import Feivel.Lib
 import Feivel.Parse (pInteger, pRat)
 

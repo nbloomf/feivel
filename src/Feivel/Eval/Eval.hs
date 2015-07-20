@@ -21,7 +21,7 @@
 
 module Feivel.Eval.Eval where
 
-import Feivel.EvalM
+import Feivel.Eval.EvalM
 import Feivel.Expr
 import Feivel.Locus
 import Feivel.Error

@@ -21,9 +21,13 @@
 {-# LANGUAGE FlexibleContexts      #-}
 
 module Feivel.Eval (
+  module Feivel.Eval.EvalM,
+  module Feivel.Eval.Eval,
+
  Eval, eval, evalToGlyph
 ) where
 
+import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
 import Feivel.Eval.Util
 import Feivel.Eval.Expr

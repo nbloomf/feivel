@@ -22,6 +22,7 @@ module Feivel.Expr (
   module Feivel.Expr.Expr,
   module Feivel.Expr.Put,
   module Feivel.Expr.Get,
+  module Feivel.Expr.Type,
 
   -- Errors
   ExprErr(..)
@@ -31,6 +32,7 @@ module Feivel.Expr (
 import Feivel.Expr.Expr
 import Feivel.Expr.Put
 import Feivel.Expr.Get
+import Feivel.Expr.Type
 
 
 data ExprErr

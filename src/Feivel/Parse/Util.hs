@@ -25,7 +25,7 @@ module Feivel.Parse.Util (
   pFun1T, pFun2T
 ) where
 
-import Feivel.Type
+import Feivel.Expr
 import Feivel.Parse.Type
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)

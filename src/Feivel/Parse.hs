@@ -20,10 +20,12 @@ module Feivel.Parse (
   module Feivel.Parse.Key,
   module Feivel.Parse.Expr,
   module Feivel.Parse.Store,
+  module Feivel.Parse.Format,
   module Feivel.Parse.ParseM
 ) where
 
 import Feivel.Parse.Key
 import Feivel.Parse.Expr
 import Feivel.Parse.Store
+import Feivel.Parse.Format
 import Feivel.Parse.ParseM

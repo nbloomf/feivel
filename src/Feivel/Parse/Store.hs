@@ -24,7 +24,7 @@ import Feivel.Expr
 import Feivel.Key
 import Feivel.Parse.Key
 import Feivel.Locus
-import Feivel.Format
+import Feivel.Parse.Format
 import Feivel.Parse.ParseM
 import Feivel.Parse.Expr
 import Feivel.Parse.Type

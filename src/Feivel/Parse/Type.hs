@@ -18,7 +18,7 @@
 
 module Feivel.Parse.Type where
 
-import Feivel.Type
+import Feivel.Expr
 import Feivel.Parse.ParseM
 
 import Text.ParserCombinators.Parsec hiding (try)

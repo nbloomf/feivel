@@ -20,8 +20,7 @@ module Feivel.Main where
 
 import Feivel.Eval
 import Feivel.Store (setLibPaths)
-import Feivel.EvalM
-import Feivel.Format
+import Feivel.Parse
 import Feivel.GUI
 import Feivel.GUI.Strings
 

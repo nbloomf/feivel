@@ -19,7 +19,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Type (
+module Feivel.Expr.Type (
   Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf
 ) where
 

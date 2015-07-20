@@ -20,7 +20,6 @@ module Feivel.GUI (gui) where
 
 import Feivel.Store
 import Feivel.Expr
-import Feivel.EvalM
 import Feivel.Eval
 import Feivel.Parse
 import Feivel.GUI.Strings
