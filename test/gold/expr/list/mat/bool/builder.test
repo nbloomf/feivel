@@ -1,7 +1,7 @@
 feivel
 <<<
 [:{[bool]}: Build(@x hcat [[#f]]; [bool] @x <- {[[#t]];[[#f]]}) :]
-[:{[bool]}: Build(@x; [bool] @x <- {[[#t]];[[#f]]}; IsRow(@x)) :]
+[:{[bool]}: Build(@x; [bool] @x <- {[[#t]];[[#f]]}; IsRow(bool; @x)) :]
 >>>
 {[[#t;#f]];[[#f;#f]]}
 {[[#t]];[[#f]]}
