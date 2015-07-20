@@ -24,7 +24,7 @@ import Feivel.Lib (Text(..))
 import Feivel.Store
 import Feivel.Expr
 
-import Feivel.Parse.Key
+import Feivel.Parse.Util
 import Feivel.Parse.Format
 import Feivel.Parse.ParseM
 import Feivel.Parse.Expr

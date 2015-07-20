@@ -17,21 +17,39 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Parse.Util (
-  keyword, whitespace, spaced,
+  module Feivel.Parse.Type,
+
+  keyword, whitespace, spaced, pKey, pToken,
 
   pTuple2, pTuple4,
 
   pFun1,  pFun2, pFun3, pFun4,
-  pFun1T, pFun2T
+  pFun1T, pFun2T,
+
+  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst
 ) where
 
+
+import Feivel.Store
 import Feivel.Expr
+
 import Feivel.Parse.Type
+
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 import Feivel.Parse.ParseM
 
 {- :Primitives -}
+
+pToken :: ParseM String
+pToken = many1 $ oneOf (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'] ++ "-_.")
+
+
+pKey :: ParseM Key
+pKey = do
+  x <- try (char '@') >> pToken
+  return (Key x)
+  <?> "key (@foo)"
 
 whitespace :: ParseM ()
 whitespace = spaces
@@ -143,3 +161,65 @@ pFun2T fun pA pB f = do
   b <- pB t
   keyword ")"
   return (f a b)
+
+-- Unary Operators (for expression parser)
+opParser1 :: (AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a))
+opParser1 f fun = do
+  start <- getPosition
+  try $ keyword fun
+  end <- getPosition
+  return $ \x -> (f x :@ (locus start end))
+
+-- Binary Operators (for expression parser)
+opParser2 :: (AtLocus a -> AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a) -> (AtLocus a))
+opParser2 f fun = do
+  start <- getPosition
+  try $ keyword fun
+  end <- getPosition
+  return $ \x y -> (f x y :@ (locus start end))
+
+pVarExpr :: (Key -> a) -> Type -> ParseM a
+pVarExpr h t = do
+  k <- pKey
+  return (h k)
+
+pTypeKeyExpr :: (Type -> ParseM Expr) -> ParseM (Type, Key, Expr)
+pTypeKeyExpr pE = do
+  t <- pType
+  whitespace
+  k <- pKey
+  keyword ":="
+  v <- pE t
+  return (t, k, v)
+
+-- Terms in Expression Grammars
+pTerm :: ParseM a -> ParseM (AtLocus a) -> String -> [ParseM a] -> ParseM (AtLocus a)
+pTerm cst expr err atoms = 
+  choice [try $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
+
+pIfThenElseExprT :: (Type -> ParseM Expr) -> ParseM a -> (Expr -> a -> a -> b) -> t -> ParseM b
+pIfThenElseExprT pE p h t = do
+  keyword "if"
+  b  <- pE BB
+  keyword "then"
+  tr <- p
+  keyword "else"
+  fa <- p
+  return (h b tr fa)
+
+pMacroExprT :: (Type -> ParseM Expr) -> ([(Type, Key, Expr)] -> Expr -> a) -> ParseM a
+pMacroExprT pE f = do
+  try $ keyword "Eval"
+  keyword "("
+  t <- pType
+  keyword ";"
+  e <- pE (MacTo t)
+  vals <- option [] $ many1 (keyword ";" >> (pTypeKeyExpr pE))
+  keyword ")"
+  return (f vals e)
+
+pConst :: ParseM a -> (a -> b) -> ParseM b
+pConst p h = do
+  x <- p
+  return (h x)
+

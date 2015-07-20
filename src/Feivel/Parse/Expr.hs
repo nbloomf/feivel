@@ -31,10 +31,11 @@ module Feivel.Parse.Expr (
 import Feivel.Store
 import Feivel.Expr
 
-import Feivel.Parse.Key
-import Feivel.Parse.Type
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
+
+import Feivel.Parse.Int
+import Feivel.Parse.Rat
 
 import Feivel.Error
 
@@ -50,8 +51,6 @@ import Text.Parsec.Prim (try)
 {-  :Doc       -}
 {-  :Expr      -}
 {-  :StrExpr   -}
-{-  :IntExpr   -}
-{-  :RatExpr   -}
 {-  :ZZModExpr -}
 {-  :BoolExpr  -}
 {-  :ListExpr  -}
@@ -65,38 +64,8 @@ import Text.Parsec.Prim (try)
 {- :Utilities -}
 {--------------}
 
--- Terms in Expression Grammars
-pTerm :: ParseM a -> ParseM (AtLocus a) -> String -> [ParseM a] -> ParseM (AtLocus a)
-pTerm cst expr err atoms = 
-  choice [try $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
-
--- Unary Operators (for expression parser)
-opParser1 :: (AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a))
-opParser1 f fun = do
-  start <- getPosition
-  try $ keyword fun
-  end <- getPosition
-  return $ \x -> (f x :@ (locus start end))
-
--- Binary Operators (for expression parser)
-opParser2 :: (AtLocus a -> AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a) -> (AtLocus a))
-opParser2 f fun = do
-  start <- getPosition
-  try $ keyword fun
-  end <- getPosition
-  return $ \x y -> (f x y :@ (locus start end))
 
 {- Term Parsing -}
-
-pConst :: ParseM a -> (a -> b) -> ParseM b
-pConst p h = do
-  x <- p
-  return (h x)
-
-pVarExpr :: (Key -> a) -> Type -> ParseM a
-pVarExpr h t = do
-  k <- pKey
-  return (h k)
 
 pAtPos :: Type -> (Expr -> Expr -> b) -> ParseM b
 pAtPos typ fun = pFun2 "AtPos" (pTypedExpr (ListOf typ)) (pTypedExpr ZZ) fun
@@ -121,11 +90,9 @@ pMacroExpr f = do
   t <- pType
   keyword ";"
   e <- pTypedExpr (MacTo t)
-  vals <- option [] $ many1 (keyword ";" >> pTypeKeyExpr)
+  vals <- option [] $ many1 (keyword ";" >> (pTypeKeyExpr pTypedExpr))
   keyword ")"
   return (f vals e)
-
-
 
 
 
@@ -164,13 +131,13 @@ pREPL = do
       try $ keyword "define"
       t <- pType
       whitespace
-      (k,_) <- pUntypedKey
+      k <- pKey
       keyword ":="
       v <- if t == DD then pBrackDocE else pTypedExpr t
       return (Define t k v (Empty :@ NullLocus))
 
     pNakedExprREPL = do
-      x <- try pTypedNakedExpr
+      x <- try (pTypedNakedExpr pTypedExpr)
       return (NakedExpr x)
 
     pImportREPL = do
@@ -218,7 +185,7 @@ pDoc = choice $ map pAtLocus
         where
           pVals = do
             _ <- try $ keyword "("
-            vs <- sepBy pTypeKeyExpr (keyword ";")
+            vs <- sepBy (pTypeKeyExpr pTypedExpr) (keyword ";")
             keyword ")"
             return vs
 
@@ -257,7 +224,7 @@ pDoc = choice $ map pAtLocus
 
     pNakedExpr = do
       try (char '[' >> keyword ":")
-      x <- try pTypedNakedExpr
+      x <- try (pTypedNakedExpr pTypedExpr)
       _ <- keyword ":" >> char ']'
       return (NakedExpr x)
 
@@ -320,7 +287,7 @@ pDoc = choice $ map pAtLocus
 
     pLetIn = do
       try (char '[' >> keyword "let")
-      (_,k,e) <- pTypeKeyExpr
+      (_,k,e) <- (pTypeKeyExpr pTypedExpr)
       body <- keyword "in" >> pBrackDoc
       option () (try (keyword "endlet"))
       _ <- whitespace >> char ']'
@@ -365,9 +332,9 @@ pDoc = choice $ map pAtLocus
 pTypedExpr :: Type -> ParseM Expr
 pTypedExpr DD = fmap DocE  pDoc
 pTypedExpr SS = fmap StrE  pStrExpr
-pTypedExpr ZZ = fmap IntE  pIntExpr
+pTypedExpr ZZ = fmap IntE  (pIntExpr pTypedExpr)
 pTypedExpr BB = fmap BoolE pBoolExpr
-pTypedExpr QQ = fmap RatE  pRatExpr
+pTypedExpr QQ = fmap RatE  (pRatExpr pTypedExpr)
 
 pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     n)
 pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t)
@@ -387,21 +354,11 @@ pTypedExpr XX = choice
   ]
 
 
-
-pTypeKeyExpr :: ParseM (Type, Key, Expr)
-pTypeKeyExpr = do
-  t <- pType
-  whitespace
-  k <- pKey
-  keyword ":="
-  v <- pTypedExpr t
-  return (t, k, v)
-
-pTypedNakedExpr :: ParseM Expr
-pTypedNakedExpr = do
+pTypedNakedExpr :: (Type -> ParseM Expr) -> ParseM Expr
+pTypedNakedExpr pE = do
   t <- pType
   keyword ":"
-  pTypedExpr t
+  pE t
 
 pTypedConst :: Type -> ParseM Expr
 pTypedConst SS           = fmap StrE   pStrConst
@@ -466,85 +423,6 @@ pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
       [ [Infix (opParser2 Concat "++") AssocLeft
         ]
       ]
-
-
-
-{------------}
-{- :IntExpr -}
-{------------}
-
-pIntConst :: ParseM (IntExpr Expr)
-pIntConst = pAtLocus pIntConst'
-
-pIntConst' :: ParseM (IntExprLeaf Expr)
-pIntConst' = pConst pInteger IntConst
-
-pIntExpr :: ParseM (IntExpr Expr)
-pIntExpr = spaced $ buildExpressionParser intOpTable pIntTerm
-  where
-    pIntTerm = pTerm pIntConst' pIntExpr "integer expression"
-      [ pVarExpr IntVar ZZ
-      , pMacroExpr IntMacro
-
-      , pAtPos ZZ IntAtPos
-      , pAtIdx ZZ IntAtIdx
-    
-      , pIfThenElseExpr pIntExpr IntIfThenElse ZZ
-
-      , pFun1 "SquarePart"     pIntExpr IntSqPart
-      , pFun1 "SquareFreePart" pIntExpr IntSqFreePart
-      , pFun1 "Rad"            pIntExpr IntRad
-
-      , pFun1 "Length" (pTypedExpr (ListOf XX)) ListLen
-      , pFun1 "Rand"   (pTypedExpr (ListOf ZZ)) IntRand
-      , pFun1 "Sum"    (pTypedExpr (ListOf ZZ)) IntSum
-      , pFun1 "Prod"   (pTypedExpr (ListOf ZZ)) IntProd
-      , pFun1 "Min"    (pTypedExpr (ListOf ZZ)) IntMinim
-      , pFun1 "Max"    (pTypedExpr (ListOf ZZ)) IntMaxim
-      , pFun1 "GCD"    (pTypedExpr (ListOf ZZ)) IntGCDiv
-      , pFun1 "LCM"    (pTypedExpr (ListOf ZZ)) IntLCMul
-    
-      , pFun1 "Numerator"   (pTypedExpr QQ)  RatNumer
-      , pFun1 "Denominator" (pTypedExpr QQ)  RatDenom
-      , pFun1 "Floor"       (pTypedExpr QQ)  RatFloor
-    
-      , pFun1 "StrLen" (pTypedExpr SS)  StrLength
-
-      , pFun1  "NumRows"    (pTypedExpr (MatOf XX)) MatNumRows
-      , pFun1  "NumCols"    (pTypedExpr (MatOf XX)) MatNumCols
-      , pFun1T "MatrixRank" (pTypedExpr . MatOf)    MatRank
-
-      , pFun1 "PolyContent" (pTypedExpr (PolyOver ZZ)) IntContent
-    
-      , pFun2 "Uniform"  pIntExpr pIntExpr IntObserveUniform
-      , pFun2 "Binomial" pIntExpr (pTypedExpr QQ) IntObserveBinomial
-      , pFun1 "Poisson"  (pTypedExpr QQ) IntObservePoisson
-
-      , pFun1 "str" (pTypedExpr SS) IntCastStr
-      ]
-
-    intOpTable =
-      [ [ Infix (opParser2 IntPow "^") AssocRight
-        ]
-      , [ Infix (opParser2 IntMult "*") AssocLeft
-        ]
-      , [ Infix (opParser2 IntQuo "div") AssocLeft
-        , Infix (opParser2 IntMod "mod") AssocLeft
-        ]
-      , [ Prefix (opParser1 IntNeg "neg")
-        , Prefix (opParser1 IntAbs "abs")
-        ]
-      , [ Infix (opParser2 IntAdd "+") AssocLeft
-        , Infix (opParser2 IntSub "-") AssocLeft
-        ]
-      , [ Infix (opParser2 IntMin "min") AssocLeft
-        , Infix (opParser2 IntMax "max") AssocLeft
-        , Infix (opParser2 IntGCD "gcd") AssocLeft
-        , Infix (opParser2 IntLCM "lcm") AssocLeft
-        ]
-      , [ Infix (opParser2 IntChoose "choose") AssocLeft]
-      ]
-
 
 
 {--------------}
@@ -651,72 +529,6 @@ pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
 
 
 
-{------------}
-{- :RatExpr -}
-{------------}
-
-pRatConst :: ParseM (RatExpr Expr)
-pRatConst = pAtLocus pRatConst'
-
-pRatConst' :: ParseM (RatExprLeaf Expr)
-pRatConst' = pConst pRat RatConst
-
-pRatExpr :: ParseM (RatExpr Expr)
-pRatExpr = spaced $ buildExpressionParser ratOpTable pRatTerm
-  where
-    pRatTerm = pTerm pRatConst' pRatExpr "rational expression"
-      [ pVarExpr RatVar QQ
-      , pMacroExpr RatMacro
-
-      , pAtPos QQ RatAtPos
-      , pAtIdx QQ RatAtIdx
-
-      , pIfThenElseExpr pRatExpr RatIfThenElse QQ
-
-      , pFun1 "Rand"   (pTypedExpr (ListOf QQ)) RatRand
-      , pFun1 "Sum"    (pTypedExpr (ListOf QQ)) RatSum
-      , pFun1 "Prod"   (pTypedExpr (ListOf QQ)) RatProd
-      , pFun1 "Min"    (pTypedExpr (ListOf QQ)) RatMinim
-      , pFun1 "Max"    (pTypedExpr (ListOf QQ)) RatMaxim
-
-      , pFun1  "int" (pTypedExpr ZZ) RatCast
-      , pFun2  "Pow" pRatExpr (pTypedExpr ZZ) RatPow
-      , pFun1T "Mean" (pTypedExpr . ListOf) RatMean
-      , pFun2  "Sqrt" pRatExpr (pTypedExpr ZZ) RatSqrt
-      , pFun1T "MeanDev" (pTypedExpr . ListOf) RatMeanDev
-      , pFun2T "StdDev" (pTypedExpr . ListOf) (const (pTypedExpr ZZ)) RatStdDev
-      , pZScore
-
-      , pFun1 "str" (pTypedExpr SS) RatCastStr
-      ]
-      where
-        pZScore = do
-          try $ keyword "ZScore"
-          keyword "("
-          t <- pType
-          keyword ";"
-          p <- pRatExpr
-          keyword ";"
-          ks <- pTypedExpr (ListOf t)
-          keyword ";"
-          n <- pTypedExpr ZZ
-          keyword ")"
-          return (RatZScore p ks n)
-    
-    ratOpTable =
-      [ [ Prefix (opParser1 RatNeg "neg" )
-        , Prefix (opParser1 RatAbs "abs")
-        ]
-      , [ Infix (opParser2 RatMult "*") AssocLeft
-        , Infix (opParser2 RatQuot "/") AssocLeft
-        ]
-      , [ Infix (opParser2 RatAdd "+") AssocLeft
-        , Infix (opParser2 RatSub "-") AssocLeft
-        ]
-      , [ Infix (opParser2 RatMin "min") AssocLeft
-        , Infix (opParser2 RatMax "max") AssocLeft
-        ]
-      ]
 
 
 
@@ -1158,7 +970,7 @@ pMacConst' typ = do
   t <- pType
   keyword ";"
   body <- if t == DD then pBrackDocE else pTypedExpr t
-  vals <- option [] $ many (keyword ";" >> pTypeKeyExpr)
+  vals <- option [] $ many (keyword ";" >> (pTypeKeyExpr pTypedExpr))
   keyword ")"
   end <- getPosition
   case unify typ t of
