@@ -20,12 +20,15 @@ module Feivel.Parse.Key (
   pKey, pTypedKey, pUntypedKey, pToken, pKeyT
 ) where
 
-import Feivel.Key
+import Feivel.Store
 import Feivel.Expr
+
 import Feivel.Parse.ParseM
 import Feivel.Parse.Type
+
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
+
 
 
 pToken :: ParseM String

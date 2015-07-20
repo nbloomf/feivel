@@ -28,15 +28,16 @@ module Feivel.Parse.Expr (
     pTypedListExpr, pTypedMatExpr, pTypedPolyExpr, pTypedPermExpr
 ) where
 
+import Feivel.Store
 import Feivel.Expr
-import Feivel.Key
+
 import Feivel.Parse.Key
 import Feivel.Parse.Type
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Locus
+
 import Feivel.Error
-import Feivel.Store (emptyStore)
+
 
 import Feivel.Lib (mFromRowList, Variable(..), Natural(..), fromListP, Monomial, fromListM, identityM, nullP, mapFst, fromCycles, zzmod, Text(..), idPerm)
 
@@ -203,7 +204,6 @@ pDoc = choice $ map pAtLocus
       , pBail
       , pLetIn
       , pSelect
-      , pQuit
       , pNote
       ]
     return (Cat xs)
@@ -335,11 +335,6 @@ pDoc = choice $ map pAtLocus
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t)
-
-    pQuit = do
-      try (char '[' >> keyword "quit")
-      _ <- spaces >> char ']'
-      reportParseErr NullLocus Quit
 
     pNote = do
       try (char '[' >> keyword "~")

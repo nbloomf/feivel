@@ -20,15 +20,15 @@ module Feivel.Parse.Store (
   pRecords
 ) where
 
+import Feivel.Lib (Text(..))
+import Feivel.Store
 import Feivel.Expr
-import Feivel.Key
+
 import Feivel.Parse.Key
-import Feivel.Locus
 import Feivel.Parse.Format
 import Feivel.Parse.ParseM
 import Feivel.Parse.Expr
 import Feivel.Parse.Type
-import Feivel.Lib (Text(..))
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)

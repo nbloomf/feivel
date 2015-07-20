@@ -17,6 +17,9 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Store (
+  module Feivel.Store.Locus,
+  module Feivel.Store.Key,
+
   -- Errors
   StateErr(),
 
@@ -45,8 +48,8 @@ module Feivel.Store (
 
 import qualified Data.Map as M
 
-import Feivel.Key
-import Feivel.Locus
+import Feivel.Store.Key
+import Feivel.Store.Locus
 
 import Data.Maybe (isJust)
 import Control.Monad (foldM)

@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Locus (
+module Feivel.Store.Locus (
   Locus(NullLocus), locus, shortReport, longReport,
   AtLocus((:@)), HasLocus, locusOf
 ) where

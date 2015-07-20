@@ -45,12 +45,11 @@ module Feivel.Eval.EvalM (
 {-  :State   -}
 {-------------}
 
-import Feivel.Error
-import Feivel.Expr (Doc, Expr(), get, Get, ToExpr, toExpr)
-import Feivel.Key (Key)
-import Feivel.Locus (Locus(NullLocus), locusOf, HasLocus)
 import Feivel.Store
-import Feivel.Parse (pDoc, pRecords, runParseM, DataFormat(..), ParseM, pPaths)
+import Feivel.Expr
+import Feivel.Parse
+
+import Feivel.Error
 
 import Control.Monad.Trans.Error
 import qualified Control.Monad.Trans.State.Lazy as MTS

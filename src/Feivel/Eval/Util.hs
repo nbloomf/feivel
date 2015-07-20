@@ -21,8 +21,6 @@
 module Feivel.Eval.Util (
   module Feivel.Eval.EvalM,
   module Feivel.Eval.Eval,
-  module Feivel.Locus,
-  module Feivel.Key,
   module Feivel.Lib,
   module Feivel.Expr,
   module Feivel.Error,
@@ -40,8 +38,6 @@ module Feivel.Eval.Util (
 
 import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
-import Feivel.Locus
-import Feivel.Key
 import Feivel.Store
 import Feivel.Error
 import Feivel.Expr

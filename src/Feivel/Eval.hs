@@ -24,8 +24,9 @@ module Feivel.Eval (
   module Feivel.Eval.EvalM,
   module Feivel.Eval.Eval,
 
- Eval, eval, evalToGlyph
+  evalToGlyph
 ) where
+
 
 import Feivel.Eval.EvalM
 import Feivel.Eval.Eval

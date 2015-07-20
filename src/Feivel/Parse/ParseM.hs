@@ -31,7 +31,7 @@ module Feivel.Parse.ParseM (
 
 
 import Feivel.Error
-import Feivel.Locus
+import Feivel.Store
 import Feivel.Lib (Rat((:/:)), Variable(..), Format(..), Text(..))
 
 import Text.Parsec.Prim
@@ -41,6 +41,11 @@ import Text.ParserCombinators.Parsec
 
 import Control.Monad.Trans.Class (lift)
 
+
+
+{-----------}
+{- :ParseM -}
+{-----------}
 
 type ParseM = ParsecT String () (Either Goof)
 

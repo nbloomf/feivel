@@ -19,12 +19,12 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 
 module Feivel.Error (
-  Err(..), PromoteError, promote, RandErr(..), REPLErr(..),
+  Err(..), PromoteError, promote, RandErr(..),
   Goof(..), reportErr, parseGoof
 ) where
 
-import Feivel.Locus
-import Feivel.Store (StateErr())
+
+import Feivel.Store (StateErr(), Locus(..), locus, shortReport)
 import Feivel.Lib.AlgErr (AlgErr())
 import Feivel.Lib.String (StrErr())
 import Feivel.Lib.List (ListErr())
@@ -55,7 +55,6 @@ data Err
   | ErrParse ParseError
   | ErrType  TypeErr
   | ErrRand  RandErr
-  | ErrREPL  REPLErr
   | ErrAlg   AlgErr
   | ErrGet   GetErr
 
@@ -72,7 +71,6 @@ instance Show Err where
   show (ErrFile  x) = show x
   show (ErrParse x) = show x
   show (ErrState x) = show x
-  show (ErrREPL  x) = show x
 
   -- Misc Errors
   show (ErrExpr  x) = show x
@@ -95,21 +93,9 @@ instance PromoteError ExprErr    where promote = ErrExpr
 instance PromoteError ParseError where promote = ErrParse
 instance PromoteError TypeErr    where promote = ErrType
 instance PromoteError RandErr    where promote = ErrRand
-instance PromoteError REPLErr    where promote = ErrREPL
 instance PromoteError GetErr     where promote = ErrGet
 
 
-
-{------------}
-{- :REPLErr -}
-{------------}
-
-data REPLErr
-  = Quit
-  deriving Eq
-
-instance Show REPLErr where
-  show Quit = "Bye!"
 
 
 

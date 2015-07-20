@@ -16,7 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Key (
+module Feivel.Store.Key (
   Key(Key), qualifyKey
 ) where
 
