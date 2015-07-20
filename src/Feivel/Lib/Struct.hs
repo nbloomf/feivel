@@ -16,22 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib (
-  module Feivel.Lib.Algebra.Ring,
-  module Feivel.Lib.String,
-  module Feivel.Lib.Bool,
-  module Feivel.Lib.Data,
-  module Feivel.Lib.List,
-  module Feivel.Lib.Struct,
-  module Feivel.Lib.Pair,
-  module Feivel.Lib.Write.LaTeX
+module Feivel.Lib.Struct (
+  module Feivel.Lib.Struct.Matrix,
+  module Feivel.Lib.Struct.Permutation,
+  module Feivel.Lib.Struct.Polynomial
 ) where
 
-import Feivel.Lib.Algebra.Ring
-import Feivel.Lib.String
-import Feivel.Lib.Bool
-import Feivel.Lib.Data
-import Feivel.Lib.List
-import Feivel.Lib.Struct
-import Feivel.Lib.Pair
-import Feivel.Lib.Write.LaTeX
+import Feivel.Lib.Struct.Matrix
+import Feivel.Lib.Struct.Permutation
+import Feivel.Lib.Struct.Polynomial
