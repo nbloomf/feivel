@@ -16,58 +16,28 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
+{-# LANGUAGE FlexibleInstances #-}
 
-module Feivel.Expr.Bool where
+module Feivel.Grammar (
+  module Feivel.Grammar.Expr,
+  module Feivel.Grammar.Put,
+  module Feivel.Grammar.Get,
+  module Feivel.Grammar.Type,
 
-import Feivel.Expr.Util
+  -- Errors
+  ExprErr(..)
+) where
 
 
-type BoolExpr a = AtLocus (BoolExprLeaf a)
+import Feivel.Grammar.Expr
+import Feivel.Grammar.Put
+import Feivel.Grammar.Get
+import Feivel.Grammar.Type
 
-data BoolExprLeaf a
-  = BoolConst Bool
-  | BoolVar   Key
-  | IsDefined Key
 
-  | BoolMacro [(Type, Key, a)] a -- Expr, MacTo BB
-  | BoolAtPos a a      -- ListOf BB, ZZ
-  | BoolAtIdx a a a -- MatOf BB, ZZ, ZZ
+data ExprErr
+ = UnevaluatedExpression
+ | BailMessage String
+ deriving (Eq, Show)
 
-  | BoolIfThenElse a (BoolExpr a) (BoolExpr a) -- BB
 
-  | BoolEq  a a
-  | BoolNEq a a
-
-  | BoolLT  a a
-  | BoolLEq a a
-  | BoolGT  a a
-  | BoolGEq a a
-
-  -- Arithmetic
-  | Conj (BoolExpr a) (BoolExpr a)
-  | Disj (BoolExpr a) (BoolExpr a)
-  | Imp  (BoolExpr a) (BoolExpr a)
-  | Neg  (BoolExpr a)
-
-  -- String
-  | Matches a Text -- SS
-
-  -- Integer
-  | IntDiv    a a -- ZZ, ZZ
-  | IntSqFree a      -- ZZ
-
-  | BoolRand a -- ListOf BB
-
-  -- List
-  | ListElem    a a -- XX, ListOf XX
-  | ListIsEmpty a -- ListOf XX
-
-  -- Matrix
-  | MatIsRow    a -- MatOf XX
-  | MatIsCol    a -- MatOf XX
-  | MatIsGJForm a -- MatOf XX
-  deriving (Eq, Show)
-
-instance Typed (BoolExpr a) where typeOf _ = BB

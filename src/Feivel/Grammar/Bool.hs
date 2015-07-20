@@ -19,52 +19,55 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Str where
+module Feivel.Grammar.Bool where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
-type StrExpr a = AtLocus (StrExprLeaf a)
+type BoolExpr a = AtLocus (BoolExprLeaf a)
 
-data StrExprLeaf a
-  = StrConst Text
-  | StrVar   Key
+data BoolExprLeaf a
+  = BoolConst Bool
+  | BoolVar   Key
+  | IsDefined Key
 
-  | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
-  | StrAtPos a a -- ListOf SS, ZZ
-  | StrAtIdx a a a -- MatOf SS, ZZ, ZZ
- 
-  | StrIfThenElse a (StrExpr a) (StrExpr a) -- BB
+  | BoolMacro [(Type, Key, a)] a -- Expr, MacTo BB
+  | BoolAtPos a a      -- ListOf BB, ZZ
+  | BoolAtIdx a a a -- MatOf BB, ZZ, ZZ
 
-  -- Combinators
-  | Concat      (StrExpr a) (StrExpr a)
-  | StrStrip    (StrExpr a) (StrExpr a)
- 
-  | Reverse     (StrExpr a)
-  | ToUpper     (StrExpr a)
-  | ToLower     (StrExpr a)
-  | Rot13       (StrExpr a)
+  | BoolIfThenElse a (BoolExpr a) (BoolExpr a) -- BB
+
+  | BoolEq  a a
+  | BoolNEq a a
+
+  | BoolLT  a a
+  | BoolLEq a a
+  | BoolGT  a a
+  | BoolGEq a a
+
+  -- Arithmetic
+  | Conj (BoolExpr a) (BoolExpr a)
+  | Disj (BoolExpr a) (BoolExpr a)
+  | Imp  (BoolExpr a) (BoolExpr a)
+  | Neg  (BoolExpr a)
+
+  -- String
+  | Matches a Text -- SS
 
   -- Integer
-  | StrHex      a -- ZZ
-  | StrRoman    a -- ZZ
-  | StrBase36   a -- ZZ
+  | IntDiv    a a -- ZZ, ZZ
+  | IntSqFree a      -- ZZ
 
-  -- Rational
-  | StrDecimal a a -- QQ, ZZ
+  | BoolRand a -- ListOf BB
 
   -- List
-  | StrRand a -- ListOf SS
+  | ListElem    a a -- XX, ListOf XX
+  | ListIsEmpty a -- ListOf XX
 
   -- Matrix
-  | StrTab a -- MatOf XX
-
-  -- General
-  | StrFormat Format a -- XX
-  | StrTypeOf a -- XX
-
-  -- Casting
-  | StrIntCast a -- ZZ
+  | MatIsRow    a -- MatOf XX
+  | MatIsCol    a -- MatOf XX
+  | MatIsGJForm a -- MatOf XX
   deriving (Eq, Show)
 
-instance Typed (StrExpr a)  where typeOf _ = SS
+instance Typed (BoolExpr a) where typeOf _ = BB

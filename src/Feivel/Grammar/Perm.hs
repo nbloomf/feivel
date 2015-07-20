@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Perm where
+module Feivel.Grammar.Perm where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
 type PermExpr a = AtLocus (PermExprLeaf a)

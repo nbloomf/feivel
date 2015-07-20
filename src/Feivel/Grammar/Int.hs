@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Int where
+module Feivel.Grammar.Int where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
 type IntExpr a = AtLocus (IntExprLeaf a)

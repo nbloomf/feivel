@@ -19,7 +19,7 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Expr (
+module Feivel.Grammar.Expr (
   ToExpr, toExpr,
 
   -- Expression Types
@@ -40,18 +40,18 @@ module Feivel.Expr.Expr (
 
 import Feivel.Lib (Rat(..), ZZModulo(..), Text(..))
 
-import Feivel.Expr.Util
-import Feivel.Expr.Doc
-import Feivel.Expr.ZZMod
-import Feivel.Expr.Perm
-import Feivel.Expr.Mac
-import Feivel.Expr.Poly
-import Feivel.Expr.Rat
-import Feivel.Expr.Mat
-import Feivel.Expr.Str
-import Feivel.Expr.Bool
-import Feivel.Expr.List
-import Feivel.Expr.Int
+import Feivel.Grammar.Util
+import Feivel.Grammar.Doc
+import Feivel.Grammar.ZZMod
+import Feivel.Grammar.Perm
+import Feivel.Grammar.Mac
+import Feivel.Grammar.Poly
+import Feivel.Grammar.Rat
+import Feivel.Grammar.Mat
+import Feivel.Grammar.Str
+import Feivel.Grammar.Bool
+import Feivel.Grammar.List
+import Feivel.Grammar.Int
 
 
 data Expr

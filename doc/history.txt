@@ -1,5 +1,11 @@
 feivel: version history
 
+X.X.X
+=====
+* Significant refactor: not visible to users, but
+  extending feivel is now vastly simpler
+* New functions: PivotCols, MatrixRank, PolyContent
+
 0.2.0
 =====
 * Shiny new graphical REPL (replaces old repl)

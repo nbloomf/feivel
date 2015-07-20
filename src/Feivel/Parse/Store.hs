@@ -22,7 +22,7 @@ module Feivel.Parse.Store (
 
 import Feivel.Lib (Text(..))
 import Feivel.Store
-import Feivel.Expr
+import Feivel.Grammar
 
 import Feivel.Parse.Util
 import Feivel.Parse.Format

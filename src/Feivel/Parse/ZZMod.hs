@@ -20,7 +20,7 @@ module Feivel.Parse.ZZMod (
   pZZModConst, pZZModExpr
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), ZZModExpr, ZZModExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), ZZModExpr, ZZModExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (zzmod)

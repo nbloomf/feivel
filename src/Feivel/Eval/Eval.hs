@@ -22,7 +22,7 @@
 module Feivel.Eval.Eval where
 
 import Feivel.Eval.EvalM
-import Feivel.Expr
+import Feivel.Grammar
 import Feivel.Store
 import Feivel.Error
 import Feivel.Lib

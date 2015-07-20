@@ -21,7 +21,7 @@ module Feivel.Parse.Doc (
 ) where
 
 import Feivel.Store (locus, AtLocus(..), Locus(..))
-import Feivel.Expr (Type(..), Expr(..), Doc, DocLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), Doc, DocLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (Text(..))

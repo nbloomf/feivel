@@ -19,34 +19,47 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Mac where
+module Feivel.Grammar.Doc where
 
-import Feivel.Expr.Util
-
-
-type MacExpr a = AtLocus (MacExprLeaf a)
-
-data MacExprLeaf a
-  = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
-  | MacVar   Type Key
-
-  | MacMacro Type [(Type, Key, a)] a -- MacTo (MacTo typ)
-  | MacAtPos Type a a -- ListOf (MacTo typ), ZZ
-  | MacAtIdx Type a a a -- MatOf (MacTo typ), ZZ, ZZ
-
-  | MacRand Type a -- ListOf (MacTo typ)
-
-  | MacIfThenElse Type a (MacExpr a) (MacExpr a) -- BB
-  deriving (Eq, Show)
+import Feivel.Grammar.Util
 
 
+type Doc a = AtLocus (DocLeaf a)
 
-instance Typed (MacExpr a) where
-  typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
-  typeOf (MacVar        typ _     :@ _) = MacTo typ
-  typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
-  typeOf (MacAtPos      typ _ _   :@ _) = MacTo typ
-  typeOf (MacAtIdx      typ _ _ _ :@ _) = MacTo typ
-  typeOf (MacRand       typ _     :@ _) = MacTo typ
-  typeOf (MacIfThenElse typ _ _ _ :@ _) = MacTo typ
+data DocLeaf a
+ -- Primitives
+ = Empty
+ | DocText   Text
+ | Escaped   Char
+ | Scope     (Doc a)
+ | NakedKey  Key
+ | NakedExpr a -- XX
 
+ | Import    String (Maybe String) (Doc a)
+
+ | DocMacro [(Type, Key, a)] a -- XX, MacTo DD
+
+ -- Combination
+ | Cat     [Doc a]
+ | CatPar  [Doc a]
+ | Alt     [Doc a]
+ | Shuffle [Doc a]
+
+ -- Flow Control
+ | IfThenElse a (Doc a) (Doc a) -- BB
+ | Cond       [(a, Doc a)] (Doc a) -- BB
+
+ -- Binding
+ | LetIn  Key a (Doc a) -- XX
+ | Define Type Key a (Doc a) -- XX
+
+ -- Selection and Repetition
+ | ForSay Key a (Doc a) (Maybe (Doc a)) -- ListOf XX
+ | Select Key a (Doc a)             -- ListOf XX
+
+ -- Debugging
+ | Bail      a -- SS
+ | ShowState
+ deriving (Eq, Show)
+
+instance Typed (Doc a) where typeOf _ = DD

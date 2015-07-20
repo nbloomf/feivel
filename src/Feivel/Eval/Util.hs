@@ -22,7 +22,7 @@ module Feivel.Eval.Util (
   module Feivel.Eval.EvalM,
   module Feivel.Eval.Eval,
   module Feivel.Lib,
-  module Feivel.Expr,
+  module Feivel.Grammar,
   module Feivel.Error,
   module Feivel.Store,
   pInteger, pRat,
@@ -40,7 +40,7 @@ import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
 import Feivel.Store
 import Feivel.Error
-import Feivel.Expr
+import Feivel.Grammar
 import Feivel.Lib
 import Feivel.Parse (pInteger, pRat)
 

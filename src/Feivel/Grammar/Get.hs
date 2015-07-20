@@ -19,12 +19,12 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Get (
+module Feivel.Grammar.Get (
   Get, get, toStateT, GetErr()
 ) where
 
-import Feivel.Expr.Expr
-import Feivel.Expr.Util
+import Feivel.Grammar.Expr
+import Feivel.Grammar.Util
 import Feivel.Lib (mSeq, polySeq, mapPerm, seqPerm)
 
 

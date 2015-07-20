@@ -21,7 +21,7 @@ module Feivel.Parse.Perm (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Expr (Type(..), Expr(..), PermExpr, PermExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), PermExpr, PermExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (fromCycles, idPerm)

@@ -30,11 +30,10 @@ module Feivel.Parse.Expr (
 
 
 import Feivel.Store
-import Feivel.Expr
+import Feivel.Grammar
 
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-
 import Feivel.Parse.Int
 import Feivel.Parse.Str
 import Feivel.Parse.Rat

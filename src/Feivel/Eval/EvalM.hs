@@ -46,7 +46,7 @@ module Feivel.Eval.EvalM (
 {-------------}
 
 import Feivel.Store
-import Feivel.Expr
+import Feivel.Grammar
 import Feivel.Parse
 
 import Feivel.Error

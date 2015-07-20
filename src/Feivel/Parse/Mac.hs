@@ -21,7 +21,7 @@ module Feivel.Parse.Mac (
 ) where
 
 import Feivel.Store (locus, emptyStore)
-import Feivel.Expr (Type(..), Expr(..), MacExpr, MacExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), MacExpr, MacExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 

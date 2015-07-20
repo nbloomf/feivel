@@ -20,7 +20,7 @@ module Feivel.Parse.Poly (
   pPolyConst, pTypedPolyExpr, pPolyExpr, pPolyLiteral
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), PolyExpr, PolyExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), PolyExpr, PolyExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (nullP, fromListM, identityM, fromListP, Natural(..), Variable, Monomial)

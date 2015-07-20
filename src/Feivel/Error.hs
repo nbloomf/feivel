@@ -29,7 +29,7 @@ import Feivel.Lib.AlgErr (AlgErr())
 import Feivel.Lib.String (StrErr())
 import Feivel.Lib.List (ListErr())
 import Feivel.Lib.Bool (BoolErr())
-import Feivel.Expr (ExprErr(), GetErr(), TypeErr())
+import Feivel.Grammar (ExprErr(), GetErr(), TypeErr())
 
 import Text.Parsec.Error (ParseError(), errorPos)
 import Control.Monad.Trans.Error

@@ -21,7 +21,7 @@ module Feivel.Parse.Mat (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Expr (Type(..), Expr(..), MatExpr, MatExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), MatExpr, MatExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (mFromRowList)

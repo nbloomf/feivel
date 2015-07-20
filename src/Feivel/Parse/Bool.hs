@@ -20,7 +20,7 @@ module Feivel.Parse.Bool (
   pBoolConst, pBoolExpr
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), BoolExpr, BoolExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), BoolExpr, BoolExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 

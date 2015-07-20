@@ -20,7 +20,7 @@ module Feivel.Parse.Int (
   pIntConst, pIntExpr
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), IntExpr, IntExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), IntExpr, IntExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 

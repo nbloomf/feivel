@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.ZZMod where
+module Feivel.Grammar.ZZMod where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
 type ZZModExpr a = AtLocus (ZZModExprLeaf a)

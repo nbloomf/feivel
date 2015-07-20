@@ -21,7 +21,7 @@ module Feivel.Debug where
 import Feivel.Parse
 import Feivel.Eval
 import Feivel.Store
-import Feivel.Expr
+import Feivel.Grammar
 import Feivel.Main
 import Feivel.GUI
 

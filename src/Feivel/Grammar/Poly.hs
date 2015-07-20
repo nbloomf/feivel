@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Poly where
+module Feivel.Grammar.Poly where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 {-------------}
 {- :PolyExpr -}

@@ -21,7 +21,7 @@ module Feivel.Parse.List (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Expr (Type(..), Expr(..), ListExpr, ListExprLeaf(..), ListGuard(..))
+import Feivel.Grammar (Type(..), Expr(..), ListExpr, ListExprLeaf(..), ListGuard(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 

@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.List where
+module Feivel.Grammar.List where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
 type ListExpr a = AtLocus (ListExprLeaf a)

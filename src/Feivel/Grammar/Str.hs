@@ -19,47 +19,52 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Doc where
+module Feivel.Grammar.Str where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
-type Doc a = AtLocus (DocLeaf a)
+type StrExpr a = AtLocus (StrExprLeaf a)
 
-data DocLeaf a
- -- Primitives
- = Empty
- | DocText   Text
- | Escaped   Char
- | Scope     (Doc a)
- | NakedKey  Key
- | NakedExpr a -- XX
+data StrExprLeaf a
+  = StrConst Text
+  | StrVar   Key
 
- | Import    String (Maybe String) (Doc a)
+  | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
+  | StrAtPos a a -- ListOf SS, ZZ
+  | StrAtIdx a a a -- MatOf SS, ZZ, ZZ
+ 
+  | StrIfThenElse a (StrExpr a) (StrExpr a) -- BB
 
- | DocMacro [(Type, Key, a)] a -- XX, MacTo DD
+  -- Combinators
+  | Concat      (StrExpr a) (StrExpr a)
+  | StrStrip    (StrExpr a) (StrExpr a)
+ 
+  | Reverse     (StrExpr a)
+  | ToUpper     (StrExpr a)
+  | ToLower     (StrExpr a)
+  | Rot13       (StrExpr a)
 
- -- Combination
- | Cat     [Doc a]
- | CatPar  [Doc a]
- | Alt     [Doc a]
- | Shuffle [Doc a]
+  -- Integer
+  | StrHex      a -- ZZ
+  | StrRoman    a -- ZZ
+  | StrBase36   a -- ZZ
 
- -- Flow Control
- | IfThenElse a (Doc a) (Doc a) -- BB
- | Cond       [(a, Doc a)] (Doc a) -- BB
+  -- Rational
+  | StrDecimal a a -- QQ, ZZ
 
- -- Binding
- | LetIn  Key a (Doc a) -- XX
- | Define Type Key a (Doc a) -- XX
+  -- List
+  | StrRand a -- ListOf SS
 
- -- Selection and Repetition
- | ForSay Key a (Doc a) (Maybe (Doc a)) -- ListOf XX
- | Select Key a (Doc a)             -- ListOf XX
+  -- Matrix
+  | StrTab a -- MatOf XX
 
- -- Debugging
- | Bail      a -- SS
- | ShowState
- deriving (Eq, Show)
+  -- General
+  | StrFormat Format a -- XX
+  | StrTypeOf a -- XX
 
-instance Typed (Doc a) where typeOf _ = DD
+  -- Casting
+  | StrIntCast a -- ZZ
+  deriving (Eq, Show)
+
+instance Typed (StrExpr a)  where typeOf _ = SS

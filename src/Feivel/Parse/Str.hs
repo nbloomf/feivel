@@ -20,7 +20,7 @@ module Feivel.Parse.Str (
   pStrConst, pStrExpr
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), StrExpr, StrExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), StrExpr, StrExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 

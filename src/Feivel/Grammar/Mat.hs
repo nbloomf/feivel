@@ -19,9 +19,9 @@
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr.Mat where
+module Feivel.Grammar.Mat where
 
-import Feivel.Expr.Util
+import Feivel.Grammar.Util
 
 
 type MatExpr a = AtLocus (MatExprLeaf a)

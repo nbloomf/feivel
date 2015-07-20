@@ -16,28 +16,37 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances    #-}
 
-module Feivel.Expr (
-  module Feivel.Expr.Expr,
-  module Feivel.Expr.Put,
-  module Feivel.Expr.Get,
-  module Feivel.Expr.Type,
+module Feivel.Grammar.Mac where
 
-  -- Errors
-  ExprErr(..)
-) where
+import Feivel.Grammar.Util
 
 
-import Feivel.Expr.Expr
-import Feivel.Expr.Put
-import Feivel.Expr.Get
-import Feivel.Expr.Type
+type MacExpr a = AtLocus (MacExprLeaf a)
+
+data MacExprLeaf a
+  = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
+  | MacVar   Type Key
+
+  | MacMacro Type [(Type, Key, a)] a -- MacTo (MacTo typ)
+  | MacAtPos Type a a -- ListOf (MacTo typ), ZZ
+  | MacAtIdx Type a a a -- MatOf (MacTo typ), ZZ, ZZ
+
+  | MacRand Type a -- ListOf (MacTo typ)
+
+  | MacIfThenElse Type a (MacExpr a) (MacExpr a) -- BB
+  deriving (Eq, Show)
 
 
-data ExprErr
- = UnevaluatedExpression
- | BailMessage String
- deriving (Eq, Show)
 
+instance Typed (MacExpr a) where
+  typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacVar        typ _     :@ _) = MacTo typ
+  typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtPos      typ _ _   :@ _) = MacTo typ
+  typeOf (MacAtIdx      typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacRand       typ _     :@ _) = MacTo typ
+  typeOf (MacIfThenElse typ _ _ _ :@ _) = MacTo typ
 

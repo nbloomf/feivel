@@ -20,7 +20,7 @@ module Feivel.Parse.Rat (
   pRatConst, pRatExpr
 ) where
 
-import Feivel.Expr (Type(..), Expr(..), RatExpr, RatExprLeaf(..))
+import Feivel.Grammar (Type(..), Expr(..), RatExpr, RatExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
