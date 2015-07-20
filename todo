@@ -45,8 +45,8 @@ Feature Ideas
 * Arch: Groupoid class
 * Arch: type synonyms
 * Refactor: Typed and Get know too much about EvalM
-  1: put type in grammar
-  2: put format in parse
+  1: (done) put type in grammar
+  2: (done) put format in parse
   3: Rename Expr subfolder to Grammar
   4: Move Error up the hierarchy of dependencies
   5: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
@@ -57,7 +57,7 @@ Feature Ideas
   2: Separate put and putVal
   3: use RankNTypes to make dispatch helper functions
 * Refactor: Eval is too big
-  5: Move parsers to own modules
+  5: (started) Move parsers to own modules
   6: Split parameters on grammar types with class constraints, e.g. IntExprType t => blah
        (recover type safety with modularity)
 * CL option: --expr=typ (default is doc)

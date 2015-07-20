@@ -159,13 +159,13 @@ parsePaths str = case runParseM pPaths "" str of
 readAndParseDoc :: FilePath -> EvalM (Doc Expr)
 readAndParseDoc path = do
   file <- readPath path
-  parseWith pDoc path file
+  parseWith (pDoc pTypedExpr) path file
 
 readAndParseDocFromLib :: FilePath -> EvalM (Doc Expr)
 readAndParseDocFromLib file = do
   lib <- lookupLibPaths
   (str, path) <- findFileInPaths file lib
-  parseWith pDoc path str
+  parseWith (pDoc pTypedExpr) path str
 
 
 readAndParseStates :: FilePath -> DataFormat -> EvalM [Store Expr]

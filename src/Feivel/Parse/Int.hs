@@ -26,9 +26,6 @@ import Feivel.Parse.ParseM
 
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
-{------------}
-{- :IntExpr -}
-{------------}
 
 pIntConstLeaf :: ParseM (IntExprLeaf Expr)
 pIntConstLeaf = pConst pInteger IntConst

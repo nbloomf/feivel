@@ -35,7 +35,14 @@ import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
 import Feivel.Parse.Int
+import Feivel.Parse.Str
 import Feivel.Parse.Rat
+import Feivel.Parse.Bool
+import Feivel.Parse.ZZMod
+import Feivel.Parse.Perm
+import Feivel.Parse.Poly
+import Feivel.Parse.Mat
+import Feivel.Parse.List
 
 import Feivel.Error
 
@@ -50,13 +57,6 @@ import Text.Parsec.Prim (try)
 {- Contents    -}
 {-  :Doc       -}
 {-  :Expr      -}
-{-  :StrExpr   -}
-{-  :ZZModExpr -}
-{-  :BoolExpr  -}
-{-  :ListExpr  -}
-{-  :MatExpr   -}
-{-  :PolyExpr  -}
-{-  :PermExpr  -}
 {-  :MacExpr   -}
 {---------------}
 
@@ -100,18 +100,18 @@ pMacroExpr f = do
 {- :Doc -}
 {--------}
 
-pBrackDoc :: ParseM (Doc Expr)
-pBrackDoc = do
+pBrackDoc :: (Type -> ParseM Expr) -> ParseM (Doc Expr)
+pBrackDoc pE = do
   _ <- try $ char '['
-  d <- pDoc
+  d <- pDoc pE
   _ <- char ']'
   whitespace
   return d
 
-pBrackDocE :: ParseM Expr
-pBrackDocE = do
+pBrackDocE :: (Type -> ParseM Expr) -> ParseM Expr
+pBrackDocE pE = do
   _ <- try $ char '['
-  d <- pDoc
+  d <- pDoc pE
   _ <- char ']'
   whitespace
   return (DocE d)
@@ -133,7 +133,7 @@ pREPL = do
       whitespace
       k <- pKey
       keyword ":="
-      v <- if t == DD then pBrackDocE else pTypedExpr t
+      v <- if t == DD then (pBrackDocE pTypedExpr) else pTypedExpr t
       return (Define t k v (Empty :@ NullLocus))
 
     pNakedExprREPL = do
@@ -147,8 +147,8 @@ pREPL = do
       return (Import path qual (Empty :@ NullLocus))
 
 
-pDoc :: ParseM (Doc Expr)
-pDoc = choice $ map pAtLocus
+pDoc :: (Type -> ParseM Expr) -> ParseM (Doc Expr)
+pDoc pE = choice $ map pAtLocus
   [ eof >> return Empty
   , lookAhead (char ']') >> return Empty
   , do
@@ -178,14 +178,14 @@ pDoc = choice $ map pAtLocus
   where
     pEval = do
       try (char '[' >> keyword "eval")
-      e <- pTypedExpr (MacTo DD)
+      e <- pE (MacTo DD)
       vals <- option [] pVals
       _ <- option () (try (keyword "endeval")) >> char ']'
       return (DocMacro vals e)
         where
           pVals = do
             _ <- try $ keyword "("
-            vs <- sepBy (pTypeKeyExpr pTypedExpr) (keyword ";")
+            vs <- sepBy (pTypeKeyExpr pE) (keyword ";")
             keyword ")"
             return vs
 
@@ -200,7 +200,7 @@ pDoc = choice $ map pAtLocus
       path <- pParens pPath
       qual <- option Nothing (try (keyword "as") >> pParens pToken >>= return . Just)
       _    <- option () (try (keyword "endimport")) >> char ']'
-      rest <- pDoc
+      rest <- pDoc pE
       return (Import path qual rest)
 
 
@@ -210,36 +210,36 @@ pDoc = choice $ map pAtLocus
       whitespace
       k <- pKey
       keyword ":="
-      v <- if t == DD then pBrackDocE else pTypedExpr t
+      v <- if t == DD then (pBrackDocE pE) else pE t
       _ <- option () (try (keyword "enddefine")) >> char ']'
-      rest <- pDoc
+      rest <- pDoc pE
       return (Define t k v rest)
 
     pScope = do
       try (char '[' >> keyword "scope")
-      x <- pBrackDoc
+      x <- pBrackDoc pE
       option () (try (keyword "endscope"))
       _ <- whitespace >> char ']'
       return (Scope x)
 
     pNakedExpr = do
       try (char '[' >> keyword ":")
-      x <- try (pTypedNakedExpr pTypedExpr)
+      x <- try (pTypedNakedExpr pE)
       _ <- keyword ":" >> char ']'
       return (NakedExpr x)
 
     pShuffle = do
       try (char '[' >> keyword "shuffle")
-      xs <- many pBrackDoc
+      xs <- many (pBrackDoc pE)
       option () (try $ keyword "endshuffle")
       _ <- whitespace >> char ']'
       return (Shuffle xs)
 
     pIfThenElse = do
       try (char '[' >> keyword "if")
-      test  <- pTypedExpr BB
-      true  <- keyword "then" >> pBrackDoc
-      false <- keyword "else" >> pBrackDoc
+      test  <- pE BB
+      true  <- keyword "then" >> (pBrackDoc pE)
+      false <- keyword "else" >> (pBrackDoc pE)
       option () (try (keyword "endif"))
       _ <- whitespace >> char ']'
       return (IfThenElse test true false)
@@ -247,14 +247,14 @@ pDoc = choice $ map pAtLocus
     pCond = do
       try (char '[' >> keyword "cond")
       cases <- many pCondCase
-      auto <- option (Empty :@ NullLocus) (try (keyword "default") >> pBrackDoc)
+      auto <- option (Empty :@ NullLocus) (try (keyword "default") >> (pBrackDoc pE))
       option () (try (keyword "endcond"))
       _ <- whitespace >> char ']'
       return (Cond cases auto)
       where
         pCondCase = do
           s <- try (keyword "case") >> (pTypedExpr BB)
-          t <- pBrackDoc
+          t <- pBrackDoc pE
           return (s,t)
 
     pFor = do
@@ -262,9 +262,9 @@ pDoc = choice $ map pAtLocus
       typ <- pType
       spaces
       k <- pKey
-      r <- keyword "in"  >> (pTypedExpr (ListOf typ))
-      t <- keyword "say" >> pBrackDoc
-      b <- option Nothing $ (try (keyword "sepby")) >> pBrackDoc >>= (return . Just)
+      r <- keyword "in"  >> (pE $ ListOf typ)
+      t <- keyword "say" >> (pBrackDoc pE)
+      b <- option Nothing $ (try (keyword "sepby")) >> (pBrackDoc pE) >>= (return . Just)
       option () (try (keyword "endfor"))
       _ <- whitespace >> char ']'
       return (ForSay k r t b)
@@ -276,19 +276,19 @@ pDoc = choice $ map pAtLocus
       _ <- whitespace >> char ']'
       return (Alt opts)
       where
-        pAltOpt = try (keyword "opt") >> pBrackDoc
+        pAltOpt = try (keyword "opt") >> (pBrackDoc pE)
 
     pBail = do
       try (char '[' >> keyword "bail")
-      message <- pTypedExpr SS
+      message <- pE SS
       option () (try (keyword "endbail"))
       _ <- whitespace >> char ']'
       return (Bail message)
 
     pLetIn = do
       try (char '[' >> keyword "let")
-      (_,k,e) <- (pTypeKeyExpr pTypedExpr)
-      body <- keyword "in" >> pBrackDoc
+      (_,k,e) <- (pTypeKeyExpr pE)
+      body <- keyword "in" >> (pBrackDoc pE)
       option () (try (keyword "endlet"))
       _ <- whitespace >> char ']'
       return (LetIn k e body)
@@ -297,8 +297,8 @@ pDoc = choice $ map pAtLocus
       try (char '[' >> keyword "select")
       ty <- pType
       k <- spaced pKey
-      r <- keyword "from" >> (pTypedExpr $ ListOf ty)
-      t <- keyword "in"   >> pBrackDoc
+      r <- keyword "from" >> (pE $ ListOf ty)
+      t <- keyword "in"   >> (pBrackDoc pE)
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t)
@@ -330,27 +330,27 @@ pDoc = choice $ map pAtLocus
 {---------}
 
 pTypedExpr :: Type -> ParseM Expr
-pTypedExpr DD = fmap DocE  pDoc
-pTypedExpr SS = fmap StrE  pStrExpr
-pTypedExpr ZZ = fmap IntE  (pIntExpr pTypedExpr)
-pTypedExpr BB = fmap BoolE pBoolExpr
-pTypedExpr QQ = fmap RatE  (pRatExpr pTypedExpr)
+pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
+pTypedExpr SS = fmap StrE  (pStrExpr  pTypedExpr)
+pTypedExpr ZZ = fmap IntE  (pIntExpr  pTypedExpr)
+pTypedExpr BB = fmap BoolE (pBoolExpr pTypedExpr)
+pTypedExpr QQ = fmap RatE  (pRatExpr  pTypedExpr)
 
-pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     n)
-pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t)
-pTypedExpr (MatOf    t) = fmap MatE   (pTypedMatExpr  t)
+pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     pTypedExpr n)
+pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t pTypedExpr)
+pTypedExpr (MatOf    t) = fmap MatE   (pTypedMatExpr  t pTypedExpr)
 pTypedExpr (MacTo    t) = fmap MacE   (pTypedMacExpr  t)
-pTypedExpr (PermOf   t) = fmap PermE  (pTypedPermExpr t)
-pTypedExpr (PolyOver t) = fmap PolyE  (pTypedPolyExpr t)
+pTypedExpr (PermOf   t) = fmap PermE  (pTypedPermExpr t pTypedExpr)
+pTypedExpr (PolyOver t) = fmap PolyE  (pTypedPolyExpr t pTypedExpr)
 
 pTypedExpr XX = choice
   [ pTypedExpr ZZ
   , pTypedExpr QQ
   , pTypedExpr BB
   , pTypedExpr SS
-  , fmap ListE pListExpr
-  , fmap MatE pMatExpr
-  , fmap PolyE pPolyExpr
+  , fmap ListE (pListExpr pTypedExpr)
+  , fmap MatE  (pMatExpr  pTypedExpr)
+  , fmap PolyE (pPolyExpr pTypedExpr)
   ]
 
 
@@ -367,591 +367,15 @@ pTypedConst BB           = fmap BoolE  pBoolConst
 pTypedConst QQ           = fmap RatE   pRatConst
 pTypedConst (ZZMod n)    = fmap ZZModE (pZZModConst n)
 
-pTypedConst (ListOf   t) = fmap ListE  (pListConst t)
-pTypedConst (MatOf    t) = fmap MatE   (pMatConst  t)
-pTypedConst (PolyOver t) = fmap PolyE  (pPolyConst t)
-pTypedConst (PermOf   t) = fmap PermE  (pPermConst t)
+pTypedConst (ListOf   t) = fmap ListE  (pListConst t pTypedConst)
+pTypedConst (MatOf    t) = fmap MatE   (pMatConst  t pTypedConst)
+pTypedConst (PolyOver t) = fmap PolyE  (pPolyConst t pTypedConst)
+pTypedConst (PermOf   t) = fmap PermE  (pPermConst t pTypedConst)
 pTypedConst (MacTo    t) = fmap MacE   (pMacConst  t)
 
 pTypedConst _ = error "pTypedConst"
 
 
-
-{------------}
-{- :StrExpr -}
-{------------}
-
-pStrConst :: ParseM (StrExpr Expr)
-pStrConst = pAtLocus pStrConst'
-
-pStrConst' :: ParseM (StrExprLeaf Expr)
-pStrConst' = pConst pText StrConst
-
-pStrExpr :: ParseM (StrExpr Expr)
-pStrExpr = spaced $ buildExpressionParser strOpTable pStrTerm
-  where
-    pStrTerm = pTerm pStrConst' pStrExpr "string expression"
-      [ pVarExpr StrVar SS
-      , pMacroExpr StrMacro
-
-      , pIfThenElseExpr pStrExpr StrIfThenElse SS
-
-      , pAtPos SS StrAtPos
-      , pAtIdx SS StrAtIdx
-    
-      , pFun2 "Strip" pStrExpr pStrExpr StrStrip
-      , pFun1 "Reverse" pStrExpr Reverse
-      , pFun1 "ToUpper" pStrExpr ToUpper
-      , pFun1 "ToLower" pStrExpr ToLower
-      , pFun1 "Rot13"   pStrExpr Rot13
-
-      , pFun1 "Rand"    (pTypedExpr $ ListOf SS) StrRand
-
-      , pFun1 "int" (pTypedExpr ZZ) StrIntCast
-    
-      , pFun1 "Hex"    (pTypedExpr ZZ) StrHex
-      , pFun1 "Roman"  (pTypedExpr ZZ) StrRoman
-      , pFun1 "Base36" (pTypedExpr ZZ) StrBase36
-    
-      , pFun1T "Tab" (pTypedExpr . MatOf) StrTab
-
-      , pFun2  "Decimal" (pTypedExpr QQ) (pTypedExpr ZZ) StrDecimal
-      , pFun2T "Format"  (const pFormat) pTypedExpr      StrFormat
-      ]
-
-    strOpTable =
-      [ [Infix (opParser2 Concat "++") AssocLeft
-        ]
-      ]
-
-
-{--------------}
-{- :ZZModExpr -}
-{--------------}
-
-pZZModConst :: Integer -> ParseM (ZZModExpr Expr)
-pZZModConst n = pAtLocus (pZZModConst' n)
-
-pZZModConst' :: Integer -> ParseM (ZZModExprLeaf Expr)
-pZZModConst' n = do
-  a <- pInteger
-  return (ZZModConst (ZZMod n) (a `zzmod` n))
-
-pZZModExpr :: Integer -> ParseM (ZZModExpr Expr)
-pZZModExpr n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
-  where
-    pZZModTerm = pTerm (pZZModConst' n) (pZZModExpr n) "integer expression"
-      [ pVarExpr (ZZModVar (ZZMod n)) (ZZMod n)
-      , pMacroExpr (ZZModMacro (ZZMod n))
-
-      , pAtPos (ZZMod n) (ZZModAtPos (ZZMod n))
-      , pAtIdx (ZZMod n) (ZZModAtIdx (ZZMod n))
-    
-      , pIfThenElseExpr (pZZModExpr n) (ZZModIfThenElse (ZZMod n)) (ZZMod n)
-
-      , pFun1 "int" (pTypedExpr ZZ) (ZZModCast (ZZMod n))
-
-      , pFun2 "Pow" (pZZModExpr n) (pTypedExpr ZZ) (ZZModPow (ZZMod n))
-
-      , pFun1 "Sum"    (pTypedExpr $ ListOf (ZZMod n)) (ZZModSum (ZZMod n))
-      , pFun1 "Prod"   (pTypedExpr $ ListOf (ZZMod n)) (ZZModProd (ZZMod n))
-      ]
-
-    zzModOpTable =
-      [ [ Infix (opParser2 (ZZModMult (ZZMod n)) "*") AssocLeft
-        ]
-      , [ Prefix (opParser1 (ZZModNeg (ZZMod n)) "neg")
-        , Prefix (opParser1 (ZZModInv (ZZMod n)) "inv")
-        ]
-      , [ Infix (opParser2 (ZZModAdd (ZZMod n)) "+") AssocLeft
-        , Infix (opParser2 (ZZModSub (ZZMod n)) "-") AssocLeft
-        ]
-      ]
-
-
-
-{-------------}
-{- :BoolExpr -}
-{-------------}
-
-pBoolConst :: ParseM (BoolExpr Expr)
-pBoolConst = pAtLocus pBoolConst'
-
-pBoolConst' :: ParseM (BoolExprLeaf Expr)
-pBoolConst' = pConst pBool BoolConst
-
-pBoolExpr :: ParseM (BoolExpr Expr)
-pBoolExpr = spaced $ buildExpressionParser boolOpTable pBoolTerm
-  where
-    pBoolTerm = pTerm pBoolConst' pBoolExpr "boolean expression"
-      [ pVarExpr BoolVar BB
-      , pMacroExpr BoolMacro
-
-      , pAtPos BB BoolAtPos
-      , pAtIdx BB BoolAtIdx
-
-      , pIfThenElseExpr pBoolExpr BoolIfThenElse BB
-    
-      , pFun1 "IsDefined" pKey IsDefined
-
-      , pFun1 "IsSquareFree" (pTypedExpr ZZ) IntSqFree
-
-      , pFun1 "Rand" (pTypedExpr $ ListOf BB) BoolRand
-
-      , pFun2T "Elem" pTypedExpr (pTypedExpr . ListOf) ListElem
-      , pFun1T "IsEmpty" (pTypedExpr . ListOf) ListIsEmpty
-
-      , pFun1 "IsRow" (pTypedExpr $ MatOf XX) MatIsRow
-      , pFun1 "IsCol" (pTypedExpr $ MatOf XX) MatIsCol
-      , pFun1T "IsGJForm" (pTypedExpr . MatOf) MatIsGJForm
-
-      , pFun2T "Equal"    pTypedExpr pTypedExpr BoolEq
-      , pFun2T "NotEqual" pTypedExpr pTypedExpr BoolNEq
-      , pFun2T "LT"       pTypedExpr pTypedExpr BoolLT
-      , pFun2T "LEq"      pTypedExpr pTypedExpr BoolLEq
-      , pFun2T "GT"       pTypedExpr pTypedExpr BoolGT
-      , pFun2T "GEq"      pTypedExpr pTypedExpr BoolGEq
-
-      , pFun2 "Matches" (pTypedExpr SS) pText    Matches
-      , pFun2 "Divides" (pTypedExpr ZZ) (pTypedExpr ZZ) IntDiv
-      ]
-
-    boolOpTable =
-      [ [ Prefix (opParser1 Neg "~")
-        ]
-      , [ Infix (opParser2 Conj "&&") AssocLeft
-        ]
-      , [ Infix (opParser2 Disj "||") AssocLeft
-        ]
-      , [ Infix (opParser2 Imp  "->") AssocRight
-        ]
-      ]
-
-
-
-
-
-
-{-------------}
-{- :ListExpr -}
-{-------------}
-
-pListLiteral :: Type -> ParseM (ListExpr Expr)
-pListLiteral typ = pAtLocus $ pListLiteralOf typ pTypedExpr
-
-pListConst :: Type -> ParseM (ListExpr Expr)
-pListConst typ = pAtLocus $ pListLiteralOf typ pTypedConst
-
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr)
-pListLiteralOf typ p = do
-    xs <- pBraceList (p typ)
-    return (ListConst typ xs)
-
-pListExpr :: ParseM (ListExpr Expr)
-pListExpr = pTypedListExpr XX
-
-pTypedListExpr :: Type -> ParseM (ListExpr Expr)
-pTypedListExpr typ = spaced $ buildExpressionParser listOpTable pListTerm
-  where
-    pListTerm = pTerm (pListLiteralOf typ pTypedExpr) (pTypedListExpr typ) "list expression"
-      [ pVarExpr (ListVar typ) (ListOf typ)
-
-      , pMacroExpr (ListMacro typ)
-
-      , pAtPos (ListOf typ) (ListAtPos typ)
-      , pAtIdx (ListOf typ) (ListAtIdx typ)
-
-      , pIfThenElseExpr (pTypedListExpr typ) (ListIfThenElse typ) (ListOf typ)
-
-      , pFun1 "Rand" (pTypedExpr $ ListOf (ListOf typ)) (ListRand typ)
-
-      , pFun1 "Reverse"  (pTypedListExpr typ) (ListRev typ)
-      , pFun1 "Sort"     (pTypedListExpr typ) (ListSort typ)
-      , pFun1 "Unique"   (pTypedListExpr typ) (ListUniq typ)
-      , pFun1 "Shuffle"  (pTypedListExpr typ) (ListShuffle typ)
-      , pListShuffles
-
-      , pFun2 "GetRow" (pTypedExpr ZZ) (pTypedExpr $ MatOf typ) (ListMatRow typ)
-      , pFun2 "GetCol" (pTypedExpr ZZ) (pTypedExpr $ MatOf typ) (ListMatCol typ)
-
-      , pListPermsOf
-
-      , pListRange
-      , pListPivotColIndices typ
-      , pListBuilder
-      , pFun2 "Choose" (pTypedExpr ZZ) (pTypedListExpr typ) (ListChoose typ)
-      , pListChoices
-      , pListFilter
-      ]
-      where
-        pListFilter = do
-          _ <- try $ keyword "Filter"
-          keyword "("
-          k <- pKey
-          keyword ";"
-          g <- pTypedExpr BB
-          keyword ";"
-          xs <- pTypedListExpr typ
-          keyword ")"
-          return (ListFilter typ k g xs)
-
-        pListChoices = do
-          _ <- try $ keyword "Choices"
-          case typ of
-            ListOf t -> do
-              keyword "("
-              n <- pTypedExpr ZZ
-              keyword ";"
-              xs <- pTypedListExpr t
-              keyword ")"
-              return (ListChoices typ n xs)
-            _ -> error "pListChoices"
-
-        pListShuffles = do
-          _ <- try $ keyword "Shuffles"
-          case typ of
-            ListOf t -> do
-              keyword "("
-              xs <- pTypedListExpr t
-              keyword ")"
-              return (ListShuffles typ xs)
-            _ -> error "pListShuffles"
-
-        pListPermsOf = do
-          _ <- try $ keyword "PermutationsOf"
-          case typ of
-            PermOf t -> do
-              keyword "("
-              xs <- pTypedListExpr t
-              keyword ")"
-              return (ListPermsOf typ xs)
-            _ -> error "pListPermsOf"
-
-        pListRange = case unify typ ZZ of
-          Right _ -> do
-            try $ keyword "Range"
-            (a,b) <- pTuple2 (pTypedExpr ZZ) (pTypedExpr ZZ)
-            return (ListRange ZZ a b)
-          Left _ -> fail "pListRange"
-
-        pListPivotColIndices ZZ = do
-          try $ keyword "PivotCols"
-          keyword "("
-          t <- pType
-          keyword ";"
-          m <- pTypedExpr (MatOf t)
-          keyword ")"
-          return (ListPivotColIndices ZZ m)
-        pListPivotColIndices _ = fail "pListPivotColIndices"
-    
-        pListBuilder = do
-          start <- getPosition
-          try $ keyword "Build"
-          keyword "("
-          expr <- pTypedExpr typ
-          keyword ";"
-          gds <- sepBy1 (pListBind <|> pListGuard) (keyword ";")
-          keyword ")"
-          end <- getPosition
-          return (ListBuilder typ expr gds)
-            where
-              pListBind = do
-                w <- try pType
-                whitespace
-                k <- pKey
-                keyword "<-"
-                ls <- pTypedListExpr w
-                return $ Bind k ls
-          
-              pListGuard = do
-                e <- try (pTypedExpr BB)
-                return $ Guard e
-    
-    listOpTable =
-      [ [ Infix (opParser2 (ListCat typ) "++") AssocLeft
-        ]
-      , [ Infix (opParser2 (ListToss typ) "\\\\") AssocLeft
-        ]
-      ]
-
-
-
-{------------}
-{- :MatExpr -}
-{------------}
-
-pMatLiteral :: Type -> ParseM (MatExpr Expr)
-pMatLiteral typ = pAtLocus $ pMatLiteralOf typ pTypedExpr
-
-pMatConst :: Type -> ParseM (MatExpr Expr)
-pMatConst typ = pAtLocus $ pMatLiteralOf typ pTypedConst
-
-pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr)
-pMatLiteralOf typ p = do
-  start <- getPosition
-  xss <- pBrackList (pBrackList (p typ))
-  end <- getPosition
-  case mFromRowList xss of
-    Left err -> reportParseErr (locus start end) err
-    Right m -> return (MatConst typ m)
-
-pMatExpr :: ParseM (MatExpr Expr)
-pMatExpr = pTypedMatExpr XX
-
-pTypedMatExpr :: Type -> ParseM (MatExpr Expr)
-pTypedMatExpr typ = spaced $ buildExpressionParser matOpTable pMatTerm
-  where
-    pMatTerm = pTerm (pMatLiteralOf typ pTypedExpr) (pTypedMatExpr typ) "matrix expression"
-      [ pVarExpr (MatVar typ) (MatOf typ)
-
-      , pAtPos (MatOf typ) (MatAtPos typ)
-      , pAtIdx (MatOf typ) (MatAtIdx typ)
-
-      , pMacroExpr (MatMacro typ)
-
-      , pIfThenElseExpr (pTypedMatExpr typ) (MatIfThenElse typ) (MatOf typ)
-
-      , pFun1 "Transpose" (pTypedMatExpr typ) (MatTrans typ)
-
-      , pFun1 "ShuffleRows" (pTypedMatExpr typ) (MatShuffleRows typ)
-      , pFun1 "ShuffleCols" (pTypedMatExpr typ) (MatShuffleCols typ)
-
-      , pFun1 "RowFromList" (pTypedExpr $ ListOf typ) (MatRowFromList typ)
-      , pFun1 "ColFromList" (pTypedExpr $ ListOf typ) (MatColFromList typ)
-
-      , pFun1 "Rand" (pTypedExpr $ ListOf (MatOf typ)) (MatRand typ)
-
-      , pFun2 "GetRow" (pTypedExpr ZZ) (pTypedMatExpr typ) (MatGetRow typ)
-      , pFun2 "GetCol" (pTypedExpr ZZ) (pTypedMatExpr typ) (MatGetCol typ)
-
-      , pMatBuilder
-
-      , pFun2 "Id"    pType (pTypedExpr ZZ) MatId
-      , pFun4 "SwapE" pType (pTypedExpr ZZ) (pTypedExpr ZZ) (pTypedExpr ZZ) MatSwapE
-      , pMatScaleE
-      , pMatAddE
-
-      , pFun2 "Pow" (pTypedMatExpr typ) (pTypedExpr ZZ) (MatPow typ)
-
-      , pFun3 "SwapRows" (pTypedMatExpr typ) (pTypedExpr ZZ) (pTypedExpr ZZ) (MatSwapRows typ)
-      , pFun3 "SwapCols" (pTypedMatExpr typ) (pTypedExpr ZZ) (pTypedExpr ZZ) (MatSwapCols typ)
-      , pFun3 "ScaleRow" (pTypedMatExpr typ) (pTypedExpr typ) (pTypedExpr ZZ) (MatScaleRow typ)
-      , pFun3 "ScaleCol" (pTypedMatExpr typ) (pTypedExpr typ) (pTypedExpr ZZ) (MatScaleCol typ)
-      , pFun4 "AddRow"   (pTypedMatExpr typ) (pTypedExpr typ) (pTypedExpr ZZ) (pTypedExpr ZZ) (MatAddRow typ)
-      , pFun4 "AddCol"   (pTypedMatExpr typ) (pTypedExpr typ) (pTypedExpr ZZ) (pTypedExpr ZZ) (MatAddCol typ)
-      , pFun2 "DelRow"   (pTypedMatExpr typ) (pTypedExpr ZZ) (MatDelRow typ)
-      , pFun2 "DelCol"   (pTypedMatExpr typ) (pTypedExpr ZZ) (MatDelCol typ)
-
-      , pFun1 "GJForm"   (pTypedMatExpr typ) (MatGJForm typ)
-      , pFun1 "GJFactor" (pTypedMatExpr typ) (MatGJFactor typ)
-      ]
-      where
-        pMatScaleE = do
-          try $ keyword "ScaleE"
-          keyword "("
-          t <- pType
-          keyword ";"
-          n <- pTypedExpr ZZ
-          keyword ";"
-          k <- pTypedExpr ZZ
-          keyword ";"
-          e <- pTypedExpr t
-          keyword ")"
-          return (MatScaleE t n k e)
-
-        pMatAddE = do
-          try $ keyword "AddE"
-          keyword "("
-          t <- pType
-          keyword ";"
-          n <- pTypedExpr ZZ
-          keyword ";"
-          i <- pTypedExpr ZZ
-          keyword ";"
-          j <- pTypedExpr ZZ
-          keyword ";"
-          e <- pTypedExpr t
-          keyword ")"
-          return (MatAddE t n i j e)
-
-        pMatBuilder = do
-          try $ keyword "Build"
-          keyword "("
-          e <- pTypedExpr typ
-          keyword ";"
-          tr <- pType
-          whitespace
-          kr <- pKey
-          keyword "<-"
-          lr <- pTypedExpr $ ListOf tr
-          keyword ";"
-          tc <- pType
-          whitespace
-          kc <- pKey
-          keyword "<-"
-          lc <- pTypedExpr $ ListOf tc
-          keyword ")"
-          return (MatBuilder typ e kr lr kc lc)
-    
-    matOpTable =
-      [ [ Prefix (opParser1 (MatNeg typ) "neg")
-        ]
-      , [ Infix (opParser2 (MatMul typ) "*") AssocLeft
-        ]
-      , [ Infix (opParser2 (MatAdd typ) "+") AssocLeft
-        ]
-      , [ Infix (opParser2 (MatHCat typ) "hcat") AssocLeft
-        , Infix (opParser2 (MatVCat typ) "vcat") AssocLeft
-        ]
-      ]
-
-
-
-{-------------}
-{- :PolyExpr -}
-{-------------}
-
-pPolyLiteral :: Type -> ParseM (PolyExpr Expr)
-pPolyLiteral typ = pAtLocus $ pPolyLiteralOf typ pTypedExpr
-
-pPolyConst :: Type -> ParseM (PolyExpr Expr)
-pPolyConst typ = pAtLocus $ pPolyLiteralOf typ pTypedConst
-
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr)
-pPolyLiteralOf typ p = do
-  try $ keyword "Poly"
-  keyword "("
-  ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
-  keyword ")"
-  return (PolyConst typ (fromListP ts))
-  where
-    pPolyTerm :: ParseM a -> ParseM (a, Monomial)
-    pPolyTerm q = do
-      c <- q
-      x <- option identityM $ try (keyword ".") >> (pIdMon <|> pMonomial)
-      return (c,x)
-    
-    pIdMon :: ParseM Monomial
-    pIdMon = (try $ char '1') >> return identityM
-
-    pMonomial :: ParseM Monomial
-    pMonomial = do
-      ps <- sepBy1 pPower (try $ keyword ".")
-      return $ fromListM ps
-    
-    pPower :: ParseM (Variable, Natural)
-    pPower = do
-      x <- pVar
-      k <- option 1 (try (keyword "^") >> pNatural)
-      return (x, Nat k)
-
-pPolyExpr :: ParseM (PolyExpr Expr)
-pPolyExpr = pTypedPolyExpr XX
-
-pTypedPolyExpr :: Type -> ParseM (PolyExpr Expr)
-pTypedPolyExpr typ = spaced $ buildExpressionParser polyOpTable pPolyTerm
-  where
-    pPolyTerm = pTerm (pPolyLiteralOf typ pTypedExpr) (pTypedPolyExpr typ) "polynomial expression"
-      [ pVarExpr (PolyVar typ) (PolyOver typ)
-
-      , pAtPos (PolyOver typ) (PolyAtPos typ)
-      , pAtIdx (PolyOver typ) (PolyAtIdx typ)
-
-      , pMacroExpr (PolyMacro typ)
-
-      , pIfThenElseExpr (pTypedPolyExpr typ) (PolyIfThenElse typ) (PolyOver typ)
-
-      , pFun1 "Rand" (pTypedExpr $ ListOf (PolyOver typ)) (PolyRand typ)
-
-      , pPolyPow
-
-      , pPolyNull
-
-      , pFun2 "FromRoots" (pLiftAt pVar XX) (pTypedExpr $ ListOf typ) (PolyFromRoots typ)
-
-      , pPolyEvalPoly
-      ]
-      where
-        pPolyEvalPoly = do
-          try $ keyword "EvalPoly"
-          keyword "("
-          p <- pTypedPolyExpr typ
-          keyword ";"
-          xs <- sepBy1 pSubs (keyword ";")
-          keyword ")"
-          return (PolyEvalPoly typ p xs)
-            where
-              pSubs = do
-                x <- try $ pVar
-                keyword "<-"
-                q <- pTypedPolyExpr typ
-                return (x,q)
-
-        pPolyPow = pFun2 "Pow" (pTypedPolyExpr typ) (pTypedExpr ZZ) (PolyPow typ)
-
-        pPolyNull = do
-          try $ keyword "Null"
-          return (PolyConst typ nullP)
-
-    polyOpTable =
-      [ [ Prefix (opParser1 (PolyNeg typ) "neg")
-        ]
-      , [ Infix (opParser2 (PolyMul typ) "*") AssocLeft
-        ]
-      , [ Infix (opParser2 (PolyAdd typ) "+") AssocLeft
-        , Infix (opParser2 (PolySub typ) "-") AssocLeft
-        ]
-      ]
-
-
-
-{-------------}
-{- :PermExpr -}
-{-------------}
-
-pPermLiteral :: Type -> ParseM (PermExpr Expr)
-pPermLiteral typ = pAtLocus $ pPermLiteralOf typ pTypedConst
-
-pPermConst :: Type -> ParseM (PermExpr Expr)
-pPermConst typ = pAtLocus $ pPermLiteralOf typ pTypedConst
-
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr)
-pPermLiteralOf typ p = (string "id" >> return (PermConst typ idPerm)) <|> do
-  start <- getPosition
-  ts <- many1 pCycle
-  end <- getPosition
-  case fromCycles ts of
-    Right q -> return (PermConst typ q)
-    Left err -> reportParseErr (locus start end) err
-    where
-      pCycle = do
-        _ <- try $ char '('
-        xs <- sepBy1 (p typ) whitespace
-        _ <- char ')'
-        return xs
-
-pTypedPermExpr :: Type -> ParseM (PermExpr Expr)
-pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
-  where
-    pPermTerm = pTerm (pPermLiteralOf typ pTypedExpr) (pTypedPermExpr typ) "permutation expression"
-      [ pVarExpr (PermVar typ) (PermOf typ)
-
-      , pAtPos (PermOf typ) (PermAtPos typ)
-      , pAtIdx (PermOf typ) (PermAtIdx typ)
-
-      , pMacroExpr (PermMacro typ)
-
-      , pIfThenElseExpr (pTypedPermExpr typ) (PermIfThenElse typ) (PermOf typ)
-
-      , pFun1 "Rand" (pTypedExpr $ ListOf (PermOf typ)) (PermRand typ)
-      ]
-
-    permOpTable =
-      [ [ Prefix (opParser1 (PermInvert typ) "inv")
-        ]
-      , [ Infix (opParser2 (PermCompose typ) "o") AssocLeft
-        ]
-      ]
 
 
 
@@ -960,17 +384,17 @@ pTypedPermExpr typ = spaced $ buildExpressionParser permOpTable pPermTerm
 {------------}
 
 pMacConst :: Type -> ParseM (MacExpr Expr)
-pMacConst typ = pAtLocus $ pMacConst' typ
+pMacConst typ = pAtLocus $ pMacConst' typ pTypedExpr
 
-pMacConst' :: Type -> ParseM (MacExprLeaf Expr)
-pMacConst' typ = do
+pMacConst' :: Type -> (Type -> ParseM Expr) -> ParseM (MacExprLeaf Expr)
+pMacConst' typ pE = do
   start <- getPosition
   try $ keyword "Macro"
   keyword "("
   t <- pType
   keyword ";"
-  body <- if t == DD then pBrackDocE else pTypedExpr t
-  vals <- option [] $ many (keyword ";" >> (pTypeKeyExpr pTypedExpr))
+  body <- if t == DD then (pBrackDocE pE) else pE t
+  vals <- option [] $ many (keyword ";" >> (pTypeKeyExpr pE))
   keyword ")"
   end <- getPosition
   case unify typ t of
@@ -985,7 +409,7 @@ pMacExpr = pTypedMacExpr XX
 pTypedMacExpr :: Type -> ParseM (MacExpr Expr)
 pTypedMacExpr typ = spaced $ buildExpressionParser macOpTable pMacTerm
   where
-    pMacTerm = pTerm (pMacConst' typ) pMacExpr "macro expression"
+    pMacTerm = pTerm (pMacConst' typ pTypedExpr) pMacExpr "macro expression"
       [ pVarExpr (MacVar typ) (MacTo typ)
 
       , pAtPos (MacTo typ) (MacAtPos typ)
