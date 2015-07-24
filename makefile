@@ -24,39 +24,6 @@ vis: FORCE
 
 golden: FORCE
 	@echo "Golden Tests"
-	shelltest --color --execdir test/gold/
-
-golden-int: FORCE
-	@echo "Golden Integer Tests"
-	shelltest --color --execdir test/gold/expr/int
-
-golden-rat: FORCE
-	@echo "Golden Rational Tests"
-	shelltest --color --execdir test/gold/expr/rat
-
-golden-bool: FORCE
-	@echo "Golden Rational Tests"
-	shelltest --color --execdir test/gold/expr/bool
-
-golden-list: FORCE
-	@echo "Golden List Tests"
-	shelltest --color --execdir test/gold/expr/list
-
-golden-list-int: FORCE
-	@echo "Golden Integer List Tests"
-	shelltest --color --execdir test/gold/expr/list/int
-
-golden-poly: FORCE
-	@echo "Golden Polynomial Tests"
-	shelltest --color --execdir test/gold/expr/poly
-
-golden-perm: FORCE
-	@echo "Golden Permutation Tests"
-	shelltest --color --execdir test/gold/expr/perm
-
-golden-mod: FORCE
-	@echo "Golden Modular Arithmetic Tests"
-	shelltest --color --execdir test/gold/expr/mod
-
+	shelltest --color --execdir test/gold/ -- --threads=16 --hide-successes
 
 FORCE:
