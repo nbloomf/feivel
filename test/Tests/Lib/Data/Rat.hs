@@ -18,8 +18,8 @@
 
 module Tests.Lib.Data.Rat where
 
-import Test.Framework (Test, testGroup)
-import Test.QuickCheck
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck
 
 import Feivel.Lib.Data.Rat
 
@@ -32,7 +32,7 @@ import Tests.Lib.Ring
 {- :Suite -}
 {----------}
 
-testRat :: Test
+testRat :: TestTree
 testRat = testGroup "Rat"
   [ testRingoid  (0:/:1)
   , testCRingoid (0:/:1)

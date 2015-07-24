@@ -18,8 +18,8 @@
 
 module Tests.Lib.Data.Integer where
 
-import Test.Framework (Test, testGroup)
-import Test.QuickCheck (arbitrary)
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck (arbitrary)
 
 import Tests.Util
 import Tests.Lib.Ring
@@ -30,7 +30,7 @@ import Tests.Lib.Ring
 {- :Suite -}
 {----------}
 
-testInteger :: Test
+testInteger :: TestTree
 testInteger = testGroup "Integer"
   [ testRingoid  (0::Integer)
   , testCRingoid (0::Integer)

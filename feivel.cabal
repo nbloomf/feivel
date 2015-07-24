@@ -15,12 +15,11 @@ Executable feivel
   build-depends:  base, parsec, containers, regex-posix,
                   random-fu, rvar, random-extras,
                   transformers, mtl, random, directory,
-                  monadlist, primes, gtk
+                  monadlist, primes, gtk, tostring
 
 Test-Suite feivel-test
   type:           exitcode-stdio-1.0
   main-is:        Tests/Main.hs
   hs-source-dirs: test/, src/
   ghc-options:    -main-is Tests.Main -fforce-recomp
-  build-depends:  base, QuickCheck, quickcheck-instances,
-                  test-framework, test-framework-quickcheck2
+  build-depends:  base, QuickCheck, tasty, tasty-quickcheck

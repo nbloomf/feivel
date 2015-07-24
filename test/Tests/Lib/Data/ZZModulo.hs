@@ -25,8 +25,8 @@ module Tests.Lib.Data.ZZModulo where
 {-   :Properties   -}
 {-------------------}
 
-import Test.Framework (Test, testGroup)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
+import Test.Tasty(TestTree, testGroup)
+import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck
 
 import Feivel.Lib.Data.ZZMod
@@ -41,7 +41,7 @@ import Tests.Lib.Ring
 {- :Suites -}
 {-----------}
 
-testZZModulo :: Test
+testZZModulo :: TestTree
 testZZModulo = testGroup "ZZModulo"
   [ testRingoid  (0 `zzmod` 0)
   , testCRingoid (0 `zzmod` 0)

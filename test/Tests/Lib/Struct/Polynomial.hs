@@ -28,9 +28,8 @@ module Tests.Lib.Struct.Polynomial where
 {-   :Properties   -}
 {-------------------}
 
-import Test.Framework (Test, testGroup)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.QuickCheck
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck
 
 import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Algebra.Ring
@@ -44,10 +43,10 @@ import Tests.Lib.Ring
 {- :Suites -}
 {-----------}
 
-testRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> Test
+testRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
 testRingoidPoly t = testRingoid (constP t)
 
-testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> Test
+testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
 testCRingoidPoly t = testCRingoid (constP t)
 
 

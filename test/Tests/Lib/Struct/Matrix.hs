@@ -25,9 +25,8 @@ module Tests.Lib.Struct.Matrix where
 {-   :Properties   -}
 {-------------------}
 
-import Test.Framework (Test, testGroup)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.QuickCheck
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck
 
 import Feivel.Lib.Struct.Matrix
 import Feivel.Lib.Algebra.Ring
@@ -41,12 +40,12 @@ import Tests.Lib.Ring
 {- :Suites -}
 {-----------}
 
-testRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> Test
+testRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> TestTree
 testRingoidMat t = testRingoid (mCell t)
 
 testURingoidMat = undefined
 
-testBipRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> Test
+testBipRingoidMat :: (Ringoid t, Arbitrary t, Show t, RingoidArb t) => t -> TestTree
 testBipRingoidMat t = testBipRingoid (mCell t)
 
 

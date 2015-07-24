@@ -18,7 +18,7 @@
 
 module Tests.Main where
 
-import Test.Framework (defaultMain, testGroup)
+import Test.Tasty (defaultMain, testGroup)
 
 import Feivel.Lib (Rat((:/:)), zzmod)
 
@@ -29,7 +29,7 @@ import Tests.Lib.Data.ZZModulo
 import Tests.Lib.Struct.Matrix
 import Tests.Lib.Struct.Polynomial
 
-main = defaultMain
+main = defaultMain $ testGroup "Property Tests"
   [ testInteger
   , testRat
   , testZZModulo

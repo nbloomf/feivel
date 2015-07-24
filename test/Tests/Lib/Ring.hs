@@ -18,9 +18,9 @@
 
 module Tests.Lib.Ring where
 
-import Test.Framework (Test, testGroup)
-import Test.Framework.Providers.QuickCheck2 (testProperty)
-import Test.QuickCheck
+import Test.Tasty (TestTree, testGroup)
+import Test.Tasty.QuickCheck (testProperty)
+import Test.QuickCheck (Property, forAll, Gen, Arbitrary, arbitrary, vectorOf)
 
 import Tests.Util
 
@@ -46,7 +46,7 @@ import Feivel.Lib.Algebra.Ring
 {- :Suites -}
 {-----------}
 
-testRingoid :: (Ringoid t, RingoidArb t, Show t) => t -> Test
+testRingoid :: (Ringoid t, RingoidArb t, Show t) => t -> TestTree
 testRingoid t = testGroup "Ringoid Structure"
   [ testProperty "(a+b)+c == a+(b+c)  " $ prop_rAdd_assoc        t
   , testProperty "a+b == b+a          " $ prop_rAdd_comm         t
@@ -60,18 +60,18 @@ testRingoid t = testGroup "Ringoid Structure"
   , testProperty "a·0 == 0            " $ prop_rMul_rzero        t
   ]
 
-testCRingoid :: (RingoidArb t, CRingoidArb t, Show t) => t -> Test
+testCRingoid :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
 testCRingoid t = testGroup "CRingoid Structure"
   [ testProperty "a·b == b·a          " $ prop_rMul_comm         t
   ]
 
-testURingoid :: (RingoidArb t, URingoidArb t, Show t) => t -> Test
+testURingoid :: (RingoidArb t, URingoidArb t, Show t) => t -> TestTree
 testURingoid t = testGroup "URingoid Structure"
   [ testProperty "1·a == a            " $ prop_rMul_lone         t
   , testProperty "a·1 == a            " $ prop_rMul_rone         t
   ]
 
-testORingoid :: (RingoidArb t, ORingoidArb t, Show t) => t -> Test
+testORingoid :: (RingoidArb t, ORingoidArb t, Show t) => t -> TestTree
 testORingoid t = testGroup "ORingoid Structure"
   [ testProperty "aµa == a            " $ prop_rMin_idemp        t
   , testProperty "(aµb)µc == aµ(bµc)  " $ prop_rMin_assoc        t
@@ -94,7 +94,7 @@ testORingoid t = testGroup "ORingoid Structure"
   , testProperty "|a+b| <= |a| + |b|  " $ prop_rAbs_triangle     t
   ]
 
-testGCDoid :: (RingoidArb t, GCDoidArb t, Show t) => t -> Test
+testGCDoid :: (RingoidArb t, GCDoidArb t, Show t) => t -> TestTree
 testGCDoid t = testGroup "GCDoid Structure"
   [ testProperty "(a;b);c == a;(b;c)  " $ prop_rGCD_assoc        t
   , testProperty "a;b == b;a          " $ prop_rGCD_comm         t
@@ -105,7 +105,7 @@ testGCDoid t = testGroup "GCDoid Structure"
   , testProperty "a;0 ~~ a            " $ prop_rGCD_rneut        t
   ]
 
-testBipRingoid :: (RingoidArb t, BipRingoidArb t, Show t) => t -> Test
+testBipRingoid :: (RingoidArb t, BipRingoidArb t, Show t) => t -> TestTree
 testBipRingoid t = testGroup "BipRingoid Structure"
   [ testProperty "(a÷b)÷c == a÷(b÷c)  " $ prop_rBipIn_assoc       t
   , testProperty "(a÷b)·c == a·c ÷ b·c" $ prop_rMul_rdist_rBipIn  t
