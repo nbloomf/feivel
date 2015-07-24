@@ -28,6 +28,7 @@ import System.IO (hPutStrLn, stderr)
 import Data.IORef
 import Graphics.UI.Gtk
 import Control.Monad.IO.Class
+import Data.String.ToString
 
 
 {--------------------}
@@ -176,7 +177,7 @@ gui = do
 
   _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
          [Control] <- eventModifier
-         "Return"  <- eventKeyName
+         "Return"  <- fmap toString eventKeyName
          liftIO evalAction
 
 
@@ -197,7 +198,7 @@ gui = do
 
   _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
          [Control] <- eventModifier
-         "u"       <- eventKeyName
+         "u"       <- fmap toString eventKeyName
          liftIO undoAction
 
 
@@ -229,12 +230,12 @@ gui = do
 
   _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
          [Control] <- eventModifier
-         "equal"   <- eventKeyName
+         "equal"   <- fmap toString eventKeyName
          liftIO $ adjustFontSize (\s -> s + 1)
 
   _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
          [Control] <- eventModifier
-         "minus"   <- eventKeyName
+         "minus"   <- fmap toString eventKeyName
          liftIO $ adjustFontSize (\s -> s - 1)
 
 
@@ -277,7 +278,7 @@ gui = do
 
   _ <- mainWindow `on` keyPressEvent $ tryEvent $ do
          [Control] <- eventModifier
-         "s"       <- eventKeyName
+         "s"       <- fmap toString eventKeyName
          liftIO saveInteraction
 
 
