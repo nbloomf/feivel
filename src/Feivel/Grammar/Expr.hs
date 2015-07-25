@@ -25,7 +25,7 @@ module Feivel.Grammar.Expr (
   -- Expression Types
   Expr(..),
   Doc,       DocLeaf(..),
-  StrExpr,   StrExprLeaf(..), Format(..),
+  StrExpr(..),   StrExprLeaf(..), Format(..),
   IntExpr(..),   IntExprLeaf(..),
   BoolExpr,  BoolExprLeaf(..),
   RatExpr,   RatExprLeaf(..),
@@ -101,7 +101,7 @@ instance ToExpr (MacExpr   Expr) where toExpr = MacE
 
 -- NB: Not a fan of "no locus" here
 -- NB: Is this even needed? Can we use put instead?
-instance ToExpr Text where toExpr t = StrE $ StrConst t :@ NullLocus
+instance ToExpr Text where toExpr t = StrE $ StrExpr $ StrConst t :@ NullLocus
 
 instance Typed Expr where
   typeOf (StrE   x) = typeOf x

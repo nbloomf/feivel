@@ -20,7 +20,7 @@ module Feivel.Parse.Str (
   pStrConst, pStrExpr
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), StrExpr, StrExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -28,7 +28,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
 pStrConst :: ParseM (StrExpr Expr)
-pStrConst = pAtLocus pStrConst'
+pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 
 pStrConst' :: ParseM (StrExprLeaf Expr)
 pStrConst' = pConst pText StrConst
@@ -36,7 +36,7 @@ pStrConst' = pConst pText StrConst
 pStrExpr :: (Type -> ParseM Expr) -> ParseM (StrExpr Expr)
 pStrExpr pE = spaced $ buildExpressionParser strOpTable pStrTerm
   where
-    pStrTerm = pTerm pStrConst' (pStrExpr pE) "string expression"
+    pStrTerm = pTerm' pStrConst' StrExpr (pStrExpr pE) "string expression"
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro
 
@@ -66,6 +66,6 @@ pStrExpr pE = spaced $ buildExpressionParser strOpTable pStrTerm
       ]
 
     strOpTable =
-      [ [Infix (opParser2 Concat "++") AssocLeft
+      [ [Infix (opParser2' Concat StrExpr "++") AssocLeft
         ]
       ]

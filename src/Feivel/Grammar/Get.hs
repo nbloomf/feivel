@@ -57,9 +57,9 @@ instance Get (BoolExpr Expr) where
 
 instance Get (StrExpr Expr) where
   get (StrE y) = return y
-  get (DocE (Empty :@ loc)) = return $ StrConst (Text "") :@ loc
-  get (DocE (DocText str :@ loc)) = return $ StrConst str :@ loc
-  get (DocE (Escaped c :@ loc)) = return $ StrConst (Text [c]) :@ loc
+  get (DocE (Empty :@ loc)) = return $ StrExpr $ StrConst (Text "") :@ loc
+  get (DocE (DocText str :@ loc)) = return $ StrExpr $ StrConst str :@ loc
+  get (DocE (Escaped c :@ loc)) = return $ StrExpr $ StrConst (Text [c]) :@ loc
   get v = Left $ GetTypeMismatch
     { typeExpected = SS, typeReceived = typeOf v }
 
@@ -127,7 +127,7 @@ instance Get Text where
   get expr = do
     x <- get expr :: Either GetErr (StrExpr Expr)
     case x of
-      StrConst s :@ _ -> return s
+      StrExpr (StrConst s :@ _) -> return s
       v -> Left GetUnevaluatedExpression
 
 instance Get Rat where

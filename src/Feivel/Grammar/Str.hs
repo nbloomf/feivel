@@ -23,8 +23,13 @@ module Feivel.Grammar.Str where
 
 import Feivel.Grammar.Util
 
+newtype StrExpr a = StrExpr
+  { unStrExpr :: AtLocus (StrExprLeaf a)
+  } deriving (Eq, Show)
 
-type StrExpr a = AtLocus (StrExprLeaf a)
+instance HasLocus (StrExpr a) where
+  locusOf = locusOf . unStrExpr
+
 
 data StrExprLeaf a
   = StrConst Text

@@ -26,52 +26,52 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph (StrExpr Expr) where
-  toGlyph (StrConst (Text s) :@ _) = return s
+  toGlyph (StrExpr (StrConst (Text s) :@ _)) = return s
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
 instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
-  eval (StrConst s :@ loc) = return (StrConst s :@ loc)
+  eval (StrExpr (StrConst s :@ loc)) = return (StrExpr $ StrConst s :@ loc)
 
   {- :Common -}
-  eval (StrVar key :@ loc)        = eKey key loc
-  eval (StrAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (StrIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (StrMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (StrExpr (StrVar key :@ loc))        = eKey key loc
+  eval (StrExpr (StrAtIdx m h k :@ loc))    = eAtIdx m h k loc
+  eval (StrExpr (StrIfThenElse b t f :@ _)) = eIfThenElse b t f
+  eval (StrExpr (StrMacro vals mac :@ loc)) = eMacro vals mac loc
 
-  eval (StrAtPos a t :@ loc) = lift2 loc a t (foo)
+  eval (StrExpr (StrAtPos a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [StrExpr Expr] -> Integer -> Either ListErr (StrExpr Expr)
 
-  eval (Concat   a b :@ loc) = lift2 loc a b (strCat)
-  eval (StrStrip a b :@ loc) = lift2 loc a b (strStrip)
+  eval (StrExpr (Concat   a b :@ loc)) = lift2 loc a b (strCat)
+  eval (StrExpr (StrStrip a b :@ loc)) = lift2 loc a b (strStrip)
 
-  eval (ToUpper   a :@ loc) = lift1 loc a (strUpper)
-  eval (ToLower   a :@ loc) = lift1 loc a (strLower)
-  eval (Reverse   a :@ loc) = lift1 loc a (strRev)
-  eval (Rot13     a :@ loc) = lift1 loc a (strRot13)
-  eval (StrHex    n :@ loc) = lift1 loc n (strHex)
-  eval (StrRoman  n :@ loc) = lift1 loc n (strRoman)
-  eval (StrBase36 n :@ loc) = lift1 loc n (strBase36)
+  eval (StrExpr (ToUpper   a :@ loc)) = lift1 loc a (strUpper)
+  eval (StrExpr (ToLower   a :@ loc)) = lift1 loc a (strLower)
+  eval (StrExpr (Reverse   a :@ loc)) = lift1 loc a (strRev)
+  eval (StrExpr (Rot13     a :@ loc)) = lift1 loc a (strRot13)
+  eval (StrExpr (StrHex    n :@ loc)) = lift1 loc n (strHex)
+  eval (StrExpr (StrRoman  n :@ loc)) = lift1 loc n (strRoman)
+  eval (StrExpr (StrBase36 n :@ loc)) = lift1 loc n (strBase36)
 
-  eval (StrDecimal p k :@ loc) = do
+  eval (StrExpr (StrDecimal p k :@ loc)) = do
     x <- eval p >>= getVal
     d <- eval k >>= getVal
     putVal loc (Text $ digits d x) >>= getVal
 
-  eval (StrRand ls :@ loc) = do
+  eval (StrExpr (StrRand ls :@ loc)) = do
     xs <- eval ls >>= getVal
     r  <- randomElementEvalM xs :: EvalM Text
     putVal loc r >>= getVal
 
-  eval (StrTab m :@ loc) = do
+  eval (StrExpr (StrTab m :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     tab <- tabulateWithM toGlyph n
     putVal loc (Text tab) >>= getVal
 
-  eval (StrTypeOf e :@ loc) = do
+  eval (StrExpr (StrTypeOf e :@ loc)) = do
     putVal loc (Text $ show $ typeOf e) >>= getVal
 
-  eval (StrFormat LaTeX e :@ loc) = do
+  eval (StrExpr (StrFormat LaTeX e :@ loc)) = do
     case typeOf e of
       ZZ -> do
         x <- eval e >>= getVal :: EvalM Integer
@@ -93,6 +93,6 @@ instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
         putVal loc (Text $ latex x) >>= getVal
       _ -> error "StrFormat LaTeX"
 
-  eval (StrIntCast n :@ loc) = do
+  eval (StrExpr (StrIntCast n :@ loc)) = do
     n <- eval n >>= getVal :: EvalM Integer
     putVal loc (Text $ show n) >>= getVal
