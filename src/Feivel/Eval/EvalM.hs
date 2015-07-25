@@ -20,7 +20,7 @@
 {-# OPTIONS_GHC -XFlexibleInstances    #-}
 
 module Feivel.Eval.EvalM (
-  EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM, getVal, putVal,
+  EvalM, runEvalM,  attempt, attemptWith, attemptsWith, tryEvalM, getVal, putVal, putTypeVal,
 
   -- IO and Parsing
   readAndParseDocFromLib, parseAsAt,
@@ -73,6 +73,9 @@ getVal x = tryEvalM (locusOf x) $ get (toExpr x)
 
 putVal :: (Put a) => Locus -> a -> EvalM Expr
 putVal loc a = return $ put loc a
+
+putTypeVal :: (Put a) => Type -> Locus -> a -> EvalM Expr
+putTypeVal typ loc a = return $ putType typ loc a
 
 {----------}
 {- :EvalM -}

@@ -20,7 +20,7 @@
 {-# LANGUAGE FlexibleInstances     #-}
 
 module Feivel.Grammar.Put (
-  Put, put
+  Put, put, putType
 ) where
 
 import Feivel.Grammar.Expr
@@ -34,7 +34,11 @@ import Feivel.Lib
 {-----------}
 
 class Put a where
-  put :: Locus -> a -> Expr
+  put     ::         Locus -> a -> Expr
+  putType :: Type -> Locus -> a -> Expr
+
+  -- Default: ignore the type
+  putType _ = put
 
 
 
@@ -102,12 +106,18 @@ instance (Put a, Typed a) => Put [a] where
               (a:_) -> typeOf a
               []    -> XX
 
+  putType typ loc x = ListE $ ListConst typ (map (put loc) x) :@ loc
+
+
 instance (Put a, Typed a) => Put (Poly a) where
   put loc x = PolyE $ PolyConst typ (fmap (put loc) x) :@ loc
     where
       typ = case coefficientsP x of
               (c:_) -> typeOf c
               []    -> XX
+
+  putType typ loc x = PolyE $ PolyConst typ (fmap (put loc) x) :@ loc
+
 
 instance (Put a, Typed a) => Put (Matrix a) where
   put loc x = MatE $ MatConst typ (fmap (put loc) x) :@ loc
@@ -116,5 +126,10 @@ instance (Put a, Typed a) => Put (Matrix a) where
               (a:_) -> typeOf a
               []    -> XX
 
+  putType typ loc x = MatE $ MatConst typ (fmap (put loc) x) :@ loc
+
+
 instance (Put a) => Put (Perm a) where
   put loc x = PermE $ PermConst undefined (mapPerm (put loc) x) :@ loc
+
+  putType typ loc x = PermE $ PermConst typ (mapPerm (put loc) x) :@ loc
