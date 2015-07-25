@@ -20,7 +20,7 @@ module Feivel.Parse.Bool (
   pBoolConst, pBoolExpr
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), BoolExpr, BoolExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -29,7 +29,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
 pBoolConst :: ParseM (BoolExpr Expr)
-pBoolConst = pAtLocus pBoolConst'
+pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 
 pBoolConst' :: ParseM (BoolExprLeaf Expr)
 pBoolConst' = pConst pBool BoolConst
@@ -37,7 +37,7 @@ pBoolConst' = pConst pBool BoolConst
 pBoolExpr :: (Type -> ParseM Expr) -> ParseM (BoolExpr Expr)
 pBoolExpr pE = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
-    pBoolTerm = pTerm pBoolConst' (pBoolExpr pE) "boolean expression"
+    pBoolTerm = pTerm' pBoolConst' BoolExpr (pBoolExpr pE) "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
@@ -71,12 +71,12 @@ pBoolExpr pE = spaced $ buildExpressionParser boolOpTable pBoolTerm
       ]
 
     boolOpTable =
-      [ [ Prefix (opParser1 Neg "~")
+      [ [ Prefix (opParser1' Neg BoolExpr "~")
         ]
-      , [ Infix (opParser2 Conj "&&") AssocLeft
+      , [ Infix (opParser2' Conj BoolExpr "&&") AssocLeft
         ]
-      , [ Infix (opParser2 Disj "||") AssocLeft
+      , [ Infix (opParser2' Disj BoolExpr "||") AssocLeft
         ]
-      , [ Infix (opParser2 Imp  "->") AssocRight
+      , [ Infix (opParser2' Imp BoolExpr "->") AssocRight
         ]
       ]

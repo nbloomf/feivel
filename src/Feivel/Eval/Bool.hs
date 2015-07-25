@@ -26,38 +26,38 @@ import Feivel.Eval.Util
 
 
 instance Glyph (BoolExpr Expr) where
-  toGlyph (BoolConst True  :@ _) = return "#t"
-  toGlyph (BoolConst False :@ _) = return "#f"
+  toGlyph (BoolExpr (BoolConst True  :@ _)) = return "#t"
+  toGlyph (BoolExpr (BoolConst False :@ _)) = return "#f"
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
 
 
 instance (Eval Expr) => Eval (BoolExpr Expr) where
-  eval (BoolConst b :@ loc) = return (BoolConst b :@ loc)
+  eval (BoolExpr (BoolConst b :@ loc)) = return (BoolExpr $ BoolConst b :@ loc)
 
   {- :Common -}
-  eval (BoolVar key :@ loc)        = eKey key loc
-  eval (BoolAtIdx m h k :@ loc)    = eAtIdx m h k loc
-  eval (BoolIfThenElse b t f :@ _) = eIfThenElse b t f
-  eval (BoolMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (BoolExpr (BoolVar key :@ loc))        = eKey key loc
+  eval (BoolExpr (BoolAtIdx m h k :@ loc))    = eAtIdx m h k loc
+  eval (BoolExpr (BoolIfThenElse b t f :@ _)) = eIfThenElse b t f
+  eval (BoolExpr (BoolMacro vals mac :@ loc)) = eMacro vals mac loc
 
-  eval (BoolAtPos a t :@ loc) = lift2 loc a t (foo)
+  eval (BoolExpr (BoolAtPos a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [BoolExpr Expr] -> Integer -> Either ListErr (BoolExpr Expr)
 
-  eval (IsDefined key :@ loc) = do
+  eval (BoolExpr (IsDefined key :@ loc)) = do
     p <- isKeyDefined key
     putVal loc p >>= getVal
 
-  eval (BoolEq a b :@ loc) = do
+  eval (BoolExpr (BoolEq a b :@ loc)) = do
     x <- eval a >>= getVal :: EvalM Expr
     y <- eval b >>= getVal :: EvalM Expr
     putVal loc (x == y) >>= getVal
 
-  eval (BoolNEq a b :@ loc) = do
+  eval (BoolExpr (BoolNEq a b :@ loc)) = do
     x <- eval a >>= getVal :: EvalM Expr
     y <- eval b >>= getVal :: EvalM Expr
     putVal loc (x /= y) >>= getVal
 
-  eval (BoolLT a b :@ loc) = do
+  eval (BoolExpr (BoolLT a b :@ loc)) = do
     case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -74,7 +74,7 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
-  eval (BoolLEq a b :@ loc) = do
+  eval (BoolExpr (BoolLEq a b :@ loc)) = do
     case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -91,7 +91,7 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
-  eval (BoolGT a b :@ loc) = do
+  eval (BoolExpr (BoolGT a b :@ loc)) = do
     case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -108,7 +108,7 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
-  eval (BoolGEq a b :@ loc) = do
+  eval (BoolExpr (BoolGEq a b :@ loc)) = do
     case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
@@ -125,31 +125,31 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
-  eval (BoolRand ls :@ loc) = do
+  eval (BoolExpr (BoolRand ls :@ loc)) = do
     xs <- eval ls >>= getVal
     r  <- randomElementEvalM xs :: EvalM Bool
     putVal loc r >>= getVal
 
-  eval (ListElem x xs :@ loc) = do
+  eval (BoolExpr (ListElem x xs :@ loc)) = do
     a <- eval x >>= getVal :: EvalM Expr
     as <- eval xs >>= getVal :: EvalM [Expr]
     putVal loc (elem a as) >>= getVal
 
-  eval (ListIsEmpty xs :@ loc) = do
+  eval (BoolExpr (ListIsEmpty xs :@ loc)) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     putVal loc (null as) >>= getVal
 
-  eval (MatIsRow m :@ loc) = do
+  eval (BoolExpr (MatIsRow m :@ loc)) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
     q <- tryEvalM loc $ mIsRow p
     putVal loc q >>= getVal
 
-  eval (MatIsCol m :@ loc) = do
+  eval (BoolExpr (MatIsCol m :@ loc)) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
     q <- tryEvalM loc $ mIsCol p
     putVal loc q >>= getVal
 
-  eval (MatIsGJForm m :@ loc) = do
+  eval (BoolExpr (MatIsGJForm m :@ loc)) = do
     case typeOf m of
       MatOf QQ -> do
         p <- eval m >>= getVal :: EvalM (Matrix Rat)
@@ -162,14 +162,14 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       t -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
-  eval (Neg    a   :@ loc) = lift1 loc a   (boolNot)
-  eval (Conj   a b :@ loc) = lift2 loc a b (boolAnd)
-  eval (Disj   a b :@ loc) = lift2 loc a b (boolOr)
-  eval (Imp    a b :@ loc) = lift2 loc a b (boolImp)
+  eval (BoolExpr (Neg    a   :@ loc)) = lift1 loc a   (boolNot)
+  eval (BoolExpr (Conj   a b :@ loc)) = lift2 loc a b (boolAnd)
+  eval (BoolExpr (Disj   a b :@ loc)) = lift2 loc a b (boolOr)
+  eval (BoolExpr (Imp    a b :@ loc)) = lift2 loc a b (boolImp)
 
   -- Int
-  eval (IntSqFree a :@ loc) = lift1 loc a   (rIsSqFreeT zeroZZ)
-  eval (IntDiv a b :@ loc)  = lift2 loc a b (rDividesT  zeroZZ)
+  eval (BoolExpr (IntSqFree a :@ loc)) = lift1 loc a   (rIsSqFreeT zeroZZ)
+  eval (BoolExpr (IntDiv a b :@ loc))  = lift2 loc a b (rDividesT  zeroZZ)
 
   -- Str
-  eval (Matches a b :@ loc) = lift2 loc a b (strMatch)
+  eval (BoolExpr (Matches a b :@ loc)) = lift2 loc a b (strMatch)

@@ -24,7 +24,13 @@ module Feivel.Grammar.Bool where
 import Feivel.Grammar.Util
 
 
-type BoolExpr a = AtLocus (BoolExprLeaf a)
+newtype BoolExpr a = BoolExpr
+  { unBoolExpr :: AtLocus (BoolExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (BoolExpr a) where
+  locusOf = locusOf . unBoolExpr
+
 
 data BoolExprLeaf a
   = BoolConst Bool

@@ -120,7 +120,7 @@ instance Get Bool where
   get expr = do
     x <- get expr :: Either GetErr (BoolExpr Expr)
     case x of
-      BoolConst b :@ _ -> return b
+      BoolExpr (BoolConst b :@ _) -> return b
       v -> Left GetUnevaluatedExpression
 
 instance Get Text where

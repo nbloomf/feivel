@@ -70,7 +70,7 @@ instance Put (RatExpr Expr) where
   put loc (x :@ _) = RatE (x :@ loc)
 
 instance Put (BoolExpr Expr) where
-  put loc (x :@ _) = BoolE (x :@ loc)
+  put loc (BoolExpr (x :@ _)) = BoolE $ BoolExpr (x :@ loc)
 
 instance Put (StrExpr Expr) where
   put loc (StrExpr (x :@ _)) = StrE $ StrExpr (x :@ loc)
@@ -88,7 +88,7 @@ instance Put Text where
   put loc x = StrE $ StrExpr $ StrConst x :@ loc
 
 instance Put Bool where
-  put loc x = BoolE $ BoolConst x :@ loc
+  put loc x = BoolE $ BoolExpr $ BoolConst x :@ loc
 
 instance Put Rat where
   put loc x = RatE $ RatConst x :@ loc
