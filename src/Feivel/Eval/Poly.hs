@@ -65,7 +65,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver ZZ -> addPoly (constP zeroZZ)
       PolyOver QQ -> addPoly (constP zeroQQ)
       PolyOver BB -> addPoly (constP zeroBB)
-      _           -> reportErr loc $ NumericTypeExpected u
+      _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolySub u a b :@ loc) = do
     let subPoly x = lift2 loc a b (rSubT (constP x))
@@ -77,7 +77,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver ZZ -> subPoly (constP zeroZZ)
       PolyOver QQ -> subPoly (constP zeroQQ)
       PolyOver BB -> subPoly (constP zeroBB)
-      _           -> reportErr loc $ NumericTypeExpected u
+      _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyMul u a b :@ loc) = do
     let mulPoly x = lift2 loc a b (rMulT (constP x))
@@ -89,38 +89,25 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver ZZ -> mulPoly (constP zeroZZ)
       PolyOver QQ -> mulPoly (constP zeroQQ)
       PolyOver BB -> mulPoly (constP zeroBB)
-      _           -> reportErr loc $ NumericTypeExpected u
+      _ -> reportErr loc $ NumericTypeExpected u
 
-  eval (PolyNeg _ a :@ loc) = do
-    let t = typeOf a
-    case t of
-      PolyOver ZZ ->
-        lift1 loc a (rNegT (constP (0::Integer)))
-      PolyOver QQ ->
-        lift1 loc a (rNegT (constP (0:/:1)))
-      PolyOver BB ->
-        lift1 loc a (rNegT (constP False))
-      PolyOver (ZZMod n) -> do
-        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
-        let y = rNeg x
-        return $ PolyConst (ZZMod n) (fmap (put loc) y) :@ loc
-      _ -> reportErr loc $ NumericPolynomialExpected t
+  eval (PolyNeg u a :@ loc) = do
+    let negPoly x = lift1 loc a (rNegT (constP x))
+    case u of
+      ZZ      -> negPoly zeroZZ
+      QQ      -> negPoly zeroQQ
+      BB      -> negPoly zeroBB
+      ZZMod n -> negPoly (zeroMod n)
+      _ -> reportErr loc $ NumericPolynomialExpected u
 
-  eval (PolyPow _ a b :@ loc) = do
-    let t = typeOf a
-    case t of
-      PolyOver ZZ ->
-        lift2 loc a b (rPowT (constP (0::Integer)))
-      PolyOver QQ ->
-        lift2 loc a b (rPowT (constP (0:/:1)))
-      PolyOver BB ->
-        lift2 loc a b (rPowT (constP False))
-      PolyOver (ZZMod n) -> do
-        x <- eval a >>= getVal :: EvalM (Poly ZZModulo)
-        y <- eval b >>= getVal :: EvalM Integer
-        z <- tryEvalM loc $ rPow x y
-        return $ PolyConst (ZZMod n) (fmap (put loc) z) :@ loc
-      _ -> reportErr loc $ NumericPolynomialExpected t
+  eval (PolyPow u a b :@ loc) = do
+    let powPoly x = lift2 loc a b (rPowT (constP x))
+    case u of
+      ZZ      -> powPoly zeroZZ
+      QQ      -> powPoly zeroQQ
+      BB      -> powPoly zeroBB
+      ZZMod n -> powPoly (zeroMod n)
+      _ -> reportErr loc $ NumericPolynomialExpected u
 
   eval (PolyFromRoots _ x cs :@ loc) = do
     let t = typeOf cs
@@ -129,45 +116,44 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
         as <- eval cs >>= getVal :: EvalM [Integer]
         p  <- tryEvalM loc $ fromRootsP x as
         let q = fmap (put loc) p
-        return (PolyConst ZZ q :@ loc)
+        putTypeVal ZZ loc q >>= getVal
       ListOf QQ -> do
         as <- eval cs >>= getVal :: EvalM [Rat]
         p  <- tryEvalM loc $ fromRootsP x as
         let q = fmap (put loc) p
-        return (PolyConst QQ q :@ loc)
+        putTypeVal QQ loc q >>= getVal
       ListOf (ZZMod n) -> do
         as <- eval cs >>= getVal :: EvalM [ZZModulo]
         p  <- tryEvalM loc $ fromRootsP x as
         let q = fmap (put loc) p
-        return (PolyConst (ZZMod n) q :@ loc)
+        putTypeVal (ZZMod n) loc q >>= getVal
       _ -> reportErr loc $ NumericListExpected t
 
-  eval (PolyEvalPoly _ p qs :@ loc) = do
-    let t = typeOf p
-    case t of
-      PolyOver ZZ -> do
+  eval (PolyEvalPoly u p qs :@ loc) = do
+    case u of
+      ZZ -> do
         a <- eval p >>= getVal :: EvalM (Poly Integer)
         let foo (x,h) = do
               b <- eval h >>= getVal :: EvalM (Poly Integer)
               return (x,b)
         ks <- sequence $ map foo qs
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        return (PolyConst ZZ (fmap (put loc) c) :@ loc)
-      PolyOver QQ -> do
+        putTypeVal ZZ loc (fmap (put loc) c) >>= getVal
+      QQ -> do
         a <- eval p >>= getVal :: EvalM (Poly Rat)
         let foo (x,h) = do
               b <- eval h >>= getVal :: EvalM (Poly Rat)
               return (x,b)
         ks <- sequence $ map foo qs
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        return (PolyConst QQ (fmap (put loc) c) :@ loc)
-      PolyOver (ZZMod n) -> do
+        putTypeVal QQ loc (fmap (put loc) c) >>= getVal
+      ZZMod n -> do
         a <- eval p >>= getVal :: EvalM (Poly ZZModulo)
         let foo (x,h) = do
               b <- eval h >>= getVal :: EvalM (Poly ZZModulo)
               return (x,b)
         ks <- sequence $ map foo qs
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        return (PolyConst (ZZMod n) (fmap (put loc) c) :@ loc)
-      _ -> reportErr loc $ NumericPolynomialExpected t
+        putTypeVal (ZZMod n) loc (fmap (put loc) c) >>= getVal
+      _ -> reportErr loc $ NumericPolynomialExpected u
 
