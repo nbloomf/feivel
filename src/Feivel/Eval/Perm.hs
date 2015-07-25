@@ -35,7 +35,7 @@ instance (Glyph Expr) => Glyph (PermExpr Expr) where
 instance (Eval Expr) => Eval (PermExpr Expr) where
   eval (PermConst t p :@ loc) = do
     q <- seqPerm $ mapPerm eval p
-    return $ PermConst t q :@ loc
+    putTypeVal t loc q >>= getVal
 
   eval (PermAtPos _ a t :@ loc) = lift2 loc a t (foo)
     where foo = listAtPos :: [PermExpr Expr] -> Integer -> Either ListErr (PermExpr Expr)
@@ -58,7 +58,7 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
         b <- eval q >>= getVal :: EvalM (Perm Integer)
         let c = compose a b
         let s = mapPerm (put loc) c
-        return (PermConst ZZ s :@ loc)
+        putTypeVal ZZ loc s >>= getVal
       _ -> reportErr loc $ PolynomialExpected t
 
   eval (PermInvert t p :@ loc) = do
@@ -67,5 +67,5 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
         a <- eval p >>= getVal :: EvalM (Perm Integer)
         let c = inverse a
         let s = mapPerm (put loc) c
-        return (PermConst ZZ s :@ loc)
+        putTypeVal ZZ loc s >>= getVal
       _ -> reportErr loc $ PolynomialExpected t
