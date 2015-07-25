@@ -69,21 +69,22 @@ instance (Eval Expr) => Eval (IntExpr Expr) where
   eval (IntExpr (MatNumRows m :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     k <- tryEvalM loc $ mNumRows n
-    return $ IntExpr $ IntConst k :@ loc
+    putVal loc k >>= getVal
 
   eval (IntExpr (MatNumCols m :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     k <- tryEvalM loc $ mNumCols n
-    return $ IntExpr $ IntConst k :@ loc
+    putVal loc k >>= getVal
 
   eval (IntExpr (IntRand ls :@ loc)) = do
     xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ IntExpr $ IntConst r :@ loc
+    r  <- randomElementEvalM xs :: EvalM Integer
+    putVal loc r >>= getVal
 
   eval (IntExpr (ListLen ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    return $ IntExpr $ IntConst (fromIntegral $ length xs) :@ loc
+    let k = fromIntegral $ length xs :: Integer
+    putVal loc k >>= getVal
 
   eval (IntExpr (IntSum   ls :@ loc)) = lift1 loc ls (rSumT   zeroZZ)
   eval (IntExpr (IntProd  ls :@ loc)) = lift1 loc ls (rUProdT zeroZZ)
@@ -96,40 +97,38 @@ instance (Eval Expr) => Eval (IntExpr Expr) where
     x  <- eval a >>= getVal
     y  <- eval b >>= getVal
     t <- observeIntegerUniform loc (x,y)
-    return $ IntExpr $ IntConst t :@ loc
+    putVal loc t >>= getVal
 
   eval (IntExpr (IntObserveBinomial n p :@ loc)) = do
     m <- eval n >>= getVal
     q <- eval p >>= getVal
     t <- observeBinomial loc m (toDouble q)
-    return $ IntExpr $ IntConst t :@ loc
+    putVal loc t >>= getVal
 
   eval (IntExpr (IntObservePoisson lambda :@ loc)) = do
     q <- eval lambda >>= getVal
     t <- observeIntegerPoisson loc (toDouble q)
-    return $ IntExpr $ IntConst t :@ loc
+    putVal loc t >>= getVal
 
   eval (IntExpr (IntCastStr str :@ loc)) = do
     Text x <- eval str >>= getVal
     n <- parseAsAt pInteger loc x
-    return $ IntExpr $ IntConst n :@ loc
+    putVal loc n >>= getVal
 
   eval (IntExpr (MatRank m :@ loc)) = do
     case typeOf m of
       MatOf QQ -> do
         n <- eval m >>= getVal :: EvalM (Matrix Rat)
         r <- tryEvalM loc $ mRank n
-        return $ IntExpr $ IntConst r :@ loc
+        putVal loc r >>= getVal
       MatOf BB -> do
         n <- eval m >>= getVal :: EvalM (Matrix Bool)
         r <- tryEvalM loc $ mRank n
-        return $ IntExpr $ IntConst r :@ loc
+        putVal loc r >>= getVal
       MatOf u -> reportErr loc $ FieldMatrixExpected u
       u -> reportErr loc $ MatrixExpected u
 
   eval (IntExpr (IntContent p :@ loc)) = do
     q <- eval p >>= getVal :: EvalM (Poly Integer)
     c <- tryEvalM loc $ contentP q
-    return $ IntExpr $ IntConst c :@ loc
-
-
+    putVal loc c >>= getVal
