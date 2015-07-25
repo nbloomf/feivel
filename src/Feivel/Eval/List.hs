@@ -52,7 +52,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
   eval (ListRange _ a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
     y <- eval b >>= getVal :: EvalM Integer
-    return (ListConst ZZ [IntE $ IntConst k :@ loc | k <- [x..y]] :@ loc)
+    return (ListConst ZZ [IntE $ IntExpr $ IntConst k :@ loc | k <- [x..y]] :@ loc)
 
   eval (ListCat u a b :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
@@ -73,7 +73,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
     return $ ListConst SS (map (\k -> StrE $ StrConst k :@ loc) (sort xs)) :@ loc
   eval (ListSort ZZ a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Integer]
-    return $ ListConst ZZ (map (\k -> IntE $ IntConst k :@ loc) (sort xs)) :@ loc
+    return $ ListConst ZZ (map (\k -> IntE $ IntExpr $ IntConst k :@ loc) (sort xs)) :@ loc
   eval (ListSort QQ a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Rat]
     return $ ListConst QQ (map (\k -> RatE $ RatConst k :@ loc) (sort xs)) :@ loc

@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst
+  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst, pTerm', opParser2', opParser1'
 ) where
 
 
@@ -170,6 +170,15 @@ opParser1 f fun = do
   end <- getPosition
   return $ \x -> (f x :@ (locus start end))
 
+-- Unary Operators (for expression parser)
+opParser1' ::
+  (b -> a) -> (AtLocus a -> b) -> String -> ParseM (b -> b)
+opParser1' f cons fun = do
+  start <- getPosition
+  try $ keyword fun
+  end <- getPosition
+  return $ \x -> (cons $ f x :@ (locus start end))
+
 -- Binary Operators (for expression parser)
 opParser2 :: (AtLocus a -> AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a) -> (AtLocus a))
 opParser2 f fun = do
@@ -177,6 +186,15 @@ opParser2 f fun = do
   try $ keyword fun
   end <- getPosition
   return $ \x y -> (f x y :@ (locus start end))
+
+-- Binary Operators (for expression parser)
+opParser2' ::
+  (b -> b -> a)-> (AtLocus a -> b) -> String -> ParseM (b -> b -> b)
+opParser2' f cons fun = do
+  start <- getPosition
+  try $ keyword fun
+  end <- getPosition
+  return $ \x y -> (cons $ f x y :@ (locus start end))
 
 pVarExpr :: (Key -> a) -> Type -> ParseM a
 pVarExpr h t = do
@@ -196,6 +214,11 @@ pTypeKeyExpr pE = do
 pTerm :: ParseM a -> ParseM (AtLocus a) -> String -> [ParseM a] -> ParseM (AtLocus a)
 pTerm cst expr err atoms = 
   choice [try $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
+
+-- Terms in Expression Grammars
+pTerm' :: ParseM a -> (AtLocus a -> b) -> ParseM b -> String -> [ParseM a] -> ParseM b
+pTerm' cst cons expr err atoms = 
+  choice [try $ fmap cons $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
 
 pIfThenElseExprT :: (Type -> ParseM Expr) -> ParseM a -> (Expr -> a -> a -> b) -> t -> ParseM b
 pIfThenElseExprT pE p h t = do

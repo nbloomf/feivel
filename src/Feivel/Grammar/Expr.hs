@@ -26,7 +26,7 @@ module Feivel.Grammar.Expr (
   Expr(..),
   Doc,       DocLeaf(..),
   StrExpr,   StrExprLeaf(..), Format(..),
-  IntExpr,   IntExprLeaf(..),
+  IntExpr(..),   IntExprLeaf(..),
   BoolExpr,  BoolExprLeaf(..),
   RatExpr,   RatExprLeaf(..),
   ZZModExpr, ZZModExprLeaf(..),

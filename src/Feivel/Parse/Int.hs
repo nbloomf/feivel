@@ -20,7 +20,7 @@ module Feivel.Parse.Int (
   pIntConst, pIntExpr
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), IntExpr, IntExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -31,12 +31,12 @@ pIntConstLeaf :: ParseM (IntExprLeaf Expr)
 pIntConstLeaf = pConst pInteger IntConst
 
 pIntConst :: ParseM (IntExpr Expr)
-pIntConst = pAtLocus pIntConstLeaf
+pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
 pIntExpr :: (Type -> ParseM Expr) -> ParseM (IntExpr Expr)
 pIntExpr pE = spaced $ buildExpressionParser intOpTable pIntTerm
   where
-    pIntTerm = pTerm pIntConstLeaf (pIntExpr pE) "integer expression"
+    pIntTerm = pTerm' pIntConstLeaf IntExpr (pIntExpr pE) "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
@@ -78,23 +78,23 @@ pIntExpr pE = spaced $ buildExpressionParser intOpTable pIntTerm
       ]
 
     intOpTable =
-      [ [ Infix (opParser2 IntPow "^") AssocRight
+      [ [ Infix (opParser2' IntPow IntExpr "^") AssocRight
         ]
-      , [ Infix (opParser2 IntMult "*") AssocLeft
+      , [ Infix (opParser2' IntMult IntExpr "*") AssocLeft
         ]
-      , [ Infix (opParser2 IntQuo "div") AssocLeft
-        , Infix (opParser2 IntMod "mod") AssocLeft
+      , [ Infix (opParser2' IntQuo IntExpr "div") AssocLeft
+        , Infix (opParser2' IntMod IntExpr "mod") AssocLeft
         ]
-      , [ Prefix (opParser1 IntNeg "neg")
-        , Prefix (opParser1 IntAbs "abs")
+      , [ Prefix (opParser1' IntNeg IntExpr "neg")
+        , Prefix (opParser1' IntAbs IntExpr "abs")
         ]
-      , [ Infix (opParser2 IntAdd "+") AssocLeft
-        , Infix (opParser2 IntSub "-") AssocLeft
+      , [ Infix (opParser2' IntAdd IntExpr "+") AssocLeft
+        , Infix (opParser2' IntSub IntExpr "-") AssocLeft
         ]
-      , [ Infix (opParser2 IntMin "min") AssocLeft
-        , Infix (opParser2 IntMax "max") AssocLeft
-        , Infix (opParser2 IntGCD "gcd") AssocLeft
-        , Infix (opParser2 IntLCM "lcm") AssocLeft
+      , [ Infix (opParser2' IntMin IntExpr "min") AssocLeft
+        , Infix (opParser2' IntMax IntExpr "max") AssocLeft
+        , Infix (opParser2' IntGCD IntExpr "gcd") AssocLeft
+        , Infix (opParser2' IntLCM IntExpr "lcm") AssocLeft
         ]
-      , [ Infix (opParser2 IntChoose "choose") AssocLeft]
+      , [ Infix (opParser2' IntChoose IntExpr "choose") AssocLeft]
       ]

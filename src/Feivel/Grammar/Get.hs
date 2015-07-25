@@ -113,7 +113,7 @@ instance Get Integer where
   get expr = do
     x <- get expr :: Either GetErr (IntExpr Expr)
     case x of
-      IntConst k :@ _ -> return k
+      IntExpr (IntConst k :@ _) -> return k
       _ -> Left GetUnevaluatedExpression
 
 instance Get Bool where

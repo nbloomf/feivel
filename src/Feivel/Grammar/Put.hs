@@ -39,7 +39,7 @@ class Put a where
 
 
 instance Put (IntExpr Expr) where
-  put loc (x :@ _) = IntE (x :@ loc)
+  put loc (IntExpr (x :@ _)) = IntE $ IntExpr (x :@ loc)
 
 instance Put (ZZModExpr Expr) where
   put loc (x :@ _) = ZZModE (x :@ loc)
@@ -75,7 +75,7 @@ instance Put (StrExpr Expr) where
 {--------------}
 
 instance Put Integer where
-  put loc x = IntE $ IntConst x :@ loc
+  put loc x = IntE $ IntExpr $ IntConst x :@ loc
 
 instance Put Text where
   put loc x = StrE $ StrConst x :@ loc

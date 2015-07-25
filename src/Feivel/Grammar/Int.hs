@@ -24,7 +24,13 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-type IntExpr a = AtLocus (IntExprLeaf a)
+newtype IntExpr a = IntExpr
+  { unIntExpr :: AtLocus (IntExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (IntExpr a) where
+  locusOf = locusOf . unIntExpr
+
 
 data IntExprLeaf a
   = IntConst Integer
