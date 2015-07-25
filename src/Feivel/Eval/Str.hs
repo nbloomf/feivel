@@ -56,43 +56,43 @@ instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
   eval (StrDecimal p k :@ loc) = do
     x <- eval p >>= getVal
     d <- eval k >>= getVal
-    return $ StrConst (Text $ digits d x) :@ loc
+    putVal loc (Text $ digits d x) >>= getVal
 
   eval (StrRand ls :@ loc) = do
     xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ StrConst r :@ loc
+    r  <- randomElementEvalM xs :: EvalM Text
+    putVal loc r >>= getVal
 
   eval (StrTab m :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     tab <- tabulateWithM toGlyph n
-    return $ StrConst (Text tab) :@ loc
+    putVal loc (Text tab) >>= getVal
 
   eval (StrTypeOf e :@ loc) = do
-    return $ StrConst (Text $ show $ typeOf e) :@ loc
+    putVal loc (Text $ show $ typeOf e) >>= getVal
 
   eval (StrFormat LaTeX e :@ loc) = do
     case typeOf e of
       ZZ -> do
         x <- eval e >>= getVal :: EvalM Integer
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       QQ -> do
         x <- eval e >>= getVal :: EvalM Rat
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       MatOf ZZ -> do
         x <- eval e >>= getVal :: EvalM (Matrix Integer)
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       MatOf QQ -> do
         x <- eval e >>= getVal :: EvalM (Matrix Rat)
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       PolyOver ZZ -> do
         x <- eval e >>= getVal :: EvalM (Poly Integer)
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       PolyOver QQ -> do
         x <- eval e >>= getVal :: EvalM (Poly Rat)
-        return $ StrConst (Text $ latex x) :@ loc
+        putVal loc (Text $ latex x) >>= getVal
       _ -> error "StrFormat LaTeX"
 
   eval (StrIntCast n :@ loc) = do
     n <- eval n >>= getVal :: EvalM Integer
-    return $ StrConst (Text $ show n) :@ loc
+    putVal loc (Text $ show n) >>= getVal
