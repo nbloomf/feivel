@@ -44,7 +44,7 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
 
   eval (RatCast expr :@ loc) = do
     n <- eval expr >>= getVal :: EvalM Integer
-    return $ RatConst (n:/:1) :@ loc
+    putVal loc (n:/:1) >>= getVal
 
   eval (RatNeg  a :@ loc)   = lift1 loc a (rNegT zeroQQ)
   eval (RatAbs  a :@ loc)   = lift1 loc a (rAbsT zeroQQ)
@@ -61,8 +61,8 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
 
   eval (RatRand ls :@ loc) = do
     xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ RatConst r :@ loc
+    r  <- randomElementEvalM xs :: EvalM Rat
+    putVal loc r >>= getVal
 
   eval (RatSum   ls :@ loc) = lift1 loc ls (rSumT   (0:/:1))
   eval (RatProd  ls :@ loc) = lift1 loc ls (rUProdT (0:/:1))
@@ -75,11 +75,11 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
         m  <- tryEvalM loc $ rMeanT (0:/:1) xs
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       u -> reportErr loc $ NumericListExpected u
 
   {- Mean Deviation -}
@@ -88,11 +88,11 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
         m  <- tryEvalM loc $ rMeanDevT (0:/:1) xs
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       u -> reportErr loc $ NumericListExpected u
 
   {- Standard Deviation -}
@@ -102,11 +102,11 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ ratIntStdDev xs k
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
         m  <- tryEvalM loc $ ratStdDev xs k
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       u -> reportErr loc $ NumericListExpected u
 
   {- Z-Score -}
@@ -117,14 +117,14 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
       ListOf ZZ -> do
         xs <- eval ls >>= getVal :: EvalM [Integer]
         m  <- tryEvalM loc $ ratIntZScore y xs k
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       ListOf QQ -> do
         xs <- eval ls >>= getVal :: EvalM [Rat]
         m  <- tryEvalM loc $ ratZScore y xs k
-        return $ RatConst m :@ loc
+        putVal loc m >>= getVal
       u -> reportErr loc $ NumericListExpected u
 
   eval (RatCastStr str :@ loc) = do
     Text x <- eval str >>= getVal
     n <- parseAsAt pRat loc x
-    return $ RatConst n :@ loc
+    putVal loc n >>= getVal
