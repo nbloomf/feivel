@@ -56,12 +56,12 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
   eval (MatRowFromList t xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mRowFromList as
-    return (MatConst t m :@ loc)
+    putTypeVal t loc m >>= getVal
 
   eval (MatColFromList t xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mColFromList as
-    return (MatConst t m :@ loc)
+    putTypeVal t loc m >>= getVal
 
   eval (MatId u n :@ loc) = do
     let makeIdMat x = lift1 loc n (mEIdT x)
@@ -114,26 +114,26 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
     rs <- tryEvalM loc $ mRowsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mVCats ts
-    return (MatConst u n :@ loc)
+    putTypeVal u loc n >>= getVal
 
   eval (MatShuffleCols u m :@ loc) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mHCats ts
-    return (MatConst u n :@ loc)
+    putTypeVal u loc n >>= getVal
 
   eval (MatHCat u a b :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mHCat m n
-    return (MatConst u x :@ loc)
+    putTypeVal u loc x >>= getVal
 
   eval (MatVCat u a b :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mVCat m n
-    return $ MatConst u x :@ loc
+    putTypeVal u loc x >>= getVal
 
   eval (MatAdd u a b :@ loc) = do
     let addMat x = lift2 loc a b (rAddT (mCell x))
@@ -162,7 +162,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
   eval (MatTrans u a :@ loc) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
-    return (MatConst u p :@ loc)
+    putTypeVal u loc p >>= getVal
 
   eval (MatMul u a b :@ loc) = do
     let mulMat x = lift2 loc a b (rMulT (mCell x))
@@ -193,14 +193,14 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
     i <- eval a >>= getVal
     j <- eval b >>= getVal
     p <- tryEvalM loc $ mSwapRows i j n
-    return $ MatConst u p :@ loc
+    putTypeVal u loc p >>= getVal
 
   eval (MatSwapCols u m a b :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     j <- eval b >>= getVal
     p <- tryEvalM loc $ mSwapCols i j n
-    return $ MatConst u p :@ loc
+    putTypeVal u loc p >>= getVal
 
   eval (MatScaleRow u m a h :@ loc) = do
     let scaleRowMat x = lift3 loc a h m (mScaleRowT x)
@@ -268,13 +268,13 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelRow n i
-    return $ MatConst u p :@ loc
+    putTypeVal u loc p >>= getVal
 
   eval (MatDelCol u m a :@ loc) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelCol n i
-    return $ MatConst u p :@ loc
+    putTypeVal u loc p >>= getVal
 
   eval (MatGJForm u m :@ loc) = do
     let gjFormMat x = lift1 loc m (mGJFormT x)
@@ -294,23 +294,22 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     r <- tryEvalM loc $ mRowOf i n
-    return (MatConst u r :@ loc)
+    putTypeVal u loc r >>= getVal
 
   eval (MatGetCol u k m :@ loc) = do
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     c <- tryEvalM loc $ mColOf i n
-    return (MatConst u c :@ loc)
+    putTypeVal u loc c >>= getVal
 
   eval (MatBuilder typ e kr lr kc lc :@ loc) = do
     st <- getState
     rs <- eval lr >>= getVal :: EvalM [Expr]
     cs <- eval lc >>= getVal :: EvalM [Expr]
-    es <- sequence [sequence [foo st r c | c <- cs] | r <- rs]
+    es <- sequence [sequence [foo st r c | c <- cs] | r <- rs] :: EvalM [[Expr]]
     m  <- tryEvalM loc $ mFromRowList es
-    return (MatConst typ m :@ loc)
+    putTypeVal typ loc m >>= getVal
       where
         foo st r c = do
           st' <- addKeyToStore kr r loc st >>= addKeyToStore kc c loc
           evalWith e st' >>= getVal
-
