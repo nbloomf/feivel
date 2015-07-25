@@ -45,32 +45,32 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
 
   eval (IsDefined key :@ loc) = do
     p <- isKeyDefined key
-    return $ BoolConst p :@ loc
+    putVal loc p >>= getVal
 
   eval (BoolEq a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Expr
     y <- eval b >>= getVal :: EvalM Expr
-    return $ BoolConst (x == y) :@ loc
+    putVal loc (x == y) >>= getVal
 
   eval (BoolNEq a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Expr
     y <- eval b >>= getVal :: EvalM Expr
-    return $ BoolConst (x /= y) :@ loc
+    putVal loc (x /= y) >>= getVal
 
   eval (BoolLT a b :@ loc) = do
     case unify (typeOf a) (typeOf b) of
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x < y) :@ loc
+        putVal loc (x < y) >>= getVal
       Right SS -> do
         x <- eval a >>= getVal :: EvalM Text
         y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x < y) :@ loc
+        putVal loc (x < y) >>= getVal
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
         y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x < y) :@ loc
+        putVal loc (x < y) >>= getVal
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
@@ -79,15 +79,15 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x <= y) :@ loc
+        putVal loc (x <= y) >>= getVal
       Right SS -> do
         x <- eval a >>= getVal :: EvalM Text
         y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x <= y) :@ loc
+        putVal loc (x <= y) >>= getVal
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
         y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x <= y) :@ loc
+        putVal loc (x <= y) >>= getVal
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
@@ -96,15 +96,15 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x > y) :@ loc
+        putVal loc (x > y) >>= getVal
       Right SS -> do
         x <- eval a >>= getVal :: EvalM Text
         y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x > y) :@ loc
+        putVal loc (x > y) >>= getVal
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
         y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x > y) :@ loc
+        putVal loc (x > y) >>= getVal
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
@@ -113,52 +113,52 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
       Right ZZ -> do
         x <- eval a >>= getVal :: EvalM Integer
         y <- eval b >>= getVal :: EvalM Integer
-        return $ BoolConst (x >= y) :@ loc
+        putVal loc (x >= y) >>= getVal
       Right SS -> do
         x <- eval a >>= getVal :: EvalM Text
         y <- eval b >>= getVal :: EvalM Text
-        return $ BoolConst (x >= y) :@ loc
+        putVal loc (x >= y) >>= getVal
       Right QQ -> do
         x <- eval a >>= getVal :: EvalM Rat
         y <- eval b >>= getVal :: EvalM Rat
-        return $ BoolConst (x >= y) :@ loc
+        putVal loc (x >= y) >>= getVal
       Right u -> reportErr loc $ SortableExpected u
       Left err -> reportErr loc err
 
   eval (BoolRand ls :@ loc) = do
     xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs
-    return $ BoolConst r :@ loc
+    r  <- randomElementEvalM xs :: EvalM Bool
+    putVal loc r >>= getVal
 
   eval (ListElem x xs :@ loc) = do
     a <- eval x >>= getVal :: EvalM Expr
     as <- eval xs >>= getVal :: EvalM [Expr]
-    return $ BoolConst (elem a as) :@ loc
+    putVal loc (elem a as) >>= getVal
 
   eval (ListIsEmpty xs :@ loc) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
-    return $ BoolConst (null as) :@ loc
+    putVal loc (null as) >>= getVal
 
   eval (MatIsRow m :@ loc) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
     q <- tryEvalM loc $ mIsRow p
-    return $ BoolConst q :@ loc
+    putVal loc q >>= getVal
 
   eval (MatIsCol m :@ loc) = do
     p <- eval m >>= getVal :: EvalM (Matrix Expr)
     q <- tryEvalM loc $ mIsCol p
-    return $ BoolConst q :@ loc
+    putVal loc q >>= getVal
 
   eval (MatIsGJForm m :@ loc) = do
     case typeOf m of
       MatOf QQ -> do
         p <- eval m >>= getVal :: EvalM (Matrix Rat)
         q <- tryEvalM loc $ mIsGaussJordanForm p
-        return $ BoolConst q :@ loc
+        putVal loc q >>= getVal
       MatOf BB -> do
         p <- eval m >>= getVal :: EvalM (Matrix Bool)
         q <- tryEvalM loc $ mIsGaussJordanForm p
-        return $ BoolConst q :@ loc
+        putVal loc q >>= getVal
       t -> reportErr loc $ NumericMatrixExpected t
 
   -- Bool
@@ -173,4 +173,3 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
 
   -- Str
   eval (Matches a b :@ loc) = lift2 loc a b (strMatch)
-
