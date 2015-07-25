@@ -41,6 +41,9 @@ class Put a where
   putType _ = put
 
 
+instance Put Expr where
+  put _ = id
+
 
 instance Put (IntExpr Expr) where
   put loc (IntExpr (x :@ _)) = IntE $ IntExpr (x :@ loc)

@@ -38,7 +38,7 @@ instance (Glyph Expr) => Glyph (ListExpr Expr) where
 instance (Eval Expr) => Eval (ListExpr Expr) where
   eval (ListConst t xs :@ loc) = do
     ys <- sequence $ map eval xs
-    return $ ListConst t ys :@ loc
+    putTypeVal t loc ys >>= getVal
 
   {- :Common -}
   eval (ListVar _ key :@ loc)        = eKey key loc
@@ -52,34 +52,34 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
   eval (ListRange _ a b :@ loc) = do
     x <- eval a >>= getVal :: EvalM Integer
     y <- eval b >>= getVal :: EvalM Integer
-    return (ListConst ZZ [IntE $ IntExpr $ IntConst k :@ loc | k <- [x..y]] :@ loc)
+    putTypeVal ZZ loc [put loc k | k <- [x..y]] >>= getVal
 
   eval (ListCat u a b :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     ys <- eval b >>= getVal :: EvalM [Expr]
-    return (ListConst u (xs ++ ys) :@ loc)
+    putTypeVal u loc (xs ++ ys) >>= getVal
 
   eval (ListToss u a b :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     ys <- eval b >>= getVal :: EvalM [Expr]
-    return $ ListConst u (xs \\ ys) :@ loc
+    putTypeVal u loc (xs \\ ys) >>= getVal
 
   eval (ListRev u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
-    return $ ListConst u (reverse xs) :@ loc
+    putTypeVal u loc (reverse xs) >>= getVal
 
   eval (ListSort SS a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Text]
-    return $ ListConst SS (map (\k -> StrE $ StrConst k :@ loc) (sort xs)) :@ loc
+    putTypeVal SS loc (map (put loc) (sort xs)) >>= getVal
   eval (ListSort ZZ a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Integer]
-    return $ ListConst ZZ (map (\k -> IntE $ IntExpr $ IntConst k :@ loc) (sort xs)) :@ loc
+    putTypeVal ZZ loc (map (put loc) (sort xs)) >>= getVal
   eval (ListSort QQ a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Rat]
-    return $ ListConst QQ (map (\k -> RatE $ RatConst k :@ loc) (sort xs)) :@ loc
+    putTypeVal QQ loc (map (put loc) (sort xs)) >>= getVal
   eval (ListSort BB a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Bool]
-    return $ ListConst BB (map (\k -> BoolE $ BoolConst k :@ loc) (sort xs)) :@ loc
+    putTypeVal BB loc (map (put loc) (sort xs)) >>= getVal
   eval (ListSort typ _ :@ loc) = reportErr loc $ SortableListExpected typ
 
   eval (ListRand _ ls :@ loc) = do
@@ -88,30 +88,30 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
 
   eval (ListUniq u a :@ loc) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
-    return $ ListConst u (nub xs) :@ loc
+    putTypeVal u loc (nub xs) >>= getVal
 
   eval (ListShuffle u ls :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     ys <- shuffleEvalM xs
-    return $ ListConst u ys :@ loc
+    putTypeVal u loc ys >>= getVal
 
   eval (ListShuffles (ListOf u) ls :@ loc) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     let us = [ListE $ ListConst (ListOf u) ys :@ loc | ys <- permutations xs]
-    return (ListConst (ListOf u) us :@ loc)
+    putTypeVal (ListOf u) loc us >>= getVal
   eval (ListShuffles u _ :@ loc) = reportErr loc $ ListExpected u
 
   eval (ListChoose u n ls :@ loc) = do
     k  <- eval n >>= getVal :: EvalM Integer
     xs <- eval ls >>= getVal :: EvalM [Expr]
     ys <- sampleEvalM (fromIntegral k) xs
-    return (ListConst u ys :@ loc)
+    putTypeVal u loc ys >>= getVal
 
   eval (ListChoices (ListOf u) n ls :@ loc) = do
     k  <- eval n  >>= getVal :: EvalM Integer
     xs <- eval ls >>= getVal :: EvalM [Expr]
     let foos = [ListE $ ListConst u x :@ loc | x <- combinations (fromIntegral k) xs]
-    return $ ListConst (ListOf u) foos :@ loc
+    putTypeVal (ListOf u) loc foos >>= getVal
   eval (ListChoices u _ _ :@ loc) = reportErr loc $ ListExpected u
 
   eval (ListBuilder _ e gs :@ loc) = do
@@ -148,19 +148,19 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
           undefineKey k
           return x
     zs <- filterM foo ys
-    return (ListConst u zs :@ loc)
+    putTypeVal u loc zs >>= getVal
 
   eval (ListMatRow u k m :@ loc) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListRowOf i n
-    return (ListConst u as :@ loc)
+    putTypeVal u loc as >>= getVal
 
   eval (ListMatCol u k m :@ loc) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListColOf i n
-    return (ListConst u as :@ loc)
+    putTypeVal u loc as >>= getVal
 
   eval (ListPermsOf typ xs :@ loc) = do
     case typ of
@@ -168,17 +168,17 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
         as <- eval xs >>= getVal :: EvalM [Integer]
         qs <- tryEvalM loc $ permsOf as
         let us = map (put loc) qs :: [Expr]
-        return (ListConst (PermOf ZZ) us :@ loc)
+        putTypeVal typ loc us >>= getVal
       PermOf SS -> do
         as <- eval xs >>= getVal :: EvalM [Text]
         qs <- tryEvalM loc $ permsOf as
         let us = map (put loc) qs :: [Expr]
-        return (ListConst (PermOf SS) us :@ loc)
+        putTypeVal typ loc us >>= getVal
       PermOf QQ -> do
         as <- eval xs >>= getVal :: EvalM [Rat]
         qs <- tryEvalM loc $ permsOf as
         let us = map (put loc) qs :: [Expr]
-        return (ListConst (PermOf SS) us :@ loc)
+        putTypeVal typ loc us >>= getVal
       u -> reportErr loc $ PermutationExpected u
 
   eval (ListPivotColIndices _ m :@ loc) = do
@@ -186,7 +186,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
           n  <- eval m >>= getVal
           suchThat $ n `hasSameTypeAs` x
           is <- tryEvalM loc $ mPivotCols n
-          return (ListConst ZZ (map (put loc) is) :@ loc)
+          putTypeVal ZZ loc (map (put loc) is) >>= getVal
     case typeOf m of
       MatOf QQ -> pivotIndices (mCell zeroQQ)
       MatOf BB -> pivotIndices (mCell zeroBB)
