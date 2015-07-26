@@ -21,7 +21,7 @@ module Feivel.Parse.List (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Grammar (Type(..), Expr(..), ListExpr, ListExprLeaf(..), ListGuard(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -31,10 +31,10 @@ import Text.Parsec.Prim (try)
 
 
 pListLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
-pListLiteral typ pE = pAtLocus $ pListLiteralOf typ pE
+pListLiteral typ pE = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pE
 
 pListConst :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
-pListConst typ pC = pAtLocus $ pListLiteralOf typ pC
+pListConst typ pC = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pC
 
 pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr)
 pListLiteralOf typ pE = do
@@ -47,7 +47,7 @@ pListExpr pE = pTypedListExpr XX pE
 pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
 pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
   where
-    pListTerm = pTerm (pListLiteralOf typ pE) (pTypedListExpr typ pE) "list expression"
+    pListTerm = pTerm' (pListLiteralOf typ pE) ListExpr (pTypedListExpr typ pE) "list expression"
       [ pVarExpr (ListVar typ) (ListOf typ)
 
       , pMacroExprT pE (ListMacro typ)
@@ -162,9 +162,9 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
                 return $ Guard e
     
     listOpTable =
-      [ [ Infix (opParser2 (ListCat typ) "++") AssocLeft
+      [ [ Infix (opParser2' (ListCat typ) ListExpr "++") AssocLeft
         ]
-      , [ Infix (opParser2 (ListToss typ) "\\\\") AssocLeft
+      , [ Infix (opParser2' (ListToss typ) ListExpr "\\\\") AssocLeft
         ]
       ]
 

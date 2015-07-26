@@ -24,7 +24,13 @@ module Feivel.Grammar.List where
 import Feivel.Grammar.Util
 
 
-type ListExpr a = AtLocus (ListExprLeaf a)
+newtype ListExpr a = ListExpr
+  { unListExpr :: AtLocus (ListExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (ListExpr a) where
+  locusOf = locusOf . unListExpr
+
 
 data ListExprLeaf a
   = ListConst   Type [a]
@@ -74,26 +80,27 @@ data ListGuard a
 
 
 instance Typed (ListExpr a) where
-  typeOf (ListConst           typ _     :@ _) = ListOf typ
-  typeOf (ListVar             typ _     :@ _) = ListOf typ
-  typeOf (ListIfThenElse      typ _ _ _ :@ _) = ListOf typ
-  typeOf (ListRand            typ _     :@ _) = ListOf typ
-  typeOf (ListAtPos           typ _ _   :@ _) = ListOf typ
-  typeOf (ListAtIdx           typ _ _ _ :@ _) = ListOf typ
-  typeOf (ListMacro           typ _ _   :@ _) = ListOf typ
-  typeOf (ListCat             typ _ _   :@ _) = ListOf typ
-  typeOf (ListToss            typ _ _   :@ _) = ListOf typ
-  typeOf (ListRev             typ _     :@ _) = ListOf typ
-  typeOf (ListSort            typ _     :@ _) = ListOf typ
-  typeOf (ListUniq            typ _     :@ _) = ListOf typ
-  typeOf (ListShuffle         typ _     :@ _) = ListOf typ
-  typeOf (ListFilter          typ _ _ _ :@ _) = ListOf typ
-  typeOf (ListMatRow          typ _ _   :@ _) = ListOf typ
-  typeOf (ListMatCol          typ _ _   :@ _) = ListOf typ
-  typeOf (ListChoose          typ _ _   :@ _) = ListOf typ
-  typeOf (ListShuffles        typ _     :@ _) = ListOf typ
-  typeOf (ListChoices         typ _ _   :@ _) = ListOf typ
-  typeOf (ListRange           typ _ _   :@ _) = ListOf typ
-  typeOf (ListPermsOf         typ _     :@ _) = ListOf typ
-  typeOf (ListBuilder         typ _ _   :@ _) = ListOf typ
-  typeOf (ListPivotColIndices typ _     :@ _) = ListOf typ
+  typeOf (ListExpr (x :@ _)) = case x of
+    ListConst           typ _     -> ListOf typ
+    ListVar             typ _     -> ListOf typ
+    ListIfThenElse      typ _ _ _ -> ListOf typ
+    ListRand            typ _     -> ListOf typ
+    ListAtPos           typ _ _   -> ListOf typ
+    ListAtIdx           typ _ _ _ -> ListOf typ
+    ListMacro           typ _ _   -> ListOf typ
+    ListCat             typ _ _   -> ListOf typ
+    ListToss            typ _ _   -> ListOf typ
+    ListRev             typ _     -> ListOf typ
+    ListSort            typ _     -> ListOf typ
+    ListUniq            typ _     -> ListOf typ
+    ListShuffle         typ _     -> ListOf typ
+    ListFilter          typ _ _ _ -> ListOf typ
+    ListMatRow          typ _ _   -> ListOf typ
+    ListMatCol          typ _ _   -> ListOf typ
+    ListChoose          typ _ _   -> ListOf typ
+    ListShuffles        typ _     -> ListOf typ
+    ListChoices         typ _ _   -> ListOf typ
+    ListRange           typ _ _   -> ListOf typ
+    ListPermsOf         typ _     -> ListOf typ
+    ListBuilder         typ _ _   -> ListOf typ
+    ListPivotColIndices typ _     -> ListOf typ

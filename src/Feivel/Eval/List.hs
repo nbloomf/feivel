@@ -29,99 +29,99 @@ import Control.Monad (filterM)
 
 
 instance (Glyph Expr) => Glyph (ListExpr Expr) where
-  toGlyph (ListConst _ xs :@ _) = do
+  toGlyph (ListExpr (ListConst _ xs :@ _)) = do
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
 instance (Eval Expr) => Eval (ListExpr Expr) where
-  eval (ListConst t xs :@ loc) = do
+  eval (ListExpr (ListConst t xs :@ loc)) = do
     ys <- sequence $ map eval xs
     putTypeVal t loc ys >>= getVal
 
   {- :Common -}
-  eval (ListVar _ key :@ loc)        = eKey key loc
-  eval (ListAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (ListMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (ListIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (ListExpr (ListVar _ key :@ loc))        = eKey key loc
+  eval (ListExpr (ListAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (ListExpr (ListMacro _ vals mac :@ loc)) = eMacro vals mac loc
+  eval (ListExpr (ListIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (ListAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (ListExpr (ListAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [ListExpr Expr] -> Integer -> Either ListErr (ListExpr Expr)
 
-  eval (ListRange _ a b :@ loc) = do
+  eval (ListExpr (ListRange _ a b :@ loc)) = do
     x <- eval a >>= getVal :: EvalM Integer
     y <- eval b >>= getVal :: EvalM Integer
     putTypeVal ZZ loc [put loc k | k <- [x..y]] >>= getVal
 
-  eval (ListCat u a b :@ loc) = do
+  eval (ListExpr (ListCat u a b :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     ys <- eval b >>= getVal :: EvalM [Expr]
     putTypeVal u loc (xs ++ ys) >>= getVal
 
-  eval (ListToss u a b :@ loc) = do
+  eval (ListExpr (ListToss u a b :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     ys <- eval b >>= getVal :: EvalM [Expr]
     putTypeVal u loc (xs \\ ys) >>= getVal
 
-  eval (ListRev u a :@ loc) = do
+  eval (ListExpr (ListRev u a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     putTypeVal u loc (reverse xs) >>= getVal
 
-  eval (ListSort SS a :@ loc) = do
+  eval (ListExpr (ListSort SS a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Text]
     putTypeVal SS loc (map (put loc) (sort xs)) >>= getVal
-  eval (ListSort ZZ a :@ loc) = do
+  eval (ListExpr (ListSort ZZ a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Integer]
     putTypeVal ZZ loc (map (put loc) (sort xs)) >>= getVal
-  eval (ListSort QQ a :@ loc) = do
+  eval (ListExpr (ListSort QQ a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Rat]
     putTypeVal QQ loc (map (put loc) (sort xs)) >>= getVal
-  eval (ListSort BB a :@ loc) = do
+  eval (ListExpr (ListSort BB a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Bool]
     putTypeVal BB loc (map (put loc) (sort xs)) >>= getVal
-  eval (ListSort typ _ :@ loc) = reportErr loc $ SortableListExpected typ
+  eval (ListExpr (ListSort typ _ :@ loc)) = reportErr loc $ SortableListExpected typ
 
-  eval (ListRand _ ls :@ loc) = do
+  eval (ListExpr (ListRand _ ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     randomElementEvalM xs >>= getVal :: EvalM (ListExpr Expr)
 
-  eval (ListUniq u a :@ loc) = do
+  eval (ListExpr (ListUniq u a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
     putTypeVal u loc (nub xs) >>= getVal
 
-  eval (ListShuffle u ls :@ loc) = do
+  eval (ListExpr (ListShuffle u ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     ys <- shuffleEvalM xs
     putTypeVal u loc ys >>= getVal
 
-  eval (ListShuffles (ListOf u) ls :@ loc) = do
+  eval (ListExpr (ListShuffles (ListOf u) ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    let us = [ListE $ ListConst (ListOf u) ys :@ loc | ys <- permutations xs]
+    let us = [putType (ListOf u) loc ys | ys <- permutations xs]
     putTypeVal (ListOf u) loc us >>= getVal
-  eval (ListShuffles u _ :@ loc) = reportErr loc $ ListExpected u
+  eval (ListExpr (ListShuffles u _ :@ loc)) = reportErr loc $ ListExpected u
 
-  eval (ListChoose u n ls :@ loc) = do
+  eval (ListExpr (ListChoose u n ls :@ loc)) = do
     k  <- eval n >>= getVal :: EvalM Integer
     xs <- eval ls >>= getVal :: EvalM [Expr]
     ys <- sampleEvalM (fromIntegral k) xs
     putTypeVal u loc ys >>= getVal
 
-  eval (ListChoices (ListOf u) n ls :@ loc) = do
+  eval (ListExpr (ListChoices (ListOf u) n ls :@ loc)) = do
     k  <- eval n  >>= getVal :: EvalM Integer
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    let foos = [ListE $ ListConst u x :@ loc | x <- combinations (fromIntegral k) xs]
+    let foos = [putType u loc x | x <- combinations (fromIntegral k) xs]
     putTypeVal (ListOf u) loc foos >>= getVal
-  eval (ListChoices u _ _ :@ loc) = reportErr loc $ ListExpected u
+  eval (ListExpr (ListChoices u _ _ :@ loc)) = reportErr loc $ ListExpected u
 
-  eval (ListBuilder _ e gs :@ loc) = do
+  eval (ListExpr (ListBuilder _ e gs :@ loc)) = do
     st <- getState
     xs <- bar st gs
     ys <- sequence [evalWith e x >>= getVal | x <- xs]
     t <- case ys of
            [] -> return XX
            (z:_) -> return (typeOf z)
-    eval $ ListConst t ys :@ loc
+    eval $ ListExpr $ ListConst t ys :@ loc
       where
         bar :: Store Expr -> [ListGuard Expr] -> EvalM [Store Expr]
         bar st []     = return [st]
@@ -140,7 +140,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
             then return [st]
             else return []
 
-  eval (ListFilter u k g xs :@ loc) = do
+  eval (ListExpr (ListFilter u k g xs :@ loc)) = do
     ys <- eval xs >>= getVal :: EvalM [Expr]
     let foo e = do
           defineKey k e loc
@@ -150,19 +150,19 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
     zs <- filterM foo ys
     putTypeVal u loc zs >>= getVal
 
-  eval (ListMatRow u k m :@ loc) = do
+  eval (ListExpr (ListMatRow u k m :@ loc)) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListRowOf i n
     putTypeVal u loc as >>= getVal
 
-  eval (ListMatCol u k m :@ loc) = do
+  eval (ListExpr (ListMatCol u k m :@ loc)) = do
     i  <- eval k >>= getVal :: EvalM Integer
     n  <- eval m >>= getVal :: EvalM (Matrix Expr)
     as <- tryEvalM loc $ mListColOf i n
     putTypeVal u loc as >>= getVal
 
-  eval (ListPermsOf typ xs :@ loc) = do
+  eval (ListExpr (ListPermsOf typ xs :@ loc)) = do
     case typ of
       PermOf ZZ -> do
         as <- eval xs >>= getVal :: EvalM [Integer]
@@ -181,7 +181,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
         putTypeVal typ loc us >>= getVal
       u -> reportErr loc $ PermutationExpected u
 
-  eval (ListPivotColIndices _ m :@ loc) = do
+  eval (ListExpr (ListPivotColIndices _ m :@ loc)) = do
     let pivotIndices x = do
           n  <- eval m >>= getVal
           suchThat $ n `hasSameTypeAs` x

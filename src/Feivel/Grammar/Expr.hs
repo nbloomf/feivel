@@ -31,7 +31,7 @@ module Feivel.Grammar.Expr (
   RatExpr(..),   RatExprLeaf(..),
   ZZModExpr(..), ZZModExprLeaf(..),
 
-  ListExpr,  ListExprLeaf(..), ListGuard(..),
+  ListExpr(..),  ListExprLeaf(..), ListGuard(..),
   MatExpr,   MatExprLeaf(..),
   PolyExpr,  PolyExprLeaf(..),
   PermExpr(..),  PermExprLeaf(..),

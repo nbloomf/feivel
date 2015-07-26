@@ -55,7 +55,7 @@ instance Put (PermExpr Expr) where
   put loc (PermExpr (x :@ _)) = PermE $ PermExpr (x :@ loc)
 
 instance Put (ListExpr Expr) where
-  put loc (x :@ _) = ListE (x :@ loc)
+  put loc (ListExpr (x :@ _)) = ListE $ ListExpr (x :@ loc)
 
 instance Put (PolyExpr Expr) where
   put loc (x :@ _) = PolyE (x :@ loc)
@@ -103,13 +103,13 @@ instance Put ZZModulo where
 {-----------------}
 
 instance (Put a, Typed a) => Put [a] where
-  put loc x = ListE $ ListConst typ (map (put loc) x) :@ loc
+  put loc x = ListE $ ListExpr $ ListConst typ (map (put loc) x) :@ loc
     where
       typ = case x of
               (a:_) -> typeOf a
               []    -> XX
 
-  putType typ loc x = ListE $ ListConst typ (map (put loc) x) :@ loc
+  putType typ loc x = ListE $ ListExpr $ ListConst typ (map (put loc) x) :@ loc
 
 
 instance (Put a, Typed a) => Put (Poly a) where
