@@ -23,15 +23,8 @@ module Feivel.Grammar.Str where
 
 import Feivel.Grammar.Util
 
-newtype StrExpr a = StrExpr
-  { unStrExpr :: AtLocus (StrExprLeaf a)
-  } deriving (Eq, Show)
 
-instance HasLocus (StrExpr a) where
-  locusOf = locusOf . unStrExpr
-
-
-data StrExprLeaf a
+data StrExprLeaf a str
   = StrConst Text
   | StrVar   Key
 
@@ -39,16 +32,16 @@ data StrExprLeaf a
   | StrAtPos a a -- ListOf SS, ZZ
   | StrAtIdx a a a -- MatOf SS, ZZ, ZZ
  
-  | StrIfThenElse a (StrExpr a) (StrExpr a) -- BB
+  | StrIfThenElse a str str -- BB
 
   -- Combinators
-  | Concat      (StrExpr a) (StrExpr a)
-  | StrStrip    (StrExpr a) (StrExpr a)
+  | Concat      str str
+  | StrStrip    str str
  
-  | Reverse     (StrExpr a)
-  | ToUpper     (StrExpr a)
-  | ToLower     (StrExpr a)
-  | Rot13       (StrExpr a)
+  | Reverse     str
+  | ToUpper     str
+  | ToLower     str
+  | Rot13       str
 
   -- Integer
   | StrHex      a -- ZZ
@@ -71,5 +64,3 @@ data StrExprLeaf a
   -- Casting
   | StrIntCast a -- ZZ
   deriving (Eq, Show)
-
-instance Typed (StrExpr a)  where typeOf _ = SS

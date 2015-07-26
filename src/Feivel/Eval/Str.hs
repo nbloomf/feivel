@@ -16,6 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -25,12 +26,12 @@ module Feivel.Eval.Str where
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr) => Glyph (StrExpr Expr) where
+instance (Glyph Expr) => Glyph StrExpr where
   toGlyph (StrExpr (StrConst (Text s) :@ _)) = return s
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
-instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
+instance (Eval Expr, Glyph Expr) => Eval StrExpr where
   eval (StrExpr (StrConst s :@ loc)) = return (StrExpr $ StrConst s :@ loc)
 
   {- :Common -}
@@ -40,7 +41,7 @@ instance (Eval Expr, Glyph Expr) => Eval (StrExpr Expr) where
   eval (StrExpr (StrMacro vals mac :@ loc)) = eMacro vals mac loc
 
   eval (StrExpr (StrAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [StrExpr Expr] -> Integer -> Either ListErr (StrExpr Expr)
+    where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
 
   eval (StrExpr (Concat   a b :@ loc)) = lift2 loc a b (strCat)
   eval (StrExpr (StrStrip a b :@ loc)) = lift2 loc a b (strStrip)

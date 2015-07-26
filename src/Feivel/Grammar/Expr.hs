@@ -65,11 +65,22 @@ instance HasLocus IntExpr where
 instance Typed IntExpr where typeOf _ = ZZ
 
 
+{- :StrExpr -}
+
+newtype StrExpr = StrExpr
+  { unStrExpr :: AtLocus (StrExprLeaf Expr StrExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus StrExpr where
+  locusOf = locusOf . unStrExpr
+
+instance Typed StrExpr where typeOf _ = SS
+
 
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  (BoolExpr  Expr)
-  | StrE   (StrExpr   Expr)
+  | StrE   StrExpr
   | IntE   IntExpr
   | RatE   (RatExpr   Expr)
   | ZZModE (ZZModExpr Expr)
@@ -101,7 +112,7 @@ class ToExpr t where
 instance ToExpr Expr where toExpr = id
 instance ToExpr (Doc       Expr) where toExpr = DocE
 instance ToExpr (BoolExpr  Expr) where toExpr = BoolE
-instance ToExpr (StrExpr   Expr) where toExpr = StrE
+instance ToExpr StrExpr          where toExpr = StrE
 instance ToExpr IntExpr          where toExpr = IntE
 instance ToExpr (RatExpr   Expr) where toExpr = RatE
 instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE

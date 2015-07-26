@@ -27,29 +27,29 @@ import Feivel.Parse.ParseM
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
-pStrConst :: ParseM (StrExpr Expr)
+pStrConst :: ParseM StrExpr
 pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 
-pStrConst' :: ParseM (StrExprLeaf Expr)
+pStrConst' :: ParseM (StrExprLeaf Expr StrExpr)
 pStrConst' = pConst pText StrConst
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM (StrExpr Expr)
-pStrExpr pE = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM StrExpr -> ParseM StrExpr
+pStrExpr pE pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
-    pStrTerm = pTerm' pStrConst' StrExpr (pStrExpr pE) "string expression"
+    pStrTerm = pTerm' pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro
 
-      , pIfThenElseExprT pE (pStrExpr pE) StrIfThenElse SS
+      , pIfThenElseExprT pE pSTR StrIfThenElse SS
 
       , pFun2 "AtPos" (pE $ ListOf SS) (pE ZZ) StrAtPos
       , pFun3 "AtIdx" (pE $ MatOf SS) (pE ZZ) (pE ZZ) StrAtIdx
     
-      , pFun2 "Strip" (pStrExpr pE) (pStrExpr pE) StrStrip
-      , pFun1 "Reverse" (pStrExpr pE) Reverse
-      , pFun1 "ToUpper" (pStrExpr pE) ToUpper
-      , pFun1 "ToLower" (pStrExpr pE) ToLower
-      , pFun1 "Rot13"   (pStrExpr pE) Rot13
+      , pFun2 "Strip"   pSTR pSTR StrStrip
+      , pFun1 "Reverse" pSTR Reverse
+      , pFun1 "ToUpper" pSTR ToUpper
+      , pFun1 "ToLower" pSTR ToLower
+      , pFun1 "Rot13"   pSTR Rot13
 
       , pFun1 "Rand"    (pE $ ListOf SS) StrRand
 

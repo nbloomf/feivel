@@ -59,13 +59,16 @@ import Text.Parsec.Prim (try)
 pINT :: ParseM IntExpr
 pINT = pIntExpr pTypedExpr pINT
 
+pSTR :: ParseM StrExpr
+pSTR = pStrExpr pTypedExpr pSTR
+
 {---------}
 {- :Expr -}
 {---------}
 
 pTypedExpr :: Type -> ParseM Expr
 pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
-pTypedExpr SS = fmap StrE  (pStrExpr  pTypedExpr)
+pTypedExpr SS = fmap StrE  pSTR
 pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE (pBoolExpr pTypedExpr)
 pTypedExpr QQ = fmap RatE  (pRatExpr  pTypedExpr)
