@@ -20,7 +20,7 @@ module Feivel.Parse.ZZMod (
   pZZModConst, pZZModExpr
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), ZZModExpr, ZZModExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (zzmod)
@@ -29,7 +29,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
 pZZModConst :: Integer -> ParseM (ZZModExpr Expr)
-pZZModConst n = pAtLocus (pZZModConst' n)
+pZZModConst n = fmap ZZModExpr $ pAtLocus (pZZModConst' n)
 
 pZZModConst' :: Integer -> ParseM (ZZModExprLeaf Expr)
 pZZModConst' n = do
@@ -39,7 +39,7 @@ pZZModConst' n = do
 pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM (ZZModExpr Expr)
 pZZModExpr pE n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
-    pZZModTerm = pTerm (pZZModConst' n) (pZZModExpr pE n) "integer expression"
+    pZZModTerm = pTerm' (pZZModConst' n) ZZModExpr (pZZModExpr pE n) "integer expression"
       [ pVarExpr (ZZModVar (ZZMod n)) (ZZMod n)
       , pMacroExprT pE (ZZModMacro (ZZMod n))
 
@@ -57,12 +57,12 @@ pZZModExpr pE n = spaced $ buildExpressionParser zzModOpTable pZZModTerm
       ]
 
     zzModOpTable =
-      [ [ Infix (opParser2 (ZZModMult (ZZMod n)) "*") AssocLeft
+      [ [ Infix (opParser2' (ZZModMult (ZZMod n)) ZZModExpr "*") AssocLeft
         ]
-      , [ Prefix (opParser1 (ZZModNeg (ZZMod n)) "neg")
-        , Prefix (opParser1 (ZZModInv (ZZMod n)) "inv")
+      , [ Prefix (opParser1' (ZZModNeg (ZZMod n)) ZZModExpr "neg")
+        , Prefix (opParser1' (ZZModInv (ZZMod n)) ZZModExpr "inv")
         ]
-      , [ Infix (opParser2 (ZZModAdd (ZZMod n)) "+") AssocLeft
-        , Infix (opParser2 (ZZModSub (ZZMod n)) "-") AssocLeft
+      , [ Infix (opParser2' (ZZModAdd (ZZMod n)) ZZModExpr "+") AssocLeft
+        , Infix (opParser2' (ZZModSub (ZZMod n)) ZZModExpr "-") AssocLeft
         ]
       ]

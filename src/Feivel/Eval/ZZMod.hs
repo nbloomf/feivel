@@ -26,33 +26,33 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph (ZZModExpr Expr) where
-  toGlyph (ZZModConst _ a :@ _) = return $ showZZMod a
+  toGlyph (ZZModExpr (ZZModConst _ a :@ _)) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
 instance (Eval Expr) => Eval (ZZModExpr Expr) where
-  eval (ZZModConst n a :@ loc) = return $ ZZModConst n a :@ loc
+  eval (ZZModExpr (ZZModConst n a :@ loc)) = return $ ZZModExpr $ ZZModConst n a :@ loc
 
   {- :Common -}
-  eval (ZZModVar _ key :@ loc)        = eKey key loc
-  eval (ZZModAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (ZZModMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (ZZModIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (ZZModExpr (ZZModVar _ key :@ loc))        = eKey key loc
+  eval (ZZModExpr (ZZModAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (ZZModExpr (ZZModMacro _ vals mac :@ loc)) = eMacro vals mac loc
+  eval (ZZModExpr (ZZModIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (ZZModAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (ZZModExpr (ZZModAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [ZZModExpr Expr] -> Integer -> Either ListErr (ZZModExpr Expr)
 
-  eval (ZZModCast (ZZMod n) a :@ loc) = do
+  eval (ZZModExpr (ZZModCast (ZZMod n) a :@ loc)) = do
     res <- eval a >>= getVal :: EvalM Integer
-    return (ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
+    return (ZZModExpr $ ZZModConst (ZZMod n) (res `zzmod` n) :@ loc)
 
-  eval (ZZModNeg  _ a   :@ loc) = lift1 loc a   (rNegT (0 `zzmod` 0))
-  eval (ZZModInv  _ a   :@ loc) = lift1 loc a   (rInvT (0 `zzmod` 0))
-  eval (ZZModAdd  _ a b :@ loc) = lift2 loc a b (rAddT (0 `zzmod` 0))
-  eval (ZZModSub  _ a b :@ loc) = lift2 loc a b (rSubT (0 `zzmod` 0))
-  eval (ZZModMult _ a b :@ loc) = lift2 loc a b (rMulT (0 `zzmod` 0))
-  eval (ZZModPow  _ a b :@ loc) = lift2 loc a b (rPowT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModNeg  _ a   :@ loc)) = lift1 loc a   (rNegT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModInv  _ a   :@ loc)) = lift1 loc a   (rInvT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModAdd  _ a b :@ loc)) = lift2 loc a b (rAddT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModSub  _ a b :@ loc)) = lift2 loc a b (rSubT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModMult _ a b :@ loc)) = lift2 loc a b (rMulT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModPow  _ a b :@ loc)) = lift2 loc a b (rPowT (0 `zzmod` 0))
 
-  eval (ZZModSum   _ ls :@ loc) = lift1 loc ls (rSumT   (0 `zzmod` 0))
-  eval (ZZModProd  _ ls :@ loc) = lift1 loc ls (rUProdT (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModSum   _ ls :@ loc)) = lift1 loc ls (rSumT   (0 `zzmod` 0))
+  eval (ZZModExpr (ZZModProd  _ ls :@ loc)) = lift1 loc ls (rUProdT (0 `zzmod` 0))
 

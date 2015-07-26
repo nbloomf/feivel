@@ -24,7 +24,13 @@ module Feivel.Grammar.ZZMod where
 import Feivel.Grammar.Util
 
 
-type ZZModExpr a = AtLocus (ZZModExprLeaf a)
+newtype ZZModExpr a = ZZModExpr
+  { unZZModExpr :: AtLocus (ZZModExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (ZZModExpr a) where
+  locusOf = locusOf . unZZModExpr
+
 
 data ZZModExprLeaf a
   = ZZModConst Type ZZModulo
@@ -53,18 +59,19 @@ data ZZModExprLeaf a
 
 
 instance Typed (ZZModExpr a) where
-  typeOf (ZZModConst      typ _     :@ _) = typ
-  typeOf (ZZModVar        typ _     :@ _) = typ
-  typeOf (ZZModAtPos      typ _ _   :@ _) = typ
-  typeOf (ZZModAtIdx      typ _ _ _ :@ _) = typ
-  typeOf (ZZModMacro      typ _ _   :@ _) = typ
-  typeOf (ZZModIfThenElse typ _ _ _ :@ _) = typ
-  typeOf (ZZModCast       typ _     :@ _) = typ
-  typeOf (ZZModNeg        typ _     :@ _) = typ
-  typeOf (ZZModInv        typ _     :@ _) = typ
-  typeOf (ZZModAdd        typ _ _   :@ _) = typ
-  typeOf (ZZModSub        typ _ _   :@ _) = typ
-  typeOf (ZZModMult       typ _ _   :@ _) = typ
-  typeOf (ZZModPow        typ _ _   :@ _) = typ
-  typeOf (ZZModSum        typ _     :@ _) = typ
-  typeOf (ZZModProd       typ _     :@ _) = typ
+  typeOf (ZZModExpr x) = case x of
+    ZZModConst      typ _     :@ _ -> typ
+    ZZModVar        typ _     :@ _ -> typ
+    ZZModAtPos      typ _ _   :@ _ -> typ
+    ZZModAtIdx      typ _ _ _ :@ _ -> typ
+    ZZModMacro      typ _ _   :@ _ -> typ
+    ZZModIfThenElse typ _ _ _ :@ _ -> typ
+    ZZModCast       typ _     :@ _ -> typ
+    ZZModNeg        typ _     :@ _ -> typ
+    ZZModInv        typ _     :@ _ -> typ
+    ZZModAdd        typ _ _   :@ _ -> typ
+    ZZModSub        typ _ _   :@ _ -> typ
+    ZZModMult       typ _ _   :@ _ -> typ
+    ZZModPow        typ _ _   :@ _ -> typ
+    ZZModSum        typ _     :@ _ -> typ
+    ZZModProd       typ _     :@ _ -> typ

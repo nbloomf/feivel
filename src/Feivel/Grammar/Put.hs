@@ -49,7 +49,7 @@ instance Put (IntExpr Expr) where
   put loc (IntExpr (x :@ _)) = IntE $ IntExpr (x :@ loc)
 
 instance Put (ZZModExpr Expr) where
-  put loc (x :@ _) = ZZModE (x :@ loc)
+  put loc (ZZModExpr (x :@ _)) = ZZModE $ ZZModExpr (x :@ loc)
 
 instance Put (PermExpr Expr) where
   put loc (x :@ _) = PermE (x :@ loc)
@@ -94,7 +94,7 @@ instance Put Rat where
   put loc x = RatE $ RatExpr $ RatConst x :@ loc
 
 instance Put ZZModulo where
-  put loc (ZZModulo a n) = ZZModE $ ZZModConst (ZZMod n) (ZZModulo a n) :@ loc
+  put loc (ZZModulo a n) = ZZModE $ ZZModExpr $ ZZModConst (ZZMod n) (ZZModulo a n) :@ loc
 
 
 

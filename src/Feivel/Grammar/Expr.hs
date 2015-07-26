@@ -29,7 +29,7 @@ module Feivel.Grammar.Expr (
   IntExpr(..),   IntExprLeaf(..),
   BoolExpr(..),  BoolExprLeaf(..),
   RatExpr(..),   RatExprLeaf(..),
-  ZZModExpr, ZZModExprLeaf(..),
+  ZZModExpr(..), ZZModExprLeaf(..),
 
   ListExpr,  ListExprLeaf(..), ListGuard(..),
   MatExpr,   MatExprLeaf(..),
