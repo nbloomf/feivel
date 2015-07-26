@@ -17,9 +17,6 @@
 {---------------------------------------------------------------------}
 
 {-# LANGUAGE UndecidableInstances  #-}
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
 
 module Feivel.Eval.Int () where
 
