@@ -17,12 +17,18 @@
 {---------------------------------------------------------------------}
 
 module Feivel.Lib.Algebra.Group (
+  Groupoid,
+    gOp,  gInv, gId, gIsId, gLIdOf, gRIdOf, gProd, gPow,
+    gOpT, gInvT
 ) where
 
 import Feivel.Lib.AlgErr
 
+import Control.Monad (foldM)
+
 class Groupoid t where
-  gOp :: t -> t -> Either AlgErr t
+  gOp  :: t -> t -> Either AlgErr t
+  gInv :: t -> t
 
   gId   :: t
   gIsId :: t -> Bool
@@ -30,5 +36,20 @@ class Groupoid t where
   gLIdOf :: t -> Either AlgErr t
   gRIdOf :: t -> Either AlgErr t
 
+gProd :: (Groupoid t) => [t] -> Either AlgErr t
+gProd = foldM gOp gId
+
+gPow :: (Groupoid t) => t -> Integer -> Either AlgErr t
+gPow x n
+  | n >= 0    = gProd [x | _ <- [1..n]]
+  | otherwise = gPow x (-n)
+
+{- -}
+
+gOpT :: (Groupoid t) => t -> t -> t -> Either AlgErr t
+gOpT _ = gOp
+
+gInvT :: (Groupoid t) => t -> t -> t
+gInvT _ = gInv
 
 class CGroupoid t
