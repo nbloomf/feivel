@@ -67,7 +67,7 @@ instance Put (MacExpr Expr) where
   put loc (x :@ _) = MacE (x :@ loc)
 
 instance Put (RatExpr Expr) where
-  put loc (x :@ _) = RatE (x :@ loc)
+  put loc (RatExpr (x :@ _)) = RatE $ RatExpr (x :@ loc)
 
 instance Put (BoolExpr Expr) where
   put loc (BoolExpr (x :@ _)) = BoolE $ BoolExpr (x :@ loc)
@@ -91,7 +91,7 @@ instance Put Bool where
   put loc x = BoolE $ BoolExpr $ BoolConst x :@ loc
 
 instance Put Rat where
-  put loc x = RatE $ RatConst x :@ loc
+  put loc x = RatE $ RatExpr $ RatConst x :@ loc
 
 instance Put ZZModulo where
   put loc (ZZModulo a n) = ZZModE $ ZZModConst (ZZMod n) (ZZModulo a n) :@ loc

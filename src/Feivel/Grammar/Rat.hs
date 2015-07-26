@@ -24,7 +24,13 @@ module Feivel.Grammar.Rat where
 import Feivel.Grammar.Util
 
 
-type RatExpr a = AtLocus (RatExprLeaf a)
+newtype RatExpr a = RatExpr
+  { unRatExpr :: AtLocus (RatExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (RatExpr a) where
+  locusOf = locusOf . unRatExpr
+
 
 data RatExprLeaf a
   = RatConst Rat

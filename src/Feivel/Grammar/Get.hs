@@ -134,7 +134,7 @@ instance Get Rat where
   get expr = do
     x <- get expr :: Either GetErr (RatExpr Expr)
     case x of
-      RatConst r :@ _ -> return r
+      RatExpr (RatConst r :@ _) -> return r
       v -> Left GetUnevaluatedExpression
 
 instance Get ZZModulo where

@@ -20,7 +20,7 @@ module Feivel.Parse.Rat (
   pRatConst, pRatExpr
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), RatExpr, RatExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -29,7 +29,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
 pRatConst :: ParseM (RatExpr Expr)
-pRatConst = pAtLocus pRatConst'
+pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 
 pRatConst' :: ParseM (RatExprLeaf Expr)
 pRatConst' = pConst pRat RatConst
@@ -37,7 +37,7 @@ pRatConst' = pConst pRat RatConst
 pRatExpr :: (Type -> ParseM Expr) -> ParseM (RatExpr Expr)
 pRatExpr pE = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
-    pRatTerm = pTerm pRatConst' (pRatExpr pE) "rational expression"
+    pRatTerm = pTerm' pRatConst' RatExpr (pRatExpr pE) "rational expression"
       [ pVarExpr RatVar QQ
       , pMacroExprT pE RatMacro
 
@@ -77,16 +77,16 @@ pRatExpr pE = spaced $ buildExpressionParser ratOpTable pRatTerm
           return (RatZScore p ks n)
     
     ratOpTable =
-      [ [ Prefix (opParser1 RatNeg "neg" )
-        , Prefix (opParser1 RatAbs "abs")
+      [ [ Prefix (opParser1' RatNeg RatExpr "neg" )
+        , Prefix (opParser1' RatAbs RatExpr "abs")
         ]
-      , [ Infix (opParser2 RatMult "*") AssocLeft
-        , Infix (opParser2 RatQuot "/") AssocLeft
+      , [ Infix (opParser2' RatMult RatExpr "*") AssocLeft
+        , Infix (opParser2' RatQuot RatExpr "/") AssocLeft
         ]
-      , [ Infix (opParser2 RatAdd "+") AssocLeft
-        , Infix (opParser2 RatSub "-") AssocLeft
+      , [ Infix (opParser2' RatAdd RatExpr "+") AssocLeft
+        , Infix (opParser2' RatSub RatExpr "-") AssocLeft
         ]
-      , [ Infix (opParser2 RatMin "min") AssocLeft
-        , Infix (opParser2 RatMax "max") AssocLeft
+      , [ Infix (opParser2' RatMin RatExpr "min") AssocLeft
+        , Infix (opParser2' RatMax RatExpr "max") AssocLeft
         ]
       ]
