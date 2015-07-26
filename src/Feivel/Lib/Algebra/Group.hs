@@ -18,7 +18,7 @@
 
 module Feivel.Lib.Algebra.Group (
   Groupoid,
-    gOp,  gInv, gId, gIsId, gLIdOf, gRIdOf, gProd, gPow,
+    gOp,  gInv, gId, gIsId, gLIdOf, gRIdOf, gProd, gPow, gEQ,
     gOpT, gInvT
 ) where
 
@@ -35,6 +35,11 @@ class Groupoid t where
 
   gLIdOf :: t -> t
   gRIdOf :: t -> t
+
+gEQ :: (Groupoid t) => t -> t -> Either AlgErr Bool
+gEQ x y = do
+  z <- gOp x (gInv y)
+  return (gIsId z) 
 
 gProd :: (Groupoid t) => [t] -> Either AlgErr t
 gProd = foldM gOp gId
