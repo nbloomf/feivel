@@ -27,27 +27,27 @@ import Feivel.Parse.ParseM
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
-pIntConstLeaf :: ParseM (IntExprLeaf Expr)
+pIntConstLeaf :: ParseM (IntExprLeaf Expr IntExpr)
 pIntConstLeaf = pConst pInteger IntConst
 
-pIntConst :: ParseM (IntExpr Expr)
+pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM (IntExpr Expr)
-pIntExpr pE = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM IntExpr
+pIntExpr pE pINT = spaced $ buildExpressionParser intOpTable pIntTerm
   where
-    pIntTerm = pTerm' pIntConstLeaf IntExpr (pIntExpr pE) "integer expression"
+    pIntTerm = pTerm' pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
       , pFun2 "AtPos" (pE (ListOf ZZ)) (pE ZZ) IntAtPos
       , pFun3 "AtIdx" (pE (MatOf ZZ)) (pE ZZ) (pE ZZ) IntAtIdx
     
-      , pIfThenElseExprT pE (pIntExpr pE) IntIfThenElse ZZ
+      , pIfThenElseExprT pE pINT IntIfThenElse ZZ
 
-      , pFun1 "SquarePart"     (pIntExpr pE) IntSqPart
-      , pFun1 "SquareFreePart" (pIntExpr pE) IntSqFreePart
-      , pFun1 "Rad"            (pIntExpr pE) IntRad
+      , pFun1 "SquarePart"     pINT IntSqPart
+      , pFun1 "SquareFreePart" pINT IntSqFreePart
+      , pFun1 "Rad"            pINT IntRad
 
       , pFun1 "Length" (pE (ListOf XX)) ListLen
       , pFun1 "Rand"   (pE (ListOf ZZ)) IntRand
@@ -70,8 +70,8 @@ pIntExpr pE = spaced $ buildExpressionParser intOpTable pIntTerm
 
       , pFun1 "PolyContent" (pE (PolyOver ZZ)) IntContent
     
-      , pFun2 "Uniform"  (pIntExpr pE) (pIntExpr pE) IntObserveUniform
-      , pFun2 "Binomial" (pIntExpr pE) (pE QQ) IntObserveBinomial
+      , pFun2 "Uniform"  pINT pINT IntObserveUniform
+      , pFun2 "Binomial" pINT (pE QQ) IntObserveBinomial
       , pFun1 "Poisson"  (pE QQ) IntObservePoisson
 
       , pFun1 "str" (pE SS) IntCastStr

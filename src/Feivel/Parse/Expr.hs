@@ -56,6 +56,9 @@ import Text.Parsec.Prim (try)
 {-  :MacExpr   -}
 {---------------}
 
+pINT :: ParseM IntExpr
+pINT = pIntExpr pTypedExpr pINT
+
 {---------}
 {- :Expr -}
 {---------}
@@ -63,7 +66,7 @@ import Text.Parsec.Prim (try)
 pTypedExpr :: Type -> ParseM Expr
 pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
 pTypedExpr SS = fmap StrE  (pStrExpr  pTypedExpr)
-pTypedExpr ZZ = fmap IntE  (pIntExpr  pTypedExpr)
+pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE (pBoolExpr pTypedExpr)
 pTypedExpr QQ = fmap RatE  (pRatExpr  pTypedExpr)
 

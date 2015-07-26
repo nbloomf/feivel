@@ -45,7 +45,7 @@ instance Put Expr where
   put _ = id
 
 
-instance Put (IntExpr Expr) where
+instance Put IntExpr where
   put loc (IntExpr (x :@ _)) = IntE $ IntExpr (x :@ loc)
 
 instance Put (ZZModExpr Expr) where

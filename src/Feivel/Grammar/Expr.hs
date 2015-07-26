@@ -53,12 +53,24 @@ import Feivel.Grammar.Bool
 import Feivel.Grammar.List
 import Feivel.Grammar.Int
 
+{- :IntExpr -}
+
+newtype IntExpr = IntExpr
+  { unIntExpr :: AtLocus (IntExprLeaf Expr IntExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus IntExpr where
+  locusOf = locusOf . unIntExpr
+
+instance Typed IntExpr where typeOf _ = ZZ
+
+
 
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  (BoolExpr  Expr)
   | StrE   (StrExpr   Expr)
-  | IntE   (IntExpr   Expr)
+  | IntE   IntExpr
   | RatE   (RatExpr   Expr)
   | ZZModE (ZZModExpr Expr)
   | ListE  (ListExpr  Expr)
@@ -90,7 +102,7 @@ instance ToExpr Expr where toExpr = id
 instance ToExpr (Doc       Expr) where toExpr = DocE
 instance ToExpr (BoolExpr  Expr) where toExpr = BoolE
 instance ToExpr (StrExpr   Expr) where toExpr = StrE
-instance ToExpr (IntExpr   Expr) where toExpr = IntE
+instance ToExpr IntExpr          where toExpr = IntE
 instance ToExpr (RatExpr   Expr) where toExpr = RatE
 instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr (ListExpr  Expr) where toExpr = ListE

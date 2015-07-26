@@ -24,15 +24,7 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-newtype IntExpr a = IntExpr
-  { unIntExpr :: AtLocus (IntExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (IntExpr a) where
-  locusOf = locusOf . unIntExpr
-
-
-data IntExprLeaf a
+data IntExprLeaf a int
   = IntConst Integer
   | IntVar   Key
 
@@ -40,26 +32,26 @@ data IntExprLeaf a
   | IntAtPos a a   -- ListOf ZZ, ZZ
   | IntAtIdx a a a -- MatOf ZZ, ZZ, ZZ
  
-  | IntIfThenElse a (IntExpr a) (IntExpr a) -- BB
+  | IntIfThenElse a int int -- BB
  
   -- Arithmetic
-  | IntAdd    (IntExpr a) (IntExpr a)
-  | IntSub    (IntExpr a) (IntExpr a)
-  | IntMult   (IntExpr a) (IntExpr a)
-  | IntQuo    (IntExpr a) (IntExpr a)
-  | IntMod    (IntExpr a) (IntExpr a)
-  | IntPow    (IntExpr a) (IntExpr a)
-  | IntGCD    (IntExpr a) (IntExpr a)
-  | IntLCM    (IntExpr a) (IntExpr a)
-  | IntMin    (IntExpr a) (IntExpr a)
-  | IntMax    (IntExpr a) (IntExpr a)
-  | IntChoose (IntExpr a) (IntExpr a)
+  | IntAdd    int int
+  | IntSub    int int
+  | IntMult   int int
+  | IntQuo    int int
+  | IntMod    int int
+  | IntPow    int int
+  | IntGCD    int int
+  | IntLCM    int int
+  | IntMin    int int
+  | IntMax    int int
+  | IntChoose int int
  
-  | IntNeg        (IntExpr a)
-  | IntAbs        (IntExpr a)
-  | IntRad        (IntExpr a)
-  | IntSqPart     (IntExpr a)
-  | IntSqFreePart (IntExpr a)
+  | IntNeg        int
+  | IntAbs        int
+  | IntRad        int
+  | IntSqPart     int
+  | IntSqFreePart int
 
   -- String
   | StrLength a -- SS
@@ -88,12 +80,10 @@ data IntExprLeaf a
   | IntContent a -- PolyOver ZZ
 
   -- Stats
-  | IntObserveUniform  (IntExpr a) (IntExpr a)
-  | IntObserveBinomial (IntExpr a) a    -- QQ
+  | IntObserveUniform  int int
+  | IntObserveBinomial int a    -- QQ
   | IntObservePoisson  a            -- QQ
 
   -- Casts
   | IntCastStr a -- SS
   deriving (Eq, Show)
-
-instance Typed (IntExpr a) where typeOf _ = ZZ

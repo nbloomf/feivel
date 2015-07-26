@@ -45,7 +45,7 @@ data GetErr
 instance Get Expr where
   get expr = return expr
 
-instance Get (IntExpr Expr) where
+instance Get IntExpr where
   get (IntE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = ZZ, typeReceived = typeOf v }
@@ -111,7 +111,7 @@ instance Get (Doc Expr) where
 
 instance Get Integer where
   get expr = do
-    x <- get expr :: Either GetErr (IntExpr Expr)
+    x <- get expr :: Either GetErr IntExpr
     case x of
       IntExpr (IntConst k :@ _) -> return k
       _ -> Left GetUnevaluatedExpression

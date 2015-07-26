@@ -16,6 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -25,12 +26,12 @@ module Feivel.Eval.Int () where
 import Feivel.Eval.Util
 
 
-instance Glyph (IntExpr Expr) where
+instance Glyph IntExpr where
   toGlyph (IntExpr (IntConst n :@ _)) = return $ show n
   toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (IntExpr Expr) where
+instance (Eval Expr) => Eval IntExpr where
   eval (IntExpr (IntConst n :@ loc)) = return (IntExpr (IntConst n :@ loc))
 
   {- :Common -}
@@ -40,7 +41,7 @@ instance (Eval Expr) => Eval (IntExpr Expr) where
   eval (IntExpr (IntMacro vals mac :@ loc)) = eMacro vals mac loc
 
   eval (IntExpr (IntAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [IntExpr Expr] -> Integer -> Either ListErr (IntExpr Expr)
+    where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
 
   eval (IntExpr (IntNeg        a :@ loc)) = lift1 loc a (rNegT        zeroZZ)
   eval (IntExpr (IntAbs        a :@ loc)) = lift1 loc a (rAbsT        zeroZZ)
