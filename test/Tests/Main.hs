@@ -28,39 +28,50 @@ import Tests.Lib.Data.ZZModulo
 
 import Tests.Lib.Struct.Matrix
 import Tests.Lib.Struct.Polynomial
+import Tests.Lib.Struct.Permutation
 
 main = defaultMain $ testGroup "Property Tests"
   [ testInteger
   , testRat
   , testZZModulo
 
-  , testGroup "Integer Matrix"
-      [ testRingoidMat    (0::Integer)
-      , testBipRingoidMat (0::Integer)
+  , testGroup "Matrices"
+      [ testGroup "Integer Matrix"
+          [ testRingoidMat    (0::Integer)
+          , testBipRingoidMat (0::Integer)
+          ]
+
+      , testGroup "Rat Matrix"
+          [ testRingoidMat    (0:/:1)
+          , testBipRingoidMat (0:/:1)
+          ]
+
+      , testGroup "ZZMod Matrix"
+          [ testRingoidMat    (0`zzmod`0)
+          , testBipRingoidMat (0`zzmod`0)
+          ]
       ]
 
-  , testGroup "Rat Matrix"
-      [ testRingoidMat    (0:/:1)
-      , testBipRingoidMat (0:/:1)
+  , testGroup "Polynomials"
+      [ testGroup "Integer Polynomial"
+          [ testRingoidPoly  (0::Integer)
+          , testCRingoidPoly (0::Integer)
+          ]
+
+      , testGroup "Rat Polynomial"
+          [ testRingoidPoly  (0:/:1)
+          , testCRingoidPoly (0:/:1)
+          ]
+
+      , testGroup "ZZMod Polynomial"
+          [ testRingoidPoly  (0`zzmod`0)
+          , testCRingoidPoly (0`zzmod`0)
+          ]
       ]
 
-  , testGroup "ZZMod Matrix"
-      [ testRingoidMat    (0`zzmod`0)
-      , testBipRingoidMat (0`zzmod`0)
-      ]
-
-  , testGroup "Integer Polynomial"
-      [ testRingoidPoly  (0::Integer)
-      , testCRingoidPoly (0::Integer)
-      ]
-
-  , testGroup "Rat Polynomial"
-      [ testRingoidPoly  (0:/:1)
-      , testCRingoidPoly (0:/:1)
-      ]
-
-  , testGroup "ZZMod Polynomial"
-      [ testRingoidPoly  (0`zzmod`0)
-      , testCRingoidPoly (0`zzmod`0)
+  , testGroup "Permutations"
+      [ testGroup "Integer Permutation"
+          [ testGroupoidPerm (0::Integer)
+          ]
       ]
   ]

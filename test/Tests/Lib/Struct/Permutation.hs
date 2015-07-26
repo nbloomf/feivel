@@ -30,7 +30,7 @@ module Tests.Lib.Struct.Permutation where
 
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck
-import Test.QuickCheck (shuffle)
+import Test.QuickCheck
 
 import Feivel.Lib.Struct.Permutation
 import Feivel.Lib.Algebra.Group
@@ -41,13 +41,13 @@ import Tests.Lib.Group
 import Data.List (nub)
 
 
-testGroupoidPerm :: (Gen t, Show t, Eq t) => t -> TestTree
+testGroupoidPerm :: (Arbitrary t, Show t, Eq t) => t -> TestTree
 testGroupoidPerm t = testGroupoid (idOn t)
 
 g_MAX_SIZE :: Int
 g_MAX_SIZE = 10
 
-instance (Gen t) => Gen (Perm t) where
+instance (Arbitrary t, Eq t) => Arbitrary (Perm t) where
   arbitrary = do
     xs <- vectorOf g_MAX_SIZE arbitrary
     let ys = nub xs
@@ -55,3 +55,5 @@ instance (Gen t) => Gen (Perm t) where
     case fromPairs $ zip ys zs of
       Left _ -> error "arbitrary permutation"
       Right p -> return p
+
+instance (Arbitrary t, Eq t) => GroupoidArb (Perm t)
