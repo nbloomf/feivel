@@ -26,7 +26,7 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph (MatExpr Expr) where
-  toGlyph (MatConst _ m :@ _) = do
+  toGlyph (MatExpr (MatConst _ m :@ _)) = do
     n <- mSeq $ fmap toGlyph m
     case mShowStr n of
       Left err -> reportErr (error "Glyph instance of MatExpr") err
@@ -35,35 +35,35 @@ instance (Glyph Expr) => Glyph (MatExpr Expr) where
 
 
 instance (Eval Expr) => Eval (MatExpr Expr) where
-  eval (MatConst t m :@ loc) = do
+  eval (MatExpr (MatConst t m :@ loc)) = do
     n <- mSeq $ fmap eval m
-    return $ MatConst t n :@ loc
+    return $ MatExpr $ MatConst t n :@ loc
 
   {- :Common -}
-  eval (MatVar _ key :@ loc)        = eKey key loc
-  eval (MatAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (MatMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (MatIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (MatExpr (MatVar _ key :@ loc))        = eKey key loc
+  eval (MatExpr (MatAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (MatExpr (MatMacro _ vals mac :@ loc)) = eMacro vals mac loc
+  eval (MatExpr (MatIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (MatAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (MatExpr (MatAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [MatExpr Expr] -> Integer -> Either ListErr (MatExpr Expr)
 
-  eval (MatRand _ ls :@ _) = do
+  eval (MatExpr (MatRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     eval r >>= getVal
 
-  eval (MatRowFromList t xs :@ loc) = do
+  eval (MatExpr (MatRowFromList t xs :@ loc)) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mRowFromList as
     putTypeVal t loc m >>= getVal
 
-  eval (MatColFromList t xs :@ loc) = do
+  eval (MatExpr (MatColFromList t xs :@ loc)) = do
     as <- eval xs >>= getVal :: EvalM [Expr]
     m  <- tryEvalM loc $ mColFromList as
     putTypeVal t loc m >>= getVal
 
-  eval (MatId u n :@ loc) = do
+  eval (MatExpr (MatId u n :@ loc)) = do
     let makeIdMat x = lift1 loc n (mEIdT x)
     case u of
       ZZ          -> makeIdMat zeroZZ
@@ -74,7 +74,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver QQ -> makeIdMat (constP zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatSwapE u n h k :@ loc) = do
+  eval (MatExpr (MatSwapE u n h k :@ loc)) = do
     let makeSwapMat x = lift3 loc n h k (mESwapT x)
     case u of
       ZZ          -> makeSwapMat zeroZZ
@@ -85,7 +85,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver QQ -> makeSwapMat (constP zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatScaleE u n h r :@ loc) = do
+  eval (MatExpr (MatScaleE u n h r :@ loc)) = do
     let makeScaleMat x = lift3 loc n h r (mEScaleT x)
     case u of
       ZZ          -> makeScaleMat zeroZZ
@@ -97,7 +97,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> makeScaleMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatAddE u n h k r :@ loc) = do
+  eval (MatExpr (MatAddE u n h k r :@ loc)) = do
     let makeAddMat x = lift4 loc n h k r (mEAddT x)
     case u of
       ZZ          -> makeAddMat zeroZZ
@@ -109,33 +109,33 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> makeAddMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatShuffleRows u m :@ loc) = do
+  eval (MatExpr (MatShuffleRows u m :@ loc)) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mRowsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mVCats ts
     putTypeVal u loc n >>= getVal
 
-  eval (MatShuffleCols u m :@ loc) = do
+  eval (MatExpr (MatShuffleCols u m :@ loc)) = do
     x  <- eval m >>= getVal :: EvalM (Matrix Expr)
     rs <- tryEvalM loc $ mColsOf x
     ts <- shuffleEvalM rs
     n  <- tryEvalM loc $ mHCats ts
     putTypeVal u loc n >>= getVal
 
-  eval (MatHCat u a b :@ loc) = do
+  eval (MatExpr (MatHCat u a b :@ loc)) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mHCat m n
     putTypeVal u loc x >>= getVal
 
-  eval (MatVCat u a b :@ loc) = do
+  eval (MatExpr (MatVCat u a b :@ loc)) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     n <- eval b >>= getVal :: EvalM (Matrix Expr)
     x <- tryEvalM loc $ mVCat m n
     putTypeVal u loc x >>= getVal
 
-  eval (MatAdd u a b :@ loc) = do
+  eval (MatExpr (MatAdd u a b :@ loc)) = do
     let addMat x = lift2 loc a b (rAddT (mCell x))
     case u of
       ZZ          -> addMat zeroZZ
@@ -147,7 +147,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> addMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatNeg u a :@ loc) = do
+  eval (MatExpr (MatNeg u a :@ loc)) = do
     let negMat x = lift1 loc a (rNegT (mCell x))
     case u of
       ZZ          -> negMat zeroZZ
@@ -159,12 +159,12 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> negMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatTrans u a :@ loc) = do
+  eval (MatExpr (MatTrans u a :@ loc)) = do
     m <- eval a >>= getVal :: EvalM (Matrix Expr)
     p <- tryEvalM loc $ mTranspose m
     putTypeVal u loc p >>= getVal
 
-  eval (MatMul u a b :@ loc) = do
+  eval (MatExpr (MatMul u a b :@ loc)) = do
     let mulMat x = lift2 loc a b (rMulT (mCell x))
     case u of
       ZZ          -> mulMat zeroZZ
@@ -176,7 +176,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> mulMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatPow u m n :@ loc) = do
+  eval (MatExpr (MatPow u m n :@ loc)) = do
     let powMat x = lift2 loc m n (rPosPowT (mCell x))
     case u of
       ZZ          -> powMat zeroZZ
@@ -188,21 +188,21 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> powMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatSwapRows u m a b :@ loc) = do
+  eval (MatExpr (MatSwapRows u m a b :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     j <- eval b >>= getVal
     p <- tryEvalM loc $ mSwapRows i j n
     putTypeVal u loc p >>= getVal
 
-  eval (MatSwapCols u m a b :@ loc) = do
+  eval (MatExpr (MatSwapCols u m a b :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     j <- eval b >>= getVal
     p <- tryEvalM loc $ mSwapCols i j n
     putTypeVal u loc p >>= getVal
 
-  eval (MatScaleRow u m a h :@ loc) = do
+  eval (MatExpr (MatScaleRow u m a h :@ loc)) = do
     let scaleRowMat x = lift3 loc a h m (mScaleRowT x)
     case u of
       ZZ          -> scaleRowMat zeroZZ
@@ -214,7 +214,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> scaleRowMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatScaleCol u m a h :@ loc) = do
+  eval (MatExpr (MatScaleCol u m a h :@ loc)) = do
     let scaleColMat x = lift3 loc a h m (mScaleColT x)
     case u of
       ZZ          -> scaleColMat zeroZZ
@@ -226,7 +226,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       PolyOver BB -> scaleColMat (constP zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatAddRow _ m a h k :@ loc) = do
+  eval (MatExpr (MatAddRow _ m a h k :@ loc)) = do
     let t = typeOf m
     let u = typeOf a
     i <- eval h >>= getVal
@@ -245,7 +245,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       Right w  -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatAddCol _ m a h k :@ loc) = do
+  eval (MatExpr (MatAddCol _ m a h k :@ loc)) = do
     let t = typeOf m
     let u = typeOf a
     i <- eval h >>= getVal
@@ -264,45 +264,45 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
       Right w -> reportErr loc $ NumericMatrixExpected w
       Left err -> reportErr loc err
 
-  eval (MatDelRow u m a :@ loc) = do
+  eval (MatExpr (MatDelRow u m a :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelRow n i
     putTypeVal u loc p >>= getVal
 
-  eval (MatDelCol u m a :@ loc) = do
+  eval (MatExpr (MatDelCol u m a :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     i <- eval a >>= getVal
     p <- tryEvalM loc $ mDelCol n i
     putTypeVal u loc p >>= getVal
 
-  eval (MatGJForm u m :@ loc) = do
+  eval (MatExpr (MatGJForm u m :@ loc)) = do
     let gjFormMat x = lift1 loc m (mGJFormT x)
     case u of
       QQ -> gjFormMat zeroQQ
       BB -> gjFormMat zeroBB
       _  -> reportErr loc $ FieldTypeExpected u
 
-  eval (MatGJFactor u m :@ loc) = do
+  eval (MatExpr (MatGJFactor u m :@ loc)) = do
     let gjFactorMat x = lift1 loc m (mGJFactorT x)
     case u of
       QQ -> gjFactorMat zeroQQ
       BB -> gjFactorMat zeroBB
       _  -> reportErr loc $ FieldTypeExpected u
 
-  eval (MatGetRow u k m :@ loc) = do
+  eval (MatExpr (MatGetRow u k m :@ loc)) = do
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     r <- tryEvalM loc $ mRowOf i n
     putTypeVal u loc r >>= getVal
 
-  eval (MatGetCol u k m :@ loc) = do
+  eval (MatExpr (MatGetCol u k m :@ loc)) = do
     i <- eval k >>= getVal :: EvalM Integer
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
     c <- tryEvalM loc $ mColOf i n
     putTypeVal u loc c >>= getVal
 
-  eval (MatBuilder typ e kr lr kc lc :@ loc) = do
+  eval (MatExpr (MatBuilder typ e kr lr kc lc :@ loc)) = do
     st <- getState
     rs <- eval lr >>= getVal :: EvalM [Expr]
     cs <- eval lc >>= getVal :: EvalM [Expr]

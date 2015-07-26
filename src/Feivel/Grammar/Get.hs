@@ -165,7 +165,7 @@ instance (Get a) => Get (Matrix a) where
       getMatrix :: Expr -> Either GetErr (Matrix Expr)
       getMatrix w = do
         case w of
-          MatE (MatConst _ m :@ _) -> return m
+          MatE (MatExpr (MatConst _ m :@ _)) -> return m
           MatE v -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = MatOf XX, typeReceived = typeOf v }

@@ -24,7 +24,13 @@ module Feivel.Grammar.Mat where
 import Feivel.Grammar.Util
 
 
-type MatExpr a = AtLocus (MatExprLeaf a)
+newtype MatExpr a = MatExpr
+  { unMatExpr :: AtLocus (MatExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (MatExpr a) where
+  locusOf = locusOf . unMatExpr
+
 
 data MatExprLeaf a
   = MatConst Type (Matrix a)
@@ -83,40 +89,41 @@ data MatExprLeaf a
 
 
 instance Typed (MatExpr a) where
-  typeOf (MatVar         typ _         :@ _) = MatOf typ
-  typeOf (MatMacro       typ _ _       :@ _) = MatOf typ
-  typeOf (MatAtPos       typ _ _       :@ _) = MatOf typ
-  typeOf (MatAtIdx       typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatIfThenElse  typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatConst       typ _         :@ _) = MatOf typ
-  typeOf (MatId          typ _         :@ _) = MatOf typ
-  typeOf (MatSwapE       typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatScaleE      typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatAddE        typ _ _ _ _   :@ _) = MatOf typ
-  typeOf (MatHCat        typ _ _       :@ _) = MatOf typ
-  typeOf (MatVCat        typ _ _       :@ _) = MatOf typ
-  typeOf (MatAdd         typ _ _       :@ _) = MatOf typ
-  typeOf (MatMul         typ _ _       :@ _) = MatOf typ
-  typeOf (MatPow         typ _ _       :@ _) = MatOf typ
-  typeOf (MatTrans       typ _         :@ _) = MatOf typ
-  typeOf (MatNeg         typ _         :@ _) = MatOf typ
-  typeOf (MatSwapRows    typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatSwapCols    typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatScaleRow    typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatScaleCol    typ _ _ _     :@ _) = MatOf typ
-  typeOf (MatAddRow      typ _ _ _ _   :@ _) = MatOf typ
-  typeOf (MatAddCol      typ _ _ _ _   :@ _) = MatOf typ
-  typeOf (MatDelRow      typ _ _       :@ _) = MatOf typ
-  typeOf (MatDelCol      typ _ _       :@ _) = MatOf typ
-  typeOf (MatShuffleRows typ _         :@ _) = MatOf typ
-  typeOf (MatShuffleCols typ _         :@ _) = MatOf typ
-  typeOf (MatGJForm      typ _         :@ _) = MatOf typ
-  typeOf (MatGJFactor    typ _         :@ _) = MatOf typ
-  typeOf (MatGetRow      typ _ _       :@ _) = MatOf typ
-  typeOf (MatGetCol      typ _ _       :@ _) = MatOf typ
-  typeOf (MatRowFromList typ _         :@ _) = MatOf typ
-  typeOf (MatColFromList typ _         :@ _) = MatOf typ
-  typeOf (MatRand        typ _         :@ _) = MatOf typ
-  typeOf (MatBuilder     typ _ _ _ _ _ :@ _) = MatOf typ
+  typeOf (MatExpr (x :@ _)) = case x of
+    MatVar         typ _         -> MatOf typ
+    MatMacro       typ _ _       -> MatOf typ
+    MatAtPos       typ _ _       -> MatOf typ
+    MatAtIdx       typ _ _ _     -> MatOf typ
+    MatIfThenElse  typ _ _ _     -> MatOf typ
+    MatConst       typ _         -> MatOf typ
+    MatId          typ _         -> MatOf typ
+    MatSwapE       typ _ _ _     -> MatOf typ
+    MatScaleE      typ _ _ _     -> MatOf typ
+    MatAddE        typ _ _ _ _   -> MatOf typ
+    MatHCat        typ _ _       -> MatOf typ
+    MatVCat        typ _ _       -> MatOf typ
+    MatAdd         typ _ _       -> MatOf typ
+    MatMul         typ _ _       -> MatOf typ
+    MatPow         typ _ _       -> MatOf typ
+    MatTrans       typ _         -> MatOf typ
+    MatNeg         typ _         -> MatOf typ
+    MatSwapRows    typ _ _ _     -> MatOf typ
+    MatSwapCols    typ _ _ _     -> MatOf typ
+    MatScaleRow    typ _ _ _     -> MatOf typ
+    MatScaleCol    typ _ _ _     -> MatOf typ
+    MatAddRow      typ _ _ _ _   -> MatOf typ
+    MatAddCol      typ _ _ _ _   -> MatOf typ
+    MatDelRow      typ _ _       -> MatOf typ
+    MatDelCol      typ _ _       -> MatOf typ
+    MatShuffleRows typ _         -> MatOf typ
+    MatShuffleCols typ _         -> MatOf typ
+    MatGJForm      typ _         -> MatOf typ
+    MatGJFactor    typ _         -> MatOf typ
+    MatGetRow      typ _ _       -> MatOf typ
+    MatGetCol      typ _ _       -> MatOf typ
+    MatRowFromList typ _         -> MatOf typ
+    MatColFromList typ _         -> MatOf typ
+    MatRand        typ _         -> MatOf typ
+    MatBuilder     typ _ _ _ _ _ -> MatOf typ
 
 

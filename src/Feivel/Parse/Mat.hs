@@ -21,7 +21,7 @@ module Feivel.Parse.Mat (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Grammar (Type(..), Expr(..), MatExpr, MatExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (mFromRowList)
@@ -32,10 +32,10 @@ import Text.Parsec.Prim (try)
 
 
 pMatLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (MatExpr Expr)
-pMatLiteral typ pE = pAtLocus $ pMatLiteralOf typ pE
+pMatLiteral typ pE = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pE
 
 pMatConst :: Type -> (Type -> ParseM Expr) -> ParseM (MatExpr Expr)
-pMatConst typ pC = pAtLocus $ pMatLiteralOf typ pC
+pMatConst typ pC = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pC
 
 pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr)
 pMatLiteralOf typ p = do
@@ -52,7 +52,7 @@ pMatExpr pE = pTypedMatExpr XX pE
 pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM (MatExpr Expr)
 pTypedMatExpr typ pE = spaced $ buildExpressionParser matOpTable pMatTerm
   where
-    pMatTerm = pTerm (pMatLiteralOf typ pE) (pTypedMatExpr typ pE) "matrix expression"
+    pMatTerm = pTerm' (pMatLiteralOf typ pE) MatExpr (pTypedMatExpr typ pE) "matrix expression"
       [ pVarExpr (MatVar typ) (MatOf typ)
 
       , pFun2 "AtPos" (pE $ ListOf (MatOf typ)) (pE ZZ) (MatAtPos typ)
@@ -145,14 +145,14 @@ pTypedMatExpr typ pE = spaced $ buildExpressionParser matOpTable pMatTerm
           return (MatBuilder typ e kr lr kc lc)
     
     matOpTable =
-      [ [ Prefix (opParser1 (MatNeg typ) "neg")
+      [ [ Prefix (opParser1' (MatNeg typ) MatExpr "neg")
         ]
-      , [ Infix (opParser2 (MatMul typ) "*") AssocLeft
+      , [ Infix (opParser2' (MatMul typ) MatExpr "*") AssocLeft
         ]
-      , [ Infix (opParser2 (MatAdd typ) "+") AssocLeft
+      , [ Infix (opParser2' (MatAdd typ) MatExpr "+") AssocLeft
         ]
-      , [ Infix (opParser2 (MatHCat typ) "hcat") AssocLeft
-        , Infix (opParser2 (MatVCat typ) "vcat") AssocLeft
+      , [ Infix (opParser2' (MatHCat typ) MatExpr "hcat") AssocLeft
+        , Infix (opParser2' (MatVCat typ) MatExpr "vcat") AssocLeft
         ]
       ]
 
