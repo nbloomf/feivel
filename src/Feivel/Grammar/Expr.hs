@@ -33,7 +33,7 @@ module Feivel.Grammar.Expr (
 
   ListExpr(..),  ListExprLeaf(..), ListGuard(..),
   MatExpr(..),   MatExprLeaf(..),
-  PolyExpr,  PolyExprLeaf(..),
+  PolyExpr(..),  PolyExprLeaf(..),
   PermExpr(..),  PermExprLeaf(..),
   MacExpr,   MacExprLeaf(..)
 ) where

@@ -20,7 +20,7 @@ module Feivel.Parse.Poly (
   pPolyConst, pTypedPolyExpr, pPolyExpr, pPolyLiteral
 ) where
 
-import Feivel.Grammar (Type(..), Expr(..), PolyExpr, PolyExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (nullP, fromListM, identityM, fromListP, Natural(..), Variable, Monomial)
@@ -31,10 +31,10 @@ import Text.Parsec.Prim (try)
 
 
 pPolyLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
-pPolyLiteral typ pE = pAtLocus $ pPolyLiteralOf typ pE
+pPolyLiteral typ pE = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pE
 
 pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
-pPolyConst typ pC = pAtLocus $ pPolyLiteralOf typ pC
+pPolyConst typ pC = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pC
 
 pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr)
 pPolyLiteralOf typ p = do
@@ -70,7 +70,7 @@ pPolyExpr pE = pTypedPolyExpr XX pE
 pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
 pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
-    pPolyTerm = pTerm (pPolyLiteralOf typ pE) (pTypedPolyExpr typ pE) "polynomial expression"
+    pPolyTerm = pTerm' (pPolyLiteralOf typ pE) PolyExpr (pTypedPolyExpr typ pE) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) (pE ZZ) (PolyAtPos typ)
@@ -111,12 +111,12 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
           return (PolyConst typ nullP)
 
     polyOpTable =
-      [ [ Prefix (opParser1 (PolyNeg typ) "neg")
+      [ [ Prefix (opParser1' (PolyNeg typ) PolyExpr "neg")
         ]
-      , [ Infix (opParser2 (PolyMul typ) "*") AssocLeft
+      , [ Infix (opParser2' (PolyMul typ) PolyExpr "*") AssocLeft
         ]
-      , [ Infix (opParser2 (PolyAdd typ) "+") AssocLeft
-        , Infix (opParser2 (PolySub typ) "-") AssocLeft
+      , [ Infix (opParser2' (PolyAdd typ) PolyExpr "+") AssocLeft
+        , Infix (opParser2' (PolySub typ) PolyExpr "-") AssocLeft
         ]
       ]
 

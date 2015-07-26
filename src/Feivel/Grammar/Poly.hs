@@ -23,11 +23,14 @@ module Feivel.Grammar.Poly where
 
 import Feivel.Grammar.Util
 
-{-------------}
-{- :PolyExpr -}
-{-------------}
 
-type PolyExpr a = AtLocus (PolyExprLeaf a)
+newtype PolyExpr a = PolyExpr
+  { unPolyExpr :: AtLocus (PolyExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (PolyExpr a) where
+  locusOf = locusOf . unPolyExpr
+
 
 data PolyExprLeaf a
   = PolyConst Type (Poly a)
@@ -53,17 +56,18 @@ data PolyExprLeaf a
 
 
 instance Typed (PolyExpr a) where
-  typeOf (PolyVar        typ _     :@ _) = PolyOver typ
-  typeOf (PolyMacro      typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyConst      typ _     :@ _) = PolyOver typ
-  typeOf (PolyAdd        typ _ _   :@ _) = PolyOver typ
-  typeOf (PolySub        typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyMul        typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyNeg        typ _     :@ _) = PolyOver typ
-  typeOf (PolyPow        typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyAtPos      typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyAtIdx      typ _ _ _ :@ _) = PolyOver typ
-  typeOf (PolyIfThenElse typ _ _ _ :@ _) = PolyOver typ
-  typeOf (PolyRand       typ _     :@ _) = PolyOver typ
-  typeOf (PolyFromRoots  typ _ _   :@ _) = PolyOver typ
-  typeOf (PolyEvalPoly   typ _ _   :@ _) = PolyOver typ
+  typeOf (PolyExpr (x :@ _)) = case x of
+    PolyVar        typ _     -> PolyOver typ
+    PolyMacro      typ _ _   -> PolyOver typ
+    PolyConst      typ _     -> PolyOver typ
+    PolyAdd        typ _ _   -> PolyOver typ
+    PolySub        typ _ _   -> PolyOver typ
+    PolyMul        typ _ _   -> PolyOver typ
+    PolyNeg        typ _     -> PolyOver typ
+    PolyPow        typ _ _   -> PolyOver typ
+    PolyAtPos      typ _ _   -> PolyOver typ
+    PolyAtIdx      typ _ _ _ -> PolyOver typ
+    PolyIfThenElse typ _ _ _ -> PolyOver typ
+    PolyRand       typ _     -> PolyOver typ
+    PolyFromRoots  typ _ _   -> PolyOver typ
+    PolyEvalPoly   typ _ _   -> PolyOver typ

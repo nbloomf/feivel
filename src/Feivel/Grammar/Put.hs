@@ -58,7 +58,7 @@ instance Put (ListExpr Expr) where
   put loc (ListExpr (x :@ _)) = ListE $ ListExpr (x :@ loc)
 
 instance Put (PolyExpr Expr) where
-  put loc (x :@ _) = PolyE (x :@ loc)
+  put loc (PolyExpr (x :@ _)) = PolyE $ PolyExpr (x :@ loc)
 
 instance Put (MatExpr Expr) where
   put loc (MatExpr (x :@ _)) = MatE $ MatExpr (x :@ loc)
@@ -113,13 +113,13 @@ instance (Put a, Typed a) => Put [a] where
 
 
 instance (Put a, Typed a) => Put (Poly a) where
-  put loc x = PolyE $ PolyConst typ (fmap (put loc) x) :@ loc
+  put loc x = PolyE $ PolyExpr $ PolyConst typ (fmap (put loc) x) :@ loc
     where
       typ = case coefficientsP x of
               (c:_) -> typeOf c
               []    -> XX
 
-  putType typ loc x = PolyE $ PolyConst typ (fmap (put loc) x) :@ loc
+  putType typ loc x = PolyE $ PolyExpr $ PolyConst typ (fmap (put loc) x) :@ loc
 
 
 instance (Put a, Typed a) => Put (Matrix a) where

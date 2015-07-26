@@ -178,7 +178,7 @@ instance (Get a) => Get (Poly a) where
       getPoly :: Expr -> Either GetErr (Poly Expr)
       getPoly w = do
         case w of
-          PolyE (PolyConst _ m :@ _) -> return m
+          PolyE (PolyExpr (PolyConst _ m :@ _)) -> return m
           PolyE v -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = PolyOver XX, typeReceived = typeOf v }

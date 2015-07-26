@@ -26,27 +26,27 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph (PolyExpr Expr) where
-  toGlyph (PolyConst _ px :@ _) = do
+  toGlyph (PolyExpr (PolyConst _ px :@ _)) = do
     qx <- polySeq $ mapCoef toGlyph px
     return $ showStrP qx
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
 instance (Eval Expr) => Eval (PolyExpr Expr) where
-  eval (PolyConst t p :@ loc) = do
+  eval (PolyExpr (PolyConst t p :@ loc)) = do
     q <- polySeq $ fmap eval p
-    return $ PolyConst t q :@ loc
+    return $ PolyExpr $ PolyConst t q :@ loc
 
   {- :Common -}
-  eval (PolyVar _ key :@ loc)        = eKey key loc
-  eval (PolyAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (PolyMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (PolyIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (PolyExpr (PolyVar _ key :@ loc))        = eKey key loc
+  eval (PolyExpr (PolyAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (PolyExpr (PolyMacro _ vals mac :@ loc)) = eMacro vals mac loc
+  eval (PolyExpr (PolyIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (PolyAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (PolyExpr (PolyAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [PolyExpr Expr] -> Integer -> Either ListErr (PolyExpr Expr)
 
-  eval (PolyRand _ ls :@ loc) = do
+  eval (PolyExpr (PolyRand _ ls :@ loc)) = do
     let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
@@ -55,7 +55,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       ListOf (PolyOver _) -> return s
       _ -> reportErr loc $ ListExpected t
 
-  eval (PolyAdd u a b :@ loc) = do
+  eval (PolyExpr (PolyAdd u a b :@ loc)) = do
     let addPoly x = lift2 loc a b (rAddT (constP x))
     case u of
       ZZ          -> addPoly zeroZZ
@@ -67,7 +67,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver BB -> addPoly (constP zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
-  eval (PolySub u a b :@ loc) = do
+  eval (PolyExpr (PolySub u a b :@ loc)) = do
     let subPoly x = lift2 loc a b (rSubT (constP x))
     case u of
       ZZ          -> subPoly zeroZZ
@@ -79,7 +79,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver BB -> subPoly (constP zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
-  eval (PolyMul u a b :@ loc) = do
+  eval (PolyExpr (PolyMul u a b :@ loc)) = do
     let mulPoly x = lift2 loc a b (rMulT (constP x))
     case u of
       ZZ          -> mulPoly zeroZZ
@@ -91,7 +91,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       PolyOver BB -> mulPoly (constP zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
-  eval (PolyNeg u a :@ loc) = do
+  eval (PolyExpr (PolyNeg u a :@ loc)) = do
     let negPoly x = lift1 loc a (rNegT (constP x))
     case u of
       ZZ      -> negPoly zeroZZ
@@ -100,7 +100,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       ZZMod n -> negPoly (zeroMod n)
       _ -> reportErr loc $ NumericPolynomialExpected u
 
-  eval (PolyPow u a b :@ loc) = do
+  eval (PolyExpr (PolyPow u a b :@ loc)) = do
     let powPoly x = lift2 loc a b (rPowT (constP x))
     case u of
       ZZ      -> powPoly zeroZZ
@@ -109,7 +109,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
       ZZMod n -> powPoly (zeroMod n)
       _ -> reportErr loc $ NumericPolynomialExpected u
 
-  eval (PolyFromRoots _ x cs :@ loc) = do
+  eval (PolyExpr (PolyFromRoots _ x cs :@ loc)) = do
     let t = typeOf cs
     case t of
       ListOf ZZ -> do
@@ -129,7 +129,7 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
         putTypeVal (ZZMod n) loc q >>= getVal
       _ -> reportErr loc $ NumericListExpected t
 
-  eval (PolyEvalPoly u p qs :@ loc) = do
+  eval (PolyExpr (PolyEvalPoly u p qs :@ loc)) = do
     case u of
       ZZ -> do
         a <- eval p >>= getVal :: EvalM (Poly Integer)
@@ -156,4 +156,3 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
         c  <- tryEvalM loc $ evalPolyAtPolysP ks a
         putTypeVal (ZZMod n) loc (fmap (put loc) c) >>= getVal
       _ -> reportErr loc $ NumericPolynomialExpected u
-
