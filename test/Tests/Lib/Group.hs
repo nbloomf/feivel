@@ -26,7 +26,6 @@ import Tests.Util
 
 import Feivel.Lib.Algebra.Group
 
-
 {-----------}
 {- :Suites -}
 {-----------}

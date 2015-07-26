@@ -89,6 +89,9 @@ movedBy = map fst . unPerm . canon
 idPerm :: (Eq a) => Perm a
 idPerm = Perm []
 
+idOn :: a -> Perm a
+idOn _ = Perm []
+
 fromCycle :: (Eq a) => [a] -> Either AlgErr (Perm a)
 fromCycle [] = Right (Perm [])
 fromCycle as
