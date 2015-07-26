@@ -191,7 +191,7 @@ instance (Get a) => Get (Perm a) where
       getPerm :: Expr -> Either GetErr (Perm Expr)
       getPerm w = do
         case w of
-          PermE (PermConst _ m :@ _) -> return m
+          PermE (PermExpr (PermConst _ m :@ _)) -> return m
           PermE v -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = PermOf XX, typeReceived = typeOf v }

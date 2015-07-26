@@ -21,7 +21,7 @@ module Feivel.Parse.Perm (
 ) where
 
 import Feivel.Store (locus)
-import Feivel.Grammar (Type(..), Expr(..), PermExpr, PermExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (fromCycles, idPerm)
@@ -32,10 +32,10 @@ import Text.Parsec.Prim (try)
 
 
 pPermLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
-pPermLiteral typ pC = pAtLocus $ pPermLiteralOf typ pC
+pPermLiteral typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
 pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
-pPermConst typ pC = pAtLocus $ pPermLiteralOf typ pC
+pPermConst typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
 pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr)
 pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
@@ -55,7 +55,7 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
 pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
 pTypedPermExpr typ pE = spaced $ buildExpressionParser permOpTable pPermTerm
   where
-    pPermTerm = pTerm (pPermLiteralOf typ pE) (pTypedPermExpr typ pE) "permutation expression"
+    pPermTerm = pTerm' (pPermLiteralOf typ pE) PermExpr (pTypedPermExpr typ pE) "permutation expression"
       [ pVarExpr (PermVar typ) (PermOf typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PermOf typ)) (pE ZZ) (PermAtPos typ) 
@@ -69,9 +69,9 @@ pTypedPermExpr typ pE = spaced $ buildExpressionParser permOpTable pPermTerm
       ]
 
     permOpTable =
-      [ [ Prefix (opParser1 (PermInvert typ) "inv")
+      [ [ Prefix (opParser1' (PermInvert typ) PermExpr "inv")
         ]
-      , [ Infix (opParser2 (PermCompose typ) "o") AssocLeft
+      , [ Infix (opParser2' (PermCompose typ) PermExpr "o") AssocLeft
         ]
       ]
 

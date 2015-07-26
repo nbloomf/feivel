@@ -52,7 +52,7 @@ instance Put (ZZModExpr Expr) where
   put loc (ZZModExpr (x :@ _)) = ZZModE $ ZZModExpr (x :@ loc)
 
 instance Put (PermExpr Expr) where
-  put loc (x :@ _) = PermE (x :@ loc)
+  put loc (PermExpr (x :@ _)) = PermE $ PermExpr (x :@ loc)
 
 instance Put (ListExpr Expr) where
   put loc (x :@ _) = ListE (x :@ loc)
@@ -133,6 +133,6 @@ instance (Put a, Typed a) => Put (Matrix a) where
 
 
 instance (Put a) => Put (Perm a) where
-  put loc x = PermE $ PermConst undefined (mapPerm (put loc) x) :@ loc
+  put loc x = PermE $ PermExpr $ PermConst undefined (mapPerm (put loc) x) :@ loc
 
-  putType typ loc x = PermE $ PermConst typ (mapPerm (put loc) x) :@ loc
+  putType typ loc x = PermE $ PermExpr $ PermConst typ (mapPerm (put loc) x) :@ loc

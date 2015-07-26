@@ -24,7 +24,13 @@ module Feivel.Grammar.Perm where
 import Feivel.Grammar.Util
 
 
-type PermExpr a = AtLocus (PermExprLeaf a)
+newtype PermExpr a = PermExpr
+  { unPermExpr :: AtLocus (PermExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (PermExpr a) where
+  locusOf = locusOf . unPermExpr
+
 
 data PermExprLeaf a
   = PermConst Type (Perm a)
@@ -45,12 +51,13 @@ data PermExprLeaf a
 
 
 instance Typed (PermExpr a) where
-  typeOf (PermVar        typ _     :@ _) = PermOf typ
-  typeOf (PermMacro      typ _ _   :@ _) = PermOf typ
-  typeOf (PermConst      typ _     :@ _) = PermOf typ
-  typeOf (PermAtPos      typ _ _   :@ _) = PermOf typ
-  typeOf (PermAtIdx      typ _ _ _ :@ _) = PermOf typ
-  typeOf (PermIfThenElse typ _ _ _ :@ _) = PermOf typ
-  typeOf (PermRand       typ _     :@ _) = PermOf typ
-  typeOf (PermCompose    typ _ _   :@ _) = PermOf typ
-  typeOf (PermInvert     typ _     :@ _) = PermOf typ
+  typeOf (PermExpr (x :@ _)) = case x of
+    PermVar        typ _     -> PermOf typ
+    PermMacro      typ _ _   -> PermOf typ
+    PermConst      typ _     -> PermOf typ
+    PermAtPos      typ _ _   -> PermOf typ
+    PermAtIdx      typ _ _ _ -> PermOf typ
+    PermIfThenElse typ _ _ _ -> PermOf typ
+    PermRand       typ _     -> PermOf typ
+    PermCompose    typ _ _   -> PermOf typ
+    PermInvert     typ _     -> PermOf typ

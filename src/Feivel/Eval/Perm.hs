@@ -26,32 +26,32 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph (PermExpr Expr) where
-  toGlyph (PermConst _ px :@ _) = do
+  toGlyph (PermExpr (PermConst _ px :@ _)) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
 instance (Eval Expr) => Eval (PermExpr Expr) where
-  eval (PermConst t p :@ loc) = do
+  eval (PermExpr (PermConst t p :@ loc)) = do
     q <- seqPerm $ mapPerm eval p
     putTypeVal t loc q >>= getVal
 
-  eval (PermAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (PermExpr (PermAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [PermExpr Expr] -> Integer -> Either ListErr (PermExpr Expr)
 
   {- Common -}
-  eval (PermVar _ key :@ loc)        = eKey key loc
-  eval (PermAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (PermMacro _ vals mac :@ loc) = eMacro vals mac loc
-  eval (PermIfThenElse _ b t f :@ _) = eIfThenElse b t f
+  eval (PermExpr (PermVar _ key :@ loc))        = eKey key loc
+  eval (PermExpr (PermAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (PermExpr (PermMacro _ vals mac :@ loc)) = eMacro vals mac loc
+  eval (PermExpr (PermIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (PermRand _ ls :@ loc) = do
+  eval (PermExpr (PermRand _ ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     eval r >>= getVal
 
-  eval (PermCompose t p q :@ loc) = do
+  eval (PermExpr (PermCompose t p q :@ loc)) = do
     case t of
       ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
@@ -61,7 +61,7 @@ instance (Eval Expr) => Eval (PermExpr Expr) where
         putTypeVal ZZ loc s >>= getVal
       _ -> reportErr loc $ PolynomialExpected t
 
-  eval (PermInvert t p :@ loc) = do
+  eval (PermExpr (PermInvert t p :@ loc)) = do
     case t of
       ZZ -> do
         a <- eval p >>= getVal :: EvalM (Perm Integer)
