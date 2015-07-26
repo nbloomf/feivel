@@ -62,6 +62,9 @@ pINT = pIntExpr pTypedExpr pINT
 pSTR :: ParseM StrExpr
 pSTR = pStrExpr pTypedExpr pSTR
 
+pBOOL :: ParseM BoolExpr
+pBOOL = pBoolExpr pTypedExpr pBOOL
+
 {---------}
 {- :Expr -}
 {---------}
@@ -70,7 +73,7 @@ pTypedExpr :: Type -> ParseM Expr
 pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
 pTypedExpr SS = fmap StrE  pSTR
 pTypedExpr ZZ = fmap IntE  pINT
-pTypedExpr BB = fmap BoolE (pBoolExpr pTypedExpr)
+pTypedExpr BB = fmap BoolE pBOOL
 pTypedExpr QQ = fmap RatE  (pRatExpr  pTypedExpr)
 
 pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     pTypedExpr n)

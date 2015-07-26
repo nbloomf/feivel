@@ -24,15 +24,7 @@ module Feivel.Grammar.Bool where
 import Feivel.Grammar.Util
 
 
-newtype BoolExpr a = BoolExpr
-  { unBoolExpr :: AtLocus (BoolExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (BoolExpr a) where
-  locusOf = locusOf . unBoolExpr
-
-
-data BoolExprLeaf a
+data BoolExprLeaf a bool
   = BoolConst Bool
   | BoolVar   Key
   | IsDefined Key
@@ -41,7 +33,7 @@ data BoolExprLeaf a
   | BoolAtPos a a      -- ListOf BB, ZZ
   | BoolAtIdx a a a -- MatOf BB, ZZ, ZZ
 
-  | BoolIfThenElse a (BoolExpr a) (BoolExpr a) -- BB
+  | BoolIfThenElse a bool bool -- BB
 
   | BoolEq  a a
   | BoolNEq a a
@@ -52,10 +44,10 @@ data BoolExprLeaf a
   | BoolGEq a a
 
   -- Arithmetic
-  | Conj (BoolExpr a) (BoolExpr a)
-  | Disj (BoolExpr a) (BoolExpr a)
-  | Imp  (BoolExpr a) (BoolExpr a)
-  | Neg  (BoolExpr a)
+  | Conj bool bool
+  | Disj bool bool
+  | Imp  bool bool
+  | Neg  bool
 
   -- String
   | Matches a Text -- SS
@@ -75,5 +67,3 @@ data BoolExprLeaf a
   | MatIsCol    a -- MatOf XX
   | MatIsGJForm a -- MatOf XX
   deriving (Eq, Show)
-
-instance Typed (BoolExpr a) where typeOf _ = BB

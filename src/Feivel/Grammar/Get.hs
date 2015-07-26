@@ -50,7 +50,7 @@ instance Get IntExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = ZZ, typeReceived = typeOf v }
 
-instance Get (BoolExpr Expr) where
+instance Get BoolExpr where
   get (BoolE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = BB, typeReceived = typeOf v }
@@ -118,7 +118,7 @@ instance Get Integer where
 
 instance Get Bool where
   get expr = do
-    x <- get expr :: Either GetErr (BoolExpr Expr)
+    x <- get expr :: Either GetErr BoolExpr
     case x of
       BoolExpr (BoolConst b :@ _) -> return b
       v -> Left GetUnevaluatedExpression

@@ -16,6 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
+{-# LANGUAGE UndecidableInstances  #-}
 {-# LANGUAGE TypeSynonymInstances  #-}
 {-# LANGUAGE FlexibleInstances     #-}
 {-# LANGUAGE FlexibleContexts      #-}
@@ -25,13 +26,13 @@ module Feivel.Eval.Bool () where
 import Feivel.Eval.Util
 
 
-instance Glyph (BoolExpr Expr) where
+instance Glyph BoolExpr where
   toGlyph (BoolExpr (BoolConst True  :@ _)) = return "#t"
   toGlyph (BoolExpr (BoolConst False :@ _)) = return "#f"
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (BoolExpr Expr) where
+instance (Eval Expr) => Eval BoolExpr where
   eval (BoolExpr (BoolConst b :@ loc)) = return (BoolExpr $ BoolConst b :@ loc)
 
   {- :Common -}
@@ -41,7 +42,7 @@ instance (Eval Expr) => Eval (BoolExpr Expr) where
   eval (BoolExpr (BoolMacro vals mac :@ loc)) = eMacro vals mac loc
 
   eval (BoolExpr (BoolAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [BoolExpr Expr] -> Integer -> Either ListErr (BoolExpr Expr)
+    where foo = listAtPos :: [BoolExpr] -> Integer -> Either ListErr BoolExpr
 
   eval (BoolExpr (IsDefined key :@ loc)) = do
     p <- isKeyDefined key

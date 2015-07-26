@@ -77,9 +77,21 @@ instance HasLocus StrExpr where
 instance Typed StrExpr where typeOf _ = SS
 
 
+{- :BoolExpr -}
+
+newtype BoolExpr = BoolExpr
+  { unBoolExpr :: AtLocus (BoolExprLeaf Expr BoolExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus BoolExpr where
+  locusOf = locusOf . unBoolExpr
+
+instance Typed BoolExpr where typeOf _ = BB
+
+
 data Expr
   = DocE   (Doc       Expr)
-  | BoolE  (BoolExpr  Expr)
+  | BoolE  BoolExpr
   | StrE   StrExpr
   | IntE   IntExpr
   | RatE   (RatExpr   Expr)
@@ -111,7 +123,7 @@ class ToExpr t where
 
 instance ToExpr Expr where toExpr = id
 instance ToExpr (Doc       Expr) where toExpr = DocE
-instance ToExpr (BoolExpr  Expr) where toExpr = BoolE
+instance ToExpr BoolExpr         where toExpr = BoolE
 instance ToExpr StrExpr          where toExpr = StrE
 instance ToExpr IntExpr          where toExpr = IntE
 instance ToExpr (RatExpr   Expr) where toExpr = RatE

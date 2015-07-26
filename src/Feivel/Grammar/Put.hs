@@ -69,7 +69,7 @@ instance Put (MacExpr Expr) where
 instance Put (RatExpr Expr) where
   put loc (RatExpr (x :@ _)) = RatE $ RatExpr (x :@ loc)
 
-instance Put (BoolExpr Expr) where
+instance Put BoolExpr where
   put loc (BoolExpr (x :@ _)) = BoolE $ BoolExpr (x :@ loc)
 
 instance Put StrExpr where

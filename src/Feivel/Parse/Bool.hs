@@ -28,23 +28,23 @@ import Text.Parsec.Prim (try)
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
-pBoolConst :: ParseM (BoolExpr Expr)
+pBoolConst :: ParseM BoolExpr
 pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 
-pBoolConst' :: ParseM (BoolExprLeaf Expr)
+pBoolConst' :: ParseM (BoolExprLeaf Expr BoolExpr)
 pBoolConst' = pConst pBool BoolConst
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM (BoolExpr Expr)
-pBoolExpr pE = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM BoolExpr
+pBoolExpr pE pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
-    pBoolTerm = pTerm' pBoolConst' BoolExpr (pBoolExpr pE) "boolean expression"
+    pBoolTerm = pTerm' pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
       , pFun2 "AtPos" (pE $ ListOf BB) (pE ZZ) BoolAtPos
       , pFun3 "AtIdx" (pE $ MatOf BB) (pE ZZ) (pE ZZ) BoolAtIdx
 
-      , pIfThenElseExprT pE (pBoolExpr pE) BoolIfThenElse BB
+      , pIfThenElseExprT pE pBOOL BoolIfThenElse BB
     
       , pFun1 "IsDefined" pKey IsDefined
 
