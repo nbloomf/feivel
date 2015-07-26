@@ -23,6 +23,7 @@ module Feivel.Lib.Struct.Permutation where
 
 import Feivel.Lib.AlgErr
 import Feivel.Lib.Canon
+import Feivel.Lib.Algebra.Group
 
 import Control.Monad (foldM)
 import Data.List (minimumBy, inits, tails, group, sortBy, sort, union, intersperse, permutations)
@@ -185,3 +186,12 @@ seqPerm (Perm ps) = fmap Perm $ sequence $ map foo ps
 
 permsOf :: (Eq a) => [a] -> Either AlgErr [Perm a]
 permsOf xs = sequence $ map (fromPairs . zip xs) (permutations xs)
+
+instance (Eq a) => Groupoid (Perm a) where
+  gOp p q = return $ compose p q
+  gInv  = inverse
+  gId   = idPerm
+  gIsId = (idPerm ==)
+
+  gLIdOf _ = idPerm
+  gRIdOf _ = idPerm

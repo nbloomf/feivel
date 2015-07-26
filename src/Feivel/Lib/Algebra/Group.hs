@@ -33,8 +33,8 @@ class Groupoid t where
   gId   :: t
   gIsId :: t -> Bool
 
-  gLIdOf :: t -> Either AlgErr t
-  gRIdOf :: t -> Either AlgErr t
+  gLIdOf :: t -> t
+  gRIdOf :: t -> t
 
 gProd :: (Groupoid t) => [t] -> Either AlgErr t
 gProd = foldM gOp gId
