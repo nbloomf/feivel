@@ -80,7 +80,7 @@ instance Typed StrExpr where typeOf _ = SS
 {- :BoolExpr -}
 
 newtype BoolExpr = BoolExpr
-  { unBoolExpr :: AtLocus (BoolExprLeaf Expr BoolExpr)
+  { unBoolExpr :: AtLocus (BoolExprLeaf Expr IntExpr BoolExpr)
   } deriving (Eq, Show)
 
 instance HasLocus BoolExpr where

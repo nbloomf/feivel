@@ -31,24 +31,24 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pBoolConst :: ParseM BoolExpr
 pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 
-pBoolConst' :: ParseM (BoolExprLeaf Expr BoolExpr)
+pBoolConst' :: ParseM (BoolExprLeaf Expr IntExpr BoolExpr)
 pBoolConst' = pConst pBool BoolConst
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM BoolExpr
-pBoolExpr pE pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> ParseM BoolExpr
+pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
     pBoolTerm = pTerm' pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
-      , pFun2 "AtPos" (pE $ ListOf BB) (pE ZZ) BoolAtPos
-      , pFun3 "AtIdx" (pE $ MatOf BB) (pE ZZ) (pE ZZ) BoolAtIdx
+      , pFun2 "AtPos" (pE $ ListOf BB) pINT BoolAtPos
+      , pFun3 "AtIdx" (pE $ MatOf BB) pINT pINT BoolAtIdx
 
       , pIfThenElseExprT pE pBOOL BoolIfThenElse BB
     
       , pFun1 "IsDefined" pKey IsDefined
 
-      , pFun1 "IsSquareFree" (pE ZZ) IntSqFree
+      , pFun1 "IsSquareFree" pINT IntSqFree
 
       , pFun1 "Rand" (pE $ ListOf BB) BoolRand
 
@@ -67,7 +67,7 @@ pBoolExpr pE pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
       , pFun2T "GEq"      pE pE BoolGEq
 
       , pFun2 "Matches" (pE SS) pText    Matches
-      , pFun2 "Divides" (pE ZZ) (pE ZZ) IntDiv
+      , pFun2 "Divides" pINT pINT IntDiv
       ]
 
     boolOpTable =
