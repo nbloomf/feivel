@@ -31,18 +31,18 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pRatConst :: ParseM RatExpr
 pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 
-pRatConst' :: ParseM (RatExprLeaf Expr RatExpr)
+pRatConst' :: ParseM (RatExprLeaf Expr IntExpr RatExpr)
 pRatConst' = pConst pRat RatConst
 
-pRatExpr :: (Type -> ParseM Expr) -> ParseM RatExpr -> ParseM RatExpr
-pRatExpr pE pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
+pRatExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM RatExpr -> ParseM RatExpr
+pRatExpr pE pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
     pRatTerm = pTerm' pRatConst' RatExpr pRAT "rational expression"
       [ pVarExpr RatVar QQ
       , pMacroExprT pE RatMacro
 
-      , pFun2 "AtPos" (pE $ ListOf QQ) (pE ZZ) RatAtPos
-      , pFun3 "AtIdx" (pE $ MatOf QQ) (pE ZZ) (pE ZZ) RatAtIdx
+      , pFun2 "AtPos" (pE $ ListOf QQ) pINT RatAtPos
+      , pFun3 "AtIdx" (pE $ MatOf QQ) pINT pINT RatAtIdx
 
       , pIfThenElseExprT pE pRAT RatIfThenElse QQ
 
@@ -53,11 +53,11 @@ pRatExpr pE pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
       , pFun1 "Max"    (pE $ ListOf QQ) RatMaxim
 
       , pFun1  "int" (pE ZZ) RatCast
-      , pFun2  "Pow" pRAT (pE ZZ) RatPow
+      , pFun2  "Pow" pRAT pINT RatPow
       , pFun1T "Mean" (pE . ListOf) RatMean
-      , pFun2  "Sqrt" pRAT (pE ZZ) RatSqrt
+      , pFun2  "Sqrt" pRAT pINT RatSqrt
       , pFun1T "MeanDev" (pE . ListOf) RatMeanDev
-      , pFun2T "StdDev" (pE . ListOf) (const (pE ZZ)) RatStdDev
+      , pFun2T "StdDev" (pE . ListOf) (const pINT) RatStdDev
       , pZScore
 
       , pFun1 "str" (pE SS) RatCastStr
@@ -72,7 +72,7 @@ pRatExpr pE pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
           keyword ";"
           ks <- pE (ListOf t)
           keyword ";"
-          n <- pE ZZ
+          n <- pINT
           keyword ")"
           return (RatZScore p ks n)
     

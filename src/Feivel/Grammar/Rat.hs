@@ -21,14 +21,14 @@ module Feivel.Grammar.Rat where
 import Feivel.Grammar.Util
 
 
-data RatExprLeaf a rat
+data RatExprLeaf a int rat
   = RatConst Rat
   | RatVar   Key
   | RatCast  a -- ZZ
 
   | RatMacro [(Type, Key, a)] a -- Expr, MacTo QQ
-  | RatAtPos a a -- ListOf QQ, ZZ
-  | RatAtIdx a a a -- MatOf QQ, ZZ, ZZ
+  | RatAtPos a int -- ListOf QQ
+  | RatAtIdx a int int -- MatOf QQ
 
   | RatIfThenElse a rat rat -- BB
  
@@ -43,7 +43,7 @@ data RatExprLeaf a rat
   | RatMin   rat rat
   | RatMax   rat rat
 
-  | RatPow   rat a -- ZZ
+  | RatPow   rat int -- ZZ
 
   -- List
   | RatRand  a -- ListOf QQ
@@ -55,11 +55,11 @@ data RatExprLeaf a rat
   -- Stats
   | RatMean    a -- ListOf XX
   | RatMeanDev a -- ListOf XX
-  | RatStdDev  a a -- ListOf XX, ZZ
-  | RatZScore  rat a a -- ListOf XX, ZZ
+  | RatStdDev  a int -- ListOf XX, ZZ
+  | RatZScore  rat a int -- ListOf XX, ZZ
 
   -- Approximations
-  | RatSqrt  rat a -- ZZ
+  | RatSqrt  rat int -- ZZ
 
   -- Casting
   | RatCastStr a -- SS
