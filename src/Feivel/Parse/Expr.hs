@@ -70,6 +70,9 @@ pRAT = pRatExpr pTypedExpr pRAT
 pMOD :: Integer -> ParseM ZZModExpr
 pMOD n = pZZModExpr pTypedExpr n pMOD
 
+pLIST :: Type -> ParseM ListExpr
+pLIST typ = pTypedListExpr typ pTypedExpr pLIST
+
 {---------}
 {- :Expr -}
 {---------}
@@ -81,8 +84,8 @@ pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE pBOOL
 pTypedExpr QQ = fmap RatE  pRAT
 
-pTypedExpr (ZZMod    n) = fmap ZZModE (pMOD n)
-pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t pTypedExpr)
+pTypedExpr (ZZMod    n) = fmap ZZModE (pMOD  n)
+pTypedExpr (ListOf   t) = fmap ListE  (pLIST t)
 pTypedExpr (MatOf    t) = fmap MatE   (pTypedMatExpr  t pTypedExpr)
 pTypedExpr (MacTo    t) = fmap MacE   (pTypedMacExpr  t pTypedExpr pBrackDocE)
 pTypedExpr (PermOf   t) = fmap PermE  (pTypedPermExpr t pTypedExpr)
@@ -93,7 +96,7 @@ pTypedExpr XX = choice
   , pTypedExpr QQ
   , pTypedExpr BB
   , pTypedExpr SS
-  , fmap ListE (pListExpr pTypedExpr)
+  , fmap ListE (pListExpr pTypedExpr pLIST)
   , fmap MatE  (pMatExpr  pTypedExpr)
   , fmap PolyE (pPolyExpr pTypedExpr)
   ]

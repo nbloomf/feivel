@@ -28,7 +28,6 @@ import Feivel.Grammar.Util
 import Feivel.Lib (mSeq, polySeq, mapPerm, seqPerm)
 
 
-
 class Get a where
   get :: Expr -> Either GetErr a
 
@@ -73,7 +72,7 @@ instance Get ZZModExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = ZZMod 0, typeReceived = typeOf v }
 
-instance Get (ListExpr Expr) where
+instance Get ListExpr where
   get (ListE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = ListOf XX, typeReceived = typeOf v }

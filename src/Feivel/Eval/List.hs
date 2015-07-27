@@ -16,9 +16,7 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.List () where
 
@@ -28,14 +26,14 @@ import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)
 
 
-instance (Glyph Expr) => Glyph (ListExpr Expr) where
+instance (Glyph Expr) => Glyph ListExpr where
   toGlyph (ListExpr (ListConst _ xs :@ _)) = do
     ys <- sequence $ map toGlyph xs
     return $ "{" ++ concat (intersperse ";" ys) ++ "}"
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (ListExpr Expr) where
+instance (Eval Expr) => Eval ListExpr where
   eval (ListExpr (ListConst t xs :@ loc)) = do
     ys <- sequence $ map eval xs
     putTypeVal t loc ys >>= getVal
@@ -47,7 +45,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
   eval (ListExpr (ListIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
   eval (ListExpr (ListAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [ListExpr Expr] -> Integer -> Either ListErr (ListExpr Expr)
+    where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
 
   eval (ListExpr (ListRange _ a b :@ loc)) = do
     x <- eval a >>= getVal :: EvalM Integer
@@ -84,7 +82,7 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
 
   eval (ListExpr (ListRand _ ls :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    randomElementEvalM xs >>= getVal :: EvalM (ListExpr Expr)
+    randomElementEvalM xs >>= getVal
 
   eval (ListExpr (ListUniq u a :@ loc)) = do
     xs <- eval a >>= getVal :: EvalM [Expr]
@@ -123,13 +121,13 @@ instance (Eval Expr) => Eval (ListExpr Expr) where
            (z:_) -> return (typeOf z)
     eval $ ListExpr $ ListConst t ys :@ loc
       where
-        bar :: Store Expr -> [ListGuard Expr] -> EvalM [Store Expr]
+        bar :: Store Expr -> [ListGuard Expr ListExpr] -> EvalM [Store Expr]
         bar st []     = return [st]
         bar st (h:hs) = do
           xs <- foo st h
           fmap concat $ sequence $ [bar x hs | x <- xs]
         
-        foo :: Store Expr -> (ListGuard Expr) -> EvalM [Store Expr]
+        foo :: Store Expr -> (ListGuard Expr ListExpr) -> EvalM [Store Expr]
         foo st (Bind key ls) = do
           xs <- eval ls >>= getVal :: EvalM [Expr]
           sequence [addKeyToStore key x (locusOf x) st | x <- xs]

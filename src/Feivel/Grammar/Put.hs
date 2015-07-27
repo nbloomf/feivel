@@ -52,7 +52,7 @@ instance Put ZZModExpr where
 instance Put (PermExpr Expr) where
   put loc (PermExpr (x :@ _)) = PermE $ PermExpr (x :@ loc)
 
-instance Put (ListExpr Expr) where
+instance Put ListExpr where
   put loc (ListExpr (x :@ _)) = ListE $ ListExpr (x :@ loc)
 
 instance Put (PolyExpr Expr) where

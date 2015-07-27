@@ -16,41 +16,30 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.List where
 
 import Feivel.Grammar.Util
 
 
-newtype ListExpr a = ListExpr
-  { unListExpr :: AtLocus (ListExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (ListExpr a) where
-  locusOf = locusOf . unListExpr
-
-
-data ListExprLeaf a
+data ListExprLeaf a list
   = ListConst   Type [a]
   | ListVar     Type Key
-  | ListBuilder Type a [ListGuard a]
+  | ListBuilder Type a [ListGuard a list]
 
   | ListMacro      Type [(Type, Key, a)] a -- MacTo (ListOf typ)
   | ListAtPos      Type a a -- ListOf (ListOf typ), ZZ
   | ListAtIdx      Type a a a -- MatOf (ListOf typ), ZZ, ZZ
   | ListRand       Type a -- ListOf (ListOf typ)
-  | ListIfThenElse Type a (ListExpr a) (ListExpr a) -- BB
+  | ListIfThenElse Type a list list -- BB
 
   -- Arithmetic
-  | ListCat   Type (ListExpr a) (ListExpr a)
-  | ListToss  Type (ListExpr a) (ListExpr a)
-  | ListRev   Type (ListExpr a)
-  | ListSort  Type (ListExpr a)
-  | ListUniq  Type (ListExpr a)
+  | ListCat   Type list list
+  | ListToss  Type list list
+  | ListRev   Type list
+  | ListSort  Type list
+  | ListUniq  Type list
 
-  | ListFilter Type Key a (ListExpr a) -- BB
+  | ListFilter Type Key a list -- BB
 
   -- Integer
   | ListRange Type a a -- ZZ, ZZ
@@ -60,27 +49,26 @@ data ListExprLeaf a
   | ListMatCol Type a a -- ZZ, MatOf typ
 
   -- Random
-  | ListShuffle  Type (ListExpr a)
-  | ListChoose   Type a  (ListExpr a) -- ZZ
+  | ListShuffle  Type list
+  | ListChoose   Type a list -- ZZ
 
-  | ListShuffles Type (ListExpr a)
-  | ListChoices  Type a  (ListExpr a) -- ZZ
+  | ListShuffles Type list
+  | ListChoices  Type a list -- ZZ
 
   -- Permutations
-  | ListPermsOf Type (ListExpr a)
+  | ListPermsOf Type list
 
   | ListPivotColIndices Type a -- MatOf XX
   deriving (Eq, Show)
 
-data ListGuard a
-  = Bind  Key (ListExpr a)
+data ListGuard a list
+  = Bind  Key list
   | Guard a -- BB
   deriving (Eq, Show)
 
 
-
-instance Typed (ListExpr a) where
-  typeOf (ListExpr (x :@ _)) = case x of
+instance Typed (ListExprLeaf a list) where
+  typeOf x = case x of
     ListConst           typ _     -> ListOf typ
     ListVar             typ _     -> ListOf typ
     ListIfThenElse      typ _ _ _ -> ListOf typ

@@ -30,24 +30,24 @@ import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
 
-pListLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
+pListLiteral :: Type -> (Type -> ParseM Expr) -> ParseM ListExpr
 pListLiteral typ pE = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pE
 
-pListConst :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
+pListConst :: Type -> (Type -> ParseM Expr) -> ParseM ListExpr
 pListConst typ pC = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pC
 
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr)
+pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr ListExpr)
 pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst typ xs)
 
-pListExpr :: (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
-pListExpr pE = pTypedListExpr XX pE
+pListExpr :: (Type -> ParseM Expr) -> (Type -> ParseM ListExpr) -> ParseM ListExpr
+pListExpr pE pLIST = pTypedListExpr XX pE pLIST
 
-pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM (ListExpr Expr)
-pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
+pTypedListExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM ListExpr) -> ParseM ListExpr
+pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTerm
   where
-    pListTerm = pTerm' (pListLiteralOf typ pE) ListExpr (pTypedListExpr typ pE) "list expression"
+    pListTerm = pTerm' (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr (ListVar typ) (ListOf typ)
 
       , pMacroExprT pE (ListMacro typ)
@@ -55,14 +55,14 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
       , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) (pE ZZ) (ListAtPos typ)
       , pFun3 "AtIdx" (pE $ MatOf (ListOf typ)) (pE ZZ) (pE ZZ) (ListAtIdx typ)
 
-      , pIfThenElseExprT pE (pTypedListExpr typ pE) (ListIfThenElse typ) (ListOf typ)
+      , pIfThenElseExprT pE (pLIST typ) (ListIfThenElse typ) (ListOf typ)
 
       , pFun1 "Rand" (pE $ ListOf (ListOf typ)) (ListRand typ)
 
-      , pFun1 "Reverse"  (pTypedListExpr typ pE) (ListRev typ)
-      , pFun1 "Sort"     (pTypedListExpr typ pE) (ListSort typ)
-      , pFun1 "Unique"   (pTypedListExpr typ pE) (ListUniq typ)
-      , pFun1 "Shuffle"  (pTypedListExpr typ pE) (ListShuffle typ)
+      , pFun1 "Reverse"  (pLIST typ) (ListRev typ)
+      , pFun1 "Sort"     (pLIST typ) (ListSort typ)
+      , pFun1 "Unique"   (pLIST typ) (ListUniq typ)
+      , pFun1 "Shuffle"  (pLIST typ) (ListShuffle typ)
       , pListShuffles
 
       , pFun2 "GetRow" (pE ZZ) (pE $ MatOf typ) (ListMatRow typ)
@@ -73,7 +73,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
       , pListRange
       , pListPivotColIndices typ
       , pListBuilder
-      , pFun2 "Choose" (pE ZZ) (pTypedListExpr typ pE) (ListChoose typ)
+      , pFun2 "Choose" (pE ZZ) (pLIST typ) (ListChoose typ)
       , pListChoices
       , pListFilter
       ]
@@ -85,7 +85,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
           keyword ";"
           g <- pE BB
           keyword ";"
-          xs <- pTypedListExpr typ pE
+          xs <- pLIST typ
           keyword ")"
           return (ListFilter typ k g xs)
 
@@ -96,7 +96,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
               keyword "("
               n <- pE ZZ
               keyword ";"
-              xs <- pTypedListExpr t pE
+              xs <- pLIST t
               keyword ")"
               return (ListChoices typ n xs)
             _ -> error "pListChoices"
@@ -106,7 +106,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
           case typ of
             ListOf t -> do
               keyword "("
-              xs <- pTypedListExpr t pE
+              xs <- pLIST typ
               keyword ")"
               return (ListShuffles typ xs)
             _ -> error "pListShuffles"
@@ -116,7 +116,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
           case typ of
             PermOf t -> do
               keyword "("
-              xs <- pTypedListExpr t pE
+              xs <- pLIST typ
               keyword ")"
               return (ListPermsOf typ xs)
             _ -> error "pListPermsOf"
@@ -154,7 +154,7 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
                 whitespace
                 k <- pKey
                 keyword "<-"
-                ls <- pTypedListExpr w pE
+                ls <- pLIST w
                 return $ Bind k ls
           
               pListGuard = do
@@ -167,4 +167,3 @@ pTypedListExpr typ pE = spaced $ buildExpressionParser listOpTable pListTerm
       , [ Infix (opParser2' (ListToss typ) ListExpr "\\\\") AssocLeft
         ]
       ]
-
