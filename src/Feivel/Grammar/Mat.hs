@@ -21,13 +21,13 @@ module Feivel.Grammar.Mat where
 import Feivel.Grammar.Util
 
 
-data MatExprLeaf a mat
+data MatExprLeaf a int mat
   = MatConst Type (Matrix a)
   | MatVar   Type Key
 
   | MatMacro Type [(Type, Key, a)] a -- Expr, MacTo (MatOf typ)
-  | MatAtPos Type a a -- ListOf (MatOf typ), ZZ
-  | MatAtIdx Type a a a -- MatOf (MatOf typ), ZZ, ZZ
+  | MatAtPos Type a int -- ListOf (MatOf typ)
+  | MatAtIdx Type a int int -- MatOf (MatOf typ)
 
   | MatIfThenElse Type a mat mat -- BB
 
@@ -37,32 +37,32 @@ data MatExprLeaf a mat
   | MatColFromList Type a -- ListOf typ
 
   -- Special Values
-  | MatId     Type a -- ZZ
-  | MatSwapE  Type a a a -- ZZ, ZZ, ZZ
-  | MatScaleE Type a a a -- ZZ, ZZ, typ
-  | MatAddE   Type a a a a -- ZZ, ZZ, ZZ, typ
+  | MatId     Type int -- ZZ
+  | MatSwapE  Type int int int -- ZZ, ZZ, ZZ
+  | MatScaleE Type int int a -- ZZ, ZZ, typ
+  | MatAddE   Type int int int a -- ZZ, ZZ, ZZ, typ
 
   -- Arithmetic
   | MatHCat  Type mat mat
   | MatVCat  Type mat mat
   | MatAdd   Type mat mat
   | MatMul   Type mat mat
-  | MatPow   Type mat a -- ZZ
+  | MatPow   Type mat int -- ZZ
   | MatNeg   Type mat
   | MatTrans Type mat
 
   -- Mutation
-  | MatSwapRows Type mat a a -- ZZ, ZZ
-  | MatSwapCols Type mat a a -- ZZ, ZZ
-  | MatScaleRow Type mat a a -- typ, ZZ
-  | MatScaleCol Type mat a a -- typ, ZZ
-  | MatAddRow   Type mat a a a -- typ, ZZ, ZZ
-  | MatAddCol   Type mat a a a -- typ, ZZ, ZZ
-  | MatDelRow   Type mat a -- ZZ
-  | MatDelCol   Type mat a -- ZZ
+  | MatSwapRows Type mat int int
+  | MatSwapCols Type mat int int
+  | MatScaleRow Type mat a int -- typ
+  | MatScaleCol Type mat a int -- typ
+  | MatAddRow   Type mat a int int -- typ
+  | MatAddCol   Type mat a int int -- typ
+  | MatDelRow   Type mat int
+  | MatDelCol   Type mat int
 
-  | MatGetRow   Type a mat -- ZZ
-  | MatGetCol   Type a mat -- ZZ
+  | MatGetRow   Type int mat
+  | MatGetCol   Type int mat
 
   -- Randomness
   | MatShuffleRows Type mat
@@ -77,7 +77,7 @@ data MatExprLeaf a mat
 
 
 
-instance Typed (MatExprLeaf a mat) where
+instance Typed (MatExprLeaf a int mat) where
   typeOf x = case x of
     MatVar         typ _         -> MatOf typ
     MatMacro       typ _ _       -> MatOf typ

@@ -37,7 +37,7 @@ pMatLiteral typ pE = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pE
 pMatConst :: Type -> (Type -> ParseM Expr) -> ParseM MatExpr
 pMatConst typ pC = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pC
 
-pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr MatExpr)
+pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr IntExpr MatExpr)
 pMatLiteralOf typ p = do
   start <- getPosition
   xss <- pBrackList (pBrackList (p typ))
@@ -46,17 +46,17 @@ pMatLiteralOf typ p = do
     Left err -> reportParseErr (locus start end) err
     Right m -> return (MatConst typ m)
 
-pMatExpr :: (Type -> ParseM Expr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pMatExpr pE pMAT = pTypedMatExpr XX pE pMAT
+pMatExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pMatExpr pE pINT pMAT = pTypedMatExpr XX pE pINT pMAT
 
-pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pTypedMatExpr typ pE pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
+pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pTypedMatExpr typ pE pINT pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm' (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr (MatVar typ) (MatOf typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (MatOf typ)) (pE ZZ) (MatAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) (pE ZZ) (pE ZZ) (MatAtIdx typ)
+      , pFun2 "AtPos" (pE $ ListOf (MatOf typ)) pINT (MatAtPos typ)
+      , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) pINT pINT (MatAtIdx typ)
 
       , pMacroExprT pE (MatMacro typ)
 
@@ -72,26 +72,26 @@ pTypedMatExpr typ pE pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
 
       , pFun1 "Rand" (pE $ ListOf (MatOf typ)) (MatRand typ)
 
-      , pFun2 "GetRow" (pE ZZ) (pMAT typ) (MatGetRow typ)
-      , pFun2 "GetCol" (pE ZZ) (pMAT typ) (MatGetCol typ)
+      , pFun2 "GetRow" pINT (pMAT typ) (MatGetRow typ)
+      , pFun2 "GetCol" pINT (pMAT typ) (MatGetCol typ)
 
       , pMatBuilder
 
-      , pFun2 "Id"    pType (pE ZZ) MatId
-      , pFun4 "SwapE" pType (pE ZZ) (pE ZZ) (pE ZZ) MatSwapE
+      , pFun2 "Id"    pType pINT MatId
+      , pFun4 "SwapE" pType pINT pINT pINT MatSwapE
       , pMatScaleE
       , pMatAddE
 
-      , pFun2 "Pow" (pMAT typ) (pE ZZ) (MatPow typ)
+      , pFun2 "Pow" (pMAT typ) pINT (MatPow typ)
 
-      , pFun3 "SwapRows" (pMAT typ) (pE ZZ) (pE ZZ) (MatSwapRows typ)
-      , pFun3 "SwapCols" (pMAT typ) (pE ZZ) (pE ZZ) (MatSwapCols typ)
-      , pFun3 "ScaleRow" (pMAT typ) (pE typ) (pE ZZ) (MatScaleRow typ)
-      , pFun3 "ScaleCol" (pMAT typ) (pE typ) (pE ZZ) (MatScaleCol typ)
-      , pFun4 "AddRow"   (pMAT typ) (pE typ) (pE ZZ) (pE ZZ) (MatAddRow typ)
-      , pFun4 "AddCol"   (pMAT typ) (pE typ) (pE ZZ) (pE ZZ) (MatAddCol typ)
-      , pFun2 "DelRow"   (pMAT typ) (pE ZZ) (MatDelRow typ)
-      , pFun2 "DelCol"   (pMAT typ) (pE ZZ) (MatDelCol typ)
+      , pFun3 "SwapRows" (pMAT typ) pINT pINT (MatSwapRows typ)
+      , pFun3 "SwapCols" (pMAT typ) pINT pINT (MatSwapCols typ)
+      , pFun3 "ScaleRow" (pMAT typ) (pE typ) pINT (MatScaleRow typ)
+      , pFun3 "ScaleCol" (pMAT typ) (pE typ) pINT (MatScaleCol typ)
+      , pFun4 "AddRow"   (pMAT typ) (pE typ) pINT pINT (MatAddRow typ)
+      , pFun4 "AddCol"   (pMAT typ) (pE typ) pINT pINT (MatAddCol typ)
+      , pFun2 "DelRow"   (pMAT typ) pINT (MatDelRow typ)
+      , pFun2 "DelCol"   (pMAT typ) pINT (MatDelCol typ)
 
       , pFun1 "GJForm"   (pMAT typ) (MatGJForm typ)
       , pFun1 "GJFactor" (pMAT typ) (MatGJFactor typ)
@@ -102,9 +102,9 @@ pTypedMatExpr typ pE pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
           keyword "("
           t <- pType
           keyword ";"
-          n <- pE ZZ
+          n <- pINT
           keyword ";"
-          k <- pE ZZ
+          k <- pINT
           keyword ";"
           e <- pE t
           keyword ")"
@@ -115,11 +115,11 @@ pTypedMatExpr typ pE pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
           keyword "("
           t <- pType
           keyword ";"
-          n <- pE ZZ
+          n <- pINT
           keyword ";"
-          i <- pE ZZ
+          i <- pINT
           keyword ";"
-          j <- pE ZZ
+          j <- pINT
           keyword ";"
           e <- pE t
           keyword ")"

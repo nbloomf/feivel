@@ -130,7 +130,7 @@ instance Typed ListExpr where
 {- :MatExpr -}
 
 newtype MatExpr = MatExpr
-  { unMatExpr :: AtLocus (MatExprLeaf Expr MatExpr)
+  { unMatExpr :: AtLocus (MatExprLeaf Expr IntExpr MatExpr)
   } deriving (Eq, Show)
 
 instance HasLocus MatExpr where
