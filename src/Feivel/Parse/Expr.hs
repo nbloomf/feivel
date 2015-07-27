@@ -53,7 +53,6 @@ import Text.Parsec.Prim (try)
 {- Contents    -}
 {-  :Expr      -}
 {-  :REPL      -}
-{-  :MacExpr   -}
 {---------------}
 
 pINT :: ParseM IntExpr
@@ -65,6 +64,9 @@ pSTR = pStrExpr pTypedExpr pSTR
 pBOOL :: ParseM BoolExpr
 pBOOL = pBoolExpr pTypedExpr pBOOL
 
+pRAT :: ParseM RatExpr
+pRAT = pRatExpr pTypedExpr pRAT
+
 {---------}
 {- :Expr -}
 {---------}
@@ -74,7 +76,7 @@ pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
 pTypedExpr SS = fmap StrE  pSTR
 pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE pBOOL
-pTypedExpr QQ = fmap RatE  (pRatExpr  pTypedExpr)
+pTypedExpr QQ = fmap RatE  pRAT
 
 pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     pTypedExpr n)
 pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t pTypedExpr)

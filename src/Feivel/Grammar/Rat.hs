@@ -16,23 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Rat where
 
 import Feivel.Grammar.Util
 
 
-newtype RatExpr a = RatExpr
-  { unRatExpr :: AtLocus (RatExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (RatExpr a) where
-  locusOf = locusOf . unRatExpr
-
-
-data RatExprLeaf a
+data RatExprLeaf a rat
   = RatConst Rat
   | RatVar   Key
   | RatCast  a -- ZZ
@@ -41,20 +30,20 @@ data RatExprLeaf a
   | RatAtPos a a -- ListOf QQ, ZZ
   | RatAtIdx a a a -- MatOf QQ, ZZ, ZZ
 
-  | RatIfThenElse a (RatExpr a) (RatExpr a) -- BB
+  | RatIfThenElse a rat rat -- BB
  
   -- Arithmetic
-  | RatNeg   (RatExpr a)
-  | RatAbs   (RatExpr a)
+  | RatNeg   rat
+  | RatAbs   rat
  
-  | RatAdd   (RatExpr a) (RatExpr a)
-  | RatSub   (RatExpr a) (RatExpr a)
-  | RatMult  (RatExpr a) (RatExpr a)
-  | RatQuot  (RatExpr a) (RatExpr a)
-  | RatMin   (RatExpr a) (RatExpr a)
-  | RatMax   (RatExpr a) (RatExpr a)
+  | RatAdd   rat rat
+  | RatSub   rat rat
+  | RatMult  rat rat
+  | RatQuot  rat rat
+  | RatMin   rat rat
+  | RatMax   rat rat
 
-  | RatPow   (RatExpr a) a -- ZZ
+  | RatPow   rat a -- ZZ
 
   -- List
   | RatRand  a -- ListOf QQ
@@ -67,13 +56,11 @@ data RatExprLeaf a
   | RatMean    a -- ListOf XX
   | RatMeanDev a -- ListOf XX
   | RatStdDev  a a -- ListOf XX, ZZ
-  | RatZScore  (RatExpr a) a a -- ListOf XX, ZZ
+  | RatZScore  rat a a -- ListOf XX, ZZ
 
   -- Approximations
-  | RatSqrt  (RatExpr a) a -- ZZ
+  | RatSqrt  rat a -- ZZ
 
   -- Casting
   | RatCastStr a -- SS
   deriving (Eq, Show)
-
-instance Typed (RatExpr a)  where typeOf _ = QQ

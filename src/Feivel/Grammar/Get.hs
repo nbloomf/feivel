@@ -63,7 +63,7 @@ instance Get StrExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = SS, typeReceived = typeOf v }
 
-instance Get (RatExpr Expr) where
+instance Get RatExpr where
   get (RatE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = QQ, typeReceived = typeOf v }
@@ -132,7 +132,7 @@ instance Get Text where
 
 instance Get Rat where
   get expr = do
-    x <- get expr :: Either GetErr (RatExpr Expr)
+    x <- get expr :: Either GetErr RatExpr
     case x of
       RatExpr (RatConst r :@ _) -> return r
       v -> Left GetUnevaluatedExpression

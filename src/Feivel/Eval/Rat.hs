@@ -16,21 +16,19 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.Rat () where
 
 import Feivel.Eval.Util
 
 
-instance Glyph (RatExpr Expr) where
+instance Glyph RatExpr where
   toGlyph (RatExpr (RatConst x :@ _)) = return $ show x
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (RatExpr Expr) where
+instance (Eval Expr) => Eval RatExpr where
   eval (RatExpr (RatConst p :@ loc)) = return $ RatExpr $ RatConst p :@ loc
 
   {- :Common -}
@@ -40,7 +38,7 @@ instance (Eval Expr) => Eval (RatExpr Expr) where
   eval (RatExpr (RatMacro vals mac :@ loc)) = eMacro vals mac loc
 
   eval (RatExpr (RatAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [RatExpr Expr] -> Integer -> Either ListErr (RatExpr Expr)
+    where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
 
   eval (RatExpr (RatCast expr :@ loc)) = do
     n <- eval expr >>= getVal :: EvalM Integer

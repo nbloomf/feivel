@@ -89,12 +89,24 @@ instance HasLocus BoolExpr where
 instance Typed BoolExpr where typeOf _ = BB
 
 
+{- :RatExpr -}
+
+newtype RatExpr = RatExpr
+  { unRatExpr :: AtLocus (RatExprLeaf Expr RatExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus RatExpr where
+  locusOf = locusOf . unRatExpr
+
+instance Typed RatExpr where typeOf _ = QQ
+
+
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  BoolExpr
   | StrE   StrExpr
   | IntE   IntExpr
-  | RatE   (RatExpr   Expr)
+  | RatE   RatExpr
   | ZZModE (ZZModExpr Expr)
   | ListE  (ListExpr  Expr)
   | MatE   (MatExpr   Expr)
@@ -126,7 +138,7 @@ instance ToExpr (Doc       Expr) where toExpr = DocE
 instance ToExpr BoolExpr         where toExpr = BoolE
 instance ToExpr StrExpr          where toExpr = StrE
 instance ToExpr IntExpr          where toExpr = IntE
-instance ToExpr (RatExpr   Expr) where toExpr = RatE
+instance ToExpr RatExpr          where toExpr = RatE
 instance ToExpr (ZZModExpr Expr) where toExpr = ZZModE
 instance ToExpr (ListExpr  Expr) where toExpr = ListE
 instance ToExpr (MatExpr   Expr) where toExpr = MatE
