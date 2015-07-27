@@ -16,23 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Mac where
 
 import Feivel.Grammar.Util
 
 
-newtype MacExpr a = MacExpr
-  { unMacExpr :: AtLocus (MacExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (MacExpr a) where
-  locusOf = locusOf . unMacExpr
-
-
-data MacExprLeaf a
+data MacExprLeaf a mac
   = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
   | MacVar   Type Key
 
@@ -42,13 +31,12 @@ data MacExprLeaf a
 
   | MacRand Type a -- ListOf (MacTo typ)
 
-  | MacIfThenElse Type a (MacExpr a) (MacExpr a) -- BB
+  | MacIfThenElse Type a mac mac -- BB
   deriving (Eq, Show)
 
 
-
-instance Typed (MacExpr a) where
-  typeOf (MacExpr (x :@ _)) = case x of
+instance Typed (MacExprLeaf a mac) where
+  typeOf x = case x of
     MacConst      typ _ _ _ -> MacTo typ
     MacVar        typ _     -> MacTo typ
     MacMacro      typ _ _   -> MacTo typ
@@ -56,4 +44,3 @@ instance Typed (MacExpr a) where
     MacAtIdx      typ _ _ _ -> MacTo typ
     MacRand       typ _     -> MacTo typ
     MacIfThenElse typ _ _ _ -> MacTo typ
-

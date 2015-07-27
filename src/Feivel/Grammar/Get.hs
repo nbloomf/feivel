@@ -92,7 +92,7 @@ instance Get PermExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = PermOf XX, typeReceived = typeOf v }
 
-instance Get (MacExpr Expr) where
+instance Get MacExpr where
   get (MacE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = MacTo XX, typeReceived = typeOf v }

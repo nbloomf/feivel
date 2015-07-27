@@ -35,12 +35,12 @@ import Text.Parsec.Prim (try)
 
 pMacConst
   :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
-      -> ParseM (MacExpr Expr)
+      -> ParseM MacExpr
 pMacConst typ pE pBD = fmap MacExpr $ pAtLocus $ pMacConst' typ pE pBD
 
 pMacConst'
   :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
-     -> ParseM (MacExprLeaf Expr)
+     -> ParseM (MacExprLeaf Expr MacExpr)
 pMacConst' typ pE pBD = do
   try $ keyword "Macro"
   keyword "("
@@ -54,14 +54,14 @@ pMacConst' typ pE pBD = do
     else return (MacConst t vals body (emptyStore, False))
 
 
-pMacExpr :: (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> ParseM (MacExpr Expr)
-pMacExpr pE pBD = pTypedMacExpr XX pE pBD
+pMacExpr :: (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> (Type -> ParseM MacExpr) -> ParseM MacExpr
+pMacExpr pE pBD pMAC = pTypedMacExpr XX pE pBD pMAC
 
 
-pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> ParseM (MacExpr Expr)
-pTypedMacExpr typ pE pBD = spaced $ buildExpressionParser macOpTable pMacTerm
+pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> (Type -> ParseM MacExpr) -> ParseM MacExpr
+pTypedMacExpr typ pE pBD pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
   where
-    pMacTerm = pTerm' (pMacConst' typ pE pBD) MacExpr (pMacExpr pE pBD) "macro expression"
+    pMacTerm = pTerm' (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
       [ pVarExpr (MacVar typ) (MacTo typ)
 
       , pFun2 "AtPos" (pE $ ListOf (MacTo typ)) (pE ZZ) (MacAtPos typ)
@@ -71,7 +71,7 @@ pTypedMacExpr typ pE pBD = spaced $ buildExpressionParser macOpTable pMacTerm
 
       , pFun1 "Rand" (pE $ ListOf (MacTo typ)) (MacRand typ)
 
-      , pIfThenElseExprT pE (pTypedMacExpr typ pE pBD) (MacIfThenElse typ) (MacTo typ)
+      , pIfThenElseExprT pE (pMAC typ) (MacIfThenElse typ) (MacTo typ)
       ]
 
     macOpTable = []

@@ -82,6 +82,9 @@ pPOLY typ = pTypedPolyExpr typ pTypedExpr pPOLY
 pPERM :: Type -> ParseM PermExpr
 pPERM typ = pTypedPermExpr typ pTypedExpr pPERM
 
+pMAC :: Type -> ParseM MacExpr
+pMAC typ = pTypedMacExpr typ pTypedExpr pBrackDocE pMAC
+
 {---------}
 {- :Expr -}
 {---------}
@@ -96,7 +99,7 @@ pTypedExpr QQ = fmap RatE  pRAT
 pTypedExpr (ZZMod    n) = fmap ZZModE (pMOD  n)
 pTypedExpr (ListOf   t) = fmap ListE  (pLIST t)
 pTypedExpr (MatOf    t) = fmap MatE   (pMAT  t)
-pTypedExpr (MacTo    t) = fmap MacE   (pTypedMacExpr  t pTypedExpr pBrackDocE)
+pTypedExpr (MacTo    t) = fmap MacE   (pMAC  t)
 pTypedExpr (PermOf   t) = fmap PermE  (pPERM t)
 pTypedExpr (PolyOver t) = fmap PolyE  (pPOLY t)
 

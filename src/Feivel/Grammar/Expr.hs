@@ -166,6 +166,20 @@ instance Typed PermExpr where
   typeOf (PermExpr (x :@ _)) = typeOf x
 
 
+{- :MacExpr -}
+
+newtype MacExpr = MacExpr
+  { unMacExpr :: AtLocus (MacExprLeaf Expr MacExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus MacExpr where
+  locusOf = locusOf . unMacExpr
+
+instance Typed MacExpr where
+  typeOf (MacExpr (x :@ _)) = typeOf x
+
+
+
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  BoolExpr
@@ -177,7 +191,7 @@ data Expr
   | MatE   MatExpr
   | PolyE  PolyExpr
   | PermE  PermExpr
-  | MacE   (MacExpr   Expr)
+  | MacE   MacExpr
   deriving (Eq, Show)
 
 instance HasLocus Expr where
@@ -200,16 +214,16 @@ class ToExpr t where
 
 instance ToExpr Expr where toExpr = id
 instance ToExpr (Doc       Expr) where toExpr = DocE
-instance ToExpr BoolExpr         where toExpr = BoolE
-instance ToExpr StrExpr          where toExpr = StrE
-instance ToExpr IntExpr          where toExpr = IntE
-instance ToExpr RatExpr          where toExpr = RatE
-instance ToExpr ZZModExpr        where toExpr = ZZModE
-instance ToExpr ListExpr         where toExpr = ListE
-instance ToExpr MatExpr          where toExpr = MatE
-instance ToExpr PolyExpr         where toExpr = PolyE
-instance ToExpr PermExpr         where toExpr = PermE
-instance ToExpr (MacExpr   Expr) where toExpr = MacE
+instance ToExpr BoolExpr  where toExpr = BoolE
+instance ToExpr StrExpr   where toExpr = StrE
+instance ToExpr IntExpr   where toExpr = IntE
+instance ToExpr RatExpr   where toExpr = RatE
+instance ToExpr ZZModExpr where toExpr = ZZModE
+instance ToExpr ListExpr  where toExpr = ListE
+instance ToExpr MatExpr   where toExpr = MatE
+instance ToExpr PolyExpr  where toExpr = PolyE
+instance ToExpr PermExpr  where toExpr = PermE
+instance ToExpr MacExpr   where toExpr = MacE
 
 -- NB: Not a fan of "no locus" here
 -- NB: Is this even needed? Can we use put instead?

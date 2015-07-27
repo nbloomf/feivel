@@ -16,16 +16,14 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.Mac () where
 
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
+instance (Glyph Expr, Eval Expr) => Glyph MacExpr where
   toGlyph (MacExpr (MacConst _ st ex (amb,_) :@ loc)) = do
     old <- getState
     ctx <- tryEvalM loc $ toStateT st
@@ -34,7 +32,7 @@ instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
   toGlyph _ = error "toGlyph: MacExpr"
 
 
-instance (Eval Expr) => Eval (MacExpr Expr) where
+instance (Eval Expr) => Eval MacExpr where
   eval (MacExpr (MacConst typ vals expr (amb,p) :@ loc)) = do
     if p == True
       then return $ MacExpr $ MacConst typ vals expr (amb,True) :@ loc
@@ -49,7 +47,7 @@ instance (Eval Expr) => Eval (MacExpr Expr) where
   eval (MacExpr (MacMacro _ vals mac :@ loc)) = eMacro vals mac loc
 
   eval (MacExpr (MacAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [MacExpr Expr] -> Integer -> Either ListErr (MacExpr Expr)
+    where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
 
   eval (MacExpr (MacRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal
