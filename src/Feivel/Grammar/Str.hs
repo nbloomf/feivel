@@ -41,12 +41,12 @@ data StrExprLeaf a int str
   | Rot13       str
 
   -- Integer
-  | StrHex      int -- ZZ
-  | StrRoman    int -- ZZ
-  | StrBase36   int -- ZZ
+  | StrHex      int
+  | StrRoman    int
+  | StrBase36   int
 
   -- Rational
-  | StrDecimal a int -- QQ, ZZ
+  | StrDecimal a int -- QQ
 
   -- List
   | StrRand a -- ListOf SS

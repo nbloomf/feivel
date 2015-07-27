@@ -28,7 +28,7 @@ instance (Glyph Expr) => Glyph ZZModExpr where
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval ZZModExpr where
+instance (Eval Expr, Eval IntExpr) => Eval ZZModExpr where
   eval (ZZModExpr (ZZModConst n a :@ loc)) = return $ ZZModExpr $ ZZModConst n a :@ loc
 
   {- :Common -}

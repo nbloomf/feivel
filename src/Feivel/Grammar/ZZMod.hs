@@ -21,14 +21,14 @@ module Feivel.Grammar.ZZMod where
 import Feivel.Grammar.Util
 
 
-data ZZModExprLeaf a zzmod
+data ZZModExprLeaf a int zzmod
   = ZZModConst Type ZZModulo
   | ZZModVar   Type Key
   | ZZModCast  Type a
 
   | ZZModMacro Type [(Type, Key, a)] a -- Expr, MacTo ZZModulo
-  | ZZModAtPos Type a a   -- ListOf ZZModulo, ZZ
-  | ZZModAtIdx Type a a a -- MatOf ZZModulo, ZZ, ZZ
+  | ZZModAtPos Type a int   -- ListOf ZZModulo, ZZ
+  | ZZModAtIdx Type a int int -- MatOf ZZModulo, ZZ, ZZ
 
   | ZZModIfThenElse Type a zzmod zzmod -- BB
  
@@ -39,7 +39,7 @@ data ZZModExprLeaf a zzmod
   | ZZModAdd   Type zzmod zzmod
   | ZZModSub   Type zzmod zzmod
   | ZZModMult  Type zzmod zzmod
-  | ZZModPow   Type zzmod a -- ZZ
+  | ZZModPow   Type zzmod int -- ZZ
 
   | ZZModSum   Type a -- ListOf ZZModulo
   | ZZModProd  Type a -- ListOf ZZModulo
@@ -47,7 +47,7 @@ data ZZModExprLeaf a zzmod
 
 
 
-instance Typed (ZZModExprLeaf a mod) where
+instance Typed (ZZModExprLeaf a int mod) where
   typeOf x = case x of
     ZZModConst      typ _     -> typ
     ZZModVar        typ _     -> typ
