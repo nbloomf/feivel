@@ -61,7 +61,7 @@ pINT :: ParseM IntExpr
 pINT = pIntExpr pTypedExpr pINT
 
 pSTR :: ParseM StrExpr
-pSTR = pStrExpr pTypedExpr pSTR
+pSTR = pStrExpr pTypedExpr pINT pSTR
 
 pBOOL :: ParseM BoolExpr
 pBOOL = pBoolExpr pTypedExpr pBOOL

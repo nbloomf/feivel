@@ -30,11 +30,11 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pStrConst :: ParseM StrExpr
 pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 
-pStrConst' :: ParseM (StrExprLeaf Expr StrExpr)
+pStrConst' :: ParseM (StrExprLeaf Expr IntExpr StrExpr)
 pStrConst' = pConst pText StrConst
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM StrExpr -> ParseM StrExpr
-pStrExpr pE pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
+pStrExpr pE pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm' pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
@@ -42,8 +42,8 @@ pStrExpr pE pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
 
       , pIfThenElseExprT pE pSTR StrIfThenElse SS
 
-      , pFun2 "AtPos" (pE $ ListOf SS) (pE ZZ) StrAtPos
-      , pFun3 "AtIdx" (pE $ MatOf SS) (pE ZZ) (pE ZZ) StrAtIdx
+      , pFun2 "AtPos" (pE $ ListOf SS) pINT StrAtPos
+      , pFun3 "AtIdx" (pE $ MatOf SS) pINT pINT StrAtIdx
     
       , pFun2 "Strip"   pSTR pSTR StrStrip
       , pFun1 "Reverse" pSTR Reverse
@@ -55,13 +55,13 @@ pStrExpr pE pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
 
       , pFun1 "int" (pE ZZ) StrIntCast
     
-      , pFun1 "Hex"    (pE ZZ) StrHex
-      , pFun1 "Roman"  (pE ZZ) StrRoman
-      , pFun1 "Base36" (pE ZZ) StrBase36
+      , pFun1 "Hex"    pINT StrHex
+      , pFun1 "Roman"  pINT StrRoman
+      , pFun1 "Base36" pINT StrBase36
     
       , pFun1T "Tab" (pE . MatOf) StrTab
 
-      , pFun2  "Decimal" (pE QQ) (pE ZZ) StrDecimal
+      , pFun2  "Decimal" (pE QQ) pINT StrDecimal
       , pFun2T "Format"  (const pFormat) pE      StrFormat
       ]
 

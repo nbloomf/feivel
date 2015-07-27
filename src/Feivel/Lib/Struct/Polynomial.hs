@@ -235,7 +235,7 @@ leadingTermByP ord = (maximumBy foo) . toListP
   where foo (_,m1) (_,m2) = ord m1 m2
 
 leadingCoefByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> a
-leadingCoefByP = fst . leadingTermByP
+leadingCoefByP ord = fst . leadingTermByP ord
 
 degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Integer
 degreeByP ord = multidegM . snd . leadingTermByP ord

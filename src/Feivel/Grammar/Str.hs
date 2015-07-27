@@ -21,13 +21,13 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a str
+data StrExprLeaf a int str
   = StrConst Text
   | StrVar   Key
 
   | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
-  | StrAtPos a a -- ListOf SS, ZZ
-  | StrAtIdx a a a -- MatOf SS, ZZ, ZZ
+  | StrAtPos a int -- ListOf SS
+  | StrAtIdx a int int -- MatOf SS
  
   | StrIfThenElse a str str -- BB
 
@@ -41,12 +41,12 @@ data StrExprLeaf a str
   | Rot13       str
 
   -- Integer
-  | StrHex      a -- ZZ
-  | StrRoman    a -- ZZ
-  | StrBase36   a -- ZZ
+  | StrHex      int -- ZZ
+  | StrRoman    int -- ZZ
+  | StrBase36   int -- ZZ
 
   -- Rational
-  | StrDecimal a a -- QQ, ZZ
+  | StrDecimal a int -- QQ, ZZ
 
   -- List
   | StrRand a -- ListOf SS
