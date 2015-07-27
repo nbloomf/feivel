@@ -67,6 +67,9 @@ pBOOL = pBoolExpr pTypedExpr pBOOL
 pRAT :: ParseM RatExpr
 pRAT = pRatExpr pTypedExpr pRAT
 
+pMOD :: Integer -> ParseM ZZModExpr
+pMOD n = pZZModExpr pTypedExpr n pMOD
+
 {---------}
 {- :Expr -}
 {---------}
@@ -78,7 +81,7 @@ pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE pBOOL
 pTypedExpr QQ = fmap RatE  pRAT
 
-pTypedExpr (ZZMod    n) = fmap ZZModE (pZZModExpr     pTypedExpr n)
+pTypedExpr (ZZMod    n) = fmap ZZModE (pMOD n)
 pTypedExpr (ListOf   t) = fmap ListE  (pTypedListExpr t pTypedExpr)
 pTypedExpr (MatOf    t) = fmap MatE   (pTypedMatExpr  t pTypedExpr)
 pTypedExpr (MacTo    t) = fmap MacE   (pTypedMacExpr  t pTypedExpr pBrackDocE)

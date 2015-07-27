@@ -16,21 +16,19 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.ZZMod () where
 
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr) => Glyph (ZZModExpr Expr) where
+instance (Glyph Expr) => Glyph ZZModExpr where
   toGlyph (ZZModExpr (ZZModConst _ a :@ _)) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (ZZModExpr Expr) where
+instance (Eval Expr) => Eval ZZModExpr where
   eval (ZZModExpr (ZZModConst n a :@ loc)) = return $ ZZModExpr $ ZZModConst n a :@ loc
 
   {- :Common -}
@@ -40,7 +38,7 @@ instance (Eval Expr) => Eval (ZZModExpr Expr) where
   eval (ZZModExpr (ZZModIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
   eval (ZZModExpr (ZZModAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [ZZModExpr Expr] -> Integer -> Either ListErr (ZZModExpr Expr)
+    where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
 
   eval (ZZModExpr (ZZModCast (ZZMod n) a :@ loc)) = do
     res <- eval a >>= getVal :: EvalM Integer

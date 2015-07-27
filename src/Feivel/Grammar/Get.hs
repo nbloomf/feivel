@@ -68,7 +68,7 @@ instance Get RatExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = QQ, typeReceived = typeOf v }
 
-instance Get (ZZModExpr Expr) where
+instance Get ZZModExpr where
   get (ZZModE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = ZZMod 0, typeReceived = typeOf v }
@@ -139,7 +139,7 @@ instance Get Rat where
 
 instance Get ZZModulo where
   get expr = do
-    x <- get expr :: Either GetErr (ZZModExpr Expr)
+    x <- get expr :: Either GetErr ZZModExpr
     case x of
       ZZModExpr (ZZModConst _ k :@ _) -> return k
       _ -> Left GetUnevaluatedExpression

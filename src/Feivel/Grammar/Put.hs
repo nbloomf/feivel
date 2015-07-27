@@ -27,8 +27,6 @@ import Feivel.Grammar.Expr
 import Feivel.Grammar.Util
 import Feivel.Lib
 
-
-
 {-----------}
 {- :Inject -}
 {-----------}
@@ -48,7 +46,7 @@ instance Put Expr where
 instance Put IntExpr where
   put loc (IntExpr (x :@ _)) = IntE $ IntExpr (x :@ loc)
 
-instance Put (ZZModExpr Expr) where
+instance Put ZZModExpr where
   put loc (ZZModExpr (x :@ _)) = ZZModE $ ZZModExpr (x :@ loc)
 
 instance Put (PermExpr Expr) where
