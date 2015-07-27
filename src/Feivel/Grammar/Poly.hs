@@ -21,13 +21,13 @@ module Feivel.Grammar.Poly where
 import Feivel.Grammar.Util
 
 
-data PolyExprLeaf a poly
+data PolyExprLeaf a int poly
   = PolyConst Type (Poly a)
   | PolyVar   Type Key
 
   | PolyMacro Type [(Type, Key, a)] a -- MacTo (PolyOver typ)
-  | PolyAtPos Type a a -- ListOf (PolyOver typ), ZZ
-  | PolyAtIdx Type a a a -- MatOf (PolyOver typ), ZZ, ZZ
+  | PolyAtPos Type a int -- ListOf (PolyOver typ)
+  | PolyAtIdx Type a int int -- MatOf (PolyOver typ)
 
   | PolyRand Type a -- ListOf (PolyOf typ)
 
@@ -36,7 +36,7 @@ data PolyExprLeaf a poly
   | PolyAdd Type poly poly
   | PolySub Type poly poly
   | PolyMul Type poly poly
-  | PolyPow Type poly a -- ZZ
+  | PolyPow Type poly int
   | PolyNeg Type poly
 
   | PolyFromRoots Type Variable a -- ListOf typ
@@ -44,7 +44,7 @@ data PolyExprLeaf a poly
   deriving (Eq, Show)
 
 
-instance Typed (PolyExprLeaf a poly) where
+instance Typed (PolyExprLeaf a int poly) where
   typeOf x = case x of
     PolyVar        typ _     -> PolyOver typ
     PolyMacro      typ _ _   -> PolyOver typ

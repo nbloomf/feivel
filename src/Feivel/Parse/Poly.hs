@@ -36,7 +36,7 @@ pPolyLiteral typ pE = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pE
 pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM PolyExpr
 pPolyConst typ pC = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pC
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr PolyExpr)
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr IntExpr PolyExpr)
 pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("
@@ -64,17 +64,17 @@ pPolyLiteralOf typ p = do
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pPolyExpr pE pPOLY = pTypedPolyExpr XX pE pPOLY
+pPolyExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pPolyExpr pE pINT pPOLY = pTypedPolyExpr XX pE pINT pPOLY
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pTypedPolyExpr typ pE pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pE pINT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm' (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) (pE ZZ) (PolyAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) (pE ZZ) (pE ZZ) (PolyAtIdx typ)
+      , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) pINT (PolyAtPos typ)
+      , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) pINT pINT (PolyAtIdx typ)
 
       , pMacroExprT pE (PolyMacro typ)
 
@@ -82,7 +82,7 @@ pTypedPolyExpr typ pE pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTe
 
       , pFun1 "Rand" (pE $ ListOf (PolyOver typ)) (PolyRand typ)
 
-      , pFun2 "Pow" (pPOLY typ) (pE ZZ) (PolyPow typ)
+      , pFun2 "Pow" (pPOLY typ) pINT (PolyPow typ)
 
       , pPolyNull
 

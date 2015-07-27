@@ -30,7 +30,7 @@ instance (Glyph Expr) => Glyph PolyExpr where
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval PolyExpr where
+instance (Eval Expr, Eval IntExpr) => Eval PolyExpr where
   eval (PolyExpr (PolyConst t p :@ loc)) = do
     q <- polySeq $ fmap eval p
     return $ PolyExpr $ PolyConst t q :@ loc
