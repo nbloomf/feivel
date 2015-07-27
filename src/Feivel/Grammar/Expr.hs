@@ -179,9 +179,21 @@ instance Typed MacExpr where
   typeOf (MacExpr (x :@ _)) = typeOf x
 
 
+{- :Doc -}
+
+newtype Doc = Doc
+  { unDoc :: AtLocus (DocLeaf Expr Doc)
+  } deriving (Eq, Show)
+
+instance HasLocus Doc where
+  locusOf = locusOf . unDoc
+
+instance Typed Doc where typeOf _ = DD
+
+
 
 data Expr
-  = DocE   (Doc       Expr)
+  = DocE   Doc
   | BoolE  BoolExpr
   | StrE   StrExpr
   | IntE   IntExpr
@@ -213,7 +225,7 @@ class ToExpr t where
   toExpr :: t -> Expr
 
 instance ToExpr Expr where toExpr = id
-instance ToExpr (Doc       Expr) where toExpr = DocE
+instance ToExpr Doc       where toExpr = DocE
 instance ToExpr BoolExpr  where toExpr = BoolE
 instance ToExpr StrExpr   where toExpr = StrE
 instance ToExpr IntExpr   where toExpr = IntE

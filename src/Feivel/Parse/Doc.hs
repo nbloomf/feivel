@@ -30,18 +30,18 @@ import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
 
-pBrackDoc :: (Type -> ParseM Expr) -> ParseM (Doc Expr)
-pBrackDoc pE = do
+pBrackDoc :: ParseM Doc -> ParseM Doc
+pBrackDoc pDOC = do
   _ <- try $ char '['
-  d <- pDoc pE
+  d <- pDOC
   _ <- char ']'
   whitespace
   return d
 
-pBrackDocE :: (Type -> ParseM Expr) -> ParseM Expr
-pBrackDocE pE = do
+pBrackDocE :: ParseM Doc -> ParseM Expr
+pBrackDocE pDOC = do
   _ <- try $ char '['
-  d <- pDoc pE
+  d <- pDOC
   _ <- char ']'
   whitespace
   return (DocE d)
@@ -52,8 +52,8 @@ pTypedNakedExpr pE = do
   keyword ":"
   pE t
 
-pDoc :: (Type -> ParseM Expr) -> ParseM (Doc Expr)
-pDoc pE = choice $ map (fmap Doc . pAtLocus)
+pDoc :: (Type -> ParseM Expr) -> ParseM Doc -> ParseM Doc
+pDoc pE pDOC = choice $ map (fmap Doc . pAtLocus)
   [ eof >> return Empty
   , lookAhead (char ']') >> return Empty
   , do
@@ -105,7 +105,7 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
       path <- pParens pPath
       qual <- option Nothing (try (keyword "as") >> pParens pToken >>= return . Just)
       _    <- option () (try (keyword "endimport")) >> char ']'
-      rest <- pDoc pE
+      rest <- pDOC
       return (Import path qual rest)
 
 
@@ -115,14 +115,14 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
       whitespace
       k <- pKey
       keyword ":="
-      v <- if t == DD then (pBrackDocE pE) else pE t
+      v <- if t == DD then (pBrackDocE pDOC) else pE t
       _ <- option () (try (keyword "enddefine")) >> char ']'
-      rest <- pDoc pE
+      rest <- pDOC
       return (Define t k v rest)
 
     pScope = do
       try (char '[' >> keyword "scope")
-      x <- pBrackDoc pE
+      x <- pBrackDoc pDOC
       option () (try (keyword "endscope"))
       _ <- whitespace >> char ']'
       return (Scope x)
@@ -135,7 +135,7 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
 
     pShuffle = do
       try (char '[' >> keyword "shuffle")
-      xs <- many (pBrackDoc pE)
+      xs <- many (pBrackDoc pDOC)
       option () (try $ keyword "endshuffle")
       _ <- whitespace >> char ']'
       return (Shuffle xs)
@@ -143,8 +143,8 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
     pIfThenElse = do
       try (char '[' >> keyword "if")
       test  <- pE BB
-      true  <- keyword "then" >> (pBrackDoc pE)
-      false <- keyword "else" >> (pBrackDoc pE)
+      true  <- keyword "then" >> (pBrackDoc pDOC)
+      false <- keyword "else" >> (pBrackDoc pDOC)
       option () (try (keyword "endif"))
       _ <- whitespace >> char ']'
       return (IfThenElse test true false)
@@ -152,14 +152,14 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
     pCond = do
       try (char '[' >> keyword "cond")
       cases <- many pCondCase
-      auto <- option (Doc (Empty :@ NullLocus)) (try (keyword "default") >> (pBrackDoc pE))
+      auto <- option (Doc (Empty :@ NullLocus)) (try (keyword "default") >> (pBrackDoc pDOC))
       option () (try (keyword "endcond"))
       _ <- whitespace >> char ']'
       return (Cond cases auto)
       where
         pCondCase = do
           s <- try (keyword "case") >> (pE BB)
-          t <- pBrackDoc pE
+          t <- pBrackDoc pDOC
           return (s,t)
 
     pFor = do
@@ -168,8 +168,8 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
       spaces
       k <- pKey
       r <- keyword "in"  >> (pE $ ListOf typ)
-      t <- keyword "say" >> (pBrackDoc pE)
-      b <- option Nothing $ (try (keyword "sepby")) >> (pBrackDoc pE) >>= (return . Just)
+      t <- keyword "say" >> (pBrackDoc pDOC)
+      b <- option Nothing $ (try (keyword "sepby")) >> (pBrackDoc pDOC) >>= (return . Just)
       option () (try (keyword "endfor"))
       _ <- whitespace >> char ']'
       return (ForSay k r t b)
@@ -181,7 +181,7 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
       _ <- whitespace >> char ']'
       return (Alt opts)
       where
-        pAltOpt = try (keyword "opt") >> (pBrackDoc pE)
+        pAltOpt = try (keyword "opt") >> (pBrackDoc pDOC)
 
     pBail = do
       try (char '[' >> keyword "bail")
@@ -193,7 +193,7 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
     pLetIn = do
       try (char '[' >> keyword "let")
       (_,k,e) <- (pTypeKeyExpr pE)
-      body <- keyword "in" >> (pBrackDoc pE)
+      body <- keyword "in" >> (pBrackDoc pDOC)
       option () (try (keyword "endlet"))
       _ <- whitespace >> char ']'
       return (LetIn k e body)
@@ -203,7 +203,7 @@ pDoc pE = choice $ map (fmap Doc . pAtLocus)
       ty <- pType
       k <- spaced pKey
       r <- keyword "from" >> (pE $ ListOf ty)
-      t <- keyword "in"   >> (pBrackDoc pE)
+      t <- keyword "in"   >> (pBrackDoc pDOC)
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t)

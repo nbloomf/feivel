@@ -45,7 +45,7 @@ Feature Ideas
 * Arch: Groupoid class
 * Arch: type synonyms
 * Refactor: Want to enforce grammar with type constraints
-  1: Make IntExpr et. al. newtypes (needed for recursive type def,
+  1: (started) Make IntExpr et. al. newtypes (needed for recursive type def,
      which is needed for class constraints on grammar)
   2: Split parameters on grammar types with class constraints,
      e.g. IntExprType t => blah (recover type safety with modularity)

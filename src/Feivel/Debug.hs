@@ -46,7 +46,7 @@ testM p str = testParseM p str >>= testEvalM
 -- Parse and evaluate a template
 testDoc :: String -> IO String
 testDoc str = do
-  x <- testParseM (pDoc pTypedExpr) str
+  x <- testParseM pDOC str
   (result, _) <- runEvalM emptyStore (evalToGlyph x)
   case result of
     Left err -> fail $ show err

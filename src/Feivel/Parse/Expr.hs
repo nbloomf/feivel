@@ -25,7 +25,9 @@ module Feivel.Parse.Expr (
 
   pTypedExpr,
     pIntExpr, pRatExpr, pStrExpr, pBoolExpr, pZZModExpr,
-    pTypedListExpr, pTypedMatExpr, pTypedPolyExpr, pTypedPermExpr
+    pTypedListExpr, pTypedMatExpr, pTypedPolyExpr, pTypedPermExpr,
+
+  pDOC
 ) where
 
 
@@ -83,14 +85,17 @@ pPERM :: Type -> ParseM PermExpr
 pPERM typ = pTypedPermExpr typ pTypedExpr pPERM
 
 pMAC :: Type -> ParseM MacExpr
-pMAC typ = pTypedMacExpr typ pTypedExpr pBrackDocE pMAC
+pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pMAC
+
+pDOC :: ParseM Doc
+pDOC = pDoc pTypedExpr pDOC
 
 {---------}
 {- :Expr -}
 {---------}
 
 pTypedExpr :: Type -> ParseM Expr
-pTypedExpr DD = fmap DocE  (pDoc      pTypedExpr)
+pTypedExpr DD = fmap DocE  pDOC
 pTypedExpr SS = fmap StrE  pSTR
 pTypedExpr ZZ = fmap IntE  pINT
 pTypedExpr BB = fmap BoolE pBOOL
@@ -124,7 +129,7 @@ pTypedConst (ListOf   t) = fmap ListE  (pListConst t pTypedConst)
 pTypedConst (MatOf    t) = fmap MatE   (pMatConst  t pTypedConst)
 pTypedConst (PolyOver t) = fmap PolyE  (pPolyConst t pTypedConst)
 pTypedConst (PermOf   t) = fmap PermE  (pPermConst t pTypedConst)
-pTypedConst (MacTo    t) = fmap MacE   (pMacConst  t pTypedConst pBrackDocE)
+pTypedConst (MacTo    t) = fmap MacE   (pMacConst  t pTypedConst (pBrackDocE pDOC))
 
 pTypedConst _ = error "pTypedConst"
 
@@ -134,7 +139,7 @@ pTypedConst _ = error "pTypedConst"
 {- :REPL -}
 {---------}
 
-pREPL :: ParseM (Doc Expr)
+pREPL :: ParseM Doc
 pREPL = do
   x <- choice $ map (fmap Doc . pAtLocus)
          [ pDefineREPL
@@ -151,7 +156,7 @@ pREPL = do
       whitespace
       k <- pKey
       keyword ":="
-      v <- if t == DD then (pBrackDocE pTypedExpr) else pTypedExpr t
+      v <- if t == DD then (pBrackDocE pDOC) else pTypedExpr t
       return (Define t k v (Doc (Empty :@ NullLocus)))
 
     pNakedExprREPL = do

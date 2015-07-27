@@ -162,16 +162,16 @@ parsePaths str = case runParseM pPaths "" str of
   Left goof -> throwError goof
   Right ps -> return ps
 
-readAndParseDoc :: FilePath -> EvalM (Doc Expr)
+readAndParseDoc :: FilePath -> EvalM Doc
 readAndParseDoc path = do
   file <- readPath path
-  parseWith (pDoc pTypedExpr) path file
+  parseWith pDOC path file
 
-readAndParseDocFromLib :: FilePath -> EvalM (Doc Expr)
+readAndParseDocFromLib :: FilePath -> EvalM Doc
 readAndParseDocFromLib file = do
   lib <- lookupLibPaths
   (str, path) <- findFileInPaths file lib
-  parseWith (pDoc pTypedExpr) path str
+  parseWith pDOC path str
 
 
 readAndParseStates :: FilePath -> DataFormat -> EvalM [Store Expr]

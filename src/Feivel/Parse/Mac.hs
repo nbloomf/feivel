@@ -34,19 +34,17 @@ import Text.Parsec.Prim (try)
 {------------}
 
 pMacConst
-  :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
-      -> ParseM MacExpr
+  :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM MacExpr
 pMacConst typ pE pBD = fmap MacExpr $ pAtLocus $ pMacConst' typ pE pBD
 
 pMacConst'
-  :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
-     -> ParseM (MacExprLeaf Expr MacExpr)
+  :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM (MacExprLeaf Expr MacExpr)
 pMacConst' typ pE pBD = do
   try $ keyword "Macro"
   keyword "("
   t <- pType
   keyword ";"
-  body <- if t == DD then (pBD pE) else pE t
+  body <- if t == DD then pBD else pE t
   vals <- option [] $ many (keyword ";" >> (pTypeKeyExpr pE))
   keyword ")"
   if typ /= t
@@ -54,11 +52,11 @@ pMacConst' typ pE pBD = do
     else return (MacConst t vals body (emptyStore, False))
 
 
-pMacExpr :: (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> (Type -> ParseM MacExpr) -> ParseM MacExpr
+pMacExpr :: (Type -> ParseM Expr) -> ParseM Expr -> (Type -> ParseM MacExpr) -> ParseM MacExpr
 pMacExpr pE pBD pMAC = pTypedMacExpr XX pE pBD pMAC
 
 
-pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> (Type -> ParseM MacExpr) -> ParseM MacExpr
+pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> (Type -> ParseM MacExpr) -> ParseM MacExpr
 pTypedMacExpr typ pE pBD pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm' (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"

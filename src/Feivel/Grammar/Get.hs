@@ -97,7 +97,7 @@ instance Get MacExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = MacTo XX, typeReceived = typeOf v }
 
-instance Get (Doc Expr) where
+instance Get Doc where
   get (DocE y) = return y
   get v = Left $ GetTypeMismatch
     { typeExpected = DD, typeReceived = typeOf v }

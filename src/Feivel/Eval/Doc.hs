@@ -16,9 +16,8 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts     #-}
 
 module Feivel.Eval.Doc (evalToGlyph) where
 
@@ -31,13 +30,13 @@ evalToGlyph :: (Eval Expr, Glyph Expr, ToExpr a) => a -> EvalM String
 evalToGlyph x = eval (toExpr x) >>= toGlyph
 
 
-instance Glyph (Doc Expr) where
+instance Glyph Doc where
   toGlyph (Doc (Empty            :@ _)) = return ""
   toGlyph (Doc (DocText (Text s) :@ _)) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
 
 
-instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
+instance (Eval Expr, Glyph Expr) => Eval Doc where
   eval (Doc (Empty :@ loc))     = return (Doc $ Empty :@ loc)
   eval (Doc (DocText s :@ loc)) = return (Doc $ DocText s :@ loc)
   eval (Doc (Escaped c :@ loc)) = return (Doc $ DocText (Text [c]) :@ loc)

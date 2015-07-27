@@ -16,56 +16,43 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Doc where
 
 import Feivel.Grammar.Util
 
 
-newtype Doc a = Doc
-  { unDoc :: AtLocus (DocLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (Doc a) where
-  locusOf = locusOf . unDoc
-
-
-data DocLeaf a
+data DocLeaf a doc
  -- Primitives
  = Empty
  | DocText   Text
  | Escaped   Char
- | Scope     (Doc a)
+ | Scope     doc
  | NakedKey  Key
  | NakedExpr a -- XX
 
- | Import    String (Maybe String) (Doc a)
+ | Import    String (Maybe String) doc
 
  | DocMacro [(Type, Key, a)] a -- XX, MacTo DD
 
  -- Combination
- | Cat     [Doc a]
- | CatPar  [Doc a]
- | Alt     [Doc a]
- | Shuffle [Doc a]
+ | Cat     [doc]
+ | CatPar  [doc]
+ | Alt     [doc]
+ | Shuffle [doc]
 
  -- Flow Control
- | IfThenElse a (Doc a) (Doc a) -- BB
- | Cond       [(a, Doc a)] (Doc a) -- BB
+ | IfThenElse a doc doc -- BB
+ | Cond       [(a, doc)] doc -- BB
 
  -- Binding
- | LetIn  Key a (Doc a) -- XX
- | Define Type Key a (Doc a) -- XX
+ | LetIn  Key a doc -- XX
+ | Define Type Key a doc -- XX
 
  -- Selection and Repetition
- | ForSay Key a (Doc a) (Maybe (Doc a)) -- ListOf XX
- | Select Key a (Doc a)             -- ListOf XX
+ | ForSay Key a doc (Maybe doc) -- ListOf XX
+ | Select Key a doc             -- ListOf XX
 
  -- Debugging
  | Bail      a -- SS
  | ShowState
  deriving (Eq, Show)
-
-instance Typed (Doc a) where typeOf _ = DD
