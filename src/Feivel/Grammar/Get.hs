@@ -77,7 +77,7 @@ instance Get ListExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = ListOf XX, typeReceived = typeOf v }
 
-instance Get (MatExpr Expr) where
+instance Get MatExpr where
   get (MatE m) = return m
   get v = Left $ GetTypeMismatch
     { typeExpected = MatOf XX, typeReceived = typeOf v }

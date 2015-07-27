@@ -16,16 +16,14 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances  #-}
-{-# LANGUAGE FlexibleInstances     #-}
-{-# LANGUAGE FlexibleContexts      #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.Mat () where
 
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr) => Glyph (MatExpr Expr) where
+instance (Glyph Expr) => Glyph MatExpr where
   toGlyph (MatExpr (MatConst _ m :@ _)) = do
     n <- mSeq $ fmap toGlyph m
     case mShowStr n of
@@ -34,7 +32,7 @@ instance (Glyph Expr) => Glyph (MatExpr Expr) where
   toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (MatExpr Expr) where
+instance (Eval Expr) => Eval MatExpr where
   eval (MatExpr (MatConst t m :@ loc)) = do
     n <- mSeq $ fmap eval m
     return $ MatExpr $ MatConst t n :@ loc
@@ -46,7 +44,7 @@ instance (Eval Expr) => Eval (MatExpr Expr) where
   eval (MatExpr (MatIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
   eval (MatExpr (MatAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [MatExpr Expr] -> Integer -> Either ListErr (MatExpr Expr)
+    where foo = listAtPos :: [MatExpr] -> Integer -> Either ListErr MatExpr
 
   eval (MatExpr (MatRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]

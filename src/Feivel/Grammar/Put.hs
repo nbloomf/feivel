@@ -58,7 +58,7 @@ instance Put ListExpr where
 instance Put (PolyExpr Expr) where
   put loc (PolyExpr (x :@ _)) = PolyE $ PolyExpr (x :@ loc)
 
-instance Put (MatExpr Expr) where
+instance Put MatExpr where
   put loc (MatExpr (x :@ _)) = MatE $ MatExpr (x :@ loc)
 
 instance Put (MacExpr Expr) where

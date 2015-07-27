@@ -16,23 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Mat where
 
 import Feivel.Grammar.Util
 
 
-newtype MatExpr a = MatExpr
-  { unMatExpr :: AtLocus (MatExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (MatExpr a) where
-  locusOf = locusOf . unMatExpr
-
-
-data MatExprLeaf a
+data MatExprLeaf a mat
   = MatConst Type (Matrix a)
   | MatVar   Type Key
 
@@ -40,7 +29,7 @@ data MatExprLeaf a
   | MatAtPos Type a a -- ListOf (MatOf typ), ZZ
   | MatAtIdx Type a a a -- MatOf (MatOf typ), ZZ, ZZ
 
-  | MatIfThenElse Type a (MatExpr a) (MatExpr a) -- BB
+  | MatIfThenElse Type a mat mat -- BB
 
   | MatBuilder Type a Key a Key a -- typ, ListOf XX, ListOf XX
 
@@ -54,42 +43,42 @@ data MatExprLeaf a
   | MatAddE   Type a a a a -- ZZ, ZZ, ZZ, typ
 
   -- Arithmetic
-  | MatHCat  Type (MatExpr a) (MatExpr a)
-  | MatVCat  Type (MatExpr a) (MatExpr a)
-  | MatAdd   Type (MatExpr a) (MatExpr a)
-  | MatMul   Type (MatExpr a) (MatExpr a)
-  | MatPow   Type (MatExpr a) a -- ZZ
-  | MatNeg   Type (MatExpr a)
-  | MatTrans Type (MatExpr a)
+  | MatHCat  Type mat mat
+  | MatVCat  Type mat mat
+  | MatAdd   Type mat mat
+  | MatMul   Type mat mat
+  | MatPow   Type mat a -- ZZ
+  | MatNeg   Type mat
+  | MatTrans Type mat
 
   -- Mutation
-  | MatSwapRows Type (MatExpr a) a a -- ZZ, ZZ
-  | MatSwapCols Type (MatExpr a) a a -- ZZ, ZZ
-  | MatScaleRow Type (MatExpr a) a a -- typ, ZZ
-  | MatScaleCol Type (MatExpr a) a a -- typ, ZZ
-  | MatAddRow   Type (MatExpr a) a a a -- typ, ZZ, ZZ
-  | MatAddCol   Type (MatExpr a) a a a -- typ, ZZ, ZZ
-  | MatDelRow   Type (MatExpr a) a -- ZZ
-  | MatDelCol   Type (MatExpr a) a -- ZZ
+  | MatSwapRows Type mat a a -- ZZ, ZZ
+  | MatSwapCols Type mat a a -- ZZ, ZZ
+  | MatScaleRow Type mat a a -- typ, ZZ
+  | MatScaleCol Type mat a a -- typ, ZZ
+  | MatAddRow   Type mat a a a -- typ, ZZ, ZZ
+  | MatAddCol   Type mat a a a -- typ, ZZ, ZZ
+  | MatDelRow   Type mat a -- ZZ
+  | MatDelCol   Type mat a -- ZZ
 
-  | MatGetRow   Type a (MatExpr a) -- ZZ
-  | MatGetCol   Type a (MatExpr a) -- ZZ
+  | MatGetRow   Type a mat -- ZZ
+  | MatGetCol   Type a mat -- ZZ
 
   -- Randomness
-  | MatShuffleRows Type (MatExpr a)
-  | MatShuffleCols Type (MatExpr a)
+  | MatShuffleRows Type mat
+  | MatShuffleCols Type mat
 
   -- Factorizations
-  | MatGJForm   Type (MatExpr a) 
-  | MatGJFactor Type (MatExpr a)
+  | MatGJForm   Type mat 
+  | MatGJFactor Type mat
 
   | MatRand Type a -- ListOf (MatOf typ)
   deriving (Eq, Show)
 
 
 
-instance Typed (MatExpr a) where
-  typeOf (MatExpr (x :@ _)) = case x of
+instance Typed (MatExprLeaf a mat) where
+  typeOf x = case x of
     MatVar         typ _         -> MatOf typ
     MatMacro       typ _ _       -> MatOf typ
     MatAtPos       typ _ _       -> MatOf typ
