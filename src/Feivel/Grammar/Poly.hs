@@ -16,23 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Poly where
 
 import Feivel.Grammar.Util
 
 
-newtype PolyExpr a = PolyExpr
-  { unPolyExpr :: AtLocus (PolyExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (PolyExpr a) where
-  locusOf = locusOf . unPolyExpr
-
-
-data PolyExprLeaf a
+data PolyExprLeaf a poly
   = PolyConst Type (Poly a)
   | PolyVar   Type Key
 
@@ -42,21 +31,21 @@ data PolyExprLeaf a
 
   | PolyRand Type a -- ListOf (PolyOf typ)
 
-  | PolyIfThenElse Type a (PolyExpr a) (PolyExpr a) -- BB
+  | PolyIfThenElse Type a poly poly -- BB
 
-  | PolyAdd Type (PolyExpr a) (PolyExpr a)
-  | PolySub Type (PolyExpr a) (PolyExpr a)
-  | PolyMul Type (PolyExpr a) (PolyExpr a)
-  | PolyPow Type (PolyExpr a) a -- ZZ
-  | PolyNeg Type (PolyExpr a)
+  | PolyAdd Type poly poly
+  | PolySub Type poly poly
+  | PolyMul Type poly poly
+  | PolyPow Type poly a -- ZZ
+  | PolyNeg Type poly
 
   | PolyFromRoots Type Variable a -- ListOf typ
-  | PolyEvalPoly  Type (PolyExpr a) [(Variable, PolyExpr a)]
+  | PolyEvalPoly  Type poly [(Variable, poly)]
   deriving (Eq, Show)
 
 
-instance Typed (PolyExpr a) where
-  typeOf (PolyExpr (x :@ _)) = case x of
+instance Typed (PolyExprLeaf a poly) where
+  typeOf x = case x of
     PolyVar        typ _     -> PolyOver typ
     PolyMacro      typ _ _   -> PolyOver typ
     PolyConst      typ _     -> PolyOver typ

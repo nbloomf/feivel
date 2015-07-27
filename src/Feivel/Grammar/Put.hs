@@ -55,7 +55,7 @@ instance Put (PermExpr Expr) where
 instance Put ListExpr where
   put loc (ListExpr (x :@ _)) = ListE $ ListExpr (x :@ loc)
 
-instance Put (PolyExpr Expr) where
+instance Put PolyExpr where
   put loc (PolyExpr (x :@ _)) = PolyE $ PolyExpr (x :@ loc)
 
 instance Put MatExpr where

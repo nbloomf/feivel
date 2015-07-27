@@ -82,7 +82,7 @@ instance Get MatExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = MatOf XX, typeReceived = typeOf v }
 
-instance Get (PolyExpr Expr) where
+instance Get PolyExpr where
   get (PolyE m) = return m
   get v = Left $ GetTypeMismatch
     { typeExpected = PolyOver XX, typeReceived = typeOf v }

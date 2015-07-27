@@ -76,6 +76,9 @@ pLIST typ = pTypedListExpr typ pTypedExpr pLIST
 pMAT :: Type -> ParseM MatExpr
 pMAT typ = pTypedMatExpr typ pTypedExpr pMAT
 
+pPOLY :: Type -> ParseM PolyExpr
+pPOLY typ = pTypedPolyExpr typ pTypedExpr pPOLY
+
 {---------}
 {- :Expr -}
 {---------}
@@ -92,7 +95,7 @@ pTypedExpr (ListOf   t) = fmap ListE  (pLIST t)
 pTypedExpr (MatOf    t) = fmap MatE   (pMAT  t)
 pTypedExpr (MacTo    t) = fmap MacE   (pTypedMacExpr  t pTypedExpr pBrackDocE)
 pTypedExpr (PermOf   t) = fmap PermE  (pTypedPermExpr t pTypedExpr)
-pTypedExpr (PolyOver t) = fmap PolyE  (pTypedPolyExpr t pTypedExpr)
+pTypedExpr (PolyOver t) = fmap PolyE  (pPOLY t)
 
 pTypedExpr XX = choice
   [ pTypedExpr ZZ
@@ -101,7 +104,7 @@ pTypedExpr XX = choice
   , pTypedExpr SS
   , fmap ListE (pListExpr pTypedExpr pLIST)
   , fmap MatE  (pMatExpr  pTypedExpr pMAT)
-  , fmap PolyE (pPolyExpr pTypedExpr)
+  , fmap PolyE (pPolyExpr pTypedExpr pPOLY)
   ]
 
 pTypedConst :: Type -> ParseM Expr

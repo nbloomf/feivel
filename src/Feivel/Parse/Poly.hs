@@ -30,13 +30,13 @@ import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
 
-pPolyLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
+pPolyLiteral :: Type -> (Type -> ParseM Expr) -> ParseM PolyExpr
 pPolyLiteral typ pE = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pE
 
-pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
+pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM PolyExpr
 pPolyConst typ pC = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pC
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr)
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr PolyExpr)
 pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("
@@ -64,13 +64,13 @@ pPolyLiteralOf typ p = do
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyExpr :: (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
-pPolyExpr pE = pTypedPolyExpr XX pE
+pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pPolyExpr pE pPOLY = pTypedPolyExpr XX pE pPOLY
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExpr Expr)
-pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pE pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
-    pPolyTerm = pTerm' (pPolyLiteralOf typ pE) PolyExpr (pTypedPolyExpr typ pE) "polynomial expression"
+    pPolyTerm = pTerm' (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) (pE ZZ) (PolyAtPos typ)
@@ -78,11 +78,11 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
 
       , pMacroExprT pE (PolyMacro typ)
 
-      , pIfThenElseExprT pE (pTypedPolyExpr typ pE) (PolyIfThenElse typ) (PolyOver typ)
+      , pIfThenElseExprT pE (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
 
       , pFun1 "Rand" (pE $ ListOf (PolyOver typ)) (PolyRand typ)
 
-      , pFun2 "Pow" (pTypedPolyExpr typ pE) (pE ZZ) (PolyPow typ)
+      , pFun2 "Pow" (pPOLY typ) (pE ZZ) (PolyPow typ)
 
       , pPolyNull
 
@@ -94,7 +94,7 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
         pPolyEvalPoly = do
           try $ keyword "EvalPoly"
           keyword "("
-          p <- pTypedPolyExpr typ pE
+          p <- pPOLY typ
           keyword ";"
           xs <- sepBy1 pSubs (keyword ";")
           keyword ")"
@@ -103,7 +103,7 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
               pSubs = do
                 x <- try $ pVar
                 keyword "<-"
-                q <- pTypedPolyExpr typ pE
+                q <- pPOLY typ
                 return (x,q)
 
         pPolyNull = do
@@ -119,4 +119,3 @@ pTypedPolyExpr typ pE = spaced $ buildExpressionParser polyOpTable pPolyTerm
         , Infix (opParser2' (PolySub typ) PolyExpr "-") AssocLeft
         ]
       ]
-

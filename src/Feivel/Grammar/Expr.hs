@@ -140,6 +140,19 @@ instance Typed MatExpr where
   typeOf (MatExpr (x :@ _)) = typeOf x
 
 
+{- :PolyExpr -}
+
+newtype PolyExpr = PolyExpr
+  { unPolyExpr :: AtLocus (PolyExprLeaf Expr PolyExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus PolyExpr where
+  locusOf = locusOf . unPolyExpr
+
+instance Typed PolyExpr where
+  typeOf (PolyExpr (x :@ _)) = typeOf x
+
+
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  BoolExpr
@@ -149,7 +162,7 @@ data Expr
   | ZZModE ZZModExpr
   | ListE  ListExpr
   | MatE   MatExpr
-  | PolyE  (PolyExpr  Expr)
+  | PolyE  PolyExpr
   | PermE  (PermExpr  Expr)
   | MacE   (MacExpr   Expr)
   deriving (Eq, Show)
@@ -181,7 +194,7 @@ instance ToExpr RatExpr          where toExpr = RatE
 instance ToExpr ZZModExpr        where toExpr = ZZModE
 instance ToExpr ListExpr         where toExpr = ListE
 instance ToExpr MatExpr          where toExpr = MatE
-instance ToExpr (PolyExpr  Expr) where toExpr = PolyE
+instance ToExpr PolyExpr         where toExpr = PolyE
 instance ToExpr (PermExpr  Expr) where toExpr = PermE
 instance ToExpr (MacExpr   Expr) where toExpr = MacE
 

@@ -16,23 +16,21 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE FlexibleContexts     #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.Poly () where
 
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr) => Glyph (PolyExpr Expr) where
+instance (Glyph Expr) => Glyph PolyExpr where
   toGlyph (PolyExpr (PolyConst _ px :@ _)) = do
     qx <- polySeq $ mapCoef toGlyph px
     return $ showStrP qx
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (PolyExpr Expr) where
+instance (Eval Expr) => Eval PolyExpr where
   eval (PolyExpr (PolyConst t p :@ loc)) = do
     q <- polySeq $ fmap eval p
     return $ PolyExpr $ PolyConst t q :@ loc
@@ -44,13 +42,13 @@ instance (Eval Expr) => Eval (PolyExpr Expr) where
   eval (PolyExpr (PolyIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
   eval (PolyExpr (PolyAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PolyExpr Expr] -> Integer -> Either ListErr (PolyExpr Expr)
+    where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
   eval (PolyExpr (PolyRand _ ls :@ loc)) = do
     let t = typeOf ls
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM (PolyExpr Expr)
+    s  <- eval r >>= getVal :: EvalM PolyExpr
     case t of
       ListOf (PolyOver _) -> return s
       _ -> reportErr loc $ ListExpected t
