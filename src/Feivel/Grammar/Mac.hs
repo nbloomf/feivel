@@ -24,7 +24,13 @@ module Feivel.Grammar.Mac where
 import Feivel.Grammar.Util
 
 
-type MacExpr a = AtLocus (MacExprLeaf a)
+newtype MacExpr a = MacExpr
+  { unMacExpr :: AtLocus (MacExprLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (MacExpr a) where
+  locusOf = locusOf . unMacExpr
+
 
 data MacExprLeaf a
   = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
@@ -42,11 +48,12 @@ data MacExprLeaf a
 
 
 instance Typed (MacExpr a) where
-  typeOf (MacConst      typ _ _ _ :@ _) = MacTo typ
-  typeOf (MacVar        typ _     :@ _) = MacTo typ
-  typeOf (MacMacro      typ _ _   :@ _) = MacTo typ
-  typeOf (MacAtPos      typ _ _   :@ _) = MacTo typ
-  typeOf (MacAtIdx      typ _ _ _ :@ _) = MacTo typ
-  typeOf (MacRand       typ _     :@ _) = MacTo typ
-  typeOf (MacIfThenElse typ _ _ _ :@ _) = MacTo typ
+  typeOf (MacExpr (x :@ _)) = case x of
+    MacConst      typ _ _ _ -> MacTo typ
+    MacVar        typ _     -> MacTo typ
+    MacMacro      typ _ _   -> MacTo typ
+    MacAtPos      typ _ _   -> MacTo typ
+    MacAtIdx      typ _ _ _ -> MacTo typ
+    MacRand       typ _     -> MacTo typ
+    MacIfThenElse typ _ _ _ -> MacTo typ
 

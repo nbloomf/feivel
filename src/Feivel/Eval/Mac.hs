@@ -26,7 +26,7 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
-  toGlyph(MacConst _ st ex (amb,_) :@ loc) = do
+  toGlyph (MacExpr (MacConst _ st ex (amb,_) :@ loc)) = do
     old <- getState
     ctx <- tryEvalM loc $ toStateT st
     f   <- evalWith ex (mergeStores [ctx, old, amb])
@@ -35,22 +35,22 @@ instance (Glyph Expr, Eval Expr) => Glyph (MacExpr Expr) where
 
 
 instance (Eval Expr) => Eval (MacExpr Expr) where
-  eval (MacConst typ vals expr (amb,p) :@ loc) = do
+  eval (MacExpr (MacConst typ vals expr (amb,p) :@ loc)) = do
     if p == True
-      then return $ MacConst typ vals expr (amb,True) :@ loc
+      then return $ MacExpr $ MacConst typ vals expr (amb,True) :@ loc
       else do
         st <- getState
-        return $ MacConst typ vals expr (st,True) :@ loc
+        return $ MacExpr $ MacConst typ vals expr (st,True) :@ loc
 
   {- :Common -}
-  eval (MacVar _ key :@ loc)        = eKey key loc
-  eval (MacIfThenElse _ b t f :@ _) = eIfThenElse b t f
-  eval (MacAtIdx _ m h k :@ loc)    = eAtIdx m h k loc
-  eval (MacMacro _ vals mac :@ loc) = eMacro vals mac loc
+  eval (MacExpr (MacVar _ key :@ loc))        = eKey key loc
+  eval (MacExpr (MacIfThenElse _ b t f :@ _)) = eIfThenElse b t f
+  eval (MacExpr (MacAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
+  eval (MacExpr (MacMacro _ vals mac :@ loc)) = eMacro vals mac loc
 
-  eval (MacAtPos _ a t :@ loc) = lift2 loc a t (foo)
+  eval (MacExpr (MacAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [MacExpr Expr] -> Integer -> Either ListErr (MacExpr Expr)
 
-  eval (MacRand _ ls :@ _) = do
+  eval (MacExpr (MacRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal
     randomElementEvalM xs

@@ -35,7 +35,7 @@ module Feivel.Grammar.Expr (
   MatExpr(..),   MatExprLeaf(..),
   PolyExpr(..),  PolyExprLeaf(..),
   PermExpr(..),  PermExprLeaf(..),
-  MacExpr,   MacExprLeaf(..)
+  MacExpr(..),   MacExprLeaf(..)
 ) where
 
 import Feivel.Lib (Rat(..), ZZModulo(..), Text(..))

@@ -21,7 +21,7 @@ module Feivel.Parse.Mac (
 ) where
 
 import Feivel.Store (emptyStore)
-import Feivel.Grammar (Type(..), Expr(..), MacExpr, MacExprLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
@@ -36,7 +36,7 @@ import Text.Parsec.Prim (try)
 pMacConst
   :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
       -> ParseM (MacExpr Expr)
-pMacConst typ pE pBD = pAtLocus $ pMacConst' typ pE pBD
+pMacConst typ pE pBD = fmap MacExpr $ pAtLocus $ pMacConst' typ pE pBD
 
 pMacConst'
   :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
@@ -61,7 +61,7 @@ pMacExpr pE pBD = pTypedMacExpr XX pE pBD
 pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr) -> ParseM (MacExpr Expr)
 pTypedMacExpr typ pE pBD = spaced $ buildExpressionParser macOpTable pMacTerm
   where
-    pMacTerm = pTerm (pMacConst' typ pE pBD) (pMacExpr pE pBD) "macro expression"
+    pMacTerm = pTerm' (pMacConst' typ pE pBD) MacExpr (pMacExpr pE pBD) "macro expression"
       [ pVarExpr (MacVar typ) (MacTo typ)
 
       , pFun2 "AtPos" (pE $ ListOf (MacTo typ)) (pE ZZ) (MacAtPos typ)

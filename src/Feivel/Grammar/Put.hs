@@ -62,7 +62,7 @@ instance Put MatExpr where
   put loc (MatExpr (x :@ _)) = MatE $ MatExpr (x :@ loc)
 
 instance Put (MacExpr Expr) where
-  put loc (x :@ _) = MacE (x :@ loc)
+  put loc (MacExpr (x :@ _)) = MacE $ MacExpr (x :@ loc)
 
 instance Put RatExpr where
   put loc (RatExpr (x :@ _)) = RatE $ RatExpr (x :@ loc)
