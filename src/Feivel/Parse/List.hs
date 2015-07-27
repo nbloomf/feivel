@@ -20,7 +20,6 @@ module Feivel.Parse.List (
   pListConst, pListExpr, pTypedListExpr, pListLiteral
 ) where
 
-import Feivel.Store (locus)
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
@@ -104,7 +103,7 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
         pListShuffles = do
           _ <- try $ keyword "Shuffles"
           case typ of
-            ListOf t -> do
+            ListOf _ -> do
               keyword "("
               xs <- pLIST typ
               keyword ")"
@@ -114,7 +113,7 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
         pListPermsOf = do
           _ <- try $ keyword "PermutationsOf"
           case typ of
-            PermOf t -> do
+            PermOf _ -> do
               keyword "("
               xs <- pLIST typ
               keyword ")"
@@ -139,14 +138,12 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
         pListPivotColIndices _ = fail "pListPivotColIndices"
     
         pListBuilder = do
-          start <- getPosition
           try $ keyword "Build"
           keyword "("
           expr <- pE typ
           keyword ";"
           gds <- sepBy1 (pListBind <|> pListGuard) (keyword ";")
           keyword ")"
-          end <- getPosition
           return (ListBuilder typ expr gds)
             where
               pListBind = do

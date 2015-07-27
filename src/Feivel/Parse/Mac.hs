@@ -20,12 +20,12 @@ module Feivel.Parse.Mac (
   pMacConst, pTypedMacExpr
 ) where
 
-import Feivel.Store (locus, emptyStore)
+import Feivel.Store (emptyStore)
 import Feivel.Grammar (Type(..), Expr(..), MacExpr, MacExprLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
-import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
+import Text.Parsec.Expr (buildExpressionParser)
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
@@ -42,7 +42,6 @@ pMacConst'
   :: Type -> (Type -> ParseM Expr) -> ((Type -> ParseM Expr) -> ParseM Expr)
      -> ParseM (MacExprLeaf Expr)
 pMacConst' typ pE pBD = do
-  start <- getPosition
   try $ keyword "Macro"
   keyword "("
   t <- pType
@@ -50,7 +49,6 @@ pMacConst' typ pE pBD = do
   body <- if t == DD then (pBD pE) else pE t
   vals <- option [] $ many (keyword ";" >> (pTypeKeyExpr pE))
   keyword ")"
-  end <- getPosition
   if typ /= t
     then error "pMacConst'" -- reportParseErr (locus start end) $ TypeUnificationError typ t
     else return (MacConst t vals body (emptyStore, False))

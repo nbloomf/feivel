@@ -20,13 +20,12 @@ module Feivel.Parse.Doc (
   pDoc, pBrackDocE, pTypedNakedExpr
 ) where
 
-import Feivel.Store (locus, AtLocus(..), Locus(..))
+import Feivel.Store (AtLocus(..), Locus(..))
 import Feivel.Grammar (Type(..), Expr(..), Doc, DocLeaf(..))
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (Text(..))
 
-import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
