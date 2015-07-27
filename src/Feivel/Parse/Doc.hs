@@ -21,7 +21,7 @@ module Feivel.Parse.Doc (
 ) where
 
 import Feivel.Store (AtLocus(..), Locus(..))
-import Feivel.Grammar (Type(..), Expr(..), Doc, DocLeaf(..))
+import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 import Feivel.Lib (Text(..))
@@ -53,11 +53,11 @@ pTypedNakedExpr pE = do
   pE t
 
 pDoc :: (Type -> ParseM Expr) -> ParseM (Doc Expr)
-pDoc pE = choice $ map pAtLocus
+pDoc pE = choice $ map (fmap Doc . pAtLocus)
   [ eof >> return Empty
   , lookAhead (char ']') >> return Empty
   , do
-    xs <- many1 $ choice $ map pAtLocus
+    xs <- many1 $ choice $ map (fmap Doc . pAtLocus)
       [ try (char '#' >> many1 space) >> return Empty
       , try (char '#' >> eof) >> return Empty
       , many1 (noneOf "#@[]") >>= \x -> return (DocText (Text x))
@@ -152,7 +152,7 @@ pDoc pE = choice $ map pAtLocus
     pCond = do
       try (char '[' >> keyword "cond")
       cases <- many pCondCase
-      auto <- option (Empty :@ NullLocus) (try (keyword "default") >> (pBrackDoc pE))
+      auto <- option (Doc (Empty :@ NullLocus)) (try (keyword "default") >> (pBrackDoc pE))
       option () (try (keyword "endcond"))
       _ <- whitespace >> char ']'
       return (Cond cases auto)

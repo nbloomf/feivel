@@ -24,7 +24,13 @@ module Feivel.Grammar.Doc where
 import Feivel.Grammar.Util
 
 
-type Doc a = AtLocus (DocLeaf a)
+newtype Doc a = Doc
+  { unDoc :: AtLocus (DocLeaf a)
+  } deriving (Eq, Show)
+
+instance HasLocus (Doc a) where
+  locusOf = locusOf . unDoc
+
 
 data DocLeaf a
  -- Primitives

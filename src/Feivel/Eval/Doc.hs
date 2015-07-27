@@ -32,35 +32,35 @@ evalToGlyph x = eval (toExpr x) >>= toGlyph
 
 
 instance Glyph (Doc Expr) where
-  toGlyph (Empty            :@ _) = return ""
-  toGlyph (DocText (Text s) :@ _) = return s
+  toGlyph (Doc (Empty            :@ _)) = return ""
+  toGlyph (Doc (DocText (Text s) :@ _)) = return s
   toGlyph x = error $ "toGlyph: Doc: " ++ show x
 
 
 instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
-  eval (Empty :@ loc)     = return (Empty :@ loc)
-  eval (DocText s :@ loc) = return (DocText s :@ loc)
-  eval (Escaped c :@ loc) = return (DocText (Text [c]) :@ loc)
+  eval (Doc (Empty :@ loc))     = return (Doc $ Empty :@ loc)
+  eval (Doc (DocText s :@ loc)) = return (Doc $ DocText s :@ loc)
+  eval (Doc (Escaped c :@ loc)) = return (Doc $ DocText (Text [c]) :@ loc)
 
-  eval (ShowState :@ loc) = do
+  eval (Doc (ShowState :@ loc)) = do
     st <- getState
-    return $ DocText (Text $ show st) :@ loc
+    return $ Doc $ DocText (Text $ show st) :@ loc
 
-  eval (NakedKey k :@ loc) = do
+  eval (Doc (NakedKey k :@ loc)) = do
     expr <- lookupKey loc k
     s <- evalToGlyph expr
-    return $ DocText (Text s) :@ loc
+    return $ Doc $ DocText (Text s) :@ loc
 
-  eval (DocMacro vals mac :@ loc) = eMacro vals mac loc
+  eval (Doc (DocMacro vals mac :@ loc)) = eMacro vals mac loc
 
-  eval (Scope body :@ _) = do
+  eval (Doc (Scope body :@ _)) = do
     --pushTrace "scope" loc
     current <- getState
     result <- evalWith body current
     --popTrace
     return result
 
-  eval (IfThenElse b true false :@ _) = do
+  eval (Doc (IfThenElse b true false :@ _)) = do
     --pushTrace "if-then-else" loc
     x <- eval b >>= getVal
     result <- case x of
@@ -69,11 +69,11 @@ instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
     --popTrace
     return result
 
-  eval (NakedExpr expr :@ loc) = do
+  eval (Doc (NakedExpr expr :@ loc)) = do
     x <- evalToGlyph expr
-    return $ DocText (Text x) :@ loc
+    return $ Doc $ DocText (Text x) :@ loc
 
-  eval (Import file Nothing rest :@ _) = do
+  eval (Doc (Import file Nothing rest :@ _)) = do
     oldSt <- getState
     clearState
     _ <- readAndParseDocFromLib file >>= eval
@@ -82,7 +82,7 @@ instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
     mergeStateEvalM newSt
     eval rest
 
-  eval (Import file (Just prefix) rest :@ _) = do
+  eval (Doc (Import file (Just prefix) rest :@ _)) = do
     oldSt <- getState
     clearState
     _ <- readAndParseDocFromLib file >>= eval
@@ -91,36 +91,36 @@ instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
     mergeStateEvalM (qualify prefix newSt)
     eval rest
 
-  eval (Cat [] :@ loc) = return $ Empty :@ loc
-  eval (Cat ts :@ loc) = do
+  eval (Doc (Cat [] :@ loc)) = return $ Doc $ Empty :@ loc
+  eval (Doc (Cat ts :@ loc)) = do
     exprs <- sequence [eval t >>= getVal | t <- ts]
-    return $ DocText (concatText exprs) :@ loc
+    return $ Doc $ DocText (concatText exprs) :@ loc
 
-  eval (CatPar [] :@ loc) = return $ Empty :@ loc
-  eval (CatPar ts :@ loc) = do
+  eval (Doc (CatPar [] :@ loc)) = return $ Doc $ Empty :@ loc
+  eval (Doc (CatPar ts :@ loc)) = do
     let foo x = do
           st <- getState
           y <- eval x >>= getVal
           putState st
           return y
     exprs <- sequence $ map foo ts
-    return $ DocText (concatText exprs) :@ loc
+    return $ Doc $ DocText (concatText exprs) :@ loc
 
 
-  eval (Cond [] defa :@ _) = do
+  eval (Doc (Cond [] defa :@ _)) = do
     --pushTrace "cond" loc
     result <- eval defa
     --popTrace
     return result
 
-  eval (Cond ((c,t):ds) defa :@ loc) = do
+  eval (Doc (Cond ((c,t):ds) defa :@ loc)) = do
     x <- eval c >>= getVal
     if x
       then eval t
-      else eval $ Cond ds defa :@ loc
+      else eval $ Doc $ Cond ds defa :@ loc
 
 
-  eval (Define t k v rest :@ loc) = do
+  eval (Doc (Define t k v rest :@ loc)) = do
     w <- eval v
     let tw = typeOf w
     if t == tw
@@ -130,33 +130,33 @@ instance (Eval Expr, Glyph Expr) => Eval (Doc Expr) where
       else reportErr loc $ TypeMismatch t tw
 
 
-  eval (LetIn key val expr :@ loc) = do
+  eval (Doc (LetIn key val expr :@ loc)) = do
     defineKey key val loc
     t <- eval expr
     undefineKey key
     return t
 
-  eval (Bail s :@ loc) = (eval s) >>= getVal >>= (reportErr loc . BailMessage . unText)
+  eval (Doc (Bail s :@ loc)) = (eval s) >>= getVal >>= (reportErr loc . BailMessage . unText)
 
-  eval (Alt [] :@ loc) = return $ Empty :@ loc
-  eval (Alt ts :@ _)   = randomElementEvalM ts >>= eval
+  eval (Doc (Alt [] :@ loc)) = return $ Doc $ Empty :@ loc
+  eval (Doc (Alt ts :@ _))   = randomElementEvalM ts >>= eval
 
-  eval (Shuffle xs :@ loc) = do
+  eval (Doc (Shuffle xs :@ loc)) = do
     x <- shuffleEvalM xs
-    eval $ Cat x :@ loc
+    eval $ Doc $ Cat x :@ loc
 
 
-  eval (ForSay k ls body Nothing :@ loc) = do
+  eval (Doc (ForSay k ls body Nothing :@ loc)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
-    eval $ CatPar [LetIn k x body :@ loc | x <- xs] :@ loc
+    eval $ Doc $ CatPar [Doc (LetIn k x body :@ loc) | x <- xs] :@ loc
 
-  eval (ForSay k ls body (Just sep) :@ loc) = do
+  eval (Doc (ForSay k ls body (Just sep) :@ loc)) = do
     xs <- eval ls  >>= getVal
     b  <- eval sep >>= getVal
-    eval $ CatPar (intersperse b [LetIn k x body :@ loc | x <- xs]) :@ loc
+    eval $ Doc $ CatPar (intersperse b [Doc (LetIn k x body :@ loc) | x <- xs]) :@ loc
 
 
-  eval (Select k ls body :@ loc) = do
+  eval (Doc (Select k ls body :@ loc)) = do
     xs <- eval ls >>= getVal
     x  <- randomElementEvalM xs
-    eval $ LetIn k x body :@ loc
+    eval $ Doc $ LetIn k x body :@ loc

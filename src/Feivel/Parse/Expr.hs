@@ -133,7 +133,7 @@ pTypedConst _ = error "pTypedConst"
 
 pREPL :: ParseM (Doc Expr)
 pREPL = do
-  x <- choice $ map pAtLocus
+  x <- choice $ map (fmap Doc . pAtLocus)
          [ pDefineREPL
          , pNakedExprREPL
          , pVarExpr NakedKey DD
@@ -149,7 +149,7 @@ pREPL = do
       k <- pKey
       keyword ":="
       v <- if t == DD then (pBrackDocE pTypedExpr) else pTypedExpr t
-      return (Define t k v (Empty :@ NullLocus))
+      return (Define t k v (Doc (Empty :@ NullLocus)))
 
     pNakedExprREPL = do
       x <- try (pTypedNakedExpr pTypedExpr)
@@ -159,4 +159,4 @@ pREPL = do
       try $ keyword "import"
       path <- pParens pPath
       qual <- option Nothing (try (keyword "as") >> pToken >>= return . Just)
-      return (Import path qual (Empty :@ NullLocus))
+      return (Import path qual (Doc (Empty :@ NullLocus)))

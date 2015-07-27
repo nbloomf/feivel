@@ -56,9 +56,9 @@ instance Get BoolExpr where
 
 instance Get StrExpr where
   get (StrE y) = return y
-  get (DocE (Empty :@ loc)) = return $ StrExpr $ StrConst (Text "") :@ loc
-  get (DocE (DocText str :@ loc)) = return $ StrExpr $ StrConst str :@ loc
-  get (DocE (Escaped c :@ loc)) = return $ StrExpr $ StrConst (Text [c]) :@ loc
+  get (DocE (Doc (Empty :@ loc))) = return $ StrExpr $ StrConst (Text "") :@ loc
+  get (DocE (Doc (DocText str :@ loc))) = return $ StrExpr $ StrConst str :@ loc
+  get (DocE (Doc (Escaped c :@ loc))) = return $ StrExpr $ StrConst (Text [c]) :@ loc
   get v = Left $ GetTypeMismatch
     { typeExpected = SS, typeReceived = typeOf v }
 

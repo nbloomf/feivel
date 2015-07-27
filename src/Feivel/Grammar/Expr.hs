@@ -24,7 +24,7 @@ module Feivel.Grammar.Expr (
 
   -- Expression Types
   Expr(..),
-  Doc,       DocLeaf(..),
+  Doc(..),       DocLeaf(..),
   StrExpr(..),   StrExprLeaf(..), Format(..),
   IntExpr(..),   IntExprLeaf(..),
   BoolExpr(..),  BoolExprLeaf(..),
