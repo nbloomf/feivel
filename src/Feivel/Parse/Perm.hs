@@ -31,13 +31,13 @@ import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
 
-pPermLiteral :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
+pPermLiteral :: Type -> (Type -> ParseM Expr) -> ParseM PermExpr
 pPermLiteral typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
-pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
+pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM PermExpr
 pPermConst typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr)
+pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr PermExpr)
 pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
   start <- getPosition
   ts <- many1 pCycle
@@ -52,10 +52,10 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM (PermExpr Expr)
-pTypedPermExpr typ pE = spaced $ buildExpressionParser permOpTable pPermTerm
+pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM PermExpr) -> ParseM PermExpr
+pTypedPermExpr typ pE pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
   where
-    pPermTerm = pTerm' (pPermLiteralOf typ pE) PermExpr (pTypedPermExpr typ pE) "permutation expression"
+    pPermTerm = pTerm' (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr (PermVar typ) (PermOf typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PermOf typ)) (pE ZZ) (PermAtPos typ) 
@@ -63,7 +63,7 @@ pTypedPermExpr typ pE = spaced $ buildExpressionParser permOpTable pPermTerm
 
       , pMacroExprT pE (PermMacro typ)
 
-      , pIfThenElseExprT pE (pTypedPermExpr typ pE) (PermIfThenElse typ) (PermOf typ)
+      , pIfThenElseExprT pE (pPERM typ) (PermIfThenElse typ) (PermOf typ)
 
       , pFun1 "Rand" (pE $ ListOf (PermOf typ)) (PermRand typ)
       ]
@@ -74,4 +74,3 @@ pTypedPermExpr typ pE = spaced $ buildExpressionParser permOpTable pPermTerm
       , [ Infix (opParser2' (PermCompose typ) PermExpr "o") AssocLeft
         ]
       ]
-

@@ -16,29 +16,27 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE FlexibleInstances    #-}
-{-# LANGUAGE FlexibleContexts     #-}
-{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Feivel.Eval.Perm () where
 
 import Feivel.Eval.Util
 
 
-instance (Glyph Expr) => Glyph (PermExpr Expr) where
+instance (Glyph Expr) => Glyph PermExpr where
   toGlyph (PermExpr (PermConst _ px :@ _)) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval (PermExpr Expr) where
+instance (Eval Expr) => Eval PermExpr where
   eval (PermExpr (PermConst t p :@ loc)) = do
     q <- seqPerm $ mapPerm eval p
     putTypeVal t loc q >>= getVal
 
   eval (PermExpr (PermAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PermExpr Expr] -> Integer -> Either ListErr (PermExpr Expr)
+    where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
   {- Common -}
   eval (PermExpr (PermVar _ key :@ loc))        = eKey key loc

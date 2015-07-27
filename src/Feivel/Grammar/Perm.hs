@@ -16,23 +16,12 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-{-# LANGUAGE TypeSynonymInstances #-}
-{-# LANGUAGE FlexibleInstances    #-}
-
 module Feivel.Grammar.Perm where
 
 import Feivel.Grammar.Util
 
 
-newtype PermExpr a = PermExpr
-  { unPermExpr :: AtLocus (PermExprLeaf a)
-  } deriving (Eq, Show)
-
-instance HasLocus (PermExpr a) where
-  locusOf = locusOf . unPermExpr
-
-
-data PermExprLeaf a
+data PermExprLeaf a perm
   = PermConst Type (Perm a)
   | PermVar   Type Key
 
@@ -42,16 +31,16 @@ data PermExprLeaf a
 
   | PermRand Type a -- ListOf typ
 
-  | PermIfThenElse Type a (PermExpr a) (PermExpr a) -- BB
+  | PermIfThenElse Type a perm perm -- BB
 
-  | PermCompose Type (PermExpr a) (PermExpr a)
-  | PermInvert  Type (PermExpr a)
+  | PermCompose Type perm perm
+  | PermInvert  Type perm
   deriving (Eq, Show)
 
 
 
-instance Typed (PermExpr a) where
-  typeOf (PermExpr (x :@ _)) = case x of
+instance Typed (PermExprLeaf a perm) where
+  typeOf x = case x of
     PermVar        typ _     -> PermOf typ
     PermMacro      typ _ _   -> PermOf typ
     PermConst      typ _     -> PermOf typ

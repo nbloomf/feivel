@@ -87,7 +87,7 @@ instance Get PolyExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = PolyOver XX, typeReceived = typeOf v }
 
-instance Get (PermExpr Expr) where
+instance Get PermExpr where
   get (PermE m) = return m
   get v = Left $ GetTypeMismatch
     { typeExpected = PermOf XX, typeReceived = typeOf v }

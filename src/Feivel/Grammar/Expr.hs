@@ -153,6 +153,19 @@ instance Typed PolyExpr where
   typeOf (PolyExpr (x :@ _)) = typeOf x
 
 
+{- :PermExpr -}
+
+newtype PermExpr = PermExpr
+  { unPermExpr :: AtLocus (PermExprLeaf Expr PermExpr)
+  } deriving (Eq, Show)
+
+instance HasLocus PermExpr where
+  locusOf = locusOf . unPermExpr
+
+instance Typed PermExpr where
+  typeOf (PermExpr (x :@ _)) = typeOf x
+
+
 data Expr
   = DocE   (Doc       Expr)
   | BoolE  BoolExpr
@@ -163,7 +176,7 @@ data Expr
   | ListE  ListExpr
   | MatE   MatExpr
   | PolyE  PolyExpr
-  | PermE  (PermExpr  Expr)
+  | PermE  PermExpr
   | MacE   (MacExpr   Expr)
   deriving (Eq, Show)
 
@@ -195,7 +208,7 @@ instance ToExpr ZZModExpr        where toExpr = ZZModE
 instance ToExpr ListExpr         where toExpr = ListE
 instance ToExpr MatExpr          where toExpr = MatE
 instance ToExpr PolyExpr         where toExpr = PolyE
-instance ToExpr (PermExpr  Expr) where toExpr = PermE
+instance ToExpr PermExpr         where toExpr = PermE
 instance ToExpr (MacExpr   Expr) where toExpr = MacE
 
 -- NB: Not a fan of "no locus" here

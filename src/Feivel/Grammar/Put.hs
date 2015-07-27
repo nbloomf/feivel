@@ -49,7 +49,7 @@ instance Put IntExpr where
 instance Put ZZModExpr where
   put loc (ZZModExpr (x :@ _)) = ZZModE $ ZZModExpr (x :@ loc)
 
-instance Put (PermExpr Expr) where
+instance Put PermExpr where
   put loc (PermExpr (x :@ _)) = PermE $ PermExpr (x :@ loc)
 
 instance Put ListExpr where
