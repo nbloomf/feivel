@@ -73,7 +73,7 @@ pMOD :: Integer -> ParseM ZZModExpr
 pMOD n = pZZModExpr pTypedExpr n pINT pMOD
 
 pLIST :: Type -> ParseM ListExpr
-pLIST typ = pTypedListExpr typ pTypedExpr pLIST
+pLIST typ = pTypedListExpr typ pTypedExpr pINT pLIST
 
 pMAT :: Type -> ParseM MatExpr
 pMAT typ = pTypedMatExpr typ pTypedExpr pMAT
@@ -113,7 +113,7 @@ pTypedExpr XX = choice
   , pTypedExpr QQ
   , pTypedExpr BB
   , pTypedExpr SS
-  , fmap ListE (pListExpr pTypedExpr pLIST)
+  , fmap ListE (pListExpr pTypedExpr pINT pLIST)
   , fmap MatE  (pMatExpr  pTypedExpr pMAT)
   , fmap PolyE (pPolyExpr pTypedExpr pPOLY)
   ]

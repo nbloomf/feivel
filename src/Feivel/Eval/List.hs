@@ -33,7 +33,7 @@ instance (Glyph Expr) => Glyph ListExpr where
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval ListExpr where
+instance (Eval Expr, Eval IntExpr) => Eval ListExpr where
   eval (ListExpr (ListConst t xs :@ loc)) = do
     ys <- sequence $ map eval xs
     putTypeVal t loc ys >>= getVal

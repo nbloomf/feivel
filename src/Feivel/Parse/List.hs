@@ -35,24 +35,24 @@ pListLiteral typ pE = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pE
 pListConst :: Type -> (Type -> ParseM Expr) -> ParseM ListExpr
 pListConst typ pC = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pC
 
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr ListExpr)
+pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr IntExpr ListExpr)
 pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst typ xs)
 
-pListExpr :: (Type -> ParseM Expr) -> (Type -> ParseM ListExpr) -> ParseM ListExpr
-pListExpr pE pLIST = pTypedListExpr XX pE pLIST
+pListExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM ListExpr
+pListExpr pE pINT pLIST = pTypedListExpr XX pE pINT pLIST
 
-pTypedListExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM ListExpr) -> ParseM ListExpr
-pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTerm
+pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM ListExpr
+pTypedListExpr typ pE pINT pLIST = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm' (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr (ListVar typ) (ListOf typ)
 
       , pMacroExprT pE (ListMacro typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) (pE ZZ) (ListAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (ListOf typ)) (pE ZZ) (pE ZZ) (ListAtIdx typ)
+      , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT (ListAtPos typ)
+      , pFun3 "AtIdx" (pE $ MatOf (ListOf typ)) pINT pINT (ListAtIdx typ)
 
       , pIfThenElseExprT pE (pLIST typ) (ListIfThenElse typ) (ListOf typ)
 
@@ -64,15 +64,15 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
       , pFun1 "Shuffle"  (pLIST typ) (ListShuffle typ)
       , pListShuffles
 
-      , pFun2 "GetRow" (pE ZZ) (pE $ MatOf typ) (ListMatRow typ)
-      , pFun2 "GetCol" (pE ZZ) (pE $ MatOf typ) (ListMatCol typ)
+      , pFun2 "GetRow" pINT (pE $ MatOf typ) (ListMatRow typ)
+      , pFun2 "GetCol" pINT (pE $ MatOf typ) (ListMatCol typ)
 
       , pListPermsOf
 
       , pListRange
       , pListPivotColIndices typ
       , pListBuilder
-      , pFun2 "Choose" (pE ZZ) (pLIST typ) (ListChoose typ)
+      , pFun2 "Choose" pINT (pLIST typ) (ListChoose typ)
       , pListChoices
       , pListFilter
       ]
@@ -93,7 +93,7 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
           case typ of
             ListOf t -> do
               keyword "("
-              n <- pE ZZ
+              n <- pINT
               keyword ";"
               xs <- pLIST t
               keyword ")"
@@ -123,7 +123,7 @@ pTypedListExpr typ pE pLIST = spaced $ buildExpressionParser listOpTable pListTe
         pListRange = if typ == ZZ
           then do
             try $ keyword "Range"
-            (a,b) <- pTuple2 (pE ZZ) (pE ZZ)
+            (a,b) <- pTuple2 pINT pINT
             return (ListRange ZZ a b)
           else fail "pListRange"
 
