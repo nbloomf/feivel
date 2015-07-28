@@ -28,8 +28,8 @@ module Feivel.Grammar.Expr (
   StrExpr(..),   StrExprLeafS,   StrExprLeaf(..), Format(..),
   IntExpr(..),   IntExprLeafS,   IntExprLeaf(..),
   BoolExpr(..),  BoolExprLeafS,  BoolExprLeaf(..),
-  RatExpr(..),   RatExprLeaf(..),
-  ZZModExpr(..), ZZModExprLeaf(..),
+  RatExpr(..),   RatExprLeafS,   RatExprLeaf(..),
+  ZZModExpr(..), ZZModExprLeafS, ZZModExprLeaf(..),
 
   ListExpr(..),  ListExprLeaf(..), ListGuard(..),
   MatExpr(..),   MatExprLeaf(..),
@@ -97,8 +97,10 @@ instance Typed BoolExpr where typeOf _ = BB
 
 {- :RatExpr -}
 
+type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr RatExpr
+
 newtype RatExpr = RatExpr
-  { unRatExpr :: AtLocus (RatExprLeaf Expr BoolExpr IntExpr RatExpr)
+  { unRatExpr :: AtLocus RatExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus RatExpr where
@@ -109,8 +111,10 @@ instance Typed RatExpr where typeOf _ = QQ
 
 {- :ZZModExpr -}
 
+type ZZModExprLeafS = ZZModExprLeaf Expr BoolExpr IntExpr ZZModExpr
+
 newtype ZZModExpr = ZZModExpr
-  { unZZModExpr :: AtLocus (ZZModExprLeaf Expr BoolExpr IntExpr ZZModExpr)
+  { unZZModExpr :: AtLocus ZZModExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus ZZModExpr where

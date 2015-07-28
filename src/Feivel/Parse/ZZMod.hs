@@ -31,7 +31,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pZZModConst :: Integer -> ParseM ZZModExpr
 pZZModConst n = fmap ZZModExpr $ pAtLocus (pZZModConst' n)
 
-pZZModConst' :: Integer -> ParseM (ZZModExprLeaf Expr BoolExpr IntExpr ZZModExpr)
+pZZModConst' :: Integer -> ParseM ZZModExprLeafS
 pZZModConst' n = do
   a <- pInteger
   return (ZZModConst (ZZMod n) (a `zzmod` n))
