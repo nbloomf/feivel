@@ -31,7 +31,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pBoolConst :: ParseM BoolExpr
 pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 
-pBoolConst' :: ParseM (BoolExprLeaf Expr IntExpr BoolExpr)
+pBoolConst' :: ParseM BoolExprLeafS
 pBoolConst' = pConst pBool BoolConst
 
 pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> ParseM BoolExpr

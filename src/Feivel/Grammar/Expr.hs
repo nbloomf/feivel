@@ -25,9 +25,9 @@ module Feivel.Grammar.Expr (
   -- Expression Types
   Expr(..),
   Doc(..),       DocLeaf(..),
-  StrExpr(..),   StrExprLeaf(..), Format(..),
-  IntExpr(..),   IntExprLeaf(..),
-  BoolExpr(..),  BoolExprLeaf(..),
+  StrExpr(..),   StrExprLeafS,   StrExprLeaf(..), Format(..),
+  IntExpr(..),   IntExprLeafS,   IntExprLeaf(..),
+  BoolExpr(..),  BoolExprLeafS,  BoolExprLeaf(..),
   RatExpr(..),   RatExprLeaf(..),
   ZZModExpr(..), ZZModExprLeaf(..),
 
@@ -55,8 +55,10 @@ import Feivel.Grammar.Int
 
 {- :IntExpr -}
 
+type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr
+
 newtype IntExpr = IntExpr
-  { unIntExpr :: AtLocus (IntExprLeaf Expr BoolExpr IntExpr)
+  { unIntExpr :: AtLocus IntExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus IntExpr where
@@ -67,8 +69,10 @@ instance Typed IntExpr where typeOf _ = ZZ
 
 {- :StrExpr -}
 
+type StrExprLeafS = StrExprLeaf Expr BoolExpr IntExpr StrExpr
+
 newtype StrExpr = StrExpr
-  { unStrExpr :: AtLocus (StrExprLeaf Expr BoolExpr IntExpr StrExpr)
+  { unStrExpr :: AtLocus StrExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus StrExpr where
@@ -79,8 +83,10 @@ instance Typed StrExpr where typeOf _ = SS
 
 {- :BoolExpr -}
 
+type BoolExprLeafS = BoolExprLeaf Expr IntExpr BoolExpr
+
 newtype BoolExpr = BoolExpr
-  { unBoolExpr :: AtLocus (BoolExprLeaf Expr IntExpr BoolExpr)
+  { unBoolExpr :: AtLocus BoolExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus BoolExpr where
