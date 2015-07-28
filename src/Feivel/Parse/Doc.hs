@@ -209,11 +209,11 @@ pDoc pE pDOC = choice $ map (fmap Doc . pAtLocus)
       return (Select k r t)
 
     pNote = do
-      try (char '[' >> keyword "~")
-      _ <- many $ choice [ try (noneOf ['\\', '~'])
-                         , try (string "\\~") >> return '~'
+      try (char '[' >> keyword "%")
+      _ <- many $ choice [ try (noneOf ['\\', '%'])
+                         , try (string "\\%") >> return '%'
                          , try (string "\\") >> return '\\']
-      _ <- keyword "~" >> char ']'
+      _ <- keyword "%" >> char ']'
       return (Empty)
 
 
