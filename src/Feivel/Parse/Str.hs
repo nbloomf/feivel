@@ -30,17 +30,17 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pStrConst :: ParseM StrExpr
 pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 
-pStrConst' :: ParseM (StrExprLeaf Expr IntExpr StrExpr)
+pStrConst' :: ParseM (StrExprLeaf Expr BoolExpr IntExpr StrExpr)
 pStrConst' = pConst pText StrConst
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
-pStrExpr pE pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
+pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm' pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro
 
-      , pIfThenElseExprT pE pSTR StrIfThenElse SS
+      , pIfThenElseExprT' pBOOL pSTR StrIfThenElse SS
 
       , pFun2 "AtPos" (pE $ ListOf SS) pINT StrAtPos
       , pFun3 "AtIdx" (pE $ MatOf SS) pINT pINT StrAtIdx

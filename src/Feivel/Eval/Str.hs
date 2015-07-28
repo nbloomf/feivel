@@ -28,7 +28,7 @@ instance (Glyph Expr) => Glyph StrExpr where
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
-instance (Eval Expr, Eval IntExpr, Glyph Expr) => Eval StrExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Glyph Expr) => Eval StrExpr where
   eval (StrExpr (StrConst s :@ loc)) = return (StrExpr $ StrConst s :@ loc)
 
   {- :Common -}

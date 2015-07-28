@@ -68,7 +68,7 @@ instance Typed IntExpr where typeOf _ = ZZ
 {- :StrExpr -}
 
 newtype StrExpr = StrExpr
-  { unStrExpr :: AtLocus (StrExprLeaf Expr IntExpr StrExpr)
+  { unStrExpr :: AtLocus (StrExprLeaf Expr BoolExpr IntExpr StrExpr)
   } deriving (Eq, Show)
 
 instance HasLocus StrExpr where

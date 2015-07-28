@@ -21,7 +21,7 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a int str
+data StrExprLeaf a bool int str
   = StrConst Text
   | StrVar   Key
 
@@ -29,7 +29,7 @@ data StrExprLeaf a int str
   | StrAtPos a int -- ListOf SS
   | StrAtIdx a int int -- MatOf SS
  
-  | StrIfThenElse a str str -- BB
+  | StrIfThenElse bool str str -- BB
 
   -- Combinators
   | Concat      str str
