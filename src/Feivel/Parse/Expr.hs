@@ -70,7 +70,7 @@ pRAT :: ParseM RatExpr
 pRAT = pRatExpr pTypedExpr pBOOL pINT pRAT
 
 pMOD :: Integer -> ParseM ZZModExpr
-pMOD n = pZZModExpr pTypedExpr n pINT pMOD
+pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pMOD
 
 pLIST :: Type -> ParseM ListExpr
 pLIST typ = pTypedListExpr typ pTypedExpr pINT pLIST
