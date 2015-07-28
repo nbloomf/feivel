@@ -21,7 +21,7 @@ module Feivel.Grammar.Rat where
 import Feivel.Grammar.Util
 
 
-data RatExprLeaf a int rat
+data RatExprLeaf a bool int rat
   = RatConst Rat
   | RatVar   Key
   | RatCast  a -- ZZ
@@ -30,7 +30,7 @@ data RatExprLeaf a int rat
   | RatAtPos a int -- ListOf QQ
   | RatAtIdx a int int -- MatOf QQ
 
-  | RatIfThenElse a rat rat -- BB
+  | RatIfThenElse bool rat rat -- BB
  
   -- Arithmetic
   | RatNeg   rat

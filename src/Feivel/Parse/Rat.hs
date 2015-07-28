@@ -31,11 +31,11 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 pRatConst :: ParseM RatExpr
 pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 
-pRatConst' :: ParseM (RatExprLeaf Expr IntExpr RatExpr)
+pRatConst' :: ParseM (RatExprLeaf Expr BoolExpr IntExpr RatExpr)
 pRatConst' = pConst pRat RatConst
 
-pRatExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM RatExpr -> ParseM RatExpr
-pRatExpr pE pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
+pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM RatExpr -> ParseM RatExpr
+pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
     pRatTerm = pTerm' pRatConst' RatExpr pRAT "rational expression"
       [ pVarExpr RatVar QQ
@@ -44,7 +44,7 @@ pRatExpr pE pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
       , pFun2 "AtPos" (pE $ ListOf QQ) pINT RatAtPos
       , pFun3 "AtIdx" (pE $ MatOf QQ) pINT pINT RatAtIdx
 
-      , pIfThenElseExprT pE pRAT RatIfThenElse QQ
+      , pIfThenElseExprT' pBOOL pRAT RatIfThenElse QQ
 
       , pFun1 "Rand"   (pE $ ListOf QQ) RatRand
       , pFun1 "Sum"    (pE $ ListOf QQ) RatSum

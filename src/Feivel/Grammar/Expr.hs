@@ -92,7 +92,7 @@ instance Typed BoolExpr where typeOf _ = BB
 {- :RatExpr -}
 
 newtype RatExpr = RatExpr
-  { unRatExpr :: AtLocus (RatExprLeaf Expr IntExpr RatExpr)
+  { unRatExpr :: AtLocus (RatExprLeaf Expr BoolExpr IntExpr RatExpr)
   } deriving (Eq, Show)
 
 instance HasLocus RatExpr where

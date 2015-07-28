@@ -28,7 +28,7 @@ instance Glyph RatExpr where
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-instance (Eval Expr, Eval IntExpr) => Eval RatExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval RatExpr where
   eval (RatExpr (RatConst p :@ loc)) = return $ RatExpr $ RatConst p :@ loc
 
   {- :Common -}
