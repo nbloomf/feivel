@@ -21,7 +21,7 @@ module Feivel.Grammar.List where
 import Feivel.Grammar.Util
 
 
-data ListExprLeaf a int list
+data ListExprLeaf a bool int list
   = ListConst   Type [a]
   | ListVar     Type Key
   | ListBuilder Type a [ListGuard a list]
@@ -30,7 +30,7 @@ data ListExprLeaf a int list
   | ListAtPos      Type a int -- ListOf (ListOf typ)
   | ListAtIdx      Type a int int -- MatOf (ListOf typ)
   | ListRand       Type a -- ListOf (ListOf typ)
-  | ListIfThenElse Type a list list -- BB
+  | ListIfThenElse Type bool list list
 
   -- Arithmetic
   | ListCat   Type list list
@@ -67,7 +67,7 @@ data ListGuard a list
   deriving (Eq, Show)
 
 
-instance Typed (ListExprLeaf a int list) where
+instance Typed (ListExprLeaf a bool int list) where
   typeOf x = case x of
     ListConst           typ _     -> ListOf typ
     ListVar             typ _     -> ListOf typ

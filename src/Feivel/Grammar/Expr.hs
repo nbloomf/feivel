@@ -123,7 +123,7 @@ instance Typed ZZModExpr where
 {- :ListExpr -}
 
 newtype ListExpr = ListExpr
-  { unListExpr :: AtLocus (ListExprLeaf Expr IntExpr ListExpr)
+  { unListExpr :: AtLocus (ListExprLeaf Expr BoolExpr IntExpr ListExpr)
   } deriving (Eq, Show)
 
 instance HasLocus ListExpr where
