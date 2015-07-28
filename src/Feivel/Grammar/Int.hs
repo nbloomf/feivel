@@ -21,16 +21,16 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a int
+data IntExprLeaf a bool int
   = IntConst Integer
   | IntVar   Key
 
   | IntMacro [(Type, Key, a)] a -- MacTo ZZ
-  | IntAtPos a a   -- ListOf ZZ, ZZ
-  | IntAtIdx a a a -- MatOf ZZ, ZZ, ZZ
+  | IntAtPos a int   -- ListOf ZZ
+  | IntAtIdx a int int -- MatOf ZZ
  
-  | IntIfThenElse a int int -- BB
- 
+  | IntIfThenElse bool int int
+
   -- Arithmetic
   | IntAdd    int int
   | IntSub    int int

@@ -27,23 +27,23 @@ import Feivel.Parse.ParseM
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
-pIntConstLeaf :: ParseM (IntExprLeaf Expr IntExpr)
+pIntConstLeaf :: ParseM (IntExprLeaf Expr BoolExpr IntExpr)
 pIntConstLeaf = pConst pInteger IntConst
 
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM IntExpr
-pIntExpr pE pINT = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM IntExpr
+pIntExpr pE pBOOL pINT = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pIntTerm = pTerm' pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
-      , pFun2 "AtPos" (pE (ListOf ZZ)) (pE ZZ) IntAtPos
-      , pFun3 "AtIdx" (pE (MatOf ZZ)) (pE ZZ) (pE ZZ) IntAtIdx
+      , pFun2 "AtPos" (pE (ListOf ZZ)) pINT IntAtPos
+      , pFun3 "AtIdx" (pE (MatOf ZZ)) pINT pINT IntAtIdx
     
-      , pIfThenElseExprT pE pINT IntIfThenElse ZZ
+      , pIfThenElseExprT' pBOOL pINT IntIfThenElse ZZ
 
       , pFun1 "SquarePart"     pINT IntSqPart
       , pFun1 "SquareFreePart" pINT IntSqFreePart

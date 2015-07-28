@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst, pTerm', opParser2', opParser1'
+  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst, pTerm', opParser2', opParser1', pIfThenElseExprT'
 ) where
 
 
@@ -230,6 +230,16 @@ pIfThenElseExprT pE p h t = do
   fa <- p
   return (h b tr fa)
 
+pIfThenElseExprT' :: ParseM BoolExpr -> ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b
+pIfThenElseExprT' pBOOL p h t = do
+  keyword "if"
+  b  <- pBOOL
+  keyword "then"
+  tr <- p
+  keyword "else"
+  fa <- p
+  return (h b tr fa)
+
 pMacroExprT :: (Type -> ParseM Expr) -> ([(Type, Key, Expr)] -> Expr -> a) -> ParseM a
 pMacroExprT pE f = do
   try $ keyword "Eval"
@@ -245,4 +255,3 @@ pConst :: ParseM a -> (a -> b) -> ParseM b
 pConst p h = do
   x <- p
   return (h x)
-

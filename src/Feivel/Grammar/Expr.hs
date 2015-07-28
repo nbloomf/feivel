@@ -56,7 +56,7 @@ import Feivel.Grammar.Int
 {- :IntExpr -}
 
 newtype IntExpr = IntExpr
-  { unIntExpr :: AtLocus (IntExprLeaf Expr IntExpr)
+  { unIntExpr :: AtLocus (IntExprLeaf Expr BoolExpr IntExpr)
   } deriving (Eq, Show)
 
 instance HasLocus IntExpr where
