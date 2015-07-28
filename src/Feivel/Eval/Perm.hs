@@ -30,7 +30,7 @@ instance (Glyph Expr) => Glyph PermExpr where
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-instance (Eval Expr) => Eval PermExpr where
+instance (Eval Expr, Eval IntExpr) => Eval PermExpr where
   eval (PermExpr (PermConst t p :@ loc)) = do
     q <- seqPerm $ mapPerm eval p
     putTypeVal t loc q >>= getVal

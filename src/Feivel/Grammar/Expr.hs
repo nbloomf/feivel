@@ -156,7 +156,7 @@ instance Typed PolyExpr where
 {- :PermExpr -}
 
 newtype PermExpr = PermExpr
-  { unPermExpr :: AtLocus (PermExprLeaf Expr PermExpr)
+  { unPermExpr :: AtLocus (PermExprLeaf Expr IntExpr PermExpr)
   } deriving (Eq, Show)
 
 instance HasLocus PermExpr where
