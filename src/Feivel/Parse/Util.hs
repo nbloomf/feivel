@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  pVarExpr, pTypeKeyExpr, pTerm, pMacroExprT, pConst, pTerm', opParser2, opParser1, pIfThenElseExprT
+  pVarExpr, pTypeKeyExpr, pMacroExprT, pConst, pTerm, opParser2, opParser1, pIfThenElseExprT
 ) where
 
 
@@ -197,13 +197,8 @@ pTypeKeyExpr pE = do
   return (t, k, v)
 
 -- Terms in Expression Grammars
-pTerm :: ParseM a -> ParseM (AtLocus a) -> String -> [ParseM a] -> ParseM (AtLocus a)
-pTerm cst expr err atoms = 
-  choice [try $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
-
--- Terms in Expression Grammars
-pTerm' :: ParseM a -> (AtLocus a -> b) -> ParseM b -> String -> [ParseM a] -> ParseM b
-pTerm' cst cons expr err atoms = 
+pTerm :: ParseM a -> (AtLocus a -> b) -> ParseM b -> String -> [ParseM a] -> ParseM b
+pTerm cst cons expr err atoms = 
   choice [try $ fmap cons $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
 
 pIfThenElseExprT :: ParseM BoolExpr -> ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b

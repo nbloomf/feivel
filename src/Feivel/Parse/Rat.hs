@@ -37,7 +37,7 @@ pRatConst' = pConst pRat RatConst
 pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM RatExpr -> ParseM RatExpr
 pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
-    pRatTerm = pTerm' pRatConst' RatExpr pRAT "rational expression"
+    pRatTerm = pTerm pRatConst' RatExpr pRAT "rational expression"
       [ pVarExpr RatVar QQ
       , pMacroExprT pE RatMacro
 

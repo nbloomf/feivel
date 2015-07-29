@@ -37,7 +37,7 @@ pBoolConst' = pConst pBool BoolConst
 pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> ParseM BoolExpr
 pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
-    pBoolTerm = pTerm' pBoolConst' BoolExpr pBOOL "boolean expression"
+    pBoolTerm = pTerm pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 

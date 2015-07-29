@@ -70,7 +70,7 @@ pPolyExpr pE pBOOL pINT pPOLY = pTypedPolyExpr XX pE pBOOL pINT pPOLY
 pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
 pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
-    pPolyTerm = pTerm' (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
+    pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) pINT (PolyAtPos typ)

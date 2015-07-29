@@ -59,7 +59,7 @@ pMacExpr pE pBD pBOOL pINT pMAC = pTypedMacExpr XX pE pBD pBOOL pINT pMAC
 pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MacExpr) -> ParseM MacExpr
 pTypedMacExpr typ pE pBD pBOOL pINT pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
   where
-    pMacTerm = pTerm' (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
+    pMacTerm = pTerm (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
       [ pVarExpr (MacVar typ) (MacTo typ)
 
       , pFun2 "AtPos" (pE $ ListOf (MacTo typ)) pINT (MacAtPos typ)

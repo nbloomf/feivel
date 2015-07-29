@@ -46,7 +46,7 @@ pListExpr pE pBOOL pINT pLIST = pTypedListExpr XX pE pBOOL pINT pLIST
 pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM ListExpr
 pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTable pListTerm
   where
-    pListTerm = pTerm' (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
+    pListTerm = pTerm (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr (ListVar typ) (ListOf typ)
 
       , pMacroExprT pE (ListMacro typ)

@@ -36,7 +36,7 @@ pStrConst' = pConst pText StrConst
 pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
 pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
-    pStrTerm = pTerm' pStrConst' StrExpr pSTR "string expression"
+    pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro
 

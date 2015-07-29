@@ -55,7 +55,7 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
 pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PermExpr) -> ParseM PermExpr
 pTypedPermExpr typ pE pBOOL pINT pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
   where
-    pPermTerm = pTerm' (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
+    pPermTerm = pTerm (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr (PermVar typ) (PermOf typ)
 
       , pFun2 "AtPos" (pE $ ListOf (PermOf typ)) pINT (PermAtPos typ) 

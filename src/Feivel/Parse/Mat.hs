@@ -52,7 +52,7 @@ pMatExpr pE pBOOL pINT pMAT = pTypedMatExpr XX pE pBOOL pINT pMAT
 pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
 pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
   where
-    pMatTerm = pTerm' (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
+    pMatTerm = pTerm (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr (MatVar typ) (MatOf typ)
 
       , pFun2 "AtPos" (pE $ ListOf (MatOf typ)) pINT (MatAtPos typ)

@@ -39,7 +39,7 @@ pZZModConst' n = do
 pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr -> ParseM IntExpr -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
 pZZModExpr pE n pBOOL pINT pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
-    pZZModTerm = pTerm' (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
+    pZZModTerm = pTerm (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
       [ pVarExpr (ZZModVar (ZZMod n)) (ZZMod n)
       , pMacroExprT pE (ZZModMacro (ZZMod n))
 
