@@ -44,7 +44,7 @@ pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
       , pFun2 "AtPos" (pE $ ListOf BB) pINT BoolAtPos
       , pFun3 "AtIdx" (pE $ MatOf BB) pINT pINT BoolAtIdx
 
-      , pIfThenElseExprT pE pBOOL BoolIfThenElse BB
+      , pIfThenElseExprT pBOOL pBOOL BoolIfThenElse BB
     
       , pFun1 "IsDefined" pKey IsDefined
 

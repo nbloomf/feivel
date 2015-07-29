@@ -43,7 +43,7 @@ pIntExpr pE pBOOL pINT = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun2 "AtPos" (pE (ListOf ZZ)) pINT IntAtPos
       , pFun3 "AtIdx" (pE (MatOf ZZ)) pINT pINT IntAtIdx
     
-      , pIfThenElseExprT' pBOOL pINT IntIfThenElse ZZ
+      , pIfThenElseExprT pBOOL pINT IntIfThenElse ZZ
 
       , pFun1 "SquarePart"     pINT IntSqPart
       , pFun1 "SquareFreePart" pINT IntSqFreePart

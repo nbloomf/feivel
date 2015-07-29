@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pIfThenElseExprT, pMacroExprT, pConst, pTerm', opParser2', opParser1', pIfThenElseExprT'
+  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pMacroExprT, pConst, pTerm', opParser2', opParser1', pIfThenElseExprT
 ) where
 
 
@@ -220,18 +220,8 @@ pTerm' :: ParseM a -> (AtLocus a -> b) -> ParseM b -> String -> [ParseM a] -> Pa
 pTerm' cst cons expr err atoms = 
   choice [try $ fmap cons $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
 
-pIfThenElseExprT :: (Type -> ParseM Expr) -> ParseM a -> (Expr -> a -> a -> b) -> t -> ParseM b
-pIfThenElseExprT pE p h t = do
-  keyword "if"
-  b  <- pE BB
-  keyword "then"
-  tr <- p
-  keyword "else"
-  fa <- p
-  return (h b tr fa)
-
-pIfThenElseExprT' :: ParseM BoolExpr -> ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b
-pIfThenElseExprT' pBOOL p h t = do
+pIfThenElseExprT :: ParseM BoolExpr -> ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b
+pIfThenElseExprT pBOOL p h t = do
   keyword "if"
   b  <- pBOOL
   keyword "then"

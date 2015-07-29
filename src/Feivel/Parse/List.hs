@@ -54,7 +54,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTa
       , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT (ListAtPos typ)
       , pFun3 "AtIdx" (pE $ MatOf (ListOf typ)) pINT pINT (ListAtIdx typ)
 
-      , pIfThenElseExprT' pBOOL (pLIST typ) (ListIfThenElse typ) (ListOf typ)
+      , pIfThenElseExprT pBOOL (pLIST typ) (ListIfThenElse typ) (ListOf typ)
 
       , pFun1 "Rand" (pE $ ListOf (ListOf typ)) (ListRand typ)
 

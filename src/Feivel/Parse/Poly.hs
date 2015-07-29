@@ -78,7 +78,7 @@ pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTa
 
       , pMacroExprT pE (PolyMacro typ)
 
-      , pIfThenElseExprT' pBOOL (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
+      , pIfThenElseExprT pBOOL (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
 
       , pFun1 "Rand" (pE $ ListOf (PolyOver typ)) (PolyRand typ)
 

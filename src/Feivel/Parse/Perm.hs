@@ -63,7 +63,7 @@ pTypedPermExpr typ pE pBOOL pINT pPERM = spaced $ buildExpressionParser permOpTa
 
       , pMacroExprT pE (PermMacro typ)
 
-      , pIfThenElseExprT' pBOOL (pPERM typ) (PermIfThenElse typ) (PermOf typ)
+      , pIfThenElseExprT pBOOL (pPERM typ) (PermIfThenElse typ) (PermOf typ)
 
       , pFun1 "Rand" (pE $ ListOf (PermOf typ)) (PermRand typ)
       ]

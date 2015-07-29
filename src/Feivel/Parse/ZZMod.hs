@@ -46,7 +46,7 @@ pZZModExpr pE n pBOOL pINT pMOD = spaced $ buildExpressionParser zzModOpTable pZ
       , pFun2 "AtPos" (pE $ ListOf (ZZMod n)) pINT (ZZModAtPos (ZZMod n))
       , pFun3 "AtIdx" (pE $ MatOf (ZZMod n)) pINT pINT (ZZModAtIdx (ZZMod n))
     
-      , pIfThenElseExprT' pBOOL (pMOD n) (ZZModIfThenElse (ZZMod n)) (ZZMod n)
+      , pIfThenElseExprT pBOOL (pMOD n) (ZZModIfThenElse (ZZMod n)) (ZZMod n)
 
       , pFun1 "int" (pE ZZ) (ZZModCast (ZZMod n))
 

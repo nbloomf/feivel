@@ -60,7 +60,7 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
 
       , pMacroExprT pE (MatMacro typ)
 
-      , pIfThenElseExprT' pBOOL (pMAT typ) (MatIfThenElse typ) (MatOf typ)
+      , pIfThenElseExprT pBOOL (pMAT typ) (MatIfThenElse typ) (MatOf typ)
 
       , pFun1 "Transpose" (pMAT typ) (MatTrans typ)
 

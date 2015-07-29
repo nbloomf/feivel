@@ -40,7 +40,7 @@ pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro
 
-      , pIfThenElseExprT' pBOOL pSTR StrIfThenElse SS
+      , pIfThenElseExprT pBOOL pSTR StrIfThenElse SS
 
       , pFun2 "AtPos" (pE $ ListOf SS) pINT StrAtPos
       , pFun3 "AtIdx" (pE $ MatOf SS) pINT pINT StrAtIdx

@@ -30,7 +30,7 @@ data BoolExprLeaf a int bool
   | BoolAtPos a int      -- ListOf BB, ZZ
   | BoolAtIdx a int int -- MatOf BB, ZZ, ZZ
 
-  | BoolIfThenElse a bool bool -- BB
+  | BoolIfThenElse bool bool bool
 
   | BoolEq  a a
   | BoolNEq a a

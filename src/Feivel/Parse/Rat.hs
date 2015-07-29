@@ -44,7 +44,7 @@ pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
       , pFun2 "AtPos" (pE $ ListOf QQ) pINT RatAtPos
       , pFun3 "AtIdx" (pE $ MatOf QQ) pINT pINT RatAtIdx
 
-      , pIfThenElseExprT' pBOOL pRAT RatIfThenElse QQ
+      , pIfThenElseExprT pBOOL pRAT RatIfThenElse QQ
 
       , pFun1 "Rand"   (pE $ ListOf QQ) RatRand
       , pFun1 "Sum"    (pE $ ListOf QQ) RatSum

@@ -69,7 +69,7 @@ pTypedMacExpr typ pE pBD pBOOL pINT pMAC = spaced $ buildExpressionParser macOpT
 
       , pFun1 "Rand" (pE $ ListOf (MacTo typ)) (MacRand typ)
 
-      , pIfThenElseExprT' pBOOL (pMAC typ) (MacIfThenElse typ) (MacTo typ)
+      , pIfThenElseExprT pBOOL (pMAC typ) (MacIfThenElse typ) (MacTo typ)
       ]
 
     macOpTable = []
