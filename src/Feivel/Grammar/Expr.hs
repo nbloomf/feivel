@@ -153,7 +153,7 @@ instance Typed MatExpr where
 {- :PolyExpr -}
 
 newtype PolyExpr = PolyExpr
-  { unPolyExpr :: AtLocus (PolyExprLeaf Expr IntExpr PolyExpr)
+  { unPolyExpr :: AtLocus (PolyExprLeaf Expr BoolExpr IntExpr PolyExpr)
   } deriving (Eq, Show)
 
 instance HasLocus PolyExpr where

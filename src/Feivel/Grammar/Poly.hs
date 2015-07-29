@@ -21,7 +21,7 @@ module Feivel.Grammar.Poly where
 import Feivel.Grammar.Util
 
 
-data PolyExprLeaf a int poly
+data PolyExprLeaf a bool int poly
   = PolyConst Type (Poly a)
   | PolyVar   Type Key
 
@@ -31,7 +31,7 @@ data PolyExprLeaf a int poly
 
   | PolyRand Type a -- ListOf (PolyOf typ)
 
-  | PolyIfThenElse Type a poly poly -- BB
+  | PolyIfThenElse Type bool poly poly
 
   | PolyAdd Type poly poly
   | PolySub Type poly poly
@@ -44,7 +44,7 @@ data PolyExprLeaf a int poly
   deriving (Eq, Show)
 
 
-instance Typed (PolyExprLeaf a int poly) where
+instance Typed (PolyExprLeaf a bool int poly) where
   typeOf x = case x of
     PolyVar        typ _     -> PolyOver typ
     PolyMacro      typ _ _   -> PolyOver typ
