@@ -37,7 +37,7 @@ pPermLiteral typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM PermExpr
 pPermConst typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr IntExpr PermExpr)
+pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr BoolExpr IntExpr PermExpr)
 pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
   start <- getPosition
   ts <- many1 pCycle
@@ -52,8 +52,8 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM PermExpr) -> ParseM PermExpr
-pTypedPermExpr typ pE pINT pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
+pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PermExpr) -> ParseM PermExpr
+pTypedPermExpr typ pE pBOOL pINT pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm' (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr (PermVar typ) (PermOf typ)
@@ -63,7 +63,7 @@ pTypedPermExpr typ pE pINT pPERM = spaced $ buildExpressionParser permOpTable pP
 
       , pMacroExprT pE (PermMacro typ)
 
-      , pIfThenElseExprT pE (pPERM typ) (PermIfThenElse typ) (PermOf typ)
+      , pIfThenElseExprT' pBOOL (pPERM typ) (PermIfThenElse typ) (PermOf typ)
 
       , pFun1 "Rand" (pE $ ListOf (PermOf typ)) (PermRand typ)
       ]
