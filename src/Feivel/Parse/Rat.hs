@@ -80,13 +80,13 @@ pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
       [ [ Prefix (opParser1' RatNeg RatExpr "neg" )
         , Prefix (opParser1' RatAbs RatExpr "abs")
         ]
-      , [ Infix (opParser2' RatMult RatExpr "*") AssocLeft
-        , Infix (opParser2' RatQuot RatExpr "/") AssocLeft
+      , [ Infix (opParser2 RatMult RatExpr "*") AssocLeft
+        , Infix (opParser2 RatQuot RatExpr "/") AssocLeft
         ]
-      , [ Infix (opParser2' RatAdd RatExpr "+") AssocLeft
-        , Infix (opParser2' RatSub RatExpr "-") AssocLeft
+      , [ Infix (opParser2 RatAdd RatExpr "+") AssocLeft
+        , Infix (opParser2 RatSub RatExpr "-") AssocLeft
         ]
-      , [ Infix (opParser2' RatMin RatExpr "min") AssocLeft
-        , Infix (opParser2' RatMax RatExpr "max") AssocLeft
+      , [ Infix (opParser2 RatMin RatExpr "min") AssocLeft
+        , Infix (opParser2 RatMax RatExpr "max") AssocLeft
         ]
       ]

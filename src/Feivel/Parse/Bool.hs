@@ -73,10 +73,10 @@ pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
     boolOpTable =
       [ [ Prefix (opParser1' Neg BoolExpr "~")
         ]
-      , [ Infix (opParser2' Conj BoolExpr "&&") AssocLeft
+      , [ Infix (opParser2 Conj BoolExpr "&&") AssocLeft
         ]
-      , [ Infix (opParser2' Disj BoolExpr "||") AssocLeft
+      , [ Infix (opParser2 Disj BoolExpr "||") AssocLeft
         ]
-      , [ Infix (opParser2' Imp BoolExpr "->") AssocRight
+      , [ Infix (opParser2 Imp BoolExpr "->") AssocRight
         ]
       ]

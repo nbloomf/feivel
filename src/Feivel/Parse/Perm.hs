@@ -71,6 +71,6 @@ pTypedPermExpr typ pE pBOOL pINT pPERM = spaced $ buildExpressionParser permOpTa
     permOpTable =
       [ [ Prefix (opParser1' (PermInvert typ) PermExpr "inv")
         ]
-      , [ Infix (opParser2' (PermCompose typ) PermExpr "o") AssocLeft
+      , [ Infix (opParser2 (PermCompose typ) PermExpr "o") AssocLeft
         ]
       ]

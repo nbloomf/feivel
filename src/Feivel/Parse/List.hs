@@ -159,8 +159,8 @@ pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTa
                 return $ Guard e
     
     listOpTable =
-      [ [ Infix (opParser2' (ListCat typ) ListExpr "++") AssocLeft
+      [ [ Infix (opParser2 (ListCat typ) ListExpr "++") AssocLeft
         ]
-      , [ Infix (opParser2' (ListToss typ) ListExpr "\\\\") AssocLeft
+      , [ Infix (opParser2 (ListToss typ) ListExpr "\\\\") AssocLeft
         ]
       ]

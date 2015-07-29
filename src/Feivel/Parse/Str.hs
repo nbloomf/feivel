@@ -66,6 +66,6 @@ pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
       ]
 
     strOpTable =
-      [ [Infix (opParser2' Concat StrExpr "++") AssocLeft
+      [ [Infix (opParser2 Concat StrExpr "++") AssocLeft
         ]
       ]

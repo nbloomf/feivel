@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  opParser1, opParser2, pVarExpr, pTypeKeyExpr, pTerm, pMacroExprT, pConst, pTerm', opParser2', opParser1', pIfThenElseExprT
+  opParser1, pVarExpr, pTypeKeyExpr, pTerm, pMacroExprT, pConst, pTerm', opParser2, opParser1', pIfThenElseExprT
 ) where
 
 
@@ -179,18 +179,11 @@ opParser1' f cons fun = do
   end <- getPosition
   return $ \x -> (cons $ f x :@ (locus start end))
 
--- Binary Operators (for expression parser)
-opParser2 :: (AtLocus a -> AtLocus a -> a) -> String -> ParseM ((AtLocus a) -> (AtLocus a) -> (AtLocus a))
-opParser2 f fun = do
-  start <- getPosition
-  try $ keyword fun
-  end <- getPosition
-  return $ \x y -> (f x y :@ (locus start end))
 
 -- Binary Operators (for expression parser)
-opParser2' ::
+opParser2 ::
   (b -> b -> a)-> (AtLocus a -> b) -> String -> ParseM (b -> b -> b)
-opParser2' f cons fun = do
+opParser2 f cons fun = do
   start <- getPosition
   try $ keyword fun
   end <- getPosition
