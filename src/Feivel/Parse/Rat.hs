@@ -32,7 +32,7 @@ pRatConst :: ParseM RatExpr
 pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 
 pRatConst' :: ParseM RatExprLeafS
-pRatConst' = pConst pRat RatConst
+pRatConst' = fmap RatConst pRat
 
 pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM RatExpr -> ParseM RatExpr
 pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm

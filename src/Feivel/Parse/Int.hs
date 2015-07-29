@@ -28,7 +28,7 @@ import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 
 pIntConstLeaf :: ParseM IntExprLeafS
-pIntConstLeaf = pConst pInteger IntConst
+pIntConstLeaf = fmap IntConst pInteger
 
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf

@@ -32,7 +32,7 @@ pBoolConst :: ParseM BoolExpr
 pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 
 pBoolConst' :: ParseM BoolExprLeafS
-pBoolConst' = pConst pBool BoolConst
+pBoolConst' = fmap BoolConst pBool
 
 pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> ParseM BoolExpr
 pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm

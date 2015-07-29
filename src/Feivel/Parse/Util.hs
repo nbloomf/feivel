@@ -26,7 +26,7 @@ module Feivel.Parse.Util (
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
 
-  pVarExpr, pTypeKeyExpr, pMacroExprT, pConst, pTerm, opParser2, opParser1, pIfThenElseExprT
+  pVarExpr, pTypeKeyExpr, pMacroExprT, pTerm, opParser2, opParser1, pIfThenElseExprT
 ) where
 
 
@@ -221,8 +221,3 @@ pMacroExprT pE f = do
   vals <- option [] $ many1 (keyword ";" >> (pTypeKeyExpr pE))
   keyword ")"
   return (f vals e)
-
-pConst :: ParseM a -> (a -> b) -> ParseM b
-pConst p h = do
-  x <- p
-  return (h x)

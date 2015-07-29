@@ -31,7 +31,7 @@ pStrConst :: ParseM StrExpr
 pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 
 pStrConst' :: ParseM StrExprLeafS
-pStrConst' = pConst pText StrConst
+pStrConst' = fmap StrConst pText
 
 pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
 pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
