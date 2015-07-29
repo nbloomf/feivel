@@ -21,7 +21,7 @@ module Feivel.Grammar.Mat where
 import Feivel.Grammar.Util
 
 
-data MatExprLeaf a int mat
+data MatExprLeaf a bool int mat
   = MatConst Type (Matrix a)
   | MatVar   Type Key
 
@@ -29,7 +29,7 @@ data MatExprLeaf a int mat
   | MatAtPos Type a int -- ListOf (MatOf typ)
   | MatAtIdx Type a int int -- MatOf (MatOf typ)
 
-  | MatIfThenElse Type a mat mat -- BB
+  | MatIfThenElse Type bool mat mat
 
   | MatBuilder Type a Key a Key a -- typ, ListOf XX, ListOf XX
 
@@ -77,7 +77,7 @@ data MatExprLeaf a int mat
 
 
 
-instance Typed (MatExprLeaf a int mat) where
+instance Typed (MatExprLeaf a bool int mat) where
   typeOf x = case x of
     MatVar         typ _         -> MatOf typ
     MatMacro       typ _ _       -> MatOf typ

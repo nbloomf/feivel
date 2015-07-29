@@ -76,7 +76,7 @@ pLIST :: Type -> ParseM ListExpr
 pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST
 
 pMAT :: Type -> ParseM MatExpr
-pMAT typ = pTypedMatExpr typ pTypedExpr pINT pMAT
+pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pMAT
 
 pPOLY :: Type -> ParseM PolyExpr
 pPOLY typ = pTypedPolyExpr typ pTypedExpr pINT pPOLY
@@ -114,7 +114,7 @@ pTypedExpr XX = choice
   , pTypedExpr BB
   , pTypedExpr SS
   , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST)
-  , fmap MatE  (pMatExpr  pTypedExpr pINT pMAT)
+  , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pMAT)
   , fmap PolyE (pPolyExpr pTypedExpr pINT pPOLY)
   ]
 

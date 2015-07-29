@@ -37,7 +37,7 @@ pMatLiteral typ pE = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pE
 pMatConst :: Type -> (Type -> ParseM Expr) -> ParseM MatExpr
 pMatConst typ pC = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pC
 
-pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr IntExpr MatExpr)
+pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr BoolExpr IntExpr MatExpr)
 pMatLiteralOf typ p = do
   start <- getPosition
   xss <- pBrackList (pBrackList (p typ))
@@ -46,11 +46,11 @@ pMatLiteralOf typ p = do
     Left err -> reportParseErr (locus start end) err
     Right m -> return (MatConst typ m)
 
-pMatExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pMatExpr pE pINT pMAT = pTypedMatExpr XX pE pINT pMAT
+pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pMatExpr pE pBOOL pINT pMAT = pTypedMatExpr XX pE pBOOL pINT pMAT
 
-pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pTypedMatExpr typ pE pINT pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
+pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm' (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr (MatVar typ) (MatOf typ)
@@ -60,7 +60,7 @@ pTypedMatExpr typ pE pINT pMAT = spaced $ buildExpressionParser matOpTable pMatT
 
       , pMacroExprT pE (MatMacro typ)
 
-      , pIfThenElseExprT pE (pMAT typ) (MatIfThenElse typ) (MatOf typ)
+      , pIfThenElseExprT' pBOOL (pMAT typ) (MatIfThenElse typ) (MatOf typ)
 
       , pFun1 "Transpose" (pMAT typ) (MatTrans typ)
 
