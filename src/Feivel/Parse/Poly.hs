@@ -111,7 +111,7 @@ pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTa
           return (PolyConst typ nullP)
 
     polyOpTable =
-      [ [ Prefix (opParser1' (PolyNeg typ) PolyExpr "neg")
+      [ [ Prefix (opParser1 (PolyNeg typ) PolyExpr "neg")
         ]
       , [ Infix (opParser2 (PolyMul typ) PolyExpr "*") AssocLeft
         ]

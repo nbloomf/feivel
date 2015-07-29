@@ -145,7 +145,7 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
           return (MatBuilder typ e kr lr kc lc)
     
     matOpTable =
-      [ [ Prefix (opParser1' (MatNeg typ) MatExpr "neg")
+      [ [ Prefix (opParser1 (MatNeg typ) MatExpr "neg")
         ]
       , [ Infix (opParser2 (MatMul typ) MatExpr "*") AssocLeft
         ]

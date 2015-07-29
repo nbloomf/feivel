@@ -85,8 +85,8 @@ pIntExpr pE pBOOL pINT = spaced $ buildExpressionParser intOpTable pIntTerm
       , [ Infix (opParser2 IntQuo IntExpr "div") AssocLeft
         , Infix (opParser2 IntMod IntExpr "mod") AssocLeft
         ]
-      , [ Prefix (opParser1' IntNeg IntExpr "neg")
-        , Prefix (opParser1' IntAbs IntExpr "abs")
+      , [ Prefix (opParser1 IntNeg IntExpr "neg")
+        , Prefix (opParser1 IntAbs IntExpr "abs")
         ]
       , [ Infix (opParser2 IntAdd IntExpr "+") AssocLeft
         , Infix (opParser2 IntSub IntExpr "-") AssocLeft

@@ -59,8 +59,8 @@ pZZModExpr pE n pBOOL pINT pMOD = spaced $ buildExpressionParser zzModOpTable pZ
     zzModOpTable =
       [ [ Infix (opParser2 (ZZModMult (ZZMod n)) ZZModExpr "*") AssocLeft
         ]
-      , [ Prefix (opParser1' (ZZModNeg (ZZMod n)) ZZModExpr "neg")
-        , Prefix (opParser1' (ZZModInv (ZZMod n)) ZZModExpr "inv")
+      , [ Prefix (opParser1 (ZZModNeg (ZZMod n)) ZZModExpr "neg")
+        , Prefix (opParser1 (ZZModInv (ZZMod n)) ZZModExpr "inv")
         ]
       , [ Infix (opParser2 (ZZModAdd (ZZMod n)) ZZModExpr "+") AssocLeft
         , Infix (opParser2 (ZZModSub (ZZMod n)) ZZModExpr "-") AssocLeft

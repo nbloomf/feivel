@@ -77,8 +77,8 @@ pRatExpr pE pBOOL pINT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
           return (RatZScore p ks n)
     
     ratOpTable =
-      [ [ Prefix (opParser1' RatNeg RatExpr "neg" )
-        , Prefix (opParser1' RatAbs RatExpr "abs")
+      [ [ Prefix (opParser1 RatNeg RatExpr "neg" )
+        , Prefix (opParser1 RatAbs RatExpr "abs")
         ]
       , [ Infix (opParser2 RatMult RatExpr "*") AssocLeft
         , Infix (opParser2 RatQuot RatExpr "/") AssocLeft
