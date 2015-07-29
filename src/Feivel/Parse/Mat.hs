@@ -79,7 +79,7 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
 
       , pFun2 "Id"    pType pINT MatId
       , pFun4 "SwapE" pType pINT pINT pINT MatSwapE
-      , pMatScaleE
+      , pFun3 "ScaleE" pINT pINT (pE typ) (MatScaleE typ)
       , pMatAddE
 
       , pFun2 "Pow" (pMAT typ) pINT (MatPow typ)
@@ -97,19 +97,6 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
       , pFun1 "GJFactor" (pMAT typ) (MatGJFactor typ)
       ]
       where
-        pMatScaleE = do
-          try $ keyword "ScaleE"
-          keyword "("
-          t <- pType
-          keyword ";"
-          n <- pINT
-          keyword ";"
-          k <- pINT
-          keyword ";"
-          e <- pE t
-          keyword ")"
-          return (MatScaleE t n k e)
-
         pMatAddE = do
           try $ keyword "AddE"
           keyword "("

@@ -39,7 +39,7 @@ data MatExprLeaf a bool int mat
   -- Special Values
   | MatId     Type int -- ZZ
   | MatSwapE  Type int int int -- ZZ, ZZ, ZZ
-  | MatScaleE Type int int a -- ZZ, ZZ, typ
+  | MatScaleE Type int int a -- typ
   | MatAddE   Type int int int a -- ZZ, ZZ, ZZ, typ
 
   -- Arithmetic

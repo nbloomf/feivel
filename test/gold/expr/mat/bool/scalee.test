@@ -1,6 +1,6 @@
 feivel
 <<<
-[:[bool]: ScaleE(bool; 3; 1; #t) :]
+[:[bool]: ScaleE(3; 1; #t) :]
 >>>
 [[#t;#f;#f];[#f;#t;#f];[#f;#f;#t]]
 >>>= 0
