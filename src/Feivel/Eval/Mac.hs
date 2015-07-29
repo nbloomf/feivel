@@ -32,7 +32,7 @@ instance (Glyph Expr, Eval Expr) => Glyph MacExpr where
   toGlyph _ = error "toGlyph: MacExpr"
 
 
-instance (Eval Expr) => Eval MacExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MacExpr where
   eval (MacExpr (MacConst typ vals expr (amb,p) :@ loc)) = do
     if p == True
       then return $ MacExpr $ MacConst typ vals expr (amb,True) :@ loc

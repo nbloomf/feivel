@@ -179,7 +179,7 @@ instance Typed PermExpr where
 {- :MacExpr -}
 
 newtype MacExpr = MacExpr
-  { unMacExpr :: AtLocus (MacExprLeaf Expr MacExpr)
+  { unMacExpr :: AtLocus (MacExprLeaf Expr BoolExpr IntExpr MacExpr)
   } deriving (Eq, Show)
 
 instance HasLocus MacExpr where

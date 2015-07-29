@@ -21,21 +21,21 @@ module Feivel.Grammar.Mac where
 import Feivel.Grammar.Util
 
 
-data MacExprLeaf a mac
+data MacExprLeaf a bool int mac
   = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
   | MacVar   Type Key
 
   | MacMacro Type [(Type, Key, a)] a -- MacTo (MacTo typ)
-  | MacAtPos Type a a -- ListOf (MacTo typ), ZZ
-  | MacAtIdx Type a a a -- MatOf (MacTo typ), ZZ, ZZ
+  | MacAtPos Type a int -- ListOf (MacTo typ)
+  | MacAtIdx Type a int int -- MatOf (MacTo typ)
 
   | MacRand Type a -- ListOf (MacTo typ)
 
-  | MacIfThenElse Type a mac mac -- BB
+  | MacIfThenElse Type bool mac mac
   deriving (Eq, Show)
 
 
-instance Typed (MacExprLeaf a mac) where
+instance Typed (MacExprLeaf a bool int mac) where
   typeOf x = case x of
     MacConst      typ _ _ _ -> MacTo typ
     MacVar        typ _     -> MacTo typ
