@@ -36,8 +36,12 @@ data AlgErr
 
   | MatCoefErr String
 
+  | NatSubErr
+
   | PolyDivErr String
   | PolyNotConstant String
+  | PolyDivByZero String
+  | PolyNotUnivariate
 
   -- Structural Errors
   | NullMatrix String

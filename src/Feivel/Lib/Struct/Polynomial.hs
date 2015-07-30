@@ -20,16 +20,17 @@
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
 module Feivel.Lib.Struct.Polynomial (
-  Monomial, fromListM, Natural(..), Variable(..), identityM,
+  Monomial, fromListM, Natural(..), Variable(..), identityM, natSub,
 
   Poly, fromListP, constP, polySeq, showP, mapCoef, showOUP, showByOUP, revlexM, varP,
   evalPolyAtPolyP, evalPolyAtScalarP, glexM, multidegM, showStrP, nullP,
-  evalPolyAtPolysP,
+  evalPolyAtPolysP, canonP,
 
   variablesP, isUnivariateP, isConstantP, fromRootsP, toScalarP,
   leadingTermByP, degreeByP, leadingTermByRevLexP, degreeByRevLexP, isRootP,
+  leadingCoefByRevLexP, leadingCoefByP,
 
-  coefficientsP, contentP
+  coefficientsP, contentP, fromCoefsP, varX, univariateLongDiv
 ) where
 
 import qualified Data.Map as Map
@@ -59,6 +60,11 @@ newtype Natural = Nat { unNat :: Integer }
 
 natAdd :: Natural -> Natural -> Natural
 natAdd (Nat a) (Nat b) = Nat (a+b)
+
+natSub :: Natural -> Natural -> Either AlgErr Natural
+natSub (Nat a) (Nat b)
+  | b > a = Left NatSubErr
+  | otherwise = return $ Nat (a-b)
 
 newtype Variable = Var { unVar :: String }
   deriving (Eq, Ord, Show)
@@ -103,14 +109,16 @@ identityM = Map.fromList []
 varM :: Variable -> Monomial
 varM x = Map.fromList [(x, Nat 1)]
 
+varX = varM $ Var "x"
+
 
 {- Query -}
 
 supportM :: Monomial -> [Variable]
 supportM = map fst . toListM . canon
 
-multidegM :: Monomial -> Integer
-multidegM = sum . map (unNat . snd) . toListM . canon
+multidegM :: Monomial -> Natural
+multidegM = Nat. sum . map (unNat . snd) . toListM . canon
 
 isIdM :: Monomial -> Bool
 isIdM = null . supportM
@@ -126,6 +134,9 @@ multiplyM m1 m2 = Map.unionWith (natAdd) m1 m2
 
 productM :: [Monomial] -> Monomial
 productM = foldr multiplyM identityM
+
+powersM :: Monomial -> [Monomial]
+powersM x = identityM : map (multiplyM x) (powersM x)
 
 
 {- Mutate -}
@@ -154,7 +165,7 @@ revlexM :: Monomial -> Monomial -> Ordering
 revlexM m1 m2 = lexM m2 m1
 
 glexM :: Monomial -> Monomial -> Ordering
-glexM m1 m2 = case compare (multidegM m1) (multidegM m2) of
+glexM m1 m2 = case compare (unNat $ multidegM m1) (unNat $ multidegM m2) of
   LT -> LT
   GT -> GT
   EQ -> lexM m1 m2
@@ -172,6 +183,9 @@ toListP = map swap . Map.toList
 
 fromListP :: [(a, Monomial)] -> Poly a
 fromListP = Map.fromList . map swap
+
+canonP :: (Ringoid a, CRingoid a, Canon a) => Poly a -> Either AlgErr (Poly a)
+canonP = rSum . map (fromListP . (:[]) . (\(a,m) -> (a, canon m))) . toListP . canon
 
 
 {- Construct -}
@@ -237,17 +251,25 @@ leadingTermByP ord = (maximumBy foo) . toListP
 leadingCoefByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> a
 leadingCoefByP ord = fst . leadingTermByP ord
 
-degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Integer
+degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Natural
 degreeByP ord = multidegM . snd . leadingTermByP ord
 
 leadingTermByRevLexP :: Poly a -> (a, Monomial)
 leadingTermByRevLexP = leadingTermByP revlexM
 
-degreeByRevLexP :: Poly a -> Integer
+leadingCoefByRevLexP :: Poly a -> a
+leadingCoefByRevLexP = leadingCoefByP revlexM
+
+degreeByRevLexP :: Poly a -> Natural
 degreeByRevLexP = degreeByP revlexM
 
 
+
+
 {- Arithmetic -}
+
+fromCoefsP :: Monomial -> [a] -> Poly a
+fromCoefsP m cs = fromListP $ zip cs (powersM m)
 
 mulMonomialP :: Monomial -> Poly a -> Poly a
 mulMonomialP x = mapVar (multiplyM x)
@@ -314,6 +336,10 @@ instance (Ringoid a, CRingoid a) => Ringoid (Poly a) where
   rNeutOf _ = return nullP
   rLAnnOf _ = return nullP
   rRAnnOf _ = return nullP
+
+
+instance (Ringoid a, Canon a) => Canon (Poly a) where
+  canon p = fromListP $ filter (\(a,_) -> not $ rIsZero a) $ map (\(a,m) -> (canon a, m)) $ toListP p
 
 
 instance (Ringoid a, CRingoid a) => CRingoid (Poly a)
@@ -396,8 +422,11 @@ isRootP a x p = case evalPolyAtScalarP a x p of
 -- Pretty-print a polynomial over an ordered unital ring (e.g. ZZ)
 showByOUP :: (Ringoid a, URingoid a, ORingoid a)
   => String -> (Monomial -> Monomial -> Ordering) -> (a -> String) -> Poly a -> String
-showByOUP sep ord f = concat . foo . termsByP ord
+showByOUP sep ord f = bar . concat . foo . termsByP ord
   where
+    bar [] = "0"
+    bar s  = s
+
     foo [] = [""]
     foo (t:ts) = firstTerm t : map otherTerms ts
 
@@ -429,3 +458,41 @@ showByOUP sep ord f = concat . foo . termsByP ord
 
 showOUP :: (Show a, Ringoid a, ORingoid a, URingoid a) => Poly a -> String
 showOUP = showByOUP "." revlexM show
+
+
+univariateLongDiv :: (Ringoid a, CRingoid a, URingoid a, Canon a) => Poly a -> Poly a -> Either AlgErr (Poly a, Poly a)
+univariateLongDiv a b
+  | rIsZero a = return (rZero, rZero)
+  | rIsZero b = Left $ PolyDivByZero "univariateLongDiv 3"
+  | not (isUnivariateP a) || not (isUnivariateP b) = Left $ PolyDivErr "univariateLongDiv 1"
+  | degreeByP glexM a < degreeByP glexM b = return (rZero, a)
+  | (variablesP a) /= (variablesP b) = Left $ PolyDivErr "univariateLongDiv 2"
+  | otherwise = do
+      let [x] = variablesP a
+      let n = degreeByP glexM a
+      let m = degreeByP glexM b
+      let an = leadingCoefByP glexM a
+      let bm = leadingCoefByP glexM b
+      bminv <- rInv bm
+      c <- rMul bminv an
+      t <- natSub n m
+      let h = fromListP [(c, fromListM [(x, t)])]
+      s <- rMul h b
+      abar <- rSub a s >>= canonP
+      (qbar, r) <- univariateLongDiv abar b
+      q <- rAdd qbar h
+      Right (q,r)
+
+
+
+instance (Ringoid a, CRingoid a, URingoid a, Canon a) => EDoid (Poly a) where
+  rDivAlg = univariateLongDiv
+
+  rNorm p
+    | not $ isUnivariateP p = Left PolyNotUnivariate
+    | otherwise = return $ unNat $ degreeByP glexM p
+
+
+instance (Ringoid a, CRingoid a, URingoid a, Canon a) => BDoid (Poly a) where
+  rBezout = rEuclidBezout
+
