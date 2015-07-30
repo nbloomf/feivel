@@ -36,6 +36,8 @@ data PolyExprLeaf a bool int poly
   | PolyAdd Type poly poly
   | PolySub Type poly poly
   | PolyMul Type poly poly
+  | PolyQuo Type poly poly
+  | PolyRem Type poly poly
   | PolyPow Type poly int
   | PolyNeg Type poly
 

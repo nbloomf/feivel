@@ -22,4 +22,4 @@ class Canon t where
   canon :: t -> t
 
 instance Canon Integer where canon = id
-
+instance Canon Bool    where canon = id

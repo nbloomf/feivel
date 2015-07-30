@@ -19,6 +19,7 @@
 module Feivel.Lib.Data.ZZMod where
 
 import Feivel.Lib.Algebra.Ring
+import Feivel.Lib.Canon
 
 data ZZModulo = ZZModulo
   { residue :: Integer
@@ -31,6 +32,9 @@ a `zzmod` n = ZZModulo b m
   where
     m = abs n
     b = ((a `rem` m) + m) `rem` m
+
+instance Canon ZZModulo where
+  canon (ZZModulo a n) = zzmod a n
 
 showZZMod :: ZZModulo -> String
 showZZMod (ZZModulo a n) = show a ++ " mod " ++ show n
