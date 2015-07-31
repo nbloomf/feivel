@@ -49,6 +49,16 @@ import Feivel.Lib.Write.LaTeX
 import Feivel.Lib.Data.Natural
 import Feivel.Lib.Data.Monomial
 
+{-------------------}
+{- :Contents       -}
+{-   :Monadish     -}
+{-   :Constructors -}
+{-   :Querying     -}
+{-   :Arithmetic   -}
+{-   :Evaluation   -}
+{-   :Instances    -}
+{-------------------}
+
 
 
 newtype Variable = Var
@@ -299,14 +309,49 @@ instance (Ringoid a, CRingoid a, URingoid a, Canon a, Eq a) => URingoid (Poly a)
     k <- rInjInt n
     return $ constPoly k
 
-{-
-{-------------------}
-{- :Contents       -}
-{-   :Monomial     -}
-{-   :Polynomial   -}
-{-   :RingInstance -}
-{-------------------}
 
+{- :Printing -}
+
+-- Pretty-print a polynomial over an ordered unital ring (e.g. ZZ)
+showByOUP :: (Ringoid a, URingoid a, ORingoid a)
+  => String -> (Monomial Variable -> Monomial Variable -> Ordering) -> (a -> String)
+    -> Poly a -> String
+showByOUP sep ord f = bar . concat . foo . termsBy ord
+  where
+    bar [] = "0"
+    bar s  = s
+
+    foo [] = [""]
+    foo (t:ts) = firstTerm t : map otherTerms ts
+
+    firstTerm (a,m)
+     | rIsZero a               = "0"
+
+     | isIdM m && rIsOne a    = "1"
+     | isIdM m && rIsPos a    = f (rAbs a)
+     | isIdM m && rIsNegOne a = "-1"
+     | isIdM m                = "-" ++ f (rAbs a)
+
+     | rIsOne a    = showM sep m
+     | rIsPos a    = f (rAbs a) ++ showM sep m
+     | rIsNegOne a = "-" ++ showM sep m
+     | otherwise   = "-" ++ f (rAbs a) ++ showM sep m
+
+    otherTerms (a,m)
+     | rIsZero a                = ""
+
+     | isIdM m   && rIsOne a    = " + 1"
+     | isIdM m   && rIsPos a    = " + " ++ f (rAbs a)
+     | isIdM m   && rIsNegOne a = " - 1"
+     | isIdM m                  = " - " ++ f (rAbs a)
+
+     | rIsOne a    = " + " ++ showM sep m
+     | rIsPos a    = " + " ++ f (rAbs a) ++ sep ++ showM sep m
+     | rIsNegOne a = " - " ++ showM sep m
+     | otherwise   = " - " ++ f (rAbs a) ++ sep ++ showM sep m
+
+
+{-
 
 instance (LaTeX a, Ringoid a, ORingoid a, URingoid a) => LaTeX (Poly a) where
   latex = showByOUP "" revlexM latex
@@ -399,42 +444,6 @@ isRootP a x p = case evalPolyAtScalarP a x p of
   Right q -> rIsZero q
 
 
--- Pretty-print a polynomial over an ordered unital ring (e.g. ZZ)
-showByOUP :: (Ringoid a, URingoid a, ORingoid a)
-  => String -> (Monomial -> Monomial -> Ordering) -> (a -> String) -> Poly a -> String
-showByOUP sep ord f = bar . concat . foo . termsByP ord
-  where
-    bar [] = "0"
-    bar s  = s
-
-    foo [] = [""]
-    foo (t:ts) = firstTerm t : map otherTerms ts
-
-    firstTerm (a,m)
-     | rIsZero a               = "0"
-
-     | isIdM m && rIsOne a    = "1"
-     | isIdM m && rIsPos a    = f (rAbs a)
-     | isIdM m && rIsNegOne a = "-1"
-     | isIdM m                = "-" ++ f (rAbs a)
-
-     | rIsOne a    = showM sep m
-     | rIsPos a    = f (rAbs a) ++ showM sep m
-     | rIsNegOne a = "-" ++ showM sep m
-     | otherwise   = "-" ++ f (rAbs a) ++ showM sep m
-
-    otherTerms (a,m)
-     | rIsZero a                = ""
-
-     | isIdM m   && rIsOne a    = " + 1"
-     | isIdM m   && rIsPos a    = " + " ++ f (rAbs a)
-     | isIdM m   && rIsNegOne a = " - 1"
-     | isIdM m                  = " - " ++ f (rAbs a)
-
-     | rIsOne a    = " + " ++ showM sep m
-     | rIsPos a    = " + " ++ f (rAbs a) ++ sep ++ showM sep m
-     | rIsNegOne a = " - " ++ showM sep m
-     | otherwise   = " - " ++ f (rAbs a) ++ sep ++ showM sep m
 
 showOUP :: (Show a, Ringoid a, ORingoid a, URingoid a) => Poly a -> String
 showOUP = showByOUP "." revlexM show
