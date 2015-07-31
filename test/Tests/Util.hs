@@ -174,8 +174,8 @@ testDivAlgBy divAlg mul add norm eq isZero (a,b) = checkEither checkRes
         then return False
         else do
           if isZero r
-          then return True
-          else do
-            nr <- norm r
-            nb <- norm b
-            return (nr < nb)
+            then return True
+            else do
+              nr <- norm r
+              nb <- norm b
+              return (nr < nb)
