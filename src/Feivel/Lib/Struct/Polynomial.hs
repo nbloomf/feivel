@@ -20,7 +20,7 @@
 {-# OPTIONS_GHC -XFlexibleInstances #-}
 
 module Feivel.Lib.Struct.Polynomial (
-  Monomial, fromListM, Natural(..), Variable(..), identityM, natSub,
+{-  Monomial, fromListM, Natural(..), Variable(..), identityM,
 
   Poly, fromListP, constP, polySeq, showP, mapCoef, showOUP, showByOUP, revlexM, varP,
   evalPolyAtPolyP, evalPolyAtScalarP, glexM, multidegM, showStrP, nullP,
@@ -30,11 +30,11 @@ module Feivel.Lib.Struct.Polynomial (
   leadingTermByP, degreeByP, leadingTermByRevLexP, degreeByRevLexP, isRootP,
   leadingCoefByRevLexP, leadingCoefByP,
 
-  coefficientsP, contentP, fromCoefsP, varX, univariateLongDiv
+  coefficientsP, contentP, fromCoefsP, varX, univariateLongDiv-}
 ) where
 
-import qualified Data.Map as Map
-import Data.List (intersperse, sortBy, maximumBy, union)
+import qualified Data.Map as M
+import Data.List (intersperse, sortBy, maximumBy, union, nub)
 import Data.Maybe (fromMaybe)
 import Control.Monad (foldM, join)
 
@@ -46,8 +46,260 @@ import Feivel.Lib.Monad
 import Feivel.Lib.AlgErr ()
 import Feivel.Lib.Write.LaTeX
 
+import Feivel.Lib.Data.Natural
+import Feivel.Lib.Data.Monomial
 
 
+
+newtype Variable = Var
+  { unVar :: String
+  } deriving (Eq, Ord)
+
+instance Show Variable where
+  show = unVar
+
+
+newtype Poly a = Poly
+  { unPoly :: M.Map (Monomial Variable) a
+  } deriving Show
+
+toTerms :: Poly a -> [(a, Monomial Variable)]
+toTerms = map swap . M.toList . unPoly
+
+
+
+{-------------}
+{- :Monadish -}
+{-------------}
+
+mapVar :: (Monomial Variable -> Monomial Variable) -> Poly a -> Poly a
+mapVar f = Poly . M.mapKeys f . unPoly
+
+mapCoef :: (a -> b) -> Poly a -> Poly b
+mapCoef f = Poly . M.map f . unPoly
+
+polySeq :: (Functor m, Monad m) => Poly (m a) -> m (Poly a)
+polySeq = fmap (Poly . M.fromList) . sequence . map seqSnd . M.toList . unPoly
+
+
+
+{-----------------}
+{- :Constructors -}
+{-----------------}
+
+zeroPoly :: Poly a
+zeroPoly = Poly $ M.fromList []
+
+fromTerm :: (Ringoid a) => (a, Monomial Variable) -> Poly a
+fromTerm (a, x) = if rIsZero a
+  then zeroPoly
+  else Poly $ M.fromList [(canon x, a)]
+
+constPoly :: (Ringoid a) => a -> Poly a
+constPoly c = fromTerm (c, identity)
+
+varPoly :: (Ringoid a, URingoid a) => String -> Poly a
+varPoly x = fromTerm (rOne, variable $ Var x)
+
+onePoly :: (Ringoid a, URingoid a) => Poly a
+onePoly = constPoly rOne
+
+addPoly :: (Ringoid a) => Poly a -> Poly a -> Either AlgErr (Poly a)
+addPoly p q = do
+  let a = unPoly $ mapCoef return p
+  let b = unPoly $ mapCoef return q
+  polySeq $ Poly $ M.unionWith (opM2 rAdd) a b
+
+sumPoly :: (Ringoid a) => [Poly a] -> Either AlgErr (Poly a)
+sumPoly = foldM addPoly zeroPoly
+
+fromTerms :: (Ringoid a) => [(a, Monomial Variable)] -> Either AlgErr (Poly a)
+fromTerms = sumPoly . map fromTerm . filter (\(c,_) -> not $ rIsZero c)
+
+
+
+{-------------}
+{- :Querying -}
+{-------------}
+
+coefficients :: (Ringoid a, Canon a) => Poly a -> Either AlgErr [a]
+coefficients p = do
+  q <- canonPoly p
+  return $ map fst $ toTerms q
+
+canonPoly :: (Ringoid a, Canon a) => Poly a -> Either AlgErr (Poly a)
+canonPoly = fromTerms . map (\(a,x) -> (canon a, canon x)) . toTerms
+
+instance (Eq a, Ringoid a, Canon a) => Eq (Poly a) where
+  p == q = case check of
+    Left _  -> False
+    Right t -> t
+    where
+      check = do
+        a <- canonPoly p
+        b <- canonPoly q
+        return $ (unPoly a) == (unPoly b)
+
+isZeroPoly :: (Eq a, Ringoid a, Canon a) => Poly a -> Bool
+isZeroPoly = (zeroPoly ==)
+
+monomials :: (Ringoid a, Canon a) => Poly a -> Either AlgErr [Monomial Variable]
+monomials p = do
+  q <- canonPoly p
+  return $ map snd $ toTerms q
+
+variables :: (Ringoid a, Canon a) => Poly a -> Either AlgErr [Variable]
+variables p = do
+  ms <- monomials p
+  return $ nub $ concatMap monomialSupport ms
+
+isUnivariate :: (Ringoid a, Canon a) => Poly a -> Either AlgErr Bool
+isUnivariate p = do
+  vars <- variables p
+  case vars of
+    []  -> return True
+    [_] -> return True
+    _   -> return False
+
+isConstant :: (Ringoid a, Canon a) => Poly a -> Either AlgErr Bool
+isConstant p = do
+  vars <- variables p
+  case vars of
+    [] -> return True
+    _  -> return False
+
+contentPoly :: (Ringoid t, GCDoid t, Canon t) => Poly t -> Either AlgErr t
+contentPoly p = canonPoly p >>= coefficients >>= rGCDs
+
+-- List of terms using the supplied monomial order
+termsBy :: (Ringoid a, Canon a) => (Monomial Variable -> Monomial Variable -> Ordering) -> Poly a
+  -> Either AlgErr [(a, Monomial Variable)]
+termsBy ord p = do
+  q <- canonPoly p
+  let foo (_,m1) (_,m2) = ord m1 m2
+  return $ sortBy foo $ toTerms q
+
+leadingTermBy :: (Ringoid a, Canon a, Eq a) => (Monomial Variable -> Monomial Variable -> Ordering)
+  -> Poly a -> Either AlgErr (a, Monomial Variable)
+leadingTermBy ord p = do
+  let foo (_,m1) (_,m2) = ord m1 m2
+  if isZeroPoly p
+    then Left ZeroPolynomial
+    else return $ maximumBy foo $ toTerms p
+
+leadingCoefBy :: (Ringoid a, Canon a, Eq a) => (Monomial Variable -> Monomial Variable -> Ordering)
+  -> Poly a -> Either AlgErr a
+leadingCoefBy ord p = do
+  (a,_) <- leadingTermBy ord p
+  return a
+
+leadingDegreeBy :: (Ringoid a, Canon a, Eq a) => (Monomial Variable -> Monomial Variable -> Ordering)
+  -> Poly a -> Either AlgErr Natural
+leadingDegreeBy ord p = do
+  (_,m) <- leadingTermBy ord p
+  return $ degree m
+
+
+
+{---------------}
+{- :Arithmetic -}
+{---------------}
+
+mulMonomial :: Monomial Variable -> Poly a -> Poly a
+mulMonomial x = mapVar (multiply x)
+
+mulCoef :: (Ringoid a, CRingoid a) => a -> Poly a -> Either AlgErr (Poly a)
+mulCoef a = polySeq . mapCoef (rMul a)
+
+mulTerm :: (Ringoid a, CRingoid a) => (a, Monomial Variable) -> Poly a -> Either AlgErr (Poly a)
+mulTerm (a,x) p = mulCoef a $ mulMonomial x p
+
+negPoly :: (Ringoid a) => Poly a -> Poly a
+negPoly p = mapCoef rNeg p
+
+multiplyPoly :: (Ringoid a, CRingoid a) => Poly a -> Poly a -> Either AlgErr (Poly a)
+multiplyPoly p q = (sequence $ map (`mulTerm` p) $ toTerms q) >>= sumPoly
+
+productPoly :: (Ringoid a, CRingoid a, URingoid a) => [Poly a] -> Either AlgErr (Poly a)
+productPoly = foldM multiplyPoly onePoly
+
+powerPoly :: (Ringoid a, CRingoid a, URingoid a) => Poly a -> Integer -> Either AlgErr (Poly a)
+powerPoly p n = productPoly [p | _ <- [1..n]]
+
+
+
+{---------------}
+{- :Evaluation -}
+{---------------}
+
+-- At a polynomial
+
+evalTermAtPoly :: (Ringoid a, CRingoid a, URingoid a)
+  => Poly a -> Variable -> (a, Monomial Variable) -> Either AlgErr (Poly a)
+evalTermAtPoly p x (a,m) = do
+  let Nat k = x `degreeOf` m
+  q <- powerPoly p k
+  let n = (a, removeVar x m)
+  mulTerm n q
+
+evalPolyAtPoly :: (Ringoid a, CRingoid a, URingoid a)
+  => Poly a -> Variable -> Poly a -> Either AlgErr (Poly a)
+evalPolyAtPoly p x = join . fmap sumPoly . sequence . map (evalTermAtPoly p x) . toTerms
+
+evalPolyAtPolys :: (Ringoid a, CRingoid a, URingoid a)
+  => [(Variable, Poly a)] -> Poly a -> Either AlgErr (Poly a)
+evalPolyAtPolys [] p = Right p
+evalPolyAtPolys ((x,q):xs) p = do
+  s <- evalPolyAtPoly q x p
+  evalPolyAtPolys xs s
+
+
+
+{--------------}
+{- :Instances -}
+{--------------}
+
+-- :Ringoid
+instance (Ringoid a, CRingoid a, Canon a, Eq a) => Ringoid (Poly a) where
+  rAdd p q = case addPoly p q of
+    Left err -> Left (RingoidAddErr $ show err)
+    Right x  -> return x
+
+  rMul p q = case multiplyPoly p q of
+    Left err -> Left (RingoidMulErr $ show err)
+    Right x  -> return x
+
+  rNeg = negPoly
+
+  rIsZero = isZeroPoly
+
+  rZero = zeroPoly
+  rNeutOf _ = return zeroPoly
+  rLAnnOf _ = return zeroPoly
+  rRAnnOf _ = return zeroPoly
+
+
+-- :CRingoid
+instance (Ringoid a, CRingoid a) => CRingoid (Poly a)
+
+
+-- :URingoid
+instance (Ringoid a, CRingoid a, URingoid a, Canon a, Eq a) => URingoid (Poly a) where
+  rOne = onePoly
+  rIsOne = (onePoly ==)
+
+  rIsUnit = error "rIsUnit: Polynomial"
+
+  rInv = error "rInv: Polynomial"
+
+  rLOneOf _ = return onePoly
+  rROneOf _ = return onePoly
+
+  rInjInt n = do
+    k <- rInjInt n
+    return $ constPoly k
+
+{-
 {-------------------}
 {- :Contents       -}
 {-   :Monomial     -}
@@ -55,221 +307,19 @@ import Feivel.Lib.Write.LaTeX
 {-   :RingInstance -}
 {-------------------}
 
-newtype Natural = Nat { unNat :: Integer }
-  deriving (Eq, Ord, Show)
-
-natAdd :: Natural -> Natural -> Natural
-natAdd (Nat a) (Nat b) = Nat (a+b)
-
-natSub :: Natural -> Natural -> Either AlgErr Natural
-natSub (Nat a) (Nat b)
-  | b > a = Left NatSubErr
-  | otherwise = return $ Nat (a-b)
-
-newtype Variable = Var { unVar :: String }
-  deriving (Eq, Ord, Show)
-
 
 instance (LaTeX a, Ringoid a, ORingoid a, URingoid a) => LaTeX (Poly a) where
   latex = showByOUP "" revlexM latex
-
-
-
-{-------------}
-{- :Monomial -}
-{-------------}
-
-type Monomial = Map.Map Variable Natural
-
-instance Canon Monomial where
-  canon = Map.fromList . filter (\(_,k) -> k /= Nat 0) . toListM
-
-showM :: String -> Monomial -> String
-showM sep m = bar $ concat $ intersperse sep $ map foo $ toListM $ canon m
-  where
-    foo (Var x, Nat k)
-      | k == 1 = x
-      | otherwise = x ++ "^" ++ show k
-
-    bar "" = "1"
-    bar s  = s
-
-
-{- Construct -}
-
-toListM :: Monomial -> [(Variable, Natural)]
-toListM = Map.toList
-
-fromListM :: [(Variable, Natural)] -> Monomial
-fromListM = productM . map (Map.fromList . (:[]))
-
-identityM :: Monomial
-identityM = Map.fromList []
-
-varM :: Variable -> Monomial
-varM x = Map.fromList [(x, Nat 1)]
-
-varX = varM $ Var "x"
-
-
-{- Query -}
-
-supportM :: Monomial -> [Variable]
-supportM = map fst . toListM . canon
-
-multidegM :: Monomial -> Natural
-multidegM = Nat. sum . map (unNat . snd) . toListM . canon
-
-isIdM :: Monomial -> Bool
-isIdM = null . supportM
-
-degOfM :: Variable -> Monomial -> Integer
-degOfM x = unNat . fromMaybe (Nat 0) . Map.lookup x
-
-
-{- Combine -}
-
-multiplyM :: Monomial -> Monomial -> Monomial
-multiplyM m1 m2 = Map.unionWith (natAdd) m1 m2
-
-productM :: [Monomial] -> Monomial
-productM = foldr multiplyM identityM
-
-powersM :: Monomial -> [Monomial]
-powersM x = identityM : map (multiplyM x) (powersM x)
-
-
-{- Mutate -}
-
-removeVarM :: Variable -> Monomial -> Monomial
-removeVarM x m = Map.delete x m
-
-
-{- Monomial Orders -}
-
-lex2 :: (Ord a, Ord b) => [(a,b)] -> [(a,b)] -> Ordering
-lex2 [] [] = EQ
-lex2 [] _  = LT
-lex2 _  [] = GT
-lex2 ((a1,b1):ps1) ((a2,b2):ps2)
-  | a1 <  a2 = LT
-  | a1 >  a2 = GT
-  | a1 == a2 && b1 < b2 = LT
-  | a1 == a2 && b1 > b2 = GT
-  | otherwise = lex2 ps1 ps2
-
-lexM :: Monomial -> Monomial -> Ordering
-lexM m1 m2 = lex2 (toListM m1) (toListM m2)
-
-revlexM :: Monomial -> Monomial -> Ordering
-revlexM m1 m2 = lexM m2 m1
-
-glexM :: Monomial -> Monomial -> Ordering
-glexM m1 m2 = case compare (unNat $ multidegM m1) (unNat $ multidegM m2) of
-  LT -> LT
-  GT -> GT
-  EQ -> lexM m1 m2
-
 
 
 {---------------}
 {- :Polynomial -}
 {---------------}
 
-type Poly a = Map.Map Monomial a
-
-toListP :: Poly a -> [(a, Monomial)]
-toListP = map swap . Map.toList
-
-fromListP :: [(a, Monomial)] -> Poly a
-fromListP = Map.fromList . map swap
-
-canonP :: (Ringoid a, CRingoid a, Canon a) => Poly a -> Either AlgErr (Poly a)
-canonP = rSum . map (fromListP . (:[]) . (\(a,m) -> (a, canon m))) . toListP . canon
-
-
-{- Construct -}
-
-nullP :: Poly a
-nullP = fromListP []
-
-constP :: a -> Poly a
-constP c = fromListP [(c, identityM)]
-
-oneP :: (URingoid a) => Poly a
-oneP = fromListP [(rOne, identityM)]
-
-varP :: (URingoid a) => Variable -> Poly a
-varP x = fromListP [(rOne, varM x)]
-
-
 {- Query -}
-
-coefficientsP :: Poly a -> [a]
-coefficientsP = map fst . toListP
-
-isZeroP :: Poly a -> Bool
-isZeroP = null . toListP
-
-variablesP :: Poly a -> [Variable]
-variablesP = foldr union [] . map (supportM . snd) . toListP
-
-isUnivariateP :: Poly a -> Bool
-isUnivariateP p = case variablesP p of
-  []  -> True
-  [_] -> True
-  _   -> False
-
-isConstantP :: Poly a -> Bool
-isConstantP = null . variablesP
 
 coefAtP :: Monomial -> Poly a -> Maybe a
 coefAtP m p = Map.lookup m p
-
-
-{- Monad-ish -}
-
-mapVar :: (Monomial -> Monomial) -> Poly a -> Poly a
-mapVar = Map.mapKeys
-
-mapCoef :: (a -> b) -> Poly a -> Poly b
-mapCoef = Map.map
-
-polySeq :: (Functor m, Monad m) => Poly (m a) -> m (Poly a)
-polySeq p = fmap Map.fromList $ sequence $ map seqSnd $ Map.toList p
-
-
--- List of terms using the supplied monomial order
-termsByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> [(a, Monomial)]
-termsByP ord = (sortBy foo) . toListP
-  where foo (_,m1) (_,m2) = ord m1 m2
-
-leadingTermByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr (a, Monomial)
-leadingTermByP ord p = do
-  let foo (_,m1) (_,m2) = ord m1 m2
-  let ts = toListP p
-  case ts of
-    [] -> Left ZeroPolynomial
-    _  -> return $ maximumBy foo ts
-
-leadingCoefByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr a
-leadingCoefByP ord p = do
-  (a,_) <- leadingTermByP ord p
-  return a
-
-degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr Natural
-degreeByP ord p = do
-  (_,m) <- leadingTermByP ord p
-  return $ multidegM m
-
-leadingTermByRevLexP :: Poly a -> Either AlgErr (a, Monomial)
-leadingTermByRevLexP = leadingTermByP revlexM
-
-leadingCoefByRevLexP :: Poly a -> Either AlgErr a
-leadingCoefByRevLexP = leadingCoefByP revlexM
-
-degreeByRevLexP :: Poly a -> Either AlgErr Natural
-degreeByRevLexP = degreeByP revlexM
 
 
 
@@ -279,32 +329,7 @@ degreeByRevLexP = degreeByP revlexM
 fromCoefsP :: (Ringoid a) => Monomial -> [a] -> Poly a
 fromCoefsP m cs = fromListP $ filter (\(a,_) -> not $ rIsZero a) $ zip cs (powersM m)
 
-mulMonomialP :: Monomial -> Poly a -> Poly a
-mulMonomialP x = mapVar (multiplyM x)
 
-mulCoefP :: (Ringoid a, CRingoid a) => a -> Poly a -> Either AlgErr (Poly a)
-mulCoefP a = polySeq . mapCoef (rMul a)
-
-mulTermP :: (Ringoid a, CRingoid a) => (a, Monomial) -> Poly a -> Either AlgErr (Poly a)
-mulTermP (a,x) p = mulCoefP a $ mulMonomialP x p
-
-addP :: (Ringoid a) => Poly a -> Poly a -> Either AlgErr (Poly a)
-addP p q = polySeq $ Map.unionWith (opM2 rAdd) (mapCoef return p) (mapCoef return q)
-
-sumP :: (Ringoid a) => [Poly a] -> Either AlgErr (Poly a)
-sumP = foldM addP nullP
-
-negP :: (Ringoid a) => Poly a -> Poly a
-negP p = mapCoef rNeg p
-
-multiplyP :: (Ringoid a, CRingoid a) => Poly a -> Poly a -> Either AlgErr (Poly a)
-multiplyP p q = (sequence . map (`mulTermP` p) . toListP $ q) >>= sumP
-
-productP :: (Ringoid a, CRingoid a, URingoid a) => [Poly a] -> Either AlgErr (Poly a)
-productP = foldM multiplyP oneP
-
-powerP :: (Ringoid a, CRingoid a, URingoid a) => Poly a -> Integer -> Either AlgErr (Poly a)
-powerP p n = productP [p | _ <- [1..n]]
 
 fromRootsP :: (Ringoid a, CRingoid a, URingoid a) => Variable -> [a] -> Either AlgErr (Poly a)
 fromRootsP x cs = do
@@ -323,53 +348,16 @@ toScalarP q
   | otherwise = Left (PolyNotConstant "")
 
 
-{-----------}
-{- Ringoid -}
-{-----------}
 
-instance (Ringoid a, CRingoid a) => Ringoid (Poly a) where
-  rAdd p q = case addP p q of
-    Left err -> Left (RingoidAddErr $ show err)
-    Right x  -> return x
-
-  rMul p q = case multiplyP p q of
-    Left err -> Left (RingoidMulErr $ show err)
-    Right x  -> return x
-
-  rNeg = negP
-
-  rIsZero = and . map (rIsZero . fst) . toListP
-
-  rZero = nullP
-  rNeutOf _ = return nullP
-  rLAnnOf _ = return nullP
-  rRAnnOf _ = return nullP
 
 
 instance (Ringoid a, Canon a) => Canon (Poly a) where
   canon p = fromListP $ filter (\(a,_) -> not $ rIsZero a) $ map (\(a,m) -> (canon a, m)) $ toListP p
 
 
-instance (Ringoid a, CRingoid a) => CRingoid (Poly a)
 
 
-instance (Ringoid a, CRingoid a, URingoid a) => URingoid (Poly a) where
-  rOne = oneP
-  rIsOne = error "rIsOne: Polynomial"
 
-  rIsUnit = error "rIsUnit: Polynomial"
-
-  rInv = error "rInv: Polynomial"
-
-  rLOneOf _ = return oneP
-  rROneOf _ = return oneP
-
-  rInjInt n = do
-    k <- rInjInt n
-    return $ constP k
-
-contentP :: (Ringoid t, GCDoid t) => Poly t -> Either AlgErr t
-contentP = rGCDs . coefficientsP
 
 
 -- Pretty-print a polynomial over any set
@@ -389,24 +377,8 @@ showStrP = showByP revlexM id
 
 {- Evaluation -}
 
-evalTermAtPolyP :: (Ringoid a, CRingoid a, URingoid a)
-  => Poly a -> Variable -> (a, Monomial) -> Either AlgErr (Poly a)
-evalTermAtPolyP p x (a,m) = do
-  let k = x `degOfM` m
-  q <- powerP p k
-  let n = (a, removeVarM x m)
-  mulTermP n q
 
-evalPolyAtPolyP :: (Ringoid a, CRingoid a, URingoid a)
-  => Poly a -> Variable -> Poly a -> Either AlgErr (Poly a)
-evalPolyAtPolyP p x = join . fmap sumP . sequence . map (evalTermAtPolyP p x) . toListP
 
-evalPolyAtPolysP :: (Ringoid a, CRingoid a, URingoid a)
-  => [(Variable, Poly a)] -> Poly a -> Either AlgErr (Poly a)
-evalPolyAtPolysP [] p = Right p
-evalPolyAtPolysP ((x,q):xs) p = do
-  s <- evalPolyAtPolyP q x p
-  evalPolyAtPolysP xs s
 
 evalTermAtScalarP :: (Ringoid a, CRingoid a, URingoid a)
   => a -> Variable -> (a, Monomial) -> Either AlgErr (a, Monomial)
@@ -513,3 +485,5 @@ instance (Ringoid a, CRingoid a, URingoid a, Canon a) => EDoid (Poly a) where
 
 instance (Ringoid a, CRingoid a, URingoid a, Canon a) => BDoid (Poly a) where
   rBezout = rEuclidBezout
+
+-}
