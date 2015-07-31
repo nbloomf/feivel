@@ -708,15 +708,22 @@ instance UFDoid Integer where
 instance EDoid Integer where
   rNorm a = return (abs a)
 
+  rDivAlg a 1 = return (a,0)
+  rDivAlg a (-1) = return (-a,0)
+  rDivAlg 0 b = return (0,0)
   rDivAlg _ 0 = Left (RingoidDivideByZeroErr "")
   rDivAlg a b
+    | b < 0 = do
+        (q,r) <- rDivAlg a (-b)
+        return (-q, r)
     | a >= 0 = do
         let q = (signum b) * (quot a (abs b))
         let r = mod a (abs b)
         return (q,r)
     | otherwise = do
-        let q = negate $ (signum b) * ((quot (-a) (abs b)) + 1)
-        let r = (abs b) - (mod (-a) (abs b))
+        let t = mod (-a) (abs b)
+        let q = negate $ (signum b) * ((quot (-a) (abs b)) + (if t==0 then 0 else 1))
+        let r = if t==0 then 0 else (abs b) - t
         return (q,r)
 
 

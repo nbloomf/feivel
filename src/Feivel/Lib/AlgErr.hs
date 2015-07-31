@@ -42,6 +42,7 @@ data AlgErr
   | PolyNotConstant String
   | PolyDivByZero String
   | PolyNotUnivariate
+  | ZeroPolynomial
 
   -- Structural Errors
   | NullMatrix String

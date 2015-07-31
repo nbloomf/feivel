@@ -20,6 +20,7 @@ module Tests.Lib.Data.Integer where
 
 import Test.Tasty (TestTree, testGroup)
 import Test.Tasty.QuickCheck (arbitrary)
+import Test.QuickCheck
 
 import Tests.Util
 import Tests.Lib.Ring
@@ -36,6 +37,7 @@ testInteger = testGroup "Integer"
   , testCRingoid (0::Integer)
   , testURingoid (0::Integer)
   , testORingoid (0::Integer)
+  , testEDoid    (0::Integer)
   , testGCDoid   (0::Integer)
   ]
 
@@ -58,6 +60,12 @@ instance ORingoidArb Integer
 instance GCDoidArb Integer where
   rGCDLNeut _ = arbitrary >>= \a -> return (0,a)
   rGCDRNeut _ = arbitrary >>= \a -> return (a,0)
+
+instance EDoidArb Integer where
+  rQuotRem _ = do
+    a <- arbitrary
+    NonZero b <- arbitrary
+    return (a,b)
 
 
 {-

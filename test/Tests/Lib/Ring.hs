@@ -105,6 +105,11 @@ testGCDoid t = testGroup "GCDoid Structure"
   , testProperty "a;0 ~~ a            " $ prop_rGCD_rneut        t
   ]
 
+testEDoid :: (RingoidArb t, EDoidArb t, Show t) => t -> TestTree
+testEDoid t = testGroup "EDoid Structure"
+  [ testProperty "Division Algorithm" $ prop_rQuotRem t
+  ]
+
 testBipRingoid :: (RingoidArb t, BipRingoidArb t, Show t) => t -> TestTree
 testBipRingoid t = testGroup "BipRingoid Structure"
   [ testProperty "(a÷b)÷c == a÷(b÷c)  " $ prop_rBipIn_assoc       t
@@ -260,6 +265,17 @@ class (URingoidAssoc t, GCDoid t, Arbitrary t) => GCDoidArb t where
   rGCDIdemp     _ = arbitrary
   rMulDistLrGCD a = arb3 a
   rMulDistRrGCD a = arb3 a
+
+
+
+{-------------}
+{- :EDoidArb -}
+{-------------}
+
+
+class (Ringoid t, EDoid t, Arbitrary t) => EDoidArb t where
+  rQuotRem :: t -> Gen (t,t) -- a and b are compatible for division algorithm and b /= 0
+
 
 
 {------------------}
@@ -429,6 +445,16 @@ prop_rMul_ldist_rGCD t = forAll (rMulDistLrGCD t) (rMul `isLDistributiveOverBy` 
 
 prop_rMul_rdist_rGCD :: (URingoidAssoc t, RingoidArb t, GCDoidArb t, Show t) => t -> Property
 prop_rMul_rdist_rGCD t = forAll (rMulDistRrGCD t) (rMul `isRDistributiveOverBy` rGCD $ rAssoc)
+
+
+
+{----------}
+{- :EDoid -}
+{----------}
+
+prop_rQuotRem :: (Ringoid t, EDoid t, EDoidArb t, Show t) => t -> Property
+prop_rQuotRem t = forAll (rQuotRem t) (testDivAlgBy rDivAlg rMul rAdd rNorm rEQ rIsZero)
+
 
 
 {---------------}

@@ -244,23 +244,31 @@ termsByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> [(a, Monomial)]
 termsByP ord = (sortBy foo) . toListP
   where foo (_,m1) (_,m2) = ord m1 m2
 
-leadingTermByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> (a, Monomial)
-leadingTermByP ord = (maximumBy foo) . toListP
-  where foo (_,m1) (_,m2) = ord m1 m2
+leadingTermByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr (a, Monomial)
+leadingTermByP ord p = do
+  let foo (_,m1) (_,m2) = ord m1 m2
+  let ts = toListP p
+  case ts of
+    [] -> Left ZeroPolynomial
+    _  -> return $ maximumBy foo ts
 
-leadingCoefByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> a
-leadingCoefByP ord = fst . leadingTermByP ord
+leadingCoefByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr a
+leadingCoefByP ord p = do
+  (a,_) <- leadingTermByP ord p
+  return a
 
-degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Natural
-degreeByP ord = multidegM . snd . leadingTermByP ord
+degreeByP :: (Monomial -> Monomial -> Ordering) -> Poly a -> Either AlgErr Natural
+degreeByP ord p = do
+  (_,m) <- leadingTermByP ord p
+  return $ multidegM m
 
-leadingTermByRevLexP :: Poly a -> (a, Monomial)
+leadingTermByRevLexP :: Poly a -> Either AlgErr (a, Monomial)
 leadingTermByRevLexP = leadingTermByP revlexM
 
-leadingCoefByRevLexP :: Poly a -> a
+leadingCoefByRevLexP :: Poly a -> Either AlgErr a
 leadingCoefByRevLexP = leadingCoefByP revlexM
 
-degreeByRevLexP :: Poly a -> Natural
+degreeByRevLexP :: Poly a -> Either AlgErr Natural
 degreeByRevLexP = degreeByP revlexM
 
 
@@ -268,8 +276,8 @@ degreeByRevLexP = degreeByP revlexM
 
 {- Arithmetic -}
 
-fromCoefsP :: Monomial -> [a] -> Poly a
-fromCoefsP m cs = fromListP $ zip cs (powersM m)
+fromCoefsP :: (Ringoid a) => Monomial -> [a] -> Poly a
+fromCoefsP m cs = fromListP $ filter (\(a,_) -> not $ rIsZero a) $ zip cs (powersM m)
 
 mulMonomialP :: Monomial -> Poly a -> Poly a
 mulMonomialP x = mapVar (multiplyM x)
@@ -465,34 +473,43 @@ univariateLongDiv a b
   | rIsZero a = return (rZero, rZero)
   | rIsZero b = Left $ PolyDivByZero "univariateLongDiv 3"
   | not (isUnivariateP a) || not (isUnivariateP b) = Left $ PolyDivErr "univariateLongDiv 1"
-  | degreeByP glexM a < degreeByP glexM b = return (rZero, a)
   | (variablesP a) /= (variablesP b) = Left $ PolyDivErr "univariateLongDiv 2"
+  | isConstantP b = do
+      b0 <- leadingCoefByP glexM b
+      binv <- rInv b0
+      q <- rMul a (constP binv)
+      return (q, rZero)
   | otherwise = do
       let [x] = variablesP a
-      let n = degreeByP glexM a
-      let m = degreeByP glexM b
-      let an = leadingCoefByP glexM a
-      let bm = leadingCoefByP glexM b
-      bminv <- rInv bm
-      c <- rMul bminv an
-      t <- natSub n m
-      let h = fromListP [(c, fromListM [(x, t)])]
-      s <- rMul h b
-      abar <- rSub a s >>= canonP
-      (qbar, r) <- univariateLongDiv abar b
-      q <- rAdd qbar h
-      Right (q,r)
+      n <- degreeByP glexM a
+      m <- degreeByP glexM b
+      if n < m
+        then return (rZero, a)
+        else do
+          an <- leadingCoefByP glexM a
+          bm <- leadingCoefByP glexM b
+          bminv <- rInv bm
+          c <- rMul bminv an
+          t <- natSub n m
+          let h = fromListP [(c, fromListM [(x, t)])]
+          s <- rMul h b
+          abar <- rSub a s >>= canonP
+          (qbar, r) <- univariateLongDiv abar b
+          q <- rAdd qbar h
+          Right (q,r)
 
 
 
 instance (Ringoid a, CRingoid a, URingoid a, Canon a) => EDoid (Poly a) where
-  rDivAlg = univariateLongDiv
+  rDivAlg a b = do
+    p <- canonP a
+    q <- canonP b
+    univariateLongDiv p q
 
   rNorm p
     | not $ isUnivariateP p = Left PolyNotUnivariate
-    | otherwise = return $ unNat $ degreeByP glexM p
+    | otherwise = fmap unNat $ degreeByP glexM p
 
 
 instance (Ringoid a, CRingoid a, URingoid a, Canon a) => BDoid (Poly a) where
   rBezout = rEuclidBezout
-

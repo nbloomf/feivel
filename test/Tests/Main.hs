@@ -61,6 +61,7 @@ main = defaultMain $ testGroup "Property Tests"
       , testGroup "Rat Polynomial"
           [ testRingoidPoly  (0:/:1)
           , testCRingoidPoly (0:/:1)
+          --, testEDoidPoly    (0:/:1)
           ]
 
       , testGroup "ZZMod Polynomial"

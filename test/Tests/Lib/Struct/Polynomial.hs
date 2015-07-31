@@ -49,6 +49,9 @@ testRingoidPoly t = testRingoid (constP t)
 testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
 testCRingoidPoly t = testCRingoid (constP t)
 
+testEDoidPoly :: (RingoidArb t, CRingoidArb t, URingoidArb t, Canon t, Show t) => t -> TestTree
+testEDoidPoly t = testEDoid (constP t)
+
 
 {---------------}
 {- :Generators -}
@@ -142,3 +145,16 @@ instance (RingoidArb a, CRingoidArb a) => CRingoidArb (Poly a) where
     p1 <- arbRingoidPoly x
     p2 <- arbRingoidPoly x
     return (p1, p2)
+
+instance (RingoidArb a, CRingoidArb a, URingoidArb a, Canon a) => EDoidArb (Poly a) where
+  rQuotRem _ = do
+    t  <- choose (1, g_MAX_NUM_TERMS)
+    as <- vectorOf t arbitrary
+    let a = fromCoefsP varX as
+    u  <- choose (1, g_MAX_NUM_TERMS)
+    cs <- vectorOf u arbitrary
+    let bs = if all rIsZero cs
+               then cs ++ [rOne]
+               else cs
+    let b = fromCoefsP varX bs
+    return (a,b)
