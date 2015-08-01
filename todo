@@ -30,7 +30,7 @@ Feature Ideas
 * Matrix: Smith normal form (uses bezout)
 * Matrix: Shuffle rows/cols by permutation
 * Matrix: Build permutation matrix
-* Polynomial: degree, division algorithm, gcd, bezout
+* Polynomial: gcd, bezout
 * Permutation: Choose random permutation (of Sn? of a list?)
 * Permutation: Orbits {{t}}
 * Permutation: Shape {int}
@@ -42,20 +42,12 @@ Feature Ideas
 * Type: cyclotomic numbers
 * Type: tuples? (constructor)
 * Type: trees (constructor)
-* Arch: Groupoid class
 * Arch: type synonyms
-* Refactor: Want to enforce grammar with type constraints
-  1: (started) Make IntExpr et. al. newtypes (needed for recursive type def,
-     which is needed for class constraints on grammar)
-  2: Split parameters on grammar types with class constraints,
-     e.g. IntExprType t => blah (recover type safety with modularity)
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
   2: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
   3: Rename Typed class to HasType
-  4: (started) Clean up parsers (Fun and FunT are now the same?)
   5: data Typed t = t :# Type (maybe. how to handle function types)
-  6: Separate put and putVal
   7: use RankNTypes to make dispatch helper functions
 * CL option: --type blah (default is doc) to specify parser
 * pure :: a -> Bool (randomness or side-effect free)
