@@ -23,7 +23,7 @@ module Feivel.Grammar.Type (
   Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf
 ) where
 
-import Feivel.Lib (Rat, Text, ZZModulo(..), Matrix, Poly, coefficientsP, toListM)
+import Feivel.Lib
 
 import Control.Monad (foldM)
 import Control.Monad.Instances ()
@@ -239,7 +239,7 @@ instance Typed Rat      where typeOf _              = QQ
 instance Typed ZZModulo where typeOf (ZZModulo _ n) = ZZMod n
 
 instance (Typed a) => Typed (Poly a) where
-  typeOf x = case coefficientsP x of
+  typeOf x = case getCoefficients x of
     (c:_) -> PolyOver (typeOf c)
     []    -> PolyOver XX
 

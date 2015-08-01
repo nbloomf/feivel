@@ -24,15 +24,15 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph PolyExpr where
-  toGlyph (PolyExpr (PolyConst _ px :@ _)) = do
+  toGlyph (PolyExpr (PolyConst _ px :@ loc)) = do
     qx <- polySeq $ mapCoef toGlyph px
-    return $ showStrP qx
+    tryEvalM loc $ showStrP qx
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
   eval (PolyExpr (PolyConst t p :@ loc)) = do
-    q <- polySeq $ fmap eval p
+    q <- polySeq $ mapCoef eval p
     return $ PolyExpr $ PolyConst t q :@ loc
 
   {- :Common -}
@@ -54,43 +54,43 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
       _ -> reportErr loc $ ListExpected t
 
   eval (PolyExpr (PolyAdd u a b :@ loc)) = do
-    let addPoly x = lift2 loc a b (rAddT (constP x))
+    let addPoly x = lift2 loc a b (rAddT (constPoly x))
     case u of
       ZZ          -> addPoly zeroZZ
       QQ          -> addPoly zeroQQ
       BB          -> addPoly zeroBB
       (ZZMod n)   -> addPoly (zeroMod n)
-      PolyOver ZZ -> addPoly (constP zeroZZ)
-      PolyOver QQ -> addPoly (constP zeroQQ)
-      PolyOver BB -> addPoly (constP zeroBB)
+      PolyOver ZZ -> addPoly (constPoly zeroZZ)
+      PolyOver QQ -> addPoly (constPoly zeroQQ)
+      PolyOver BB -> addPoly (constPoly zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolySub u a b :@ loc)) = do
-    let subPoly x = lift2 loc a b (rSubT (constP x))
+    let subPoly x = lift2 loc a b (rSubT (constPoly x))
     case u of
       ZZ          -> subPoly zeroZZ
       QQ          -> subPoly zeroQQ
       BB          -> subPoly zeroBB
       (ZZMod n)   -> subPoly (zeroMod n)
-      PolyOver ZZ -> subPoly (constP zeroZZ)
-      PolyOver QQ -> subPoly (constP zeroQQ)
-      PolyOver BB -> subPoly (constP zeroBB)
+      PolyOver ZZ -> subPoly (constPoly zeroZZ)
+      PolyOver QQ -> subPoly (constPoly zeroQQ)
+      PolyOver BB -> subPoly (constPoly zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyMul u a b :@ loc)) = do
-    let mulPoly x = lift2 loc a b (rMulT (constP x))
+    let mulPoly x = lift2 loc a b (rMulT (constPoly x))
     case u of
       ZZ          -> mulPoly zeroZZ
       QQ          -> mulPoly zeroQQ
       BB          -> mulPoly zeroBB
       (ZZMod n)   -> mulPoly (zeroMod n)
-      PolyOver ZZ -> mulPoly (constP zeroZZ)
-      PolyOver QQ -> mulPoly (constP zeroQQ)
-      PolyOver BB -> mulPoly (constP zeroBB)
+      PolyOver ZZ -> mulPoly (constPoly zeroZZ)
+      PolyOver QQ -> mulPoly (constPoly zeroQQ)
+      PolyOver BB -> mulPoly (constPoly zeroBB)
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyQuo u a b :@ loc)) = do
-    let quoPoly x = lift2 loc a b (rQuoT (constP x))
+    let quoPoly x = lift2 loc a b (rQuoT (constPoly x))
     case u of
       ZZ          -> quoPoly zeroZZ
       QQ          -> quoPoly zeroQQ
@@ -99,7 +99,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyRem u a b :@ loc)) = do
-    let remPoly x = lift2 loc a b (rRemT (constP x))
+    let remPoly x = lift2 loc a b (rRemT (constPoly x))
     case u of
       ZZ          -> remPoly zeroZZ
       QQ          -> remPoly zeroQQ
@@ -108,7 +108,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyNeg u a :@ loc)) = do
-    let negPoly x = lift1 loc a (rNegT (constP x))
+    let negPoly x = lift1 loc a (rNegT (constPoly x))
     case u of
       ZZ      -> negPoly zeroZZ
       QQ      -> negPoly zeroQQ
@@ -117,7 +117,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
       _ -> reportErr loc $ NumericPolynomialExpected u
 
   eval (PolyExpr (PolyPow u a b :@ loc)) = do
-    let powPoly x = lift2 loc a b (rPowT (constP x))
+    let powPoly x = lift2 loc a b (rPowT (constPoly x))
     case u of
       ZZ      -> powPoly zeroZZ
       QQ      -> powPoly zeroQQ
@@ -130,18 +130,18 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
     case t of
       ListOf ZZ -> do
         as <- eval cs >>= getVal :: EvalM [Integer]
-        p  <- tryEvalM loc $ fromRootsP x as
-        let q = fmap (put loc) p
+        p  <- tryEvalM loc $ fromRoots x as
+        let q = mapCoef (put loc) p
         putTypeVal ZZ loc q >>= getVal
       ListOf QQ -> do
         as <- eval cs >>= getVal :: EvalM [Rat]
-        p  <- tryEvalM loc $ fromRootsP x as
-        let q = fmap (put loc) p
+        p  <- tryEvalM loc $ fromRoots x as
+        let q = mapCoef (put loc) p
         putTypeVal QQ loc q >>= getVal
       ListOf (ZZMod n) -> do
         as <- eval cs >>= getVal :: EvalM [ZZModulo]
-        p  <- tryEvalM loc $ fromRootsP x as
-        let q = fmap (put loc) p
+        p  <- tryEvalM loc $ fromRoots x as
+        let q = mapCoef (put loc) p
         putTypeVal (ZZMod n) loc q >>= getVal
       _ -> reportErr loc $ NumericListExpected t
 
@@ -153,22 +153,22 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
               b <- eval h >>= getVal :: EvalM (Poly Integer)
               return (x,b)
         ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        putTypeVal ZZ loc (fmap (put loc) c) >>= getVal
+        c  <- tryEvalM loc $ evalPolyAtPolys ks a
+        putTypeVal ZZ loc (mapCoef (put loc) c) >>= getVal
       QQ -> do
         a <- eval p >>= getVal :: EvalM (Poly Rat)
         let foo (x,h) = do
               b <- eval h >>= getVal :: EvalM (Poly Rat)
               return (x,b)
         ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        putTypeVal QQ loc (fmap (put loc) c) >>= getVal
+        c  <- tryEvalM loc $ evalPolyAtPolys ks a
+        putTypeVal QQ loc (mapCoef (put loc) c) >>= getVal
       ZZMod n -> do
         a <- eval p >>= getVal :: EvalM (Poly ZZModulo)
         let foo (x,h) = do
               b <- eval h >>= getVal :: EvalM (Poly ZZModulo)
               return (x,b)
         ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolysP ks a
-        putTypeVal (ZZMod n) loc (fmap (put loc) c) >>= getVal
+        c  <- tryEvalM loc $ evalPolyAtPolys ks a
+        putTypeVal (ZZMod n) loc (mapCoef (put loc) c) >>= getVal
       _ -> reportErr loc $ NumericPolynomialExpected u

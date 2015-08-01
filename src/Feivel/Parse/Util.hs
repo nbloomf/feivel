@@ -25,6 +25,7 @@ module Feivel.Parse.Util (
 
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
+  pFun1T',
 
   pVarExpr, pTypeKeyExpr, pMacroExprT, pTerm, opParser2, opParser1, pIfThenElseExprT
 ) where
@@ -161,6 +162,17 @@ pFun2T fun pA pB f = do
   b <- pB t
   keyword ")"
   return (f a b)
+
+
+pFun1T' :: String -> (Type -> ParseM a) -> (Type -> a -> b) -> ParseM b
+pFun1T' fun pA f = do
+  try $ keyword fun
+  keyword "("
+  t <- pType
+  keyword ";"
+  a <- pA t
+  keyword ")"
+  return (f t a)
 
 
 -- Unary Operators (for expression parser)

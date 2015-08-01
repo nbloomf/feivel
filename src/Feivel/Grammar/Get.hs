@@ -25,7 +25,7 @@ module Feivel.Grammar.Get (
 
 import Feivel.Grammar.Expr
 import Feivel.Grammar.Util
-import Feivel.Lib (mSeq, polySeq, mapPerm, seqPerm)
+import Feivel.Lib
 
 
 class Get a where
@@ -34,6 +34,7 @@ class Get a where
 data GetErr
   = GetTypeMismatch { typeExpected :: Type, typeReceived :: Type }
   | GetUnevaluatedExpression
+  | GetAlgErr AlgErr
   deriving (Eq, Show)
 
 
@@ -172,7 +173,7 @@ instance (Get a) => Get (Matrix a) where
 instance (Get a) => Get (Poly a) where
   get expr = do
     x <- getPoly expr
-    polySeq $ fmap get x
+    polySeq $ mapCoef get x
     where
       getPoly :: Expr -> Either GetErr (Poly Expr)
       getPoly w = do

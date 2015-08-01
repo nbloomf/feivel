@@ -18,8 +18,12 @@
 
 module Feivel.Lib.Data (
   module Feivel.Lib.Data.Rat,
-  module Feivel.Lib.Data.ZZMod
+  module Feivel.Lib.Data.ZZMod,
+  module Feivel.Lib.Data.Natural,
+  module Feivel.Lib.Data.Monomial
 ) where
 
 import Feivel.Lib.Data.Rat
 import Feivel.Lib.Data.ZZMod
+import Feivel.Lib.Data.Natural
+import Feivel.Lib.Data.Monomial

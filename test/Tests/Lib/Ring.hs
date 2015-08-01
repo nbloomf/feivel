@@ -107,7 +107,8 @@ testGCDoid t = testGroup "GCDoid Structure"
 
 testEDoid :: (RingoidArb t, EDoidArb t, Show t) => t -> TestTree
 testEDoid t = testGroup "EDoid Structure"
-  [ testProperty "Division Algorithm" $ prop_rQuotRem t
+  [ testProperty "a = qb + r           " $ prop_DivAlg_quot t
+  , testProperty "r == 0 or N(r) < N(b)" $ prop_DivAlg_rem  t
   ]
 
 testBipRingoid :: (RingoidArb t, BipRingoidArb t, Show t) => t -> TestTree
@@ -452,8 +453,11 @@ prop_rMul_rdist_rGCD t = forAll (rMulDistRrGCD t) (rMul `isRDistributiveOverBy` 
 {- :EDoid -}
 {----------}
 
-prop_rQuotRem :: (Ringoid t, EDoid t, EDoidArb t, Show t) => t -> Property
-prop_rQuotRem t = forAll (rQuotRem t) (testDivAlgBy rDivAlg rMul rAdd rNorm rEQ rIsZero)
+prop_DivAlg_rem :: (Ringoid t, EDoid t, EDoidArb t, Show t) => t -> Property
+prop_DivAlg_rem t = forAll (rQuotRem t) (testDivAlgRem rDivAlg rNorm rIsZero)
+
+prop_DivAlg_quot :: (Ringoid t, EDoid t, EDoidArb t, Show t) => t -> Property
+prop_DivAlg_quot t = forAll (rQuotRem t) (testDivAlgQuot rDivAlg rMul rAdd rEQ)
 
 
 

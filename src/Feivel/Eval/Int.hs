@@ -126,7 +126,14 @@ instance (Eval Expr, Eval BoolExpr) => Eval IntExpr where
       MatOf u -> reportErr loc $ FieldMatrixExpected u
       u -> reportErr loc $ MatrixExpected u
 
+  eval (IntExpr (PolyDegree u p :@ loc)) = do
+    case u of
+      QQ -> do
+        q <- eval p >>= getVal :: EvalM (Poly Rat)
+        Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
+        putVal loc n >>= getVal
+
   eval (IntExpr (IntContent p :@ loc)) = do
     q <- eval p >>= getVal :: EvalM (Poly Integer)
-    c <- tryEvalM loc $ contentP q
+    c <- tryEvalM loc $ contentPoly q
     putVal loc c >>= getVal

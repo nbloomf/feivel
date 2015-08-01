@@ -68,8 +68,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> makeIdMat zeroQQ
       BB          -> makeIdMat zeroBB
       ZZMod k     -> makeIdMat (zeroMod k)
-      PolyOver ZZ -> makeIdMat (constP zeroZZ)
-      PolyOver QQ -> makeIdMat (constP zeroQQ)
+      PolyOver ZZ -> makeIdMat (constPoly zeroZZ)
+      PolyOver QQ -> makeIdMat (constPoly zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatSwapE u n h k :@ loc)) = do
@@ -79,8 +79,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> makeSwapMat zeroQQ
       BB          -> makeSwapMat zeroBB
       ZZMod n     -> makeSwapMat (zeroMod n)
-      PolyOver ZZ -> makeSwapMat (constP zeroZZ)
-      PolyOver QQ -> makeSwapMat (constP zeroQQ)
+      PolyOver ZZ -> makeSwapMat (constPoly zeroZZ)
+      PolyOver QQ -> makeSwapMat (constPoly zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatScaleE u n h r :@ loc)) = do
@@ -90,9 +90,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> makeScaleMat zeroQQ
       BB          -> makeScaleMat zeroBB
       ZZMod n     -> makeScaleMat (zeroMod n)
-      PolyOver ZZ -> makeScaleMat (constP zeroZZ)
-      PolyOver QQ -> makeScaleMat (constP zeroQQ)
-      PolyOver BB -> makeScaleMat (constP zeroBB)
+      PolyOver ZZ -> makeScaleMat (constPoly zeroZZ)
+      PolyOver QQ -> makeScaleMat (constPoly zeroQQ)
+      PolyOver BB -> makeScaleMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatAddE u n h k r :@ loc)) = do
@@ -102,9 +102,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> makeAddMat zeroQQ
       BB          -> makeAddMat zeroBB
       ZZMod d     -> makeAddMat (zeroMod d)
-      PolyOver ZZ -> makeAddMat (constP zeroZZ)
-      PolyOver QQ -> makeAddMat (constP zeroQQ)
-      PolyOver BB -> makeAddMat (constP zeroBB)
+      PolyOver ZZ -> makeAddMat (constPoly zeroZZ)
+      PolyOver QQ -> makeAddMat (constPoly zeroQQ)
+      PolyOver BB -> makeAddMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatShuffleRows u m :@ loc)) = do
@@ -140,9 +140,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> addMat zeroQQ
       BB          -> addMat zeroBB
       ZZMod n     -> addMat (zeroMod n)
-      PolyOver ZZ -> addMat (constP zeroZZ)
-      PolyOver QQ -> addMat (constP zeroQQ)
-      PolyOver BB -> addMat (constP zeroBB)
+      PolyOver ZZ -> addMat (constPoly zeroZZ)
+      PolyOver QQ -> addMat (constPoly zeroQQ)
+      PolyOver BB -> addMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatNeg u a :@ loc)) = do
@@ -152,9 +152,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> negMat zeroQQ
       BB          -> negMat zeroBB
       ZZMod n     -> negMat (zeroMod n)
-      PolyOver ZZ -> negMat (constP zeroZZ)
-      PolyOver QQ -> negMat (constP zeroQQ)
-      PolyOver BB -> negMat (constP zeroBB)
+      PolyOver ZZ -> negMat (constPoly zeroZZ)
+      PolyOver QQ -> negMat (constPoly zeroQQ)
+      PolyOver BB -> negMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatTrans u a :@ loc)) = do
@@ -169,9 +169,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> mulMat zeroQQ
       BB          -> mulMat zeroBB
       (ZZMod n)   -> mulMat (zeroMod n)
-      PolyOver ZZ -> mulMat (constP zeroZZ)
-      PolyOver QQ -> mulMat (constP zeroQQ)
-      PolyOver BB -> mulMat (constP zeroBB)
+      PolyOver ZZ -> mulMat (constPoly zeroZZ)
+      PolyOver QQ -> mulMat (constPoly zeroQQ)
+      PolyOver BB -> mulMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatPow u m n :@ loc)) = do
@@ -181,9 +181,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> powMat zeroQQ
       BB          -> powMat zeroBB
       (ZZMod k)   -> powMat (zeroMod k)
-      PolyOver ZZ -> powMat (constP zeroZZ)
-      PolyOver QQ -> powMat (constP zeroQQ)
-      PolyOver BB -> powMat (constP zeroBB)
+      PolyOver ZZ -> powMat (constPoly zeroZZ)
+      PolyOver QQ -> powMat (constPoly zeroQQ)
+      PolyOver BB -> powMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatSwapRows u m a b :@ loc)) = do
@@ -207,9 +207,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> scaleRowMat zeroQQ
       BB          -> scaleRowMat zeroBB
       (ZZMod n)   -> scaleRowMat (zeroMod n)
-      PolyOver ZZ -> scaleRowMat (constP zeroZZ)
-      PolyOver QQ -> scaleRowMat (constP zeroQQ)
-      PolyOver BB -> scaleRowMat (constP zeroBB)
+      PolyOver ZZ -> scaleRowMat (constPoly zeroZZ)
+      PolyOver QQ -> scaleRowMat (constPoly zeroQQ)
+      PolyOver BB -> scaleRowMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatScaleCol u m a h :@ loc)) = do
@@ -219,9 +219,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       QQ          -> scaleColMat zeroQQ
       BB          -> scaleColMat zeroBB
       (ZZMod n)   -> scaleColMat (zeroMod n)
-      PolyOver ZZ -> scaleColMat (constP zeroZZ)
-      PolyOver QQ -> scaleColMat (constP zeroQQ)
-      PolyOver BB -> scaleColMat (constP zeroBB)
+      PolyOver ZZ -> scaleColMat (constPoly zeroZZ)
+      PolyOver QQ -> scaleColMat (constPoly zeroQQ)
+      PolyOver BB -> scaleColMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
   eval (MatExpr (MatAddRow _ m a h k :@ loc)) = do

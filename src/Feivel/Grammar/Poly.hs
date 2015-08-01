@@ -41,6 +41,8 @@ data PolyExprLeaf a bool int poly
   | PolyPow Type poly int
   | PolyNeg Type poly
 
+  | PolySum Type a -- ListOf (PolyOver typ)
+
   | PolyFromRoots Type Variable a -- ListOf typ
   | PolyEvalPoly  Type poly [(Variable, poly)]
   deriving (Eq, Show)

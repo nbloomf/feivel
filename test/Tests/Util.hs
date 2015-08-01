@@ -159,23 +159,25 @@ isDistributiveUOverBy op up eq (a,b) = checkEither foo
       u <- (op a) `up` (op b)
       (op t) `eq` u
 
-
-testDivAlgBy :: (a -> a -> Either err (a,a)) -> (a -> a -> Either err a)
-  -> (a -> a -> Either err a) -> (a -> Either err Integer) -> (a -> a -> Either err Bool)
+testDivAlgRem :: (a -> a -> Either err (a,a)) -> (a -> Either err Integer)
   -> (a -> Bool) -> (a,a) -> Bool
-testDivAlgBy divAlg mul add norm eq isZero (a,b) = checkEither checkRes
+testDivAlgRem divAlg norm isZero (a,b) = checkEither remainder
+  where
+    remainder = do
+      (_,r) <- divAlg a b
+      if isZero r
+        then return True
+        else do
+          nr <- norm r
+          nb <- norm b
+          return (nr < nb)
+
+testDivAlgQuot :: (a -> a -> Either err (a,a)) -> (a -> a -> Either err a)
+  -> (a -> a -> Either err a) -> (a -> a -> Either err Bool) -> (a,a) -> Bool
+testDivAlgQuot divAlg mul add eq (a,b) = checkEither checkRes
   where
     checkRes = do
       (q,r) <- divAlg a b
       qb <- q `mul` b
       a' <- qb `add` r
-      decomp <- eq a a'
-      if decomp == False
-        then return False
-        else do
-          if isZero r
-            then return True
-            else do
-              nr <- norm r
-              nb <- norm b
-              return (nr < nb)
+      eq a a'

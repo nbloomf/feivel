@@ -23,7 +23,7 @@ module Feivel.Parse.Poly (
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Lib (nullP, fromListM, identityM, fromListP, Natural(..), Variable, Monomial)
+import Feivel.Lib
 
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 import Text.ParserCombinators.Parsec hiding (try)
@@ -42,21 +42,21 @@ pPolyLiteralOf typ p = do
   keyword "("
   ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
   keyword ")"
-  return (PolyConst typ (fromListP ts))
+  return (PolyConst typ (fromTerms ts))
   where
-    pPolyTerm :: ParseM a -> ParseM (a, Monomial)
+    pPolyTerm :: ParseM a -> ParseM (a, Monomial Variable)
     pPolyTerm q = do
       c <- q
-      x <- option identityM $ try (keyword ".") >> (pIdMon <|> pMonomial)
+      x <- option identity $ try (keyword ".") >> (pIdMon <|> pMonomial)
       return (c,x)
     
-    pIdMon :: ParseM Monomial
-    pIdMon = (try $ char '1') >> return identityM
+    pIdMon :: ParseM (Monomial Variable)
+    pIdMon = (try $ char '1') >> return identity
 
-    pMonomial :: ParseM Monomial
+    pMonomial :: ParseM (Monomial Variable)
     pMonomial = do
       ps <- sepBy1 pPower (try $ keyword ".")
-      return $ fromListM ps
+      return $ makeMonomial ps
     
     pPower :: ParseM (Variable, Natural)
     pPower = do
@@ -108,7 +108,7 @@ pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTa
 
         pPolyNull = do
           try $ keyword "Null"
-          return (PolyConst typ nullP)
+          return (PolyConst typ zeroPoly)
 
     polyOpTable =
       [ [ Prefix (opParser1 (PolyNeg typ) PolyExpr "neg")

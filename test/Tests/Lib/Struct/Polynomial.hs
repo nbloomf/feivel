@@ -33,6 +33,8 @@ import Test.Tasty.QuickCheck
 
 import Feivel.Lib.Struct.Polynomial
 import Feivel.Lib.Algebra.Ring
+import Feivel.Lib.Data.Monomial
+import Feivel.Lib.Data.Natural
 import Feivel.Lib.Canon
 
 import Tests.Util
@@ -43,14 +45,14 @@ import Tests.Lib.Ring
 {- :Suites -}
 {-----------}
 
-testRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
-testRingoidPoly t = testRingoid (constP t)
+testRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t, Canon t, Eq t) => t -> TestTree
+testRingoidPoly t = testRingoid (constPoly t)
 
-testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t) => t -> TestTree
-testCRingoidPoly t = testCRingoid (constP t)
+testCRingoidPoly :: (RingoidArb t, CRingoidArb t, Show t, Canon t, Eq t) => t -> TestTree
+testCRingoidPoly t = testCRingoid (constPoly t)
 
-testEDoidPoly :: (RingoidArb t, CRingoidArb t, URingoidArb t, Canon t, Show t) => t -> TestTree
-testEDoidPoly t = testEDoid (constP t)
+testEDoidPoly :: (RingoidArb t, CRingoidArb t, URingoidArb t, Canon t, Show t, Eq t) => t -> TestTree
+testEDoidPoly t = testEDoid (constPoly t)
 
 
 {---------------}
@@ -69,10 +71,10 @@ varchar =
 var :: Gen String
 var = listOf1 $ elements varchar
 
-arbPowerOf :: Variable -> Gen Monomial
+arbPowerOf :: Variable -> Gen (Monomial Variable)
 arbPowerOf x = do
   k <- arbitrary
-  return $ fromListM [(x, k)]
+  return $ makeMonomial [(x, k)]
 
 instance Arbitrary Natural where
   arbitrary = do
@@ -84,26 +86,26 @@ instance Arbitrary Variable where
     cs <- var
     return (Var cs)
 
-instance Arbitrary Monomial where
+instance Arbitrary (Monomial Variable) where
   arbitrary = do
     t  <- choose (1,5)
     xs <- vectorOf t arbitrary
     ks <- vectorOf t arbitrary
-    return $ canon $ fromListM $ zip xs ks
+    return $ canon $ makeMonomial $ zip xs ks
 
 arbRingoidPoly :: (RingoidArb t) => t -> Gen (Poly t)
 arbRingoidPoly x = do
   t  <- choose (1, g_MAX_NUM_TERMS)
   cs <- rLocalElts x t
   xs <- vectorOf t arbitrary
-  return $ fromListP $ zip cs xs
+  return $ fromTerms $ zip cs xs
 
 instance (Arbitrary a, RingoidArb a) => Arbitrary (Poly a) where
   arbitrary = do
     x  <- arbitrary
     arbRingoidPoly x
 
-instance (RingoidArb a, CRingoidArb a) => RingoidArb (Poly a) where
+instance (RingoidArb a, CRingoidArb a, Canon a, Eq a) => RingoidArb (Poly a) where
   rAddAssoc _ = do
     x  <- arbitrary
     p1 <- arbRingoidPoly x
@@ -146,15 +148,15 @@ instance (RingoidArb a, CRingoidArb a) => CRingoidArb (Poly a) where
     p2 <- arbRingoidPoly x
     return (p1, p2)
 
-instance (RingoidArb a, CRingoidArb a, URingoidArb a, Canon a) => EDoidArb (Poly a) where
+instance (RingoidArb a, CRingoidArb a, URingoidArb a, Canon a, Eq a) => EDoidArb (Poly a) where
   rQuotRem _ = do
     t  <- choose (1, g_MAX_NUM_TERMS)
     as <- vectorOf t arbitrary
-    let a = fromCoefsP varX as
+    let Right a = fromCoefficients (variable $ Var "x") as
     u  <- choose (1, g_MAX_NUM_TERMS)
     cs <- vectorOf u arbitrary
     let bs = if all rIsZero cs
                then cs ++ [rOne]
                else cs
-    let b = fromCoefsP varX bs
+    let Right b = fromCoefficients (variable $ Var "x") bs
     return (a,b)

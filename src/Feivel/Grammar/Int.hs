@@ -75,6 +75,7 @@ data IntExprLeaf a bool int
 
   -- Polynomial
   | IntContent a -- PolyOver ZZ
+  | PolyDegree Type a -- PolyOver typ
 
   -- Stats
   | IntObserveUniform  int int
