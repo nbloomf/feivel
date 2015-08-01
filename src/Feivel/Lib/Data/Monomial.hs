@@ -23,7 +23,11 @@ module Feivel.Lib.Data.Monomial (
 
   isIdentity, monomialSupport, degree, degreeOf,
 
-  multiply, monomialProduct, powers
+  multiply, monomialProduct, powers,
+
+  mLex, mRevLex, mGLex,
+
+  showSepBy
 ) where
 
 import qualified Data.Map as M
@@ -33,6 +37,9 @@ import Feivel.Lib.AlgErr
 import Feivel.Lib.Data.Natural
 import Feivel.Lib.Canon
 import Feivel.Lib.Orders
+
+{- :Constructors   -}
+{- :MonomialOrders -}
 
 
 newtype Monomial a = Monomial
