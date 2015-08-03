@@ -36,20 +36,9 @@ pPolyLiteral typ pE = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pE
 pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM PolyExpr
 pPolyConst typ pC = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pC
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr BoolExpr IntExpr PolyExpr)
-pPolyLiteralOf typ p = do
-  try $ keyword "Poly"
-  keyword "("
-  ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
-  keyword ")"
-  return (PolyConst typ (fromTerms ts))
+pMon :: ParseM (Monomial Variable)
+pMon = pIdMon <|> pMonomial
   where
-    pPolyTerm :: ParseM a -> ParseM (a, Monomial Variable)
-    pPolyTerm q = do
-      c <- q
-      x <- option identity $ try (keyword ".") >> (pIdMon <|> pMonomial)
-      return (c,x)
-    
     pIdMon :: ParseM (Monomial Variable)
     pIdMon = (try $ char '1') >> return identity
 
@@ -64,11 +53,27 @@ pPolyLiteralOf typ p = do
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pPolyExpr pE pBOOL pINT pPOLY = pTypedPolyExpr XX pE pBOOL pINT pPOLY
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr BoolExpr IntExpr PolyExpr)
+pPolyLiteralOf typ p = do
+  try $ keyword "Poly"
+  keyword "("
+  ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
+  keyword ")"
+  return (PolyConst typ (fromTerms ts))
+  where
+    pPolyTerm :: ParseM a -> ParseM (a, Monomial Variable)
+    pPolyTerm q = do
+      c <- q
+      x <- option identity $ try (keyword ".") >> pMon
+      return (c,x)
+    
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
+
+pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pPolyExpr pC pE pBOOL pINT pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pPOLY
+
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pC pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
@@ -89,8 +94,22 @@ pTypedPolyExpr typ pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTa
       , pFun2 "FromRoots" pVar (pE $ ListOf typ) (PolyFromRoots typ)
 
       , pPolyEvalPoly
+      , pPoly
       ]
       where
+        pPoly = do
+          try $ keyword "P"
+          keyword "("
+          terms <- sepBy1 foo (keyword "+")
+          keyword ")"
+          return (PolyConst typ (fromTerms terms))
+            where
+              foo = do
+                a <- pE typ
+                keyword "."
+                m <- pMon
+                return (a,m)
+
         pPolyEvalPoly = do
           try $ keyword "EvalPoly"
           keyword "("
