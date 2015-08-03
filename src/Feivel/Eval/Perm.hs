@@ -32,36 +32,37 @@ instance (Glyph Expr) => Glyph PermExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PermExpr where
-  eval (PermExpr (PermConst t p :@ loc)) = do
-    q <- seqPerm $ mapPerm eval p
-    putTypeVal t loc q >>= getVal
+  eval (PermExpr (m :@ loc)) = case m of
+    PermConst t p -> do
+      q <- seqPerm $ mapPerm eval p
+      putTypeVal t loc q >>= getVal
 
-  eval (PermExpr (PermAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
+    PermAtPos _ a t -> lift2 loc a t (foo)
+      where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
-  {- Common -}
-  eval (PermExpr (PermVar _ key :@ loc))        = eKey key loc
-  eval (PermExpr (PermAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
-  eval (PermExpr (PermMacro _ vals mac :@ loc)) = eMacro vals mac loc
-  eval (PermExpr (PermIfThenElse _ b t f :@ _)) = eIfThenElse b t f
+    {- Common -}
+    PermVar        _ key      -> eKey key loc
+    PermAtIdx      _ m h k    -> eAtIdx m h k loc
+    PermMacro      _ vals mac -> eMacro vals mac loc
+    PermIfThenElse _ b t f    -> eIfThenElse b t f
 
-  eval (PermExpr (PermRand _ ls :@ _)) = do
-    xs <- eval ls >>= getVal :: EvalM [Expr]
-    r  <- randomElementEvalM xs
-    eval r >>= getVal
+    PermRand _ ls -> do
+      xs <- eval ls >>= getVal :: EvalM [Expr]
+      r  <- randomElementEvalM xs
+      eval r >>= getVal
 
-  eval (PermExpr (PermCompose t p q :@ loc)) = do
-    let comp z = lift2 loc p q (gOpT (idOn z))
-    case t of
-      ZZ -> comp zeroZZ
-      QQ -> comp zeroQQ
-      BB -> comp zeroBB
-      _ -> error "Eval: PermCompose"
+    PermCompose t p q -> do
+      let comp z = lift2 loc p q (gOpT (idOn z))
+      case t of
+        ZZ -> comp zeroZZ
+        QQ -> comp zeroQQ
+        BB -> comp zeroBB
+        _ -> error "Eval: PermCompose"
 
-  eval (PermExpr (PermInvert t p :@ loc)) = do
-    let inver z = lift1 loc p (gInvT (idOn z))
-    case t of
-      ZZ -> inver zeroZZ
-      QQ -> inver zeroQQ
-      BB -> inver zeroBB
-      _ -> error "Eval: PermCompose"
+    PermInvert t p -> do
+      let inver z = lift1 loc p (gInvT (idOn z))
+      case t of
+        ZZ -> inver zeroZZ
+        QQ -> inver zeroQQ
+        BB -> inver zeroBB
+        _ -> error "Eval: PermCompose"
