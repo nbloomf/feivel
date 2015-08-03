@@ -92,8 +92,8 @@ instance (Eval Expr, Eval BoolExpr) => Eval IntExpr where
   eval (IntExpr (IntLCMul ls :@ loc)) = lift1 loc ls (rLCMsT  zeroZZ)
 
   eval (IntExpr (IntObserveUniform a b :@ loc)) = do
-    x  <- eval a >>= getVal
-    y  <- eval b >>= getVal
+    x <- eval a >>= getVal
+    y <- eval b >>= getVal
     t <- observeIntegerUniform loc (x,y)
     putVal loc t >>= getVal
 

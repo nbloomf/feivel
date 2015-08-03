@@ -44,14 +44,10 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
   eval (PolyExpr (PolyAtPos _ a t :@ loc)) = lift2 loc a t (foo)
     where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr
 
-  eval (PolyExpr (PolyRand _ ls :@ loc)) = do
-    let t = typeOf ls
-    xs <- eval ls >>= getVal :: EvalM [Expr]
-    r  <- randomElementEvalM xs
-    s  <- eval r >>= getVal :: EvalM PolyExpr
-    case t of
-      ListOf (PolyOver _) -> return s
-      _ -> reportErr loc $ ListExpected t
+  eval (PolyExpr (PolyRand u ls :@ loc)) = do
+    xs <- eval ls >>= getVal
+    r  <- randomElementEvalM xs :: EvalM PolyExpr
+    putTypeVal u loc r >>= getVal
 
   eval (PolyExpr (PolyAdd u a b :@ loc)) = do
     let addPoly x = lift2 loc a b (rAddT (constPoly x))
@@ -135,6 +131,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
     case u of
       ZZ      -> rootPoly zeroZZ
       QQ      -> rootPoly zeroQQ
+      BB      -> rootPoly zeroBB
       ZZMod n -> rootPoly (zeroMod n)
       _ -> reportErr loc $ NumericListExpected u
 
@@ -152,5 +149,6 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
     case u of
       ZZ      -> evalPoly zeroZZ
       QQ      -> evalPoly zeroQQ
+      BB      -> evalPoly zeroBB
       ZZMod n -> evalPoly (zeroMod n)
       _ -> reportErr loc $ NumericPolynomialExpected u
