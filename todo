@@ -43,6 +43,7 @@ Feature Ideas
 * Type: tuples? (constructor)
 * Type: trees (constructor)
 * Type: Quadratic numbers
+* Type: Dihedral words
 * Arch: type synonyms
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
