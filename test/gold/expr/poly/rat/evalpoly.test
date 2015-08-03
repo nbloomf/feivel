@@ -1,0 +1,8 @@
+feivel
+<<<
+[define ^rat @p := Poly(1.x^2)]#
+[define ^rat @q := Poly(1.x;1.y)]#
+[:^rat: EvalPoly(@p; x <- @q) :]
+>>>
+Poly(1.y^2;1.x^2;2.x.y)
+>>>= 0

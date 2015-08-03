@@ -1,0 +1,9 @@
+feivel
+<<<
+[:^rat: if #t then Poly(1.x) else Poly(1.y) :]
+[:^rat: if #f then Poly(1.x) else Poly(1.y) :]
+>>>
+Poly(1.x)
+Poly(1.y)
+>>>= 0
+

@@ -1,0 +1,7 @@
+feivel
+<<<
+[:^rat: AtPos({Null;Poly(1.x);Null}; 2) :]
+>>>
+Poly(1.x)
+>>>= 0
+

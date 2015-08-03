@@ -47,7 +47,6 @@ Feature Ideas
 * Arch: type synonyms
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
-  2: (started) use of typeOf in Eval is now more complicated than necessary. Fix it.
   3: Rename Typed class to HasType
   5: data Typed t = t :# Type (maybe. how to handle function types)
   7: use RankNTypes to make dispatch helper functions

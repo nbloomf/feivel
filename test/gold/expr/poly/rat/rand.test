@@ -1,0 +1,7 @@
+feivel
+<<<
+[:^rat: Rand({Poly(1.x);Poly(1.x);Poly(1.x)}) :]
+>>>
+Poly(1.x)
+>>>= 0
+
