@@ -92,6 +92,6 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Glyph Expr) => Eval StrExpr wh
         putVal loc (Text $ latex x) >>= getVal
       _ -> error "StrFormat LaTeX"
 
-  eval (StrExpr (StrIntCast n :@ loc)) = do
-    n <- eval n >>= getVal :: EvalM Integer
+  eval (StrExpr (StrIntCast k :@ loc)) = do
+    n <- eval k >>= getVal :: EvalM Integer
     putVal loc (Text $ show n) >>= getVal

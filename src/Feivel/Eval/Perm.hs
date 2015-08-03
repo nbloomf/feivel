@@ -45,7 +45,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PermExpr where
   eval (PermExpr (PermMacro _ vals mac :@ loc)) = eMacro vals mac loc
   eval (PermExpr (PermIfThenElse _ b t f :@ _)) = eIfThenElse b t f
 
-  eval (PermExpr (PermRand _ ls :@ loc)) = do
+  eval (PermExpr (PermRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     r  <- randomElementEvalM xs
     eval r >>= getVal

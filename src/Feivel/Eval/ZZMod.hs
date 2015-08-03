@@ -44,6 +44,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval ZZModExpr where
   eval (ZZModExpr (ZZModCast (ZZMod n) a :@ loc)) = do
     res <- eval a >>= getVal :: EvalM Integer
     putTypeVal (ZZMod n) loc (res `zzmod` n) >>= getVal
+  eval (ZZModExpr (ZZModCast t _ :@ loc)) = do
+    reportErr loc $ ModularIntegerExpected t
 
   eval (ZZModExpr (ZZModNeg  _ a   :@ loc)) = lift1 loc a   (rNegT (0 `zzmod` 0))
   eval (ZZModExpr (ZZModInv  _ a   :@ loc)) = lift1 loc a   (rInvT (0 `zzmod` 0))

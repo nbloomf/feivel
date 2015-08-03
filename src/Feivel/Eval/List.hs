@@ -81,7 +81,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval ListExpr where
     putTypeVal BB loc (map (put loc) (sort xs)) >>= getVal
   eval (ListExpr (ListSort typ _ :@ loc)) = reportErr loc $ SortableListExpected typ
 
-  eval (ListExpr (ListRand _ ls :@ loc)) = do
+  eval (ListExpr (ListRand _ ls :@ _)) = do
     xs <- eval ls >>= getVal :: EvalM [Expr]
     randomElementEvalM xs >>= getVal
 

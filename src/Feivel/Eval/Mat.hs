@@ -68,7 +68,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       ZZ          -> makeIdMat zeroZZ
       QQ          -> makeIdMat zeroQQ
       BB          -> makeIdMat zeroBB
-      ZZMod k     -> makeIdMat (zeroMod k)
+      ZZMod d     -> makeIdMat (zeroMod d)
       PolyOver ZZ -> makeIdMat (constPoly zeroZZ)
       PolyOver QQ -> makeIdMat (constPoly zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
@@ -79,7 +79,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       ZZ          -> makeSwapMat zeroZZ
       QQ          -> makeSwapMat zeroQQ
       BB          -> makeSwapMat zeroBB
-      ZZMod n     -> makeSwapMat (zeroMod n)
+      ZZMod d     -> makeSwapMat (zeroMod d)
       PolyOver ZZ -> makeSwapMat (constPoly zeroZZ)
       PolyOver QQ -> makeSwapMat (constPoly zeroQQ)
       _           -> reportErr loc $ NumericTypeExpected u
@@ -90,7 +90,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       ZZ          -> makeScaleMat zeroZZ
       QQ          -> makeScaleMat zeroQQ
       BB          -> makeScaleMat zeroBB
-      ZZMod n     -> makeScaleMat (zeroMod n)
+      ZZMod d     -> makeScaleMat (zeroMod d)
       PolyOver ZZ -> makeScaleMat (constPoly zeroZZ)
       PolyOver QQ -> makeScaleMat (constPoly zeroQQ)
       PolyOver BB -> makeScaleMat (constPoly zeroBB)
