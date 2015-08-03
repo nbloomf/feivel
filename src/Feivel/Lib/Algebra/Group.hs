@@ -56,7 +56,7 @@ gPow x n
 gOpT :: (Groupoid t) => t -> t -> t -> Either AlgErr t
 gOpT _ = gOp
 
-gInvT :: (Groupoid t) => t -> t -> t
-gInvT _ = gInv
+gInvT :: (Groupoid t) => t -> t -> Either AlgErr t
+gInvT _ = return . gInv
 
 class CGroupoid t

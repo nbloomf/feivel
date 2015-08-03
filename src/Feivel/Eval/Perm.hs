@@ -51,20 +51,17 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PermExpr where
     eval r >>= getVal
 
   eval (PermExpr (PermCompose t p q :@ loc)) = do
+    let comp z = lift2 loc p q (gOpT (idOn z))
     case t of
-      ZZ -> do
-        a <- eval p >>= getVal :: EvalM (Perm Integer)
-        b <- eval q >>= getVal :: EvalM (Perm Integer)
-        let c = compose a b
-        let s = mapPerm (put loc) c
-        putTypeVal ZZ loc s >>= getVal
-      _ -> reportErr loc $ PolynomialExpected t
+      ZZ -> comp zeroZZ
+      QQ -> comp zeroQQ
+      BB -> comp zeroBB
+      _ -> error "Eval: PermCompose"
 
   eval (PermExpr (PermInvert t p :@ loc)) = do
+    let inver z = lift1 loc p (gInvT (idOn z))
     case t of
-      ZZ -> do
-        a <- eval p >>= getVal :: EvalM (Perm Integer)
-        let c = inverse a
-        let s = mapPerm (put loc) c
-        putTypeVal ZZ loc s >>= getVal
-      _ -> reportErr loc $ PolynomialExpected t
+      ZZ -> inver zeroZZ
+      QQ -> inver zeroQQ
+      BB -> inver zeroBB
+      _ -> error "Eval: PermCompose"

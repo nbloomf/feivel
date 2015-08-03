@@ -18,6 +18,7 @@
 
 module Feivel.Lib (
   module Feivel.Lib.Algebra.Ring,
+  module Feivel.Lib.Algebra.Group,
   module Feivel.Lib.String,
   module Feivel.Lib.Bool,
   module Feivel.Lib.Data,
@@ -29,6 +30,7 @@ module Feivel.Lib (
 ) where
 
 import Feivel.Lib.Algebra.Ring
+import Feivel.Lib.Algebra.Group
 import Feivel.Lib.String
 import Feivel.Lib.Bool
 import Feivel.Lib.Data
