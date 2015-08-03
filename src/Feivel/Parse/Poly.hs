@@ -106,7 +106,7 @@ pTypedPolyExpr typ pC pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyO
           return (PolyConst typ (fromTerms terms))
             where
               foo = do
-                a <- pE typ
+                a <- pC typ
                 keyword "."
                 m <- pMon
                 return (a,m)

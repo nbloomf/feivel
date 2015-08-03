@@ -23,7 +23,7 @@ module Feivel.Lib.Data.Monomial (
 
   isIdentity, monomialSupport, degree, degreeOf,
 
-  multiply, monomialProduct, powers,
+  multiply, monomialProduct, powers, monomialLCM, monomialDivides,
 
   mLex, mRevLex, mGLex,
 
@@ -33,7 +33,6 @@ module Feivel.Lib.Data.Monomial (
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 
-import Feivel.Lib.AlgErr
 import Feivel.Lib.Data.Natural
 import Feivel.Lib.Canon
 import Feivel.Lib.Orders

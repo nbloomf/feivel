@@ -19,7 +19,9 @@
 module Feivel.Lib.Algebra.Group (
   Groupoid,
     gOp,  gInv, gId, gIsId, gLIdOf, gRIdOf, gProd, gPow, gEQ,
-    gOpT, gInvT
+    gOpT, gInvT,
+
+  CGroupoid
 ) where
 
 import Feivel.Lib.AlgErr

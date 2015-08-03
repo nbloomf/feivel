@@ -56,7 +56,10 @@ instance Typed (PolyExprLeaf a bool int poly) where
     PolyAdd        typ _ _   -> PolyOver typ
     PolySub        typ _ _   -> PolyOver typ
     PolyMul        typ _ _   -> PolyOver typ
+    PolyQuo        typ _ _   -> PolyOver typ
+    PolyRem        typ _ _   -> PolyOver typ
     PolyNeg        typ _     -> PolyOver typ
+    PolySum        typ _     -> PolyOver typ
     PolyPow        typ _ _   -> PolyOver typ
     PolyAtPos      typ _ _   -> PolyOver typ
     PolyAtIdx      typ _ _ _ -> PolyOver typ

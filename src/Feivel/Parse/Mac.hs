@@ -52,10 +52,6 @@ pMacConst' typ pE pBD = do
     else return (MacConst t vals body (emptyStore, False))
 
 
-pMacExpr :: (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MacExpr) ->  ParseM MacExpr
-pMacExpr pE pBD pBOOL pINT pMAC = pTypedMacExpr XX pE pBD pBOOL pINT pMAC
-
-
 pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MacExpr) -> ParseM MacExpr
 pTypedMacExpr typ pE pBD pBOOL pINT pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
   where

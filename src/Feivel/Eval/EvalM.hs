@@ -182,8 +182,8 @@ readAndParseStates path format = do
     where
       parseStates :: String -> String -> DataFormat -> EvalM [Store Expr]
       parseStates _ "" _ = return [emptyStore]
-      parseStates msg str format = do
-        case runParseM (pRecords format) msg str of
+      parseStates msg str fmt = do
+        case runParseM (pRecords fmt) msg str of
           Left goof -> throwError goof
           Right rs  -> case sequence $ map fromKeyValLocList rs of
             Left err  -> reportErr NullLocus err

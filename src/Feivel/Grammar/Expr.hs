@@ -25,7 +25,7 @@ module Feivel.Grammar.Expr (
   -- Expression Types
   Expr(..),
   Doc(..),       DocLeaf(..),
-  StrExpr(..),   StrExprLeafS,   StrExprLeaf(..), Format(..),
+  StrExpr(..),   StrExprLeafS,   StrExprLeaf(..),
   IntExpr(..),   IntExprLeafS,   IntExprLeaf(..),
   BoolExpr(..),  BoolExprLeafS,  BoolExprLeaf(..),
   RatExpr(..),   RatExprLeafS,   RatExprLeaf(..),
@@ -37,8 +37,6 @@ module Feivel.Grammar.Expr (
   PermExpr(..),  PermExprLeaf(..),
   MacExpr(..),   MacExprLeaf(..)
 ) where
-
-import Feivel.Lib (Rat(..), ZZModulo(..), Text(..))
 
 import Feivel.Grammar.Util
 import Feivel.Grammar.Doc

@@ -32,7 +32,7 @@ module Feivel.Lib.Struct.Polynomial (
 
   evalPolyAtPolys, evalPolyAtPoly, evalPolyAtScalar,
 
-  showStrP, showP
+  showStrP, showP, showOUP
 ) where
 
 import qualified Data.Map as M

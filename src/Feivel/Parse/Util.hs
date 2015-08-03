@@ -21,7 +21,7 @@ module Feivel.Parse.Util (
 
   keyword, whitespace, spaced, pKey, pToken,
 
-  pTuple2, pTuple4,
+  pTuple1, pTuple2, pTuple4,
 
   pFun1,  pFun2, pFun3, pFun4,
   pFun1T, pFun2T,
@@ -195,7 +195,7 @@ opParser2 f cons fun = do
   return $ \x y -> (cons $ f x y :@ (locus start end))
 
 pVarExpr :: (Key -> a) -> Type -> ParseM a
-pVarExpr h t = do
+pVarExpr h _ = do
   k <- pKey
   return (h k)
 
@@ -214,7 +214,7 @@ pTerm cst cons expr err atoms =
   choice [try $ fmap cons $ pAtLocus atom | atom <- cst:atoms] <|> (pParens expr) <?> err
 
 pIfThenElseExprT :: ParseM BoolExpr -> ParseM a -> (BoolExpr -> a -> a -> b) -> t -> ParseM b
-pIfThenElseExprT pBOOL p h t = do
+pIfThenElseExprT pBOOL p h _ = do
   keyword "if"
   b  <- pBOOL
   keyword "then"
