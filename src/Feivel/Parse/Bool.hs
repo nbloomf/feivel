@@ -24,7 +24,6 @@ import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
-import Text.Parsec.Prim (try)
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 
 

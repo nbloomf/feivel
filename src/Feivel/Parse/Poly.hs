@@ -86,6 +86,7 @@ pTypedPolyExpr typ pC pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyO
       , pIfThenElseExprT pBOOL (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
 
       , pFun1 "Rand" (pE $ ListOf (PolyOver typ)) (PolyRand typ)
+      , pFun1 "Sum" (pE $ ListOf (PolyOver  typ)) (PolySum typ)
 
       , pFun2 "Pow" (pPOLY typ) pINT (PolyPow typ)
 

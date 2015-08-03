@@ -24,28 +24,19 @@ module Feivel.Lib.Struct.Polynomial (
 
   mapCoef, polySeq,
 
-  coefficients, leadingDegreeBy,
+  coefficients, leadingDegreeBy, isRootOf,
 
   constPoly, zeroPoly, fromRoots, fromCoefficients, varPoly,
 
   sumPoly, contentPoly,
 
-  evalPolyAtPolys,
+  evalPolyAtPolys, evalPolyAtPoly, evalPolyAtScalar,
 
-  showStrP
-{- constP, polySeq, showP, showOUP, showByOUP, varP,
-  evalPolyAtScalarP, showStrP, nullP,
-  evalPolyAtPolysP, canonP,
-
-  variablesP, isUnivariateP, isConstantP, fromRootsP, toScalarP,
-  leadingTermByP, degreeByP, leadingTermByRevLexP, degreeByRevLexP, isRootP,
-  leadingCoefByRevLexP, leadingCoefByP,
-
-  contentP, fromCoefsP, univariateLongDiv-}
+  showStrP, showP
 ) where
 
 import qualified Data.Map as M
-import Data.List (intersperse, sortBy, maximumBy, union, nub)
+import Data.List (intersperse, sortBy, maximumBy, nub)
 import Data.Maybe (fromMaybe)
 import Control.Monad (foldM, join)
 

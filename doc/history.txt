@@ -5,7 +5,7 @@ feivel: version history
 * Significant refactor: not visible to users, but
   extending feivel is now vastly simpler
 * New functions: PivotCols, MatrixRank, IsRow,
-  IsCol, PolyContent, Degree, quo and rem for
+  IsCol, PolyContent, Degree, sum, quo and rem for
   polynomials
 
 0.2.0

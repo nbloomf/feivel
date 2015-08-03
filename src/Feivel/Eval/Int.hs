@@ -128,11 +128,17 @@ instance (Eval Expr, Eval BoolExpr) => Eval IntExpr where
       u -> reportErr loc $ MatrixExpected u
 
   eval (IntExpr (PolyDegree u p :@ loc)) = do
+    let polyDeg z = do
+          q <- eval p >>= getVal
+          suchThat $ q `hasSameTypeAs` (constPoly z)
+          Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
+          putVal loc n >>= getVal
     case u of
-      QQ -> do
-        q <- eval p >>= getVal :: EvalM (Poly Rat)
-        Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
-        putVal loc n >>= getVal
+      ZZ      -> polyDeg zeroZZ
+      QQ      -> polyDeg zeroQQ
+      BB      -> polyDeg zeroBB
+      ZZMod n -> polyDeg (zeroMod n)
+      _ -> reportErr loc $ NumericTypeExpected u
 
   eval (IntExpr (IntContent p :@ loc)) = do
     q <- eval p >>= getVal :: EvalM (Poly Integer)

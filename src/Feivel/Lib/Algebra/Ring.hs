@@ -710,7 +710,7 @@ instance EDoid Integer where
 
   rDivAlg a 1 = return (a,0)
   rDivAlg a (-1) = return (-a,0)
-  rDivAlg 0 b = return (0,0)
+  rDivAlg 0 _ = return (0,0)
   rDivAlg _ 0 = Left (RingoidDivideByZeroErr "")
   rDivAlg a b
     | b < 0 = do

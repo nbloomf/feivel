@@ -121,21 +121,21 @@ instance Get Bool where
     x <- get expr :: Either GetErr BoolExpr
     case x of
       BoolExpr (BoolConst b :@ _) -> return b
-      v -> Left GetUnevaluatedExpression
+      _ -> Left GetUnevaluatedExpression
 
 instance Get Text where
   get expr = do
     x <- get expr :: Either GetErr StrExpr
     case x of
       StrExpr (StrConst s :@ _) -> return s
-      v -> Left GetUnevaluatedExpression
+      _ -> Left GetUnevaluatedExpression
 
 instance Get Rat where
   get expr = do
     x <- get expr :: Either GetErr RatExpr
     case x of
       RatExpr (RatConst r :@ _) -> return r
-      v -> Left GetUnevaluatedExpression
+      _ -> Left GetUnevaluatedExpression
 
 instance Get ZZModulo where
   get expr = do
@@ -153,7 +153,7 @@ instance (Get a) => Get [a] where
       getList w = do
         case w of
           ListE (ListExpr (ListConst _ xs :@ _)) -> return xs
-          ListE v -> Left GetUnevaluatedExpression
+          ListE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = ListOf XX, typeReceived = typeOf v }
 
@@ -166,7 +166,7 @@ instance (Get a) => Get (Matrix a) where
       getMatrix w = do
         case w of
           MatE (MatExpr (MatConst _ m :@ _)) -> return m
-          MatE v -> Left GetUnevaluatedExpression
+          MatE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = MatOf XX, typeReceived = typeOf v }
 
@@ -179,7 +179,7 @@ instance (Get a) => Get (Poly a) where
       getPoly w = do
         case w of
           PolyE (PolyExpr (PolyConst _ m :@ _)) -> return m
-          PolyE v -> Left GetUnevaluatedExpression
+          PolyE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = PolyOver XX, typeReceived = typeOf v }
 
@@ -192,7 +192,7 @@ instance (Get a) => Get (Perm a) where
       getPerm w = do
         case w of
           PermE (PermExpr (PermConst _ m :@ _)) -> return m
-          PermE v -> Left GetUnevaluatedExpression
+          PermE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = PermOf XX, typeReceived = typeOf v }
 
@@ -202,7 +202,7 @@ instance Get (Store Expr, Expr) where
       MacE (MacExpr (MacConst _ vals y (amb,_) :@ _)) -> do
         st <- toStateT vals
         return (mergeState st amb, y)
-      MacE v -> Left GetUnevaluatedExpression
+      MacE _ -> Left GetUnevaluatedExpression
       v -> Left $ GetTypeMismatch
              { typeExpected = MacTo XX, typeReceived = typeOf v }
 

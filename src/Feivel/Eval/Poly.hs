@@ -89,19 +89,28 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
   eval (PolyExpr (PolyQuo u a b :@ loc)) = do
     let quoPoly x = lift2 loc a b (rQuoT (constPoly x))
     case u of
-      ZZ          -> quoPoly zeroZZ
-      QQ          -> quoPoly zeroQQ
-      BB          -> quoPoly zeroBB
-      (ZZMod n)   -> quoPoly (zeroMod n)
+      ZZ      -> quoPoly zeroZZ
+      QQ      -> quoPoly zeroQQ
+      BB      -> quoPoly zeroBB
+      ZZMod n -> quoPoly (zeroMod n)
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyRem u a b :@ loc)) = do
     let remPoly x = lift2 loc a b (rRemT (constPoly x))
     case u of
-      ZZ          -> remPoly zeroZZ
-      QQ          -> remPoly zeroQQ
-      BB          -> remPoly zeroBB
-      (ZZMod n)   -> remPoly (zeroMod n)
+      ZZ      -> remPoly zeroZZ
+      QQ      -> remPoly zeroQQ
+      BB      -> remPoly zeroBB
+      ZZMod n -> remPoly (zeroMod n)
+      _ -> reportErr loc $ NumericTypeExpected u
+
+  eval (PolyExpr (PolySum u ps :@ loc)) = do
+    let sumPolys x = lift1 loc ps (rSumT (constPoly x))
+    case u of
+      ZZ      -> sumPolys zeroZZ
+      QQ      -> sumPolys zeroQQ
+      BB      -> sumPolys zeroBB
+      ZZMod n -> sumPolys (zeroMod n)
       _ -> reportErr loc $ NumericTypeExpected u
 
   eval (PolyExpr (PolyNeg u a :@ loc)) = do

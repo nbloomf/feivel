@@ -28,7 +28,6 @@ import Feivel.Parse.Util
 import Feivel.Parse.Format
 import Feivel.Parse.ParseM
 import Feivel.Parse.Expr
-import Feivel.Parse.Type
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
