@@ -42,6 +42,7 @@ Feature Ideas
 * Type: cyclotomic numbers
 * Type: tuples? (constructor)
 * Type: trees (constructor)
+* Type: Quadratic numbers
 * Arch: type synonyms
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
