@@ -224,9 +224,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
       PolyOver BB -> scaleColMat (constPoly zeroBB)
       _           -> reportErr loc $ NumericTypeExpected u
 
-  eval (MatExpr (MatAddRow _ m a h k :@ loc)) = do
-    let t = typeOf m
-    let u = typeOf a
+  eval (MatExpr (MatAddRow u m a h k :@ loc)) = do
     i <- eval h >>= getVal
     j <- eval k >>= getVal
     let makeAddRow zer = do
@@ -234,18 +232,15 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
           r <- eval a >>= getVal
           suchThat $ r `hasSameTypeAs` zer
           p <- tryEvalM loc $ mAddRow r i j n
-          getVal (put loc p)
-    case unify t (MatOf u) of
-      Right (MatOf ZZ) -> makeAddRow zeroZZ
-      Right (MatOf QQ) -> makeAddRow zeroQQ
-      Right (MatOf BB) -> makeAddRow zeroBB
-      Right (MatOf (ZZMod n)) -> makeAddRow (zeroMod n)
-      Right w  -> reportErr loc $ NumericMatrixExpected w
-      Left err -> reportErr loc err
+          putTypeVal u loc p >>= getVal
+    case u of
+      ZZ      -> makeAddRow zeroZZ
+      QQ      -> makeAddRow zeroQQ
+      BB      -> makeAddRow zeroBB
+      ZZMod n -> makeAddRow (zeroMod n)
+      _ -> reportErr loc $ NumericMatrixExpected u
 
-  eval (MatExpr (MatAddCol _ m a h k :@ loc)) = do
-    let t = typeOf m
-    let u = typeOf a
+  eval (MatExpr (MatAddCol u m a h k :@ loc)) = do
     i <- eval h >>= getVal
     j <- eval k >>= getVal
     let makeAddCol zer = do
@@ -254,13 +249,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
           suchThat $ r `hasSameTypeAs` zer
           p <- tryEvalM loc $ mAddCol r i j n
           getVal (put loc p)
-    case unify t (MatOf u) of
-      Right (MatOf ZZ) -> makeAddCol zeroZZ
-      Right (MatOf QQ) -> makeAddCol zeroQQ
-      Right (MatOf BB) -> makeAddCol zeroBB
-      Right (MatOf (ZZMod n)) -> makeAddCol (zeroMod n)
-      Right w -> reportErr loc $ NumericMatrixExpected w
-      Left err -> reportErr loc err
+    case u of
+      ZZ      -> makeAddCol zeroZZ
+      QQ      -> makeAddCol zeroQQ
+      BB      -> makeAddCol zeroBB
+      ZZMod n -> makeAddCol (zeroMod n)
+      _ -> reportErr loc $ NumericMatrixExpected u
 
   eval (MatExpr (MatDelRow u m a :@ loc)) = do
     n <- eval m >>= getVal :: EvalM (Matrix Expr)
@@ -304,10 +298,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
     st <- getState
     rs <- eval lr >>= getVal :: EvalM [Expr]
     cs <- eval lc >>= getVal :: EvalM [Expr]
-    es <- sequence [sequence [foo st r c | c <- cs] | r <- rs] :: EvalM [[Expr]]
-    m  <- tryEvalM loc $ mFromRowList es
-    putTypeVal typ loc m >>= getVal
-      where
-        foo st r c = do
+    let foo r c = do
           st' <- addKeyToStore kr r loc st >>= addKeyToStore kc c loc
           evalWith e st' >>= getVal
+    es <- sequence [sequence [foo r c | c <- cs] | r <- rs] :: EvalM [[Expr]]
+    m  <- tryEvalM loc $ mFromRowList es
+    putTypeVal typ loc m >>= getVal
