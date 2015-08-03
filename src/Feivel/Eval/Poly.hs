@@ -128,40 +128,29 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
   eval (PolyExpr (PolyFromRoots u x cs :@ loc)) = do
     let rootPoly z = do
           as <- eval cs >>= getVal
-          return $ as `hasSameTypeAs` [z]
+          suchThat $ as `hasSameTypeAs` [z]
           p <- tryEvalM loc $ fromRoots x as
           let q = mapCoef (put loc) p
           putTypeVal u loc q >>= getVal
     case u of
-      ZZ -> rootPoly zeroZZ
-      QQ -> rootPoly zeroQQ
+      ZZ      -> rootPoly zeroZZ
+      QQ      -> rootPoly zeroQQ
       ZZMod n -> rootPoly (zeroMod n)
       _ -> reportErr loc $ NumericListExpected u
 
   eval (PolyExpr (PolyEvalPoly u p qs :@ loc)) = do
+    let evalPoly z = do
+          a <- eval p >>= getVal
+          suchThat $ a `hasSameTypeAs` (constPoly z)
+          let foo (x,h) = do
+                b <- eval h >>= getVal
+                suchThat $ b `hasSameTypeAs` (constPoly z)
+                return (x,b)
+          ks <- sequence $ map foo qs
+          c  <- tryEvalM loc $ evalPolyAtPolys ks a
+          putTypeVal u loc (mapCoef (put loc) c) >>= getVal
     case u of
-      ZZ -> do
-        a <- eval p >>= getVal :: EvalM (Poly Integer)
-        let foo (x,h) = do
-              b <- eval h >>= getVal :: EvalM (Poly Integer)
-              return (x,b)
-        ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolys ks a
-        putTypeVal ZZ loc (mapCoef (put loc) c) >>= getVal
-      QQ -> do
-        a <- eval p >>= getVal :: EvalM (Poly Rat)
-        let foo (x,h) = do
-              b <- eval h >>= getVal :: EvalM (Poly Rat)
-              return (x,b)
-        ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolys ks a
-        putTypeVal QQ loc (mapCoef (put loc) c) >>= getVal
-      ZZMod n -> do
-        a <- eval p >>= getVal :: EvalM (Poly ZZModulo)
-        let foo (x,h) = do
-              b <- eval h >>= getVal :: EvalM (Poly ZZModulo)
-              return (x,b)
-        ks <- sequence $ map foo qs
-        c  <- tryEvalM loc $ evalPolyAtPolys ks a
-        putTypeVal (ZZMod n) loc (mapCoef (put loc) c) >>= getVal
+      ZZ      -> evalPoly zeroZZ
+      QQ      -> evalPoly zeroQQ
+      ZZMod n -> evalPoly (zeroMod n)
       _ -> reportErr loc $ NumericPolynomialExpected u
