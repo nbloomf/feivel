@@ -18,6 +18,7 @@
 
 {-# LANGUAGE UndecidableInstances #-}
 {-# LANGUAGE FlexibleContexts     #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Feivel.Eval.Doc (evalToGlyph) where
 

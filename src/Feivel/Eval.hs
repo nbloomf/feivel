@@ -30,7 +30,6 @@ module Feivel.Eval (
 
 import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
-import Feivel.Eval.Util
 import Feivel.Eval.Expr
 
 {-

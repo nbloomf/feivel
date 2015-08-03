@@ -17,6 +17,7 @@
 {---------------------------------------------------------------------}
 
 {-# LANGUAGE UndecidableInstances  #-}
+{-# OPTIONS_GHC -fno-warn-orphans #-}
 
 module Feivel.Eval.Str where
 
