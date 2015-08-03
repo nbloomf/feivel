@@ -125,25 +125,18 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval PolyExpr where
       ZZMod n -> powPoly (zeroMod n)
       _ -> reportErr loc $ NumericPolynomialExpected u
 
-  eval (PolyExpr (PolyFromRoots _ x cs :@ loc)) = do
-    let t = typeOf cs
-    case t of
-      ListOf ZZ -> do
-        as <- eval cs >>= getVal :: EvalM [Integer]
-        p  <- tryEvalM loc $ fromRoots x as
-        let q = mapCoef (put loc) p
-        putTypeVal ZZ loc q >>= getVal
-      ListOf QQ -> do
-        as <- eval cs >>= getVal :: EvalM [Rat]
-        p  <- tryEvalM loc $ fromRoots x as
-        let q = mapCoef (put loc) p
-        putTypeVal QQ loc q >>= getVal
-      ListOf (ZZMod n) -> do
-        as <- eval cs >>= getVal :: EvalM [ZZModulo]
-        p  <- tryEvalM loc $ fromRoots x as
-        let q = mapCoef (put loc) p
-        putTypeVal (ZZMod n) loc q >>= getVal
-      _ -> reportErr loc $ NumericListExpected t
+  eval (PolyExpr (PolyFromRoots u x cs :@ loc)) = do
+    let rootPoly z = do
+          as <- eval cs >>= getVal
+          return $ as `hasSameTypeAs` [z]
+          p <- tryEvalM loc $ fromRoots x as
+          let q = mapCoef (put loc) p
+          putTypeVal u loc q >>= getVal
+    case u of
+      ZZ -> rootPoly zeroZZ
+      QQ -> rootPoly zeroQQ
+      ZZMod n -> rootPoly (zeroMod n)
+      _ -> reportErr loc $ NumericListExpected u
 
   eval (PolyExpr (PolyEvalPoly u p qs :@ loc)) = do
     case u of
