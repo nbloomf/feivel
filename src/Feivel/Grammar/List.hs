@@ -21,14 +21,14 @@ module Feivel.Grammar.List where
 import Feivel.Grammar.Util
 
 
-data ListExprLeaf a bool int list
+data ListExprLeaf a bool int list mat
   = ListConst   Type [a]
   | ListVar     Type Key
   | ListBuilder Type a [ListGuard a list]
 
   | ListMacro      Type [(Type, Key, a)] a -- MacTo (ListOf typ)
   | ListAtPos      Type a int -- ListOf (ListOf typ)
-  | ListAtIdx      Type a int int -- MatOf (ListOf typ)
+  | ListAtIdx      Type mat int int
   | ListRand       Type a -- ListOf (ListOf typ)
   | ListIfThenElse Type bool list list
 
@@ -45,8 +45,8 @@ data ListExprLeaf a bool int list
   | ListRange Type int int -- ZZ, ZZ
 
   -- Matrices
-  | ListMatRow Type int a -- MatOf typ
-  | ListMatCol Type int a -- MatOf typ
+  | ListMatRow Type int mat
+  | ListMatCol Type int mat
 
   -- Random
   | ListShuffle  Type list
@@ -58,7 +58,7 @@ data ListExprLeaf a bool int list
   -- Permutations
   | ListPermsOf Type list
 
-  | ListPivotColIndices Type a -- MatOf XX
+  | ListPivotColIndices Type mat
   deriving (Eq, Show)
 
 data ListGuard a list
@@ -67,7 +67,7 @@ data ListGuard a list
   deriving (Eq, Show)
 
 
-instance Typed (ListExprLeaf a bool int list) where
+instance Typed (ListExprLeaf a bool int list mat) where
   typeOf x = case x of
     ListConst           typ _     -> ListOf typ
     ListVar             typ _     -> ListOf typ

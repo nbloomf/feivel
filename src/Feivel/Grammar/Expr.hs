@@ -124,7 +124,7 @@ instance Typed ZZModExpr where
 
 {- :ListExpr -}
 
-type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr
+type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr
 
 newtype ListExpr = ListExpr
   { unListExpr :: AtLocus ListExprLeafS

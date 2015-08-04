@@ -34,7 +34,7 @@ instance (Glyph Expr) => Glyph ListExpr where
   toGlyph x = error $ "toGlyph: ListExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval ListExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr) => Eval ListExpr where
   eval (ListExpr (zappa :@ loc)) = case zappa of
     ListConst t xs -> do
       ys <- sequence $ map eval xs

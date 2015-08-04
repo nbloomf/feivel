@@ -40,11 +40,11 @@ pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst typ xs)
 
-pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM ListExpr
-pListExpr pE pBOOL pINT pLIST = pTypedListExpr XX pE pBOOL pINT pLIST
+pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM ListExpr
+pListExpr pE pBOOL pINT pLIST pMAT = pTypedListExpr XX pE pBOOL pINT pLIST pMAT
 
-pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM ListExpr
-pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTable pListTerm
+pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM ListExpr
+pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr (ListVar typ) (ListOf typ)
@@ -52,7 +52,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTa
       , pMacroExprT pE (ListMacro typ)
 
       , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT (ListAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (ListOf typ)) pINT pINT (ListAtIdx typ)
+      , pFun3 "AtIdx" (pMAT (ListOf typ)) pINT pINT (ListAtIdx typ)
 
       , pIfThenElseExprT pBOOL (pLIST typ) (ListIfThenElse typ) (ListOf typ)
 
@@ -64,8 +64,8 @@ pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTa
       , pFun1 "Shuffle"  (pLIST typ) (ListShuffle typ)
       , pListShuffles
 
-      , pFun2 "GetRow" pINT (pE $ MatOf typ) (ListMatRow typ)
-      , pFun2 "GetCol" pINT (pE $ MatOf typ) (ListMatCol typ)
+      , pFun2 "GetRow" pINT (pMAT typ) (ListMatRow typ)
+      , pFun2 "GetCol" pINT (pMAT typ) (ListMatCol typ)
 
       , pListPermsOf
 
@@ -132,7 +132,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST = spaced $ buildExpressionParser listOpTa
           keyword "("
           t <- pType
           keyword ";"
-          m <- pE (MatOf t)
+          m <- pMAT t
           keyword ")"
           return (ListPivotColIndices ZZ m)
         pListPivotColIndices _ = fail "pListPivotColIndices"
