@@ -1,6 +1,6 @@
 feivel
 <<<
-[:[bool]: Id(bool;3) :]
+[:[bool]: Id(3) :]
 >>>
 [[#t;#f;#f];[#f;#t;#f];[#f;#f;#t]]
 >>>= 0
