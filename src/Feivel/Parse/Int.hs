@@ -33,15 +33,15 @@ pIntConstLeaf = fmap IntConst pInteger
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM IntExpr
-pIntExpr pE pBOOL pINT pLIST = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM IntExpr
+pIntExpr pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pIntTerm = pTerm pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
       , pFun2 "AtPos" (pLIST ZZ) pINT IntAtPos
-      , pFun3 "AtIdx" (pE (MatOf ZZ)) pINT pINT IntAtIdx
+      , pFun3 "AtIdx" (pMAT ZZ) pINT pINT IntAtIdx
     
       , pIfThenElseExprT pBOOL pINT IntIfThenElse ZZ
 
@@ -64,10 +64,10 @@ pIntExpr pE pBOOL pINT pLIST = spaced $ buildExpressionParser intOpTable pIntTer
     
       , pFun1 "StrLen" (pE SS)  StrLength
 
-      , pFun1T "NumRows"    (pE . MatOf) MatNumRows
-      , pFun1T "NumCols"    (pE . MatOf) MatNumCols
-      , pFun1T "MatrixRank" (pE . MatOf) MatRank
-      , pFun1T' "Degree"     (pE . PolyOver) PolyDegree
+      , pFun1T "NumRows"    pMAT MatNumRows
+      , pFun1T "NumCols"    pMAT MatNumCols
+      , pFun1T "MatrixRank" pMAT MatRank
+      , pFun1T' "Degree"    (pE . PolyOver) PolyDegree
 
       , pFun1 "PolyContent" (pE (PolyOver ZZ)) IntContent
     

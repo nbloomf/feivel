@@ -21,13 +21,13 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a bool int list
+data IntExprLeaf a bool int list mat
   = IntConst Integer
   | IntVar   Key
 
   | IntMacro [(Type, Key, a)] a -- MacTo ZZ
   | IntAtPos list int
-  | IntAtIdx a int int -- MatOf ZZ
+  | IntAtIdx mat int int
  
   | IntIfThenElse bool int int
 
@@ -69,9 +69,9 @@ data IntExprLeaf a bool int list
   | IntLCMul list
 
   -- Matrix
-  | MatNumRows a -- MatOf XX
-  | MatNumCols a -- MatOf XX
-  | MatRank    a -- MatOf XX
+  | MatNumRows mat
+  | MatNumCols mat
+  | MatRank    mat
 
   -- Polynomial
   | IntContent a -- PolyOver ZZ
