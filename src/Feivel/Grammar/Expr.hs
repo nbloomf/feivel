@@ -154,7 +154,7 @@ instance Typed MatExpr where
 
 {- :PolyExpr -}
 
-type PolyExprLeafS = PolyExprLeaf Expr BoolExpr IntExpr ListExpr PolyExpr
+type PolyExprLeafS = PolyExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr PolyExpr
 
 newtype PolyExpr = PolyExpr
   { unPolyExpr :: AtLocus (OfType PolyExprLeafS)

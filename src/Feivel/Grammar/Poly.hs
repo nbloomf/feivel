@@ -21,13 +21,13 @@ module Feivel.Grammar.Poly where
 import Feivel.Grammar.Util
 
 
-data PolyExprLeaf a bool int list poly
+data PolyExprLeaf a bool int list mat poly
   = PolyConst (Poly a)
   | PolyVar   Key
 
   | PolyMacro [(Type, Key, a)] a -- MacTo (PolyOver typ)
   | PolyAtPos list int
-  | PolyAtIdx a int int -- MatOf (PolyOver typ)
+  | PolyAtIdx mat  int int
 
   | PolyRand list
 

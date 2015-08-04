@@ -31,7 +31,7 @@ instance (Glyph Expr) => Glyph PolyExpr where
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval PolyExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval PolyExpr where
   eval (PolyExpr (zappa :# typ :@ loc)) = case zappa of
     PolyConst p -> do
       q <- polySeq $ mapCoef eval p

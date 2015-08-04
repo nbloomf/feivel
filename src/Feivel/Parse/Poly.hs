@@ -69,17 +69,17 @@ pPolyLiteralOf typ p = do
     
 
 
-pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pPolyExpr pC pE pBOOL pINT pLIST pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pLIST pPOLY
+pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pPolyExpr pC pE pBOOL pINT pLIST pMAT pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pLIST pMAT pPOLY
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pC pE pBOOL pINT pLIST pMAT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr ((:# typ) `o` PolyVar) (PolyOver typ)
 
       , pFun2 "AtPos" (pLIST (PolyOver typ)) pINT ((:# typ) `oo` PolyAtPos)
-      , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) pINT pINT ((:# typ) `ooo` PolyAtIdx)
+      , pFun3 "AtIdx" (pMAT (PolyOver typ))  pINT pINT ((:# typ) `ooo` PolyAtIdx)
 
       , pMacroExprT pE ((:# typ) `oo` PolyMacro)
 
