@@ -30,68 +30,69 @@ instance (Glyph Expr) => Glyph StrExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Glyph Expr) => Eval StrExpr where
-  eval (StrExpr (StrConst s :@ loc)) = return (StrExpr $ StrConst s :@ loc)
+  eval (StrExpr (zappa :@ loc)) = case zappa of
+    StrConst s -> return (StrExpr $ StrConst s :@ loc)
 
-  {- :Common -}
-  eval (StrExpr (StrVar key :@ loc))        = eKey key loc
-  eval (StrExpr (StrAtIdx m h k :@ loc))    = eAtIdx m h k loc
-  eval (StrExpr (StrIfThenElse b t f :@ _)) = eIfThenElse b t f
-  eval (StrExpr (StrMacro vals mac :@ loc)) = eMacro vals mac loc
+    {- :Common -}
+    StrVar        key      -> eKey key loc
+    StrAtIdx      m h k    -> eAtIdx m h k loc
+    StrIfThenElse b t f    -> eIfThenElse b t f
+    StrMacro      vals mac -> eMacro vals mac loc
 
-  eval (StrExpr (StrAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
+    StrAtPos a t -> lift2 loc a t (foo)
+      where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
 
-  eval (StrExpr (Concat   a b :@ loc)) = lift2 loc a b (strCat)
-  eval (StrExpr (StrStrip a b :@ loc)) = lift2 loc a b (strStrip)
+    Concat   a b -> lift2 loc a b (strCat)
+    StrStrip a b -> lift2 loc a b (strStrip)
 
-  eval (StrExpr (ToUpper   a :@ loc)) = lift1 loc a (strUpper)
-  eval (StrExpr (ToLower   a :@ loc)) = lift1 loc a (strLower)
-  eval (StrExpr (Reverse   a :@ loc)) = lift1 loc a (strRev)
-  eval (StrExpr (Rot13     a :@ loc)) = lift1 loc a (strRot13)
-  eval (StrExpr (StrHex    n :@ loc)) = lift1 loc n (strHex)
-  eval (StrExpr (StrRoman  n :@ loc)) = lift1 loc n (strRoman)
-  eval (StrExpr (StrBase36 n :@ loc)) = lift1 loc n (strBase36)
+    ToUpper   a -> lift1 loc a (strUpper)
+    ToLower   a -> lift1 loc a (strLower)
+    Reverse   a -> lift1 loc a (strRev)
+    Rot13     a -> lift1 loc a (strRot13)
+    StrHex    n -> lift1 loc n (strHex)
+    StrRoman  n -> lift1 loc n (strRoman)
+    StrBase36 n -> lift1 loc n (strBase36)
 
-  eval (StrExpr (StrDecimal p k :@ loc)) = do
-    x <- eval p >>= getVal
-    d <- eval k >>= getVal
-    putVal loc (Text $ digits d x) >>= getVal
+    StrDecimal p k -> do
+      x <- eval p >>= getVal
+      d <- eval k >>= getVal
+      putVal loc (Text $ digits d x) >>= getVal
 
-  eval (StrExpr (StrRand ls :@ loc)) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs :: EvalM Text
-    putVal loc r >>= getVal
+    StrRand ls -> do
+      xs <- eval ls >>= getVal
+      r  <- randomElementEvalM xs :: EvalM Text
+      putVal loc r >>= getVal
 
-  eval (StrExpr (StrTab m :@ loc)) = do
-    n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    tab <- tabulateWithM toGlyph n
-    putVal loc (Text tab) >>= getVal
+    StrTab m -> do
+      n <- eval m >>= getVal :: EvalM (Matrix Expr)
+      tab <- tabulateWithM toGlyph n
+      putVal loc (Text tab) >>= getVal
 
-  eval (StrExpr (StrTypeOf e :@ loc)) = do
-    putVal loc (Text $ show $ typeOf e) >>= getVal
+    StrTypeOf e -> do
+      putVal loc (Text $ show $ typeOf e) >>= getVal
 
-  eval (StrExpr (StrFormat LaTeX e :@ loc)) = do
-    case typeOf e of
-      ZZ -> do
-        x <- eval e >>= getVal :: EvalM Integer
-        putVal loc (Text $ latex x) >>= getVal
-      QQ -> do
-        x <- eval e >>= getVal :: EvalM Rat
-        putVal loc (Text $ latex x) >>= getVal
-      MatOf ZZ -> do
-        x <- eval e >>= getVal :: EvalM (Matrix Integer)
-        putVal loc (Text $ latex x) >>= getVal
-      MatOf QQ -> do
-        x <- eval e >>= getVal :: EvalM (Matrix Rat)
-        putVal loc (Text $ latex x) >>= getVal
-      PolyOver ZZ -> do
-        x <- eval e >>= getVal :: EvalM (Poly Integer)
-        putVal loc (Text $ latex x) >>= getVal
-      PolyOver QQ -> do
-        x <- eval e >>= getVal :: EvalM (Poly Rat)
-        putVal loc (Text $ latex x) >>= getVal
-      _ -> error "StrFormat LaTeX"
+    StrFormat LaTeX e -> do
+      case typeOf e of
+        ZZ -> do
+          x <- eval e >>= getVal :: EvalM Integer
+          putVal loc (Text $ latex x) >>= getVal
+        QQ -> do
+          x <- eval e >>= getVal :: EvalM Rat
+          putVal loc (Text $ latex x) >>= getVal
+        MatOf ZZ -> do
+          x <- eval e >>= getVal :: EvalM (Matrix Integer)
+          putVal loc (Text $ latex x) >>= getVal
+        MatOf QQ -> do
+          x <- eval e >>= getVal :: EvalM (Matrix Rat)
+          putVal loc (Text $ latex x) >>= getVal
+        PolyOver ZZ -> do
+          x <- eval e >>= getVal :: EvalM (Poly Integer)
+          putVal loc (Text $ latex x) >>= getVal
+        PolyOver QQ -> do
+          x <- eval e >>= getVal :: EvalM (Poly Rat)
+          putVal loc (Text $ latex x) >>= getVal
+        _ -> error "StrFormat LaTeX"
 
-  eval (StrExpr (StrIntCast k :@ loc)) = do
-    n <- eval k >>= getVal :: EvalM Integer
-    putVal loc (Text $ show n) >>= getVal
+    StrIntCast k -> do
+      n <- eval k >>= getVal :: EvalM Integer
+      putVal loc (Text $ show n) >>= getVal
