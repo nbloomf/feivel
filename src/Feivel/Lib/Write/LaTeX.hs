@@ -23,7 +23,10 @@ module Feivel.Lib.Write.LaTeX where
 
 
 class LaTeX t where
-  latex :: t -> String
+  latex        :: t -> String
+  latexCompact :: t -> String
+
+  latexCompact = latex
 
 instance LaTeX Integer where
   latex = show

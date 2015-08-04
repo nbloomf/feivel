@@ -16,10 +16,20 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib.Either (
-  mapLeft
-) where
+{-# OPTIONS_GHC -XTypeSynonymInstances #-}
+{-# OPTIONS_GHC -XFlexibleInstances #-}
 
-mapLeft :: (a -> b) -> Either a c -> Either b c
-mapLeft f (Left a)  = Left (f a)
-mapLeft _ (Right c) = Right c
+module Feivel.Lib.Write.Unicode where
+
+
+class Unicode t where
+  unicode        :: t -> String
+  unicodeCompact :: t -> String
+
+  unicodeCompact = unicode
+
+instance Unicode Integer where
+  unicode = show
+
+instance Unicode String where
+  unicode = id

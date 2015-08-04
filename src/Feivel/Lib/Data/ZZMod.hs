@@ -20,6 +20,8 @@ module Feivel.Lib.Data.ZZMod where
 
 import Feivel.Lib.Algebra.Ring
 import Feivel.Lib.Canon
+import Feivel.Lib.Write.LaTeX
+import Feivel.Lib.Write.Unicode
 
 data ZZModulo = ZZModulo
   { residue :: Integer
@@ -89,3 +91,14 @@ instance URingoid ZZModulo where
 
   rLOneOf (ZZModulo _ n) = Right $ ZZModulo 1 n
   rROneOf (ZZModulo _ n) = Right $ ZZModulo 1 n
+
+
+{- :Write -}
+
+instance Unicode ZZModulo where
+  unicode (ZZModulo a n) = show a ++ " mod " ++ show n
+  unicodeCompact a = show $ residue a
+
+instance LaTeX ZZModulo where
+  latex (ZZModulo a n) = show a ++ "\\ \\mathrm{mod}\\ " ++ show n
+  latexCompact a = show $ residue a

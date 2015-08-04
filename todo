@@ -45,6 +45,7 @@ Feature Ideas
 * Type: Quadratic numbers
 * Type: Dihedral words
 * Arch: type synonyms
+* Lib/Write: LaTeX (display option), Unicode instances. Use Unicode instead of Show.
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
   2: Use case statement in Eval instances (c.f. zzmod)

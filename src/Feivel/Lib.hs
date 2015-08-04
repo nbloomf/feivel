@@ -26,6 +26,7 @@ module Feivel.Lib (
   module Feivel.Lib.Struct,
   module Feivel.Lib.Pair,
   module Feivel.Lib.Write.LaTeX,
+  module Feivel.Lib.Write.Unicode,
   module Feivel.Lib.Canon
 ) where
 
@@ -38,4 +39,5 @@ import Feivel.Lib.List
 import Feivel.Lib.Struct
 import Feivel.Lib.Pair
 import Feivel.Lib.Write.LaTeX
+import Feivel.Lib.Write.Unicode
 import Feivel.Lib.Canon

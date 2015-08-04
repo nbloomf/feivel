@@ -507,8 +507,3 @@ instance (LaTeX a, Ringoid a, ORingoid a, URingoid a, Canon a) => LaTeX (Poly a)
 
 instance (Ringoid a, Canon a) => Canon (Poly a) where
   canon = fromTerms . filter (\(a,_) -> not $ rIsZero a) . map (\(a,m) -> (canon a, m)) . toTerms
-
-{-
-
-
--}
