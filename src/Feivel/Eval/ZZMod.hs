@@ -29,7 +29,7 @@ instance (Glyph Expr) => Glyph ZZModExpr where
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval ZZModExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval ZZModExpr where
   eval (ZZModExpr (m :# (ZZMod n) :@ loc)) = case m of
     ZZModConst a -> return $ ZZModExpr $ ZZModConst a :# (ZZMod n) :@ loc
 

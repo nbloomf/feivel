@@ -36,33 +36,35 @@ pZZModConst' n = do
   a <- pInteger
   return (ZZModConst (a `zzmod` n) :# (ZZMod n))
 
-pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr -> ParseM IntExpr -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
-pZZModExpr pE n pBOOL pINT pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
+pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr
+  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
+pZZModExpr pE n pBOOL pINT pLIST pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
     pZZModTerm = pTerm (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
-      [ pVarExpr ((:# (ZZMod n)) `o` ZZModVar) (ZZMod n)
-      , pMacroExprT pE ((:# (ZZMod n)) `oo` ZZModMacro)
+      [ pVarExpr ((:# typ) `o` ZZModVar) (ZZMod n)
+      , pMacroExprT pE ((:# typ) `oo` ZZModMacro)
+      , pIfThenElseExprT pBOOL (pMOD n) ((:# typ) `ooo` ZZModIfThenElse) (ZZMod n)
 
-      , pFun2 "AtPos" (pE $ ListOf (ZZMod n)) pINT ((:# (ZZMod n)) `oo` ZZModAtPos)
-      , pFun3 "AtIdx" (pE $ MatOf (ZZMod n)) pINT pINT ((:# (ZZMod n)) `ooo` ZZModAtIdx)
-    
-      , pIfThenElseExprT pBOOL (pMOD n) ((:# (ZZMod n)) `ooo` ZZModIfThenElse) (ZZMod n)
+      , pFun2 "AtPos" (pLIST (ZZMod n)) pINT      ((:# typ) `oo`  ZZModAtPos)
+      , pFun3 "AtIdx" (pE $ MatOf (ZZMod n))  pINT pINT ((:# typ) `ooo` ZZModAtIdx)
 
-      , pFun1 "int" (pE ZZ) ((:# (ZZMod n)) `o` ZZModCast)
+      , pFun1 "int" (pE ZZ) ((:# typ) `o` ZZModCast)
 
-      , pFun2 "Pow" (pMOD n) pINT ((:# (ZZMod n)) `oo` ZZModPow)
+      , pFun2 "Pow" (pMOD n) pINT ((:# typ) `oo` ZZModPow)
 
-      , pFun1 "Sum"    (pE $ ListOf (ZZMod n)) ((:# (ZZMod n)) `o` ZZModSum)
-      , pFun1 "Prod"   (pE $ ListOf (ZZMod n)) ((:# (ZZMod n)) `o` ZZModProd)
+      , pFun1 "Sum"    (pLIST (ZZMod n)) ((:# typ) `o` ZZModSum)
+      , pFun1 "Prod"   (pLIST (ZZMod n)) ((:# typ) `o` ZZModProd)
       ]
 
     zzModOpTable =
-      [ [ Infix (opParser2 ((:# (ZZMod n)) `oo` ZZModMult) ZZModExpr "*") AssocLeft
+      [ [ Infix  (opParser2 ((:# typ) `oo` ZZModMult) ZZModExpr "*") AssocLeft
         ]
-      , [ Prefix (opParser1 ((:# (ZZMod n)) `o` ZZModNeg) ZZModExpr "neg")
-        , Prefix (opParser1 ((:# (ZZMod n)) `o` ZZModInv) ZZModExpr "inv")
+      , [ Prefix (opParser1 ((:# typ) `o`  ZZModNeg)  ZZModExpr "neg")
+        , Prefix (opParser1 ((:# typ) `o`  ZZModInv)  ZZModExpr "inv")
         ]
-      , [ Infix (opParser2 ((:# (ZZMod n)) `oo` ZZModAdd) ZZModExpr "+") AssocLeft
-        , Infix (opParser2 ((:# (ZZMod n)) `oo` ZZModSub) ZZModExpr "-") AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` ZZModAdd)  ZZModExpr "+") AssocLeft
+        , Infix  (opParser2 ((:# typ) `oo` ZZModSub)  ZZModExpr "-") AssocLeft
         ]
       ]
+
+    typ = ZZMod n

@@ -21,13 +21,13 @@ module Feivel.Grammar.ZZMod where
 import Feivel.Grammar.Util
 
 
-data ZZModExprLeaf a bool int zzmod
+data ZZModExprLeaf a bool int list zzmod
   = ZZModConst ZZModulo
   | ZZModVar   Key
   | ZZModCast  a
 
   | ZZModMacro [(Type, Key, a)] a -- Expr, MacTo ZZModulo
-  | ZZModAtPos a int   -- ListOf ZZModulo
+  | ZZModAtPos list int
   | ZZModAtIdx a int int -- MatOf ZZModulo
 
   | ZZModIfThenElse bool zzmod zzmod
@@ -41,6 +41,6 @@ data ZZModExprLeaf a bool int zzmod
   | ZZModMult  zzmod zzmod
   | ZZModPow   zzmod int
 
-  | ZZModSum   a -- ListOf ZZModulo
-  | ZZModProd  a -- ListOf ZZModulo
+  | ZZModSum   list
+  | ZZModProd  list
   deriving (Eq, Show)
