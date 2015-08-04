@@ -34,13 +34,13 @@ Feivel is written in Haskell and licensed under the GNU GPLv3. Currently the onl
 
 - **To build Feivel from source:** (Assuming a unix-like operating system)
   - Run "make feivel" in the project's root directory.
-  - You will need GHC version 7.8 or higher and cabal version 1.2 or higher, as well as several libraries, all of which are available on Hackage. (For a list of dependencies see feivel.cabal in the root directory.)
+  - You will need GHC version 7.6.3 or higher and cabal version 1.20 or higher, as well as several libraries, all of which are available on Hackage. (For a list of dependencies see feivel.cabal in the root directory.)
   - The easiest way to get GHC and cabal is with the [Haskell Platform](https://www.haskell.org/platform/). The extra libraries can be installed using cabal.
-  - Compilation has been successfully tested on Fedora 21. If you build Feivel on another OS, or have problems doing so, I'd like to hear about it.
+  - Compilation has been successfully tested on Fedora 21 and Ubuntu 15.04. If you build Feivel on another OS, or have problems doing so, I'd like to hear about it.
 
 - **To load Feivel into GHCi:** (for typechecking, repl-ing, and debugging)
-  - Load Feivel.Main from the project root directory.
-  - You may need to add src/ and test/ to the GHCi path; this is done by keeping the hidden file .ghci in the project root.
+  - Load Feivel.Debug from the project root directory.
+  - You may need to add src/ and test/ to the GHCi path; this is done by keeping the hidden file .ghci (which is in the repo) in the project root.
 
 - **To run the tests:**
   - There are two test suites: an algebraic property test suite which is run at every build and a suite of "golden tests" of the syntax.
