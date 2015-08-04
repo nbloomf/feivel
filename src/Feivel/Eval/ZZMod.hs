@@ -30,7 +30,7 @@ instance (Glyph Expr) => Glyph ZZModExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval ZZModExpr where
-  eval (ZZModExpr (m :# (ZZMod n) :@ loc)) = case m of
+  eval (ZZModExpr (zappa :# (ZZMod n) :@ loc)) = case zappa of
     ZZModConst a -> return $ ZZModExpr $ ZZModConst a :# (ZZMod n) :@ loc
 
     {- :Common -}

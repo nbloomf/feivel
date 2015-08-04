@@ -83,7 +83,7 @@ pPERM :: Type -> ParseM PermExpr
 pPERM typ = pTypedPermExpr typ pTypedExpr pBOOL pINT pLIST pPERM
 
 pMAC :: Type -> ParseM MacExpr
-pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pMAC
+pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAC
 
 pDOC :: ParseM Doc
 pDOC = pDoc pTypedExpr pDOC
@@ -95,11 +95,11 @@ pDOC = pDoc pTypedExpr pDOC
 {---------}
 
 pTypedExpr :: Type -> ParseM Expr
-pTypedExpr DD           = fmap DocE  pDOC
-pTypedExpr SS           = fmap StrE  pSTR
-pTypedExpr ZZ           = fmap IntE  pINT
-pTypedExpr BB           = fmap BoolE pBOOL
-pTypedExpr QQ           = fmap RatE  pRAT
+pTypedExpr DD           = fmap DocE   pDOC
+pTypedExpr SS           = fmap StrE   pSTR
+pTypedExpr ZZ           = fmap IntE   pINT
+pTypedExpr BB           = fmap BoolE  pBOOL
+pTypedExpr QQ           = fmap RatE   pRAT
 pTypedExpr (ZZMod    n) = fmap ZZModE (pMOD  n)
 pTypedExpr (ListOf   t) = fmap ListE  (pLIST t)
 pTypedExpr (MatOf    t) = fmap MatE   (pMAT  t)
