@@ -45,15 +45,14 @@ pZZModExpr pE n pBOOL pINT pLIST pMOD = spaced $ buildExpressionParser zzModOpTa
       , pMacroExprT pE ((:# typ) `oo` ZZModMacro)
       , pIfThenElseExprT pBOOL (pMOD n) ((:# typ) `ooo` ZZModIfThenElse) (ZZMod n)
 
-      , pFun2 "AtPos" (pLIST (ZZMod n)) pINT      ((:# typ) `oo`  ZZModAtPos)
+      , pFun1 "int"   (pE ZZ)     ((:# typ) `o` ZZModCast)
+      , pFun1 "Sum"   (pLIST typ) ((:# typ) `o` ZZModSum)
+      , pFun1 "Prod"  (pLIST typ) ((:# typ) `o` ZZModProd)
+
+      , pFun2 "AtPos" (pLIST typ) pINT ((:# typ) `oo` ZZModAtPos)
+      , pFun2 "Pow"   (pMOD n)    pINT ((:# typ) `oo` ZZModPow)
+
       , pFun3 "AtIdx" (pE $ MatOf (ZZMod n))  pINT pINT ((:# typ) `ooo` ZZModAtIdx)
-
-      , pFun1 "int" (pE ZZ) ((:# typ) `o` ZZModCast)
-
-      , pFun2 "Pow" (pMOD n) pINT ((:# typ) `oo` ZZModPow)
-
-      , pFun1 "Sum"    (pLIST (ZZMod n)) ((:# typ) `o` ZZModSum)
-      , pFun1 "Prod"   (pLIST (ZZMod n)) ((:# typ) `o` ZZModProd)
       ]
 
     zzModOpTable =
