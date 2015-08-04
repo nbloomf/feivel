@@ -33,8 +33,8 @@ pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 pStrConst' :: ParseM StrExprLeafS
 pStrConst' = fmap StrConst pText
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM StrExpr -> ParseM StrExpr
-pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM StrExpr -> ParseM StrExpr
+pStrExpr pE pBOOL pINT pLIST pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
@@ -42,7 +42,7 @@ pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
 
       , pIfThenElseExprT pBOOL pSTR StrIfThenElse SS
 
-      , pFun2 "AtPos" (pE $ ListOf SS) pINT StrAtPos
+      , pFun2 "AtPos" (pLIST SS) pINT StrAtPos
       , pFun3 "AtIdx" (pE $ MatOf SS) pINT pINT StrAtIdx
     
       , pFun2 "Strip"   pSTR pSTR StrStrip
@@ -51,7 +51,7 @@ pStrExpr pE pBOOL pINT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
       , pFun1 "ToLower" pSTR ToLower
       , pFun1 "Rot13"   pSTR Rot13
 
-      , pFun1 "Rand"    (pE $ ListOf SS) StrRand
+      , pFun1 "Rand"    (pLIST SS) StrRand
 
       , pFun1 "int" (pE ZZ) StrIntCast
     

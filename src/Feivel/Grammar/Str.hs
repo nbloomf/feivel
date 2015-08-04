@@ -21,12 +21,12 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a bool int str
+data StrExprLeaf a bool int list str
   = StrConst Text
   | StrVar   Key
 
   | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
-  | StrAtPos a int -- ListOf SS
+  | StrAtPos list int
   | StrAtIdx a int int -- MatOf SS
  
   | StrIfThenElse bool str str -- BB
@@ -49,7 +49,7 @@ data StrExprLeaf a bool int str
   | StrDecimal a int -- QQ
 
   -- List
-  | StrRand a -- ListOf SS
+  | StrRand list
 
   -- Matrix
   | StrTab a -- MatOf XX
