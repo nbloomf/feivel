@@ -22,45 +22,25 @@ import Feivel.Grammar.Util
 
 
 data ZZModExprLeaf a bool int zzmod
-  = ZZModConst Type ZZModulo
-  | ZZModVar   Type Key
-  | ZZModCast  Type a
+  = ZZModConst ZZModulo
+  | ZZModVar   Key
+  | ZZModCast  a
 
-  | ZZModMacro Type [(Type, Key, a)] a -- Expr, MacTo ZZModulo
-  | ZZModAtPos Type a int   -- ListOf ZZModulo
-  | ZZModAtIdx Type a int int -- MatOf ZZModulo
+  | ZZModMacro [(Type, Key, a)] a -- Expr, MacTo ZZModulo
+  | ZZModAtPos a int   -- ListOf ZZModulo
+  | ZZModAtIdx a int int -- MatOf ZZModulo
 
-  | ZZModIfThenElse Type bool zzmod zzmod
+  | ZZModIfThenElse bool zzmod zzmod
 
   -- Arithmetic
-  | ZZModNeg   Type zzmod
-  | ZZModInv   Type zzmod
+  | ZZModNeg   zzmod
+  | ZZModInv   zzmod
 
-  | ZZModAdd   Type zzmod zzmod
-  | ZZModSub   Type zzmod zzmod
-  | ZZModMult  Type zzmod zzmod
-  | ZZModPow   Type zzmod int
+  | ZZModAdd   zzmod zzmod
+  | ZZModSub   zzmod zzmod
+  | ZZModMult  zzmod zzmod
+  | ZZModPow   zzmod int
 
-  | ZZModSum   Type a -- ListOf ZZModulo
-  | ZZModProd  Type a -- ListOf ZZModulo
+  | ZZModSum   a -- ListOf ZZModulo
+  | ZZModProd  a -- ListOf ZZModulo
   deriving (Eq, Show)
-
-
-
-instance Typed (ZZModExprLeaf a bool int mod) where
-  typeOf x = case x of
-    ZZModConst      typ _     -> typ
-    ZZModVar        typ _     -> typ
-    ZZModAtPos      typ _ _   -> typ
-    ZZModAtIdx      typ _ _ _ -> typ
-    ZZModMacro      typ _ _   -> typ
-    ZZModIfThenElse typ _ _ _ -> typ
-    ZZModCast       typ _     -> typ
-    ZZModNeg        typ _     -> typ
-    ZZModInv        typ _     -> typ
-    ZZModAdd        typ _ _   -> typ
-    ZZModSub        typ _ _   -> typ
-    ZZModMult       typ _ _   -> typ
-    ZZModPow        typ _ _   -> typ
-    ZZModSum        typ _     -> typ
-    ZZModProd       typ _     -> typ

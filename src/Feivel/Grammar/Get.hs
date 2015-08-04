@@ -141,7 +141,7 @@ instance Get ZZModulo where
   get expr = do
     x <- get expr :: Either GetErr ZZModExpr
     case x of
-      ZZModExpr (ZZModConst _ k :@ _) -> return k
+      ZZModExpr (ZZModConst k :# _ :@ _) -> return k
       _ -> Left GetUnevaluatedExpression
 
 instance (Get a) => Get [a] where

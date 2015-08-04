@@ -112,14 +112,14 @@ instance Typed RatExpr where typeOf _ = QQ
 type ZZModExprLeafS = ZZModExprLeaf Expr BoolExpr IntExpr ZZModExpr
 
 newtype ZZModExpr = ZZModExpr
-  { unZZModExpr :: AtLocus ZZModExprLeafS
+  { unZZModExpr :: AtLocus (OfType ZZModExprLeafS)
   } deriving (Eq, Show)
 
 instance HasLocus ZZModExpr where
   locusOf = locusOf . unZZModExpr
 
 instance Typed ZZModExpr where
-  typeOf (ZZModExpr (x :@ _)) = typeOf x
+  typeOf (ZZModExpr (_ :# typ :@ _)) = typ
 
 
 {- :ListExpr -}

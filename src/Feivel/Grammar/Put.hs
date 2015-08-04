@@ -92,7 +92,7 @@ instance Put Rat where
   put loc x = RatE $ RatExpr $ RatConst x :@ loc
 
 instance Put ZZModulo where
-  put loc (ZZModulo a n) = ZZModE $ ZZModExpr $ ZZModConst (ZZMod n) (ZZModulo a n) :@ loc
+  put loc (ZZModulo a n) = ZZModE $ ZZModExpr $ ZZModConst (ZZModulo a n) :# (ZZMod n) :@ loc
 
 
 

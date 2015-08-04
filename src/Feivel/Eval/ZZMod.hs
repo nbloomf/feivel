@@ -25,35 +25,33 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph ZZModExpr where
-  toGlyph (ZZModExpr (ZZModConst _ a :@ _)) = return $ showZZMod a
+  toGlyph (ZZModExpr (ZZModConst a :# _ :@ _)) = return $ showZZMod a
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval ZZModExpr where
-  eval (ZZModExpr (m :@ loc)) = case m of
-    ZZModConst n a -> return $ ZZModExpr $ ZZModConst n a :@ loc
+  eval (ZZModExpr (m :# (ZZMod n) :@ loc)) = case m of
+    ZZModConst a -> return $ ZZModExpr $ ZZModConst a :# (ZZMod n) :@ loc
 
     {- :Common -}
-    ZZModVar        _ key      -> eKey key loc
-    ZZModAtIdx      _ m h k    -> eAtIdx m h k loc
-    ZZModMacro      _ vals mac -> eMacro vals mac loc
-    ZZModIfThenElse _ b t f    -> eIfThenElse b t f
+    ZZModVar        key      -> eKey key loc
+    ZZModAtIdx      m h k    -> eAtIdx m h k loc
+    ZZModMacro      vals mac -> eMacro vals mac loc
+    ZZModIfThenElse b t f    -> eIfThenElse b t f
 
-    ZZModAtPos _ a t -> lift2 loc a t (foo)
+    ZZModAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
 
-    ZZModCast (ZZMod n) a -> do
+    ZZModCast a -> do
       res <- eval a >>= getVal :: EvalM Integer
       putTypeVal (ZZMod n) loc (res `zzmod` n) >>= getVal
-    ZZModCast t _ -> do
-      reportErr loc $ ModularIntegerExpected t
 
-    ZZModNeg  _ a   -> lift1 loc a   (rNegT (0 `zzmod` 0))
-    ZZModInv  _ a   -> lift1 loc a   (rInvT (0 `zzmod` 0))
-    ZZModAdd  _ a b -> lift2 loc a b (rAddT (0 `zzmod` 0))
-    ZZModSub  _ a b -> lift2 loc a b (rSubT (0 `zzmod` 0))
-    ZZModMult _ a b -> lift2 loc a b (rMulT (0 `zzmod` 0))
-    ZZModPow  _ a b -> lift2 loc a b (rPowT (0 `zzmod` 0))
+    ZZModNeg  a   -> lift1 loc a   (rNegT (0 `zzmod` 0))
+    ZZModInv  a   -> lift1 loc a   (rInvT (0 `zzmod` 0))
+    ZZModAdd  a b -> lift2 loc a b (rAddT (0 `zzmod` 0))
+    ZZModSub  a b -> lift2 loc a b (rSubT (0 `zzmod` 0))
+    ZZModMult a b -> lift2 loc a b (rMulT (0 `zzmod` 0))
+    ZZModPow  a b -> lift2 loc a b (rPowT (0 `zzmod` 0))
 
-    ZZModSum  _ ls  -> lift1 loc ls (rSumT   (0 `zzmod` 0))
-    ZZModProd _ ls  -> lift1 loc ls (rUProdT (0 `zzmod` 0))
+    ZZModSum  ls  -> lift1 loc ls (rSumT   (0 `zzmod` 0))
+    ZZModProd ls  -> lift1 loc ls (rUProdT (0 `zzmod` 0))

@@ -20,7 +20,7 @@
 {-# LANGUAGE FlexibleInstances    #-}
 
 module Feivel.Grammar.Type (
-  Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf
+  Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf, OfType(..)
 ) where
 
 import Feivel.Lib
@@ -37,6 +37,8 @@ import Control.Monad.Instances ()
 {---------}
 {- :Type -}
 {---------}
+
+data OfType a = a :# Type deriving (Eq, Show)
 
 class Typed t where
   typeOf :: t -> Type

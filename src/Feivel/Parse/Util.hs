@@ -19,6 +19,8 @@
 module Feivel.Parse.Util (
   module Feivel.Parse.Type,
 
+  o, oo, ooo, oooo,
+
   keyword, whitespace, spaced, pKey, pToken,
 
   pTuple1, pTuple2, pTuple4,
@@ -39,6 +41,18 @@ import Feivel.Parse.Type
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 import Feivel.Parse.ParseM
+
+o :: (b -> z) -> (a -> b) -> a -> z
+o = (.)
+
+oo :: (c -> z) -> (a -> b -> c) -> a -> b -> z
+oo = (.) . (.)
+
+ooo :: (d -> z) -> (a -> b -> c -> d) -> a -> b -> c -> z
+ooo = (.) . (.) . (.)
+
+oooo :: (e -> z) -> (a -> b -> c -> d -> e) -> a -> b -> c -> d -> z
+oooo = (.) . (.) . (.) . (.)
 
 {- :Primitives -}
 
