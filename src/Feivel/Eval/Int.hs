@@ -30,117 +30,118 @@ instance Glyph IntExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval ListExpr) => Eval IntExpr where
-  eval (IntExpr (IntConst n :@ loc)) = return (IntExpr (IntConst n :@ loc))
+  eval (IntExpr (zappa :@ loc)) = case zappa of
+    IntConst n -> return (IntExpr (IntConst n :@ loc))
 
-  {- :Common -}
-  eval (IntExpr (IntVar key :@ loc))        = eKey key loc
-  eval (IntExpr (IntAtIdx m h k :@ loc))    = eAtIdx m h k loc
-  eval (IntExpr (IntIfThenElse b t f :@ _)) = eIfThenElse b t f
-  eval (IntExpr (IntMacro vals mac :@ loc)) = eMacro vals mac loc
+    {- :Common -}
+    IntVar        key      -> eKey key loc
+    IntAtIdx      m h k    -> eAtIdx m h k loc
+    IntIfThenElse b t f    -> eIfThenElse b t f
+    IntMacro      vals mac -> eMacro vals mac loc
 
-  eval (IntExpr (IntAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
+    IntAtPos a t -> lift2 loc a t (foo)
+      where foo = listAtPos :: [IntExpr] -> Integer -> Either ListErr IntExpr
 
-  eval (IntExpr (IntNeg        a :@ loc)) = lift1 loc a (rNegT        zeroZZ)
-  eval (IntExpr (IntAbs        a :@ loc)) = lift1 loc a (rAbsT        zeroZZ)
-  eval (IntExpr (IntSqPart     a :@ loc)) = lift1 loc a (rSqPartT     zeroZZ)
-  eval (IntExpr (IntSqFreePart a :@ loc)) = lift1 loc a (rSqFreePartT zeroZZ)
-  eval (IntExpr (IntRad        a :@ loc)) = lift1 loc a (rRadT        zeroZZ)
+    IntNeg        a -> lift1 loc a (rNegT        zeroZZ)
+    IntAbs        a -> lift1 loc a (rAbsT        zeroZZ)
+    IntSqPart     a -> lift1 loc a (rSqPartT     zeroZZ)
+    IntSqFreePart a -> lift1 loc a (rSqFreePartT zeroZZ)
+    IntRad        a -> lift1 loc a (rRadT        zeroZZ)
 
-  eval (IntExpr (IntAdd  a b :@ loc)) = lift2 loc a b (rAddT zeroZZ)
-  eval (IntExpr (IntSub  a b :@ loc)) = lift2 loc a b (rSubT zeroZZ)
-  eval (IntExpr (IntMult a b :@ loc)) = lift2 loc a b (rMulT zeroZZ)
-  eval (IntExpr (IntMod  a b :@ loc)) = lift2 loc a b (rRemT zeroZZ)
-  eval (IntExpr (IntMin  a b :@ loc)) = lift2 loc a b (rMinT zeroZZ)
-  eval (IntExpr (IntMax  a b :@ loc)) = lift2 loc a b (rMaxT zeroZZ)
-  eval (IntExpr (IntGCD  a b :@ loc)) = lift2 loc a b (rGCDT zeroZZ)
-  eval (IntExpr (IntLCM  a b :@ loc)) = lift2 loc a b (rLCMT zeroZZ)
-  eval (IntExpr (IntQuo  a b :@ loc)) = lift2 loc a b (rQuoT zeroZZ)
-  eval (IntExpr (IntPow  a b :@ loc)) = lift2 loc a b (rPowT zeroZZ)
+    IntAdd  a b -> lift2 loc a b (rAddT zeroZZ)
+    IntSub  a b -> lift2 loc a b (rSubT zeroZZ)
+    IntMult a b -> lift2 loc a b (rMulT zeroZZ)
+    IntMod  a b -> lift2 loc a b (rRemT zeroZZ)
+    IntMin  a b -> lift2 loc a b (rMinT zeroZZ)
+    IntMax  a b -> lift2 loc a b (rMaxT zeroZZ)
+    IntGCD  a b -> lift2 loc a b (rGCDT zeroZZ)
+    IntLCM  a b -> lift2 loc a b (rLCMT zeroZZ)
+    IntQuo  a b -> lift2 loc a b (rQuoT zeroZZ)
+    IntPow  a b -> lift2 loc a b (rPowT zeroZZ)
 
-  eval (IntExpr (IntChoose a b :@ loc)) = lift2 loc a b (rChooseT zeroZZ)
+    IntChoose a b -> lift2 loc a b (rChooseT zeroZZ)
 
-  eval (IntExpr (RatNumer  p :@ loc)) = lift1 loc p (ratNum)
-  eval (IntExpr (RatDenom  p :@ loc)) = lift1 loc p (ratDen)
-  eval (IntExpr (RatFloor  p :@ loc)) = lift1 loc p (ratFlr)
-  eval (IntExpr (StrLength s :@ loc)) = lift1 loc s (strLen)
+    RatNumer  p -> lift1 loc p (ratNum)
+    RatDenom  p -> lift1 loc p (ratDen)
+    RatFloor  p -> lift1 loc p (ratFlr)
+    StrLength s -> lift1 loc s (strLen)
 
-  eval (IntExpr (MatNumRows m :@ loc)) = do
-    n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    k <- tryEvalM loc $ mNumRows n
-    putVal loc k >>= getVal
+    MatNumRows m -> do
+      n <- eval m >>= getVal :: EvalM (Matrix Expr)
+      k <- tryEvalM loc $ mNumRows n
+      putVal loc k >>= getVal
 
-  eval (IntExpr (MatNumCols m :@ loc)) = do
-    n <- eval m >>= getVal :: EvalM (Matrix Expr)
-    k <- tryEvalM loc $ mNumCols n
-    putVal loc k >>= getVal
+    MatNumCols m -> do
+      n <- eval m >>= getVal :: EvalM (Matrix Expr)
+      k <- tryEvalM loc $ mNumCols n
+      putVal loc k >>= getVal
 
-  eval (IntExpr (IntRand ls :@ loc)) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs :: EvalM Integer
-    putVal loc r >>= getVal
+    IntRand ls -> do
+      xs <- eval ls >>= getVal
+      r  <- randomElementEvalM xs :: EvalM Integer
+      putVal loc r >>= getVal
 
-  eval (IntExpr (ListLen ls :@ loc)) = do
-    xs <- eval ls >>= getVal :: EvalM [Expr]
-    let k = fromIntegral $ length xs :: Integer
-    putVal loc k >>= getVal
+    ListLen ls -> do
+      xs <- eval ls >>= getVal :: EvalM [Expr]
+      let k = fromIntegral $ length xs :: Integer
+      putVal loc k >>= getVal
 
-  eval (IntExpr (IntSum   ls :@ loc)) = lift1 loc ls (rSumT   zeroZZ)
-  eval (IntExpr (IntProd  ls :@ loc)) = lift1 loc ls (rUProdT zeroZZ)
-  eval (IntExpr (IntMaxim ls :@ loc)) = lift1 loc ls (rMaximT zeroZZ)
-  eval (IntExpr (IntMinim ls :@ loc)) = lift1 loc ls (rMinimT zeroZZ)
-  eval (IntExpr (IntGCDiv ls :@ loc)) = lift1 loc ls (rGCDsT  zeroZZ)
-  eval (IntExpr (IntLCMul ls :@ loc)) = lift1 loc ls (rLCMsT  zeroZZ)
+    IntSum   ls -> lift1 loc ls (rSumT   zeroZZ)
+    IntProd  ls -> lift1 loc ls (rUProdT zeroZZ)
+    IntMaxim ls -> lift1 loc ls (rMaximT zeroZZ)
+    IntMinim ls -> lift1 loc ls (rMinimT zeroZZ)
+    IntGCDiv ls -> lift1 loc ls (rGCDsT  zeroZZ)
+    IntLCMul ls -> lift1 loc ls (rLCMsT  zeroZZ)
 
-  eval (IntExpr (IntObserveUniform a b :@ loc)) = do
-    x <- eval a >>= getVal
-    y <- eval b >>= getVal
-    t <- observeIntegerUniform loc (x,y)
-    putVal loc t >>= getVal
+    IntObserveUniform a b -> do
+      x <- eval a >>= getVal
+      y <- eval b >>= getVal
+      t <- observeIntegerUniform loc (x,y)
+      putVal loc t >>= getVal
 
-  eval (IntExpr (IntObserveBinomial n p :@ loc)) = do
-    m <- eval n >>= getVal
-    q <- eval p >>= getVal
-    t <- observeBinomial loc m (toDouble q)
-    putVal loc t >>= getVal
+    IntObserveBinomial n p -> do
+      m <- eval n >>= getVal
+      q <- eval p >>= getVal
+      t <- observeBinomial loc m (toDouble q)
+      putVal loc t >>= getVal
 
-  eval (IntExpr (IntObservePoisson lambda :@ loc)) = do
-    q <- eval lambda >>= getVal
-    t <- observeIntegerPoisson loc (toDouble q)
-    putVal loc t >>= getVal
+    IntObservePoisson lambda -> do
+      q <- eval lambda >>= getVal
+      t <- observeIntegerPoisson loc (toDouble q)
+      putVal loc t >>= getVal
 
-  eval (IntExpr (IntCastStr str :@ loc)) = do
-    Text x <- eval str >>= getVal
-    n <- parseAsAt pInteger loc x
-    putVal loc n >>= getVal
+    IntCastStr str -> do
+      Text x <- eval str >>= getVal
+      n <- parseAsAt pInteger loc x
+      putVal loc n >>= getVal
 
-  eval (IntExpr (MatRank m :@ loc)) = do
-    case typeOf m of
-      MatOf QQ -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Rat)
-        r <- tryEvalM loc $ mRank n
-        putVal loc r >>= getVal
-      MatOf BB -> do
-        n <- eval m >>= getVal :: EvalM (Matrix Bool)
-        r <- tryEvalM loc $ mRank n
-        putVal loc r >>= getVal
-      MatOf u -> reportErr loc $ FieldMatrixExpected u
-      u -> reportErr loc $ MatrixExpected u
+    MatRank m -> do
+      case typeOf m of
+        MatOf QQ -> do
+          n <- eval m >>= getVal :: EvalM (Matrix Rat)
+          r <- tryEvalM loc $ mRank n
+          putVal loc r >>= getVal
+        MatOf BB -> do
+          n <- eval m >>= getVal :: EvalM (Matrix Bool)
+          r <- tryEvalM loc $ mRank n
+          putVal loc r >>= getVal
+        MatOf u -> reportErr loc $ FieldMatrixExpected u
+        u -> reportErr loc $ MatrixExpected u
 
-  eval (IntExpr (PolyDegree u p :@ loc)) = do
-    let polyDeg z = do
-          q <- eval p >>= getVal
-          suchThat $ q `hasSameTypeAs` (constPoly z)
-          Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
-          putVal loc n >>= getVal
-    case u of
-      ZZ      -> polyDeg zeroZZ
-      QQ      -> polyDeg zeroQQ
-      BB      -> polyDeg zeroBB
-      ZZMod n -> polyDeg (zeroMod n)
-      _ -> reportErr loc $ NumericTypeExpected u
+    PolyDegree u p -> do
+      let polyDeg z = do
+            q <- eval p >>= getVal
+            suchThat $ q `hasSameTypeAs` (constPoly z)
+            Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
+            putVal loc n >>= getVal
+      case u of
+        ZZ      -> polyDeg zeroZZ
+        QQ      -> polyDeg zeroQQ
+        BB      -> polyDeg zeroBB
+        ZZMod n -> polyDeg (zeroMod n)
+        _ -> reportErr loc $ NumericTypeExpected u
 
-  eval (IntExpr (IntContent p :@ loc)) = do
-    q <- eval p >>= getVal :: EvalM (Poly Integer)
-    c <- tryEvalM loc $ contentPoly q
-    putVal loc c >>= getVal
+    IntContent p -> do
+      q <- eval p >>= getVal :: EvalM (Poly Integer)
+      c <- tryEvalM loc $ contentPoly q
+      putVal loc c >>= getVal
