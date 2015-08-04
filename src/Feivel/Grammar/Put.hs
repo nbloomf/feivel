@@ -131,6 +131,6 @@ instance (Put a, Typed a) => Put (Matrix a) where
 
 
 instance (Put a) => Put (Perm a) where
-  put loc x = PermE $ PermExpr $ PermConst undefined (mapPerm (put loc) x) :@ loc
+  put loc x = PermE $ PermExpr $ PermConst (mapPerm (put loc) x) :# undefined :@ loc
 
-  putType typ loc x = PermE $ PermExpr $ PermConst typ (mapPerm (put loc) x) :@ loc
+  putType typ loc x = PermE $ PermExpr $ PermConst (mapPerm (put loc) x) :# typ :@ loc

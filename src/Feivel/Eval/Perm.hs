@@ -25,43 +25,43 @@ import Feivel.Eval.Util
 
 
 instance (Glyph Expr) => Glyph PermExpr where
-  toGlyph (PermExpr (PermConst _ px :@ _)) = do
+  toGlyph (PermExpr (PermConst px :# _ :@ _)) = do
     qx <- seqPerm $ mapPerm toGlyph px
     return $ showPerm qx
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval PermExpr where
-  eval (PermExpr (m :@ loc)) = case m of
-    PermConst t p -> do
+  eval (PermExpr (m :# typ :@ loc)) = case m of
+    PermConst p -> do
       q <- seqPerm $ mapPerm eval p
-      putTypeVal t loc q >>= getVal
+      putTypeVal typ loc q >>= getVal
 
-    PermAtPos _ a t -> lift2 loc a t (foo)
+    PermAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [PermExpr] -> Integer -> Either ListErr PermExpr
 
     {- Common -}
-    PermVar        _ key      -> eKey key loc
-    PermAtIdx      _ m h k    -> eAtIdx m h k loc
-    PermMacro      _ vals mac -> eMacro vals mac loc
-    PermIfThenElse _ b t f    -> eIfThenElse b t f
+    PermVar        key      -> eKey key loc
+    PermAtIdx      m h k    -> eAtIdx m h k loc
+    PermMacro      vals mac -> eMacro vals mac loc
+    PermIfThenElse b t f    -> eIfThenElse b t f
 
-    PermRand _ ls -> do
+    PermRand ls -> do
       xs <- eval ls >>= getVal :: EvalM [Expr]
       r  <- randomElementEvalM xs
       eval r >>= getVal
 
-    PermCompose t p q -> do
+    PermCompose p q -> do
       let comp z = lift2 loc p q (gOpT (idOn z))
-      case t of
+      case typ of
         ZZ -> comp zeroZZ
         QQ -> comp zeroQQ
         BB -> comp zeroBB
         _ -> error "Eval: PermCompose"
 
-    PermInvert t p -> do
+    PermInvert p -> do
       let inver z = lift1 loc p (gInvT (idOn z))
-      case t of
+      case typ of
         ZZ -> inver zeroZZ
         QQ -> inver zeroQQ
         BB -> inver zeroBB

@@ -172,14 +172,14 @@ instance Typed PolyExpr where
 type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr ListExpr PermExpr
 
 newtype PermExpr = PermExpr
-  { unPermExpr :: AtLocus PermExprLeafS
+  { unPermExpr :: AtLocus (OfType PermExprLeafS)
   } deriving (Eq, Show)
 
 instance HasLocus PermExpr where
   locusOf = locusOf . unPermExpr
 
 instance Typed PermExpr where
-  typeOf (PermExpr (x :@ _)) = typeOf x
+  typeOf (PermExpr (_ :# typ :@ _)) = PermOf typ
 
 
 {- :MacExpr -}

@@ -37,13 +37,13 @@ pPermLiteral typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM PermExpr
 pPermConst typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PermExprLeafS
-pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
+pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (OfType PermExprLeafS)
+pPermLiteralOf typ pC = (string "id" >> return (PermConst idPerm :# typ)) <|> do
   start <- getPosition
   ts <- many1 pCycle
   end <- getPosition
   case fromCycles ts of
-    Right q -> return (PermConst typ q)
+    Right q -> return (PermConst q :# typ)
     Left err -> reportParseErr (locus start end) err
     where
       pCycle = do
@@ -56,21 +56,21 @@ pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM Int
 pTypedPermExpr typ pE pBOOL pINT pLIST pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
-      [ pVarExpr (PermVar typ) (PermOf typ)
+      [ pVarExpr ((:# typ) `o` PermVar) (PermOf typ)
 
-      , pFun2 "AtPos" (pLIST (PermOf typ)) pINT (PermAtPos typ) 
-      , pFun3 "AtIdx" (pE $ MatOf (PermOf typ)) pINT pINT (PermAtIdx typ)
+      , pFun2 "AtPos" (pLIST (PermOf typ)) pINT ((:# typ) `oo` PermAtPos)
+      , pFun3 "AtIdx" (pE $ MatOf (PermOf typ)) pINT pINT ((:# typ) `ooo` PermAtIdx)
 
-      , pMacroExprT pE (PermMacro typ)
+      , pMacroExprT pE ((:# typ) `oo` PermMacro)
 
-      , pIfThenElseExprT pBOOL (pPERM typ) (PermIfThenElse typ) (PermOf typ)
+      , pIfThenElseExprT pBOOL (pPERM typ) ((:# typ) `ooo` PermIfThenElse) (PermOf typ)
 
-      , pFun1 "Rand" (pLIST (PermOf typ)) (PermRand typ)
+      , pFun1 "Rand" (pLIST (PermOf typ)) ((:# typ) `o` PermRand)
       ]
 
     permOpTable =
-      [ [ Prefix (opParser1 (PermInvert typ)  PermExpr "inv")
+      [ [ Prefix (opParser1 ((:# typ) `o`  PermInvert)  PermExpr "inv")
         ]
-      , [ Infix  (opParser2 (PermCompose typ) PermExpr "o")   AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` PermCompose) PermExpr "o")   AssocLeft
         ]
       ]
