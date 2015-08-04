@@ -33,14 +33,14 @@ pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 pBoolConst' :: ParseM BoolExprLeafS
 pBoolConst' = fmap BoolConst pBool
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> ParseM BoolExpr
-pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> ParseM BoolExpr
+pBoolExpr pE pINT pBOOL pLIST = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
     pBoolTerm = pTerm pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
-      , pFun2 "AtPos" (pE $ ListOf BB) pINT BoolAtPos
+      , pFun2 "AtPos" (pLIST BB) pINT BoolAtPos
       , pFun3 "AtIdx" (pE $ MatOf BB) pINT pINT BoolAtIdx
 
       , pIfThenElseExprT pBOOL pBOOL BoolIfThenElse BB
@@ -49,10 +49,10 @@ pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
 
       , pFun1 "IsSquareFree" pINT IntSqFree
 
-      , pFun1 "Rand" (pE $ ListOf BB) BoolRand
+      , pFun1 "Rand" (pLIST BB) BoolRand
 
-      , pFun2T "Elem" pE (pE . ListOf) ListElem
-      , pFun1T "IsEmpty" (pE . ListOf) ListIsEmpty
+      , pFun2T "Elem"    pE pLIST ListElem
+      , pFun1T "IsEmpty" pLIST ListIsEmpty
 
       , pFun1T "IsRow"    (pE . MatOf) MatIsRow
       , pFun1T "IsCol"    (pE . MatOf) MatIsCol
@@ -70,12 +70,12 @@ pBoolExpr pE pINT pBOOL = spaced $ buildExpressionParser boolOpTable pBoolTerm
       ]
 
     boolOpTable =
-      [ [ Prefix (opParser1 Neg BoolExpr "~")
+      [ [ Prefix (opParser1 Neg  BoolExpr "~")
         ]
-      , [ Infix (opParser2 Conj BoolExpr "&&") AssocLeft
+      , [ Infix  (opParser2 Conj BoolExpr "&&") AssocLeft
         ]
-      , [ Infix (opParser2 Disj BoolExpr "||") AssocLeft
+      , [ Infix  (opParser2 Disj BoolExpr "||") AssocLeft
         ]
-      , [ Infix (opParser2 Imp BoolExpr "->") AssocRight
+      , [ Infix  (opParser2 Imp  BoolExpr "->") AssocRight
         ]
       ]
