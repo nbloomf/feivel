@@ -30,100 +30,101 @@ instance Glyph RatExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval RatExpr where
-  eval (RatExpr (RatConst p :@ loc)) = return $ RatExpr $ RatConst p :@ loc
+  eval (RatExpr (zappa :@ loc)) = case zappa of
+    RatConst p -> return $ RatExpr $ RatConst p :@ loc
 
-  {- :Common -}
-  eval (RatExpr (RatVar key :@ loc))        = eKey key loc
-  eval (RatExpr (RatAtIdx m h k :@ loc))    = eAtIdx m h k loc
-  eval (RatExpr (RatIfThenElse b t f :@ _)) = eIfThenElse b t f
-  eval (RatExpr (RatMacro vals mac :@ loc)) = eMacro vals mac loc
+    {- :Common -}
+    RatVar key -> eKey key loc
+    RatAtIdx m h k -> eAtIdx m h k loc
+    RatIfThenElse b t f -> eIfThenElse b t f
+    RatMacro vals mac -> eMacro vals mac loc
 
-  eval (RatExpr (RatAtPos a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
+    RatAtPos a t -> lift2 loc a t (foo)
+      where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
 
-  eval (RatExpr (RatCast expr :@ loc)) = do
-    n <- eval expr >>= getVal :: EvalM Integer
-    putVal loc (n:/:1) >>= getVal
+    RatCast expr -> do
+      n <- eval expr >>= getVal :: EvalM Integer
+      putVal loc (n:/:1) >>= getVal
 
-  eval (RatExpr (RatNeg  a :@ loc))   = lift1 loc a (rNegT zeroQQ)
-  eval (RatExpr (RatAbs  a :@ loc))   = lift1 loc a (rAbsT zeroQQ)
+    RatNeg  a -> lift1 loc a (rNegT zeroQQ)
+    RatAbs  a -> lift1 loc a (rAbsT zeroQQ)
 
-  eval (RatExpr (RatAdd  a b :@ loc)) = lift2 loc a b (rAddT zeroQQ)
-  eval (RatExpr (RatSub  a b :@ loc)) = lift2 loc a b (rSubT zeroQQ)
-  eval (RatExpr (RatMult a b :@ loc)) = lift2 loc a b (rMulT zeroQQ)
-  eval (RatExpr (RatMin  a b :@ loc)) = lift2 loc a b (rMinT zeroQQ)
-  eval (RatExpr (RatMax  a b :@ loc)) = lift2 loc a b (rMaxT zeroQQ)
-  eval (RatExpr (RatPow  a b :@ loc)) = lift2 loc a b (rPowT zeroQQ)
-  eval (RatExpr (RatQuot a b :@ loc)) = lift2 loc a b (rDivT zeroQQ)
+    RatAdd  a b -> lift2 loc a b (rAddT zeroQQ)
+    RatSub  a b -> lift2 loc a b (rSubT zeroQQ)
+    RatMult a b -> lift2 loc a b (rMulT zeroQQ)
+    RatMin  a b -> lift2 loc a b (rMinT zeroQQ)
+    RatMax  a b -> lift2 loc a b (rMaxT zeroQQ)
+    RatPow  a b -> lift2 loc a b (rPowT zeroQQ)
+    RatQuot a b -> lift2 loc a b (rDivT zeroQQ)
 
-  eval (RatExpr (RatSqrt p k :@ loc)) = lift2 loc p k (ratSqt)
+    RatSqrt p k -> lift2 loc p k (ratSqt)
 
-  eval (RatExpr (RatRand ls :@ loc)) = do
-    xs <- eval ls >>= getVal
-    r  <- randomElementEvalM xs :: EvalM Rat
-    putVal loc r >>= getVal
+    RatRand ls -> do
+      xs <- eval ls >>= getVal
+      r  <- randomElementEvalM xs :: EvalM Rat
+      putVal loc r >>= getVal
 
-  eval (RatExpr (RatSum   ls :@ loc)) = lift1 loc ls (rSumT   (0:/:1))
-  eval (RatExpr (RatProd  ls :@ loc)) = lift1 loc ls (rUProdT (0:/:1))
-  eval (RatExpr (RatMaxim ls :@ loc)) = lift1 loc ls (rMaximT (0:/:1))
-  eval (RatExpr (RatMinim ls :@ loc)) = lift1 loc ls (rMinimT (0:/:1))
+    RatSum   ls -> lift1 loc ls (rSumT   (0:/:1))
+    RatProd  ls -> lift1 loc ls (rUProdT (0:/:1))
+    RatMaxim ls -> lift1 loc ls (rMaximT (0:/:1))
+    RatMinim ls -> lift1 loc ls (rMinimT (0:/:1))
 
-  {- Mean -}
-  eval (RatExpr (RatMean ls :@ loc)) = do
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
-        putVal loc m >>= getVal
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ rMeanT (0:/:1) xs
-        putVal loc m >>= getVal
-      u -> reportErr loc $ NumericListExpected u
+    {- Mean -}
+    RatMean ls -> do
+      case typeOf ls of
+        ListOf ZZ -> do
+          xs <- eval ls >>= getVal :: EvalM [Integer]
+          m  <- tryEvalM loc $ rIntMeanT (0:/:1) xs
+          putVal loc m >>= getVal
+        ListOf QQ -> do
+          xs <- eval ls >>= getVal :: EvalM [Rat]
+          m  <- tryEvalM loc $ rMeanT (0:/:1) xs
+          putVal loc m >>= getVal
+        u -> reportErr loc $ NumericListExpected u
 
-  {- Mean Deviation -}
-  eval (RatExpr (RatMeanDev ls :@ loc)) = do
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
-        putVal loc m >>= getVal
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ rMeanDevT (0:/:1) xs
-        putVal loc m >>= getVal
-      u -> reportErr loc $ NumericListExpected u
+    {- Mean Deviation -}
+    RatMeanDev ls -> do
+      case typeOf ls of
+        ListOf ZZ -> do
+          xs <- eval ls >>= getVal :: EvalM [Integer]
+          m  <- tryEvalM loc $ rIntMeanDevT (0:/:1) xs
+          putVal loc m >>= getVal
+        ListOf QQ -> do
+          xs <- eval ls >>= getVal :: EvalM [Rat]
+          m  <- tryEvalM loc $ rMeanDevT (0:/:1) xs
+          putVal loc m >>= getVal
+        u -> reportErr loc $ NumericListExpected u
 
-  {- Standard Deviation -}
-  eval (RatExpr (RatStdDev ls d :@ loc)) = do
-    k <- eval d >>= getVal
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ ratIntStdDev xs k
-        putVal loc m >>= getVal
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ ratStdDev xs k
-        putVal loc m >>= getVal
-      u -> reportErr loc $ NumericListExpected u
+    {- Standard Deviation -}
+    RatStdDev ls d -> do
+      k <- eval d >>= getVal
+      case typeOf ls of
+        ListOf ZZ -> do
+          xs <- eval ls >>= getVal :: EvalM [Integer]
+          m  <- tryEvalM loc $ ratIntStdDev xs k
+          putVal loc m >>= getVal
+        ListOf QQ -> do
+          xs <- eval ls >>= getVal :: EvalM [Rat]
+          m  <- tryEvalM loc $ ratStdDev xs k
+          putVal loc m >>= getVal
+        u -> reportErr loc $ NumericListExpected u
 
-  {- Z-Score -}
-  eval (RatExpr (RatZScore x ls d :@ loc)) = do
-    k <- eval d >>= getVal
-    y <- eval x >>= getVal
-    case typeOf ls of
-      ListOf ZZ -> do
-        xs <- eval ls >>= getVal :: EvalM [Integer]
-        m  <- tryEvalM loc $ ratIntZScore y xs k
-        putVal loc m >>= getVal
-      ListOf QQ -> do
-        xs <- eval ls >>= getVal :: EvalM [Rat]
-        m  <- tryEvalM loc $ ratZScore y xs k
-        putVal loc m >>= getVal
-      u -> reportErr loc $ NumericListExpected u
+    {- Z-Score -}
+    RatZScore x ls d -> do
+      k <- eval d >>= getVal
+      y <- eval x >>= getVal
+      case typeOf ls of
+        ListOf ZZ -> do
+          xs <- eval ls >>= getVal :: EvalM [Integer]
+          m  <- tryEvalM loc $ ratIntZScore y xs k
+          putVal loc m >>= getVal
+        ListOf QQ -> do
+          xs <- eval ls >>= getVal :: EvalM [Rat]
+          m  <- tryEvalM loc $ ratZScore y xs k
+          putVal loc m >>= getVal
+        u -> reportErr loc $ NumericListExpected u
 
-  eval (RatExpr (RatCastStr str :@ loc)) = do
-    Text x <- eval str >>= getVal
-    n <- parseAsAt pRat loc x
-    putVal loc n >>= getVal
+    RatCastStr str -> do
+      Text x <- eval str >>= getVal
+      n <- parseAsAt pRat loc x
+      putVal loc n >>= getVal
