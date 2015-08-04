@@ -56,7 +56,7 @@ import Text.Parsec.Prim (try)
 {---------------}
 
 pINT :: ParseM IntExpr
-pINT = pIntExpr pTypedExpr pBOOL pINT
+pINT = pIntExpr pTypedExpr pBOOL pINT pLIST
 
 pSTR :: ParseM StrExpr
 pSTR = pStrExpr pTypedExpr pBOOL pINT pSTR

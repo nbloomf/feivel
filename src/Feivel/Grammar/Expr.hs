@@ -53,7 +53,7 @@ import Feivel.Grammar.Int
 
 {- :IntExpr -}
 
-type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr
+type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr
 
 newtype IntExpr = IntExpr
   { unIntExpr :: AtLocus IntExprLeafS

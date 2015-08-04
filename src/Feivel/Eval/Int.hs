@@ -29,7 +29,7 @@ instance Glyph IntExpr where
   toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr) => Eval IntExpr where
+instance (Eval Expr, Eval BoolExpr, Eval ListExpr) => Eval IntExpr where
   eval (IntExpr (IntConst n :@ loc)) = return (IntExpr (IntConst n :@ loc))
 
   {- :Common -}

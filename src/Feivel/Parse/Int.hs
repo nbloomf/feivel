@@ -33,14 +33,14 @@ pIntConstLeaf = fmap IntConst pInteger
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> ParseM IntExpr
-pIntExpr pE pBOOL pINT = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM IntExpr
+pIntExpr pE pBOOL pINT pLIST = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pIntTerm = pTerm pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
-      , pFun2 "AtPos" (pE (ListOf ZZ)) pINT IntAtPos
+      , pFun2 "AtPos" (pLIST ZZ) pINT IntAtPos
       , pFun3 "AtIdx" (pE (MatOf ZZ)) pINT pINT IntAtIdx
     
       , pIfThenElseExprT pBOOL pINT IntIfThenElse ZZ
@@ -49,14 +49,14 @@ pIntExpr pE pBOOL pINT = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "SquareFreePart" pINT IntSqFreePart
       , pFun1 "Rad"            pINT IntRad
 
-      , pFun1 "Length" (pE (ListOf XX)) ListLen
-      , pFun1 "Rand"   (pE (ListOf ZZ)) IntRand
-      , pFun1 "Sum"    (pE (ListOf ZZ)) IntSum
-      , pFun1 "Prod"   (pE (ListOf ZZ)) IntProd
-      , pFun1 "Min"    (pE (ListOf ZZ)) IntMinim
-      , pFun1 "Max"    (pE (ListOf ZZ)) IntMaxim
-      , pFun1 "GCD"    (pE (ListOf ZZ)) IntGCDiv
-      , pFun1 "LCM"    (pE (ListOf ZZ)) IntLCMul
+      , pFun1 "Length" (pLIST XX) ListLen
+      , pFun1 "Rand"   (pLIST ZZ) IntRand
+      , pFun1 "Sum"    (pLIST ZZ) IntSum
+      , pFun1 "Prod"   (pLIST ZZ) IntProd
+      , pFun1 "Min"    (pLIST ZZ) IntMinim
+      , pFun1 "Max"    (pLIST ZZ) IntMaxim
+      , pFun1 "GCD"    (pLIST ZZ) IntGCDiv
+      , pFun1 "LCM"    (pLIST ZZ) IntLCMul
     
       , pFun1 "Numerator"   (pE QQ)  RatNumer
       , pFun1 "Denominator" (pE QQ)  RatDenom
