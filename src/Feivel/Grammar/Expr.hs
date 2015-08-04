@@ -169,7 +169,7 @@ instance Typed PolyExpr where
 
 {- :PermExpr -}
 
-type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr PermExpr
+type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr ListExpr PermExpr
 
 newtype PermExpr = PermExpr
   { unPermExpr :: AtLocus PermExprLeafS

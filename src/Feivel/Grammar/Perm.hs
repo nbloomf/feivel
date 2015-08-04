@@ -21,15 +21,15 @@ module Feivel.Grammar.Perm where
 import Feivel.Grammar.Util
 
 
-data PermExprLeaf a bool int perm
+data PermExprLeaf a bool int list perm
   = PermConst Type (Perm a)
   | PermVar   Type Key
 
   | PermMacro Type [(Type, Key, a)] a -- Expr, MacTo (PermOf typ)
-  | PermAtPos Type a int -- ListOf (PermOf typ)
+  | PermAtPos Type list int
   | PermAtIdx Type a int int -- MatOf (PermOf typ)
 
-  | PermRand Type a -- ListOf typ
+  | PermRand Type list
 
   | PermIfThenElse Type bool perm perm
 
@@ -39,7 +39,7 @@ data PermExprLeaf a bool int perm
 
 
 
-instance Typed (PermExprLeaf a bool int perm) where
+instance Typed (PermExprLeaf a bool int list perm) where
   typeOf x = case x of
     PermVar        typ _     -> PermOf typ
     PermMacro      typ _ _   -> PermOf typ

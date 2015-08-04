@@ -48,10 +48,11 @@ Feature Ideas
 * Lib/Write: LaTeX (display option), Unicode instances. Use Unicode instead of Show.
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
-  2: Use case statement in Eval instances (c.f. zzmod)
+  2: (started) Use case statement in Eval instances (c.f. zzmod)
   3: Rename Typed class to HasType
   5: (started; cf. ZZModExprLeaf) data Typed t = t :# Type
   7: use RankNTypes to make dispatch helper functions
+  8: In Bool grammar, put type argument on LEq, GEq, etc. and refactor eval
 * CL option: --type blah (default is doc) to specify parser
 * pure :: a -> Bool (randomness or side-effect free)
 * verifyType :: a -> Either SomeErr Bool?

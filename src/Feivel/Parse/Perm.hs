@@ -52,25 +52,25 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PermExpr) -> ParseM PermExpr
-pTypedPermExpr typ pE pBOOL pINT pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
+pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM PermExpr) -> ParseM PermExpr
+pTypedPermExpr typ pE pBOOL pINT pLIST pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr (PermVar typ) (PermOf typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (PermOf typ)) pINT (PermAtPos typ) 
+      , pFun2 "AtPos" (pLIST (PermOf typ)) pINT (PermAtPos typ) 
       , pFun3 "AtIdx" (pE $ MatOf (PermOf typ)) pINT pINT (PermAtIdx typ)
 
       , pMacroExprT pE (PermMacro typ)
 
       , pIfThenElseExprT pBOOL (pPERM typ) (PermIfThenElse typ) (PermOf typ)
 
-      , pFun1 "Rand" (pE $ ListOf (PermOf typ)) (PermRand typ)
+      , pFun1 "Rand" (pLIST (PermOf typ)) (PermRand typ)
       ]
 
     permOpTable =
-      [ [ Prefix (opParser1 (PermInvert typ) PermExpr "inv")
+      [ [ Prefix (opParser1 (PermInvert typ)  PermExpr "inv")
         ]
-      , [ Infix (opParser2 (PermCompose typ) PermExpr "o") AssocLeft
+      , [ Infix  (opParser2 (PermCompose typ) PermExpr "o")   AssocLeft
         ]
       ]
