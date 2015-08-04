@@ -83,7 +83,7 @@ pPERM :: Type -> ParseM PermExpr
 pPERM typ = pTypedPermExpr typ pTypedExpr pBOOL pINT pLIST pMAT pPERM
 
 pMAC :: Type -> ParseM MacExpr
-pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAC
+pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAT pMAC
 
 pDOC :: ParseM Doc
 pDOC = pDoc pTypedExpr pDOC
