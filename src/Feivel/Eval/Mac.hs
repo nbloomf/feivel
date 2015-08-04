@@ -34,22 +34,23 @@ instance (Glyph Expr, Eval Expr) => Glyph MacExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval MacExpr where
-  eval (MacExpr (MacConst typ vals expr (amb,p) :@ loc)) = do
-    if p == True
-      then return $ MacExpr $ MacConst typ vals expr (amb,True) :@ loc
-      else do
-        st <- getState
-        return $ MacExpr $ MacConst typ vals expr (st,True) :@ loc
+  eval (MacExpr (zappa :@ loc)) = case zappa of
+    MacConst typ vals expr (amb,p) -> do
+      if p == True
+        then return $ MacExpr $ MacConst typ vals expr (amb,True) :@ loc
+        else do
+          st <- getState
+          return $ MacExpr $ MacConst typ vals expr (st,True) :@ loc
 
-  {- :Common -}
-  eval (MacExpr (MacVar _ key :@ loc))        = eKey key loc
-  eval (MacExpr (MacIfThenElse _ b t f :@ _)) = eIfThenElse b t f
-  eval (MacExpr (MacAtIdx _ m h k :@ loc))    = eAtIdx m h k loc
-  eval (MacExpr (MacMacro _ vals mac :@ loc)) = eMacro vals mac loc
+    {- :Common -}
+    MacVar _ key -> eKey key loc
+    MacIfThenElse _ b t f -> eIfThenElse b t f
+    MacAtIdx _ m h k -> eAtIdx m h k loc
+    MacMacro _ vals mac -> eMacro vals mac loc
 
-  eval (MacExpr (MacAtPos _ a t :@ loc)) = lift2 loc a t (foo)
-    where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
+    MacAtPos _ a t -> lift2 loc a t (foo)
+      where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr
 
-  eval (MacExpr (MacRand _ ls :@ _)) = do
-    xs <- eval ls >>= getVal
-    randomElementEvalM xs
+    MacRand _ ls -> do
+      xs <- eval ls >>= getVal
+      randomElementEvalM xs
