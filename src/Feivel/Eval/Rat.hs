@@ -29,7 +29,7 @@ instance Glyph RatExpr where
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval RatExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval RatExpr where
   eval (RatExpr (zappa :@ loc)) = case zappa of
     RatConst p -> return $ RatExpr $ RatConst p :@ loc
 

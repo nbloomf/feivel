@@ -34,15 +34,15 @@ pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 pRatConst' :: ParseM RatExprLeafS
 pRatConst' = fmap RatConst pRat
 
-pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM RatExpr -> ParseM RatExpr
-pRatExpr pE pBOOL pINT pLIST pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
+pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM RatExpr -> ParseM RatExpr
+pRatExpr pE pBOOL pINT pLIST pMAT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
     pRatTerm = pTerm pRatConst' RatExpr pRAT "rational expression"
       [ pVarExpr RatVar QQ
       , pMacroExprT pE RatMacro
 
       , pFun2 "AtPos" (pLIST QQ) pINT RatAtPos
-      , pFun3 "AtIdx" (pE $ MatOf QQ) pINT pINT RatAtIdx
+      , pFun3 "AtIdx" (pMAT QQ)  pINT pINT RatAtIdx
 
       , pIfThenElseExprT pBOOL pRAT RatIfThenElse QQ
 

@@ -95,7 +95,7 @@ instance Typed BoolExpr where typeOf _ = BB
 
 {- :RatExpr -}
 
-type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr ListExpr RatExpr
+type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr RatExpr
 
 newtype RatExpr = RatExpr
   { unRatExpr :: AtLocus RatExprLeafS
