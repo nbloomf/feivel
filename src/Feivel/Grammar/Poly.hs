@@ -22,48 +22,27 @@ import Feivel.Grammar.Util
 
 
 data PolyExprLeaf a bool int list poly
-  = PolyConst Type (Poly a)
-  | PolyVar   Type Key
+  = PolyConst (Poly a)
+  | PolyVar   Key
 
-  | PolyMacro Type [(Type, Key, a)] a -- MacTo (PolyOver typ)
-  | PolyAtPos Type list int
-  | PolyAtIdx Type a int int -- MatOf (PolyOver typ)
+  | PolyMacro [(Type, Key, a)] a -- MacTo (PolyOver typ)
+  | PolyAtPos list int
+  | PolyAtIdx a int int -- MatOf (PolyOver typ)
 
-  | PolyRand Type list
+  | PolyRand list
 
-  | PolyIfThenElse Type bool poly poly
+  | PolyIfThenElse bool poly poly
 
-  | PolyAdd Type poly poly
-  | PolySub Type poly poly
-  | PolyMul Type poly poly
-  | PolyQuo Type poly poly
-  | PolyRem Type poly poly
-  | PolyPow Type poly int
-  | PolyNeg Type poly
+  | PolyAdd poly poly
+  | PolySub poly poly
+  | PolyMul poly poly
+  | PolyQuo poly poly
+  | PolyRem poly poly
+  | PolyPow poly int
+  | PolyNeg poly
 
-  | PolySum Type list
+  | PolySum list
 
-  | PolyFromRoots Type Variable list
-  | PolyEvalPoly  Type poly [(Variable, poly)]
+  | PolyFromRoots Variable list
+  | PolyEvalPoly  poly [(Variable, poly)]
   deriving (Eq, Show)
-
-
-instance Typed (PolyExprLeaf a bool int list poly) where
-  typeOf x = case x of
-    PolyVar        typ _     -> PolyOver typ
-    PolyMacro      typ _ _   -> PolyOver typ
-    PolyConst      typ _     -> PolyOver typ
-    PolyAdd        typ _ _   -> PolyOver typ
-    PolySub        typ _ _   -> PolyOver typ
-    PolyMul        typ _ _   -> PolyOver typ
-    PolyQuo        typ _ _   -> PolyOver typ
-    PolyRem        typ _ _   -> PolyOver typ
-    PolyNeg        typ _     -> PolyOver typ
-    PolySum        typ _     -> PolyOver typ
-    PolyPow        typ _ _   -> PolyOver typ
-    PolyAtPos      typ _ _   -> PolyOver typ
-    PolyAtIdx      typ _ _ _ -> PolyOver typ
-    PolyIfThenElse typ _ _ _ -> PolyOver typ
-    PolyRand       typ _     -> PolyOver typ
-    PolyFromRoots  typ _ _   -> PolyOver typ
-    PolyEvalPoly   typ _ _   -> PolyOver typ

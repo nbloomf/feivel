@@ -53,13 +53,13 @@ pMon = pIdMon <|> pMonomial
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PolyExprLeafS
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (OfType PolyExprLeafS)
 pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("
   ts <- sepBy1 (pPolyTerm $ p typ) (try $ char ';')
   keyword ")"
-  return (PolyConst typ (fromTerms ts))
+  return (PolyConst (fromTerms ts) :# typ)
   where
     pPolyTerm :: ParseM a -> ParseM (a, Monomial Variable)
     pPolyTerm q = do
@@ -76,23 +76,23 @@ pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> Pars
 pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
-      [ pVarExpr (PolyVar typ) (PolyOver typ)
+      [ pVarExpr ((:# typ) `o` PolyVar) (PolyOver typ)
 
-      , pFun2 "AtPos" (pLIST (PolyOver typ)) pINT (PolyAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) pINT pINT (PolyAtIdx typ)
+      , pFun2 "AtPos" (pLIST (PolyOver typ)) pINT ((:# typ) `oo` PolyAtPos)
+      , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) pINT pINT ((:# typ) `ooo` PolyAtIdx)
 
-      , pMacroExprT pE (PolyMacro typ)
+      , pMacroExprT pE ((:# typ) `oo` PolyMacro)
 
-      , pIfThenElseExprT pBOOL (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
+      , pIfThenElseExprT pBOOL (pPOLY typ) ((:# typ) `ooo` PolyIfThenElse) (PolyOver typ)
 
-      , pFun1 "Rand" (pLIST (PolyOver typ)) (PolyRand typ)
-      , pFun1 "Sum"  (pLIST (PolyOver typ)) (PolySum typ)
+      , pFun1 "Rand" (pLIST (PolyOver typ)) ((:# typ) `o` PolyRand)
+      , pFun1 "Sum"  (pLIST (PolyOver typ)) ((:# typ) `o` PolySum)
 
-      , pFun2 "Pow" (pPOLY typ) pINT (PolyPow typ)
+      , pFun2 "Pow" (pPOLY typ) pINT ((:# typ) `oo` PolyPow)
 
       , pPolyNull
 
-      , pFun2 "FromRoots" pVar (pLIST typ) (PolyFromRoots typ)
+      , pFun2 "FromRoots" pVar (pLIST typ) ((:# typ) `oo` PolyFromRoots)
 
       , pPolyEvalPoly
       , pPoly
@@ -103,7 +103,7 @@ pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser
           keyword "("
           terms <- sepBy1 foo (keyword "+")
           keyword ")"
-          return (PolyConst typ (fromTerms terms))
+          return (PolyConst (fromTerms terms) :# typ)
             where
               foo = do
                 a <- pC typ
@@ -118,7 +118,7 @@ pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser
           keyword ";"
           xs <- sepBy1 pSubs (keyword ";")
           keyword ")"
-          return (PolyEvalPoly typ p xs)
+          return (PolyEvalPoly p xs :# typ)
             where
               pSubs = do
                 x <- try $ pVar
@@ -128,16 +128,16 @@ pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser
 
         pPolyNull = do
           try $ keyword "Null"
-          return (PolyConst typ zeroPoly)
+          return (PolyConst zeroPoly :# typ)
 
     polyOpTable =
-      [ [ Prefix (opParser1 (PolyNeg typ) PolyExpr "neg")
+      [ [ Prefix (opParser1 ((:# typ) `o` PolyNeg)  PolyExpr "neg")
         ]
-      , [ Infix (opParser2 (PolyMul typ) PolyExpr "*")   AssocLeft
-        , Infix (opParser2 (PolyQuo typ) PolyExpr "quo") AssocLeft
-        , Infix (opParser2 (PolyRem typ) PolyExpr "rem") AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` PolyMul) PolyExpr "*")   AssocLeft
+        , Infix  (opParser2 ((:# typ) `oo` PolyQuo) PolyExpr "quo") AssocLeft
+        , Infix  (opParser2 ((:# typ) `oo` PolyRem) PolyExpr "rem") AssocLeft
         ]
-      , [ Infix (opParser2 (PolyAdd typ) PolyExpr "+")   AssocLeft
-        , Infix (opParser2 (PolySub typ) PolyExpr "-")   AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` PolyAdd) PolyExpr "+")   AssocLeft
+        , Infix  (opParser2 ((:# typ) `oo` PolySub) PolyExpr "-")   AssocLeft
         ]
       ]

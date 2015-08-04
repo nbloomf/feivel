@@ -111,13 +111,13 @@ instance (Put a, Typed a) => Put [a] where
 
 
 instance (Put a, Typed a) => Put (Poly a) where
-  put loc x = PolyE $ PolyExpr $ PolyConst typ (mapCoef (put loc) x) :@ loc
+  put loc x = PolyE $ PolyExpr $ PolyConst (mapCoef (put loc) x) :# typ :@ loc
     where
       typ = case getCoefficients x of
               (c:_) -> typeOf c
               []    -> XX
 
-  putType typ loc x = PolyE $ PolyExpr $ PolyConst typ (mapCoef (put loc) x) :@ loc
+  putType typ loc x = PolyE $ PolyExpr $ PolyConst (mapCoef (put loc) x) :# typ :@ loc
 
 
 instance (Put a, Typed a) => Put (Matrix a) where
