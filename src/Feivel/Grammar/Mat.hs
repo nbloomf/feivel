@@ -21,24 +21,24 @@ module Feivel.Grammar.Mat where
 import Feivel.Grammar.Util
 
 
-data MatExprLeaf a bool int mat
+data MatExprLeaf a bool int list mat
   = MatConst Type (Matrix a)
   | MatVar   Type Key
 
   | MatMacro Type [(Type, Key, a)] a -- Expr, MacTo (MatOf typ)
-  | MatAtPos Type a int -- ListOf (MatOf typ)
+  | MatAtPos Type list int
   | MatAtIdx Type a int int -- MatOf (MatOf typ)
 
   | MatIfThenElse Type bool mat mat
 
-  | MatBuilder Type a Key a Key a -- typ, ListOf XX, ListOf XX
+  | MatBuilder Type a Key list Key list -- typ
 
-  | MatRowFromList Type a -- ListOf typ
-  | MatColFromList Type a -- ListOf typ
+  | MatRowFromList Type list
+  | MatColFromList Type list
 
   -- Special Values
-  | MatId     Type int -- ZZ
-  | MatSwapE  Type int int int -- ZZ, ZZ, ZZ
+  | MatId     Type int
+  | MatSwapE  Type int int int
   | MatScaleE Type int int a -- typ
   | MatAddE   Type int int int a -- ZZ, ZZ, ZZ, typ
 
@@ -47,7 +47,7 @@ data MatExprLeaf a bool int mat
   | MatVCat  Type mat mat
   | MatAdd   Type mat mat
   | MatMul   Type mat mat
-  | MatPow   Type mat int -- ZZ
+  | MatPow   Type mat int
   | MatNeg   Type mat
   | MatTrans Type mat
 
@@ -72,12 +72,12 @@ data MatExprLeaf a bool int mat
   | MatGJForm   Type mat 
   | MatGJFactor Type mat
 
-  | MatRand Type a -- ListOf (MatOf typ)
+  | MatRand Type list
   deriving (Eq, Show)
 
 
 
-instance Typed (MatExprLeaf a bool int mat) where
+instance Typed (MatExprLeaf a bool int list mat) where
   typeOf x = case x of
     MatVar         typ _         -> MatOf typ
     MatMacro       typ _ _       -> MatOf typ

@@ -74,10 +74,10 @@ pLIST :: Type -> ParseM ListExpr
 pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST
 
 pMAT :: Type -> ParseM MatExpr
-pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pMAT
+pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pLIST pMAT
 
 pPOLY :: Type -> ParseM PolyExpr
-pPOLY typ = pTypedPolyExpr typ pTypedConst pTypedExpr pBOOL pINT pPOLY
+pPOLY typ = pTypedPolyExpr typ pTypedConst pTypedExpr pBOOL pINT pLIST pPOLY
 
 pPERM :: Type -> ParseM PermExpr
 pPERM typ = pTypedPermExpr typ pTypedExpr pBOOL pINT pPERM
@@ -113,8 +113,8 @@ pTypedExpr XX = choice
   , pTypedExpr BB
   , pTypedExpr SS
   , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST)
-  , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pMAT)
-  , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pPOLY)
+  , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pLIST pMAT)
+  , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pLIST pPOLY)
   ]
 
 

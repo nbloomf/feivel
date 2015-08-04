@@ -21,15 +21,15 @@ module Feivel.Grammar.Poly where
 import Feivel.Grammar.Util
 
 
-data PolyExprLeaf a bool int poly
+data PolyExprLeaf a bool int list poly
   = PolyConst Type (Poly a)
   | PolyVar   Type Key
 
   | PolyMacro Type [(Type, Key, a)] a -- MacTo (PolyOver typ)
-  | PolyAtPos Type a int -- ListOf (PolyOver typ)
+  | PolyAtPos Type list int
   | PolyAtIdx Type a int int -- MatOf (PolyOver typ)
 
-  | PolyRand Type a -- ListOf (PolyOf typ)
+  | PolyRand Type list
 
   | PolyIfThenElse Type bool poly poly
 
@@ -41,14 +41,14 @@ data PolyExprLeaf a bool int poly
   | PolyPow Type poly int
   | PolyNeg Type poly
 
-  | PolySum Type a -- ListOf (PolyOver typ)
+  | PolySum Type list
 
-  | PolyFromRoots Type Variable a -- ListOf typ
+  | PolyFromRoots Type Variable list
   | PolyEvalPoly  Type poly [(Variable, poly)]
   deriving (Eq, Show)
 
 
-instance Typed (PolyExprLeaf a bool int poly) where
+instance Typed (PolyExprLeaf a bool int list poly) where
   typeOf x = case x of
     PolyVar        typ _     -> PolyOver typ
     PolyMacro      typ _ _   -> PolyOver typ

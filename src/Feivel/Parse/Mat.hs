@@ -46,16 +46,16 @@ pMatLiteralOf typ p = do
     Left err -> reportParseErr (locus start end) err
     Right m -> return (MatConst typ m)
 
-pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pMatExpr pE pBOOL pINT pMAT = pTypedMatExpr XX pE pBOOL pINT pMAT
+pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pMatExpr pE pBOOL pINT pLIST pMAT = pTypedMatExpr XX pE pBOOL pINT pLIST pMAT
 
-pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
+pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
+pTypedMatExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr (MatVar typ) (MatOf typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (MatOf typ)) pINT (MatAtPos typ)
+      , pFun2 "AtPos" (pLIST (MatOf typ)) pINT (MatAtPos typ)
       , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) pINT pINT (MatAtIdx typ)
 
       , pMacroExprT pE (MatMacro typ)
@@ -67,10 +67,10 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
       , pFun1 "ShuffleRows" (pMAT typ) (MatShuffleRows typ)
       , pFun1 "ShuffleCols" (pMAT typ) (MatShuffleCols typ)
 
-      , pFun1 "RowFromList" (pE $ ListOf typ) (MatRowFromList typ)
-      , pFun1 "ColFromList" (pE $ ListOf typ) (MatColFromList typ)
+      , pFun1 "RowFromList" (pLIST typ) (MatRowFromList typ)
+      , pFun1 "ColFromList" (pLIST typ) (MatColFromList typ)
 
-      , pFun1 "Rand" (pE $ ListOf (MatOf typ)) (MatRand typ)
+      , pFun1 "Rand" (pLIST (MatOf typ)) (MatRand typ)
 
       , pFun2 "GetRow" pINT (pMAT typ) (MatGetRow typ)
       , pFun2 "GetCol" pINT (pMAT typ) (MatGetCol typ)
@@ -121,24 +121,24 @@ pTypedMatExpr typ pE pBOOL pINT pMAT = spaced $ buildExpressionParser matOpTable
           whitespace
           kr <- pKey
           keyword "<-"
-          lr <- pE $ ListOf tr
+          lr <- pLIST tr
           keyword ";"
           tc <- pType
           whitespace
           kc <- pKey
           keyword "<-"
-          lc <- pE $ ListOf tc
+          lc <- pLIST tc
           keyword ")"
           return (MatBuilder typ e kr lr kc lc)
     
     matOpTable =
-      [ [ Prefix (opParser1 (MatNeg typ) MatExpr "neg")
+      [ [ Prefix (opParser1 (MatNeg typ)  MatExpr "neg")
         ]
-      , [ Infix (opParser2 (MatMul typ) MatExpr "*") AssocLeft
+      , [ Infix  (opParser2 (MatMul typ)  MatExpr "*")    AssocLeft
         ]
-      , [ Infix (opParser2 (MatAdd typ) MatExpr "+") AssocLeft
+      , [ Infix  (opParser2 (MatAdd typ)  MatExpr "+")    AssocLeft
         ]
-      , [ Infix (opParser2 (MatHCat typ) MatExpr "hcat") AssocLeft
-        , Infix (opParser2 (MatVCat typ) MatExpr "vcat") AssocLeft
+      , [ Infix  (opParser2 (MatHCat typ) MatExpr "hcat") AssocLeft
+        , Infix  (opParser2 (MatVCat typ) MatExpr "vcat") AssocLeft
         ]
       ]

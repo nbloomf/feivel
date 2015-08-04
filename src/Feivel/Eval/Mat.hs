@@ -33,7 +33,7 @@ instance (Glyph Expr) => Glyph MatExpr where
   toGlyph x = error $ "toGlyph: MatExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr) => Eval MatExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval MatExpr where
   eval (MatExpr (MatConst t m :@ loc)) = do
     n <- mSeq $ fmap eval m
     return $ MatExpr $ MatConst t n :@ loc

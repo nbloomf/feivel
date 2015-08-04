@@ -69,30 +69,30 @@ pPolyLiteralOf typ p = do
     
 
 
-pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pPolyExpr pC pE pBOOL pINT pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pPOLY
+pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pPolyExpr pC pE pBOOL pINT pLIST pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pLIST pPOLY
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pTypedPolyExpr typ pC pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pC pE pBOOL pINT pLIST pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr (PolyVar typ) (PolyOver typ)
 
-      , pFun2 "AtPos" (pE $ ListOf (PolyOver typ)) pINT (PolyAtPos typ)
+      , pFun2 "AtPos" (pLIST (PolyOver typ)) pINT (PolyAtPos typ)
       , pFun3 "AtIdx" (pE $ MatOf (PolyOver typ)) pINT pINT (PolyAtIdx typ)
 
       , pMacroExprT pE (PolyMacro typ)
 
       , pIfThenElseExprT pBOOL (pPOLY typ) (PolyIfThenElse typ) (PolyOver typ)
 
-      , pFun1 "Rand" (pE $ ListOf (PolyOver typ)) (PolyRand typ)
-      , pFun1 "Sum" (pE $ ListOf (PolyOver  typ)) (PolySum typ)
+      , pFun1 "Rand" (pLIST (PolyOver typ)) (PolyRand typ)
+      , pFun1 "Sum"  (pLIST (PolyOver typ)) (PolySum typ)
 
       , pFun2 "Pow" (pPOLY typ) pINT (PolyPow typ)
 
       , pPolyNull
 
-      , pFun2 "FromRoots" pVar (pE $ ListOf typ) (PolyFromRoots typ)
+      , pFun2 "FromRoots" pVar (pLIST typ) (PolyFromRoots typ)
 
       , pPolyEvalPoly
       , pPoly
@@ -133,11 +133,11 @@ pTypedPolyExpr typ pC pE pBOOL pINT pPOLY = spaced $ buildExpressionParser polyO
     polyOpTable =
       [ [ Prefix (opParser1 (PolyNeg typ) PolyExpr "neg")
         ]
-      , [ Infix (opParser2 (PolyMul typ) PolyExpr "*") AssocLeft
+      , [ Infix (opParser2 (PolyMul typ) PolyExpr "*")   AssocLeft
         , Infix (opParser2 (PolyQuo typ) PolyExpr "quo") AssocLeft
         , Infix (opParser2 (PolyRem typ) PolyExpr "rem") AssocLeft
         ]
-      , [ Infix (opParser2 (PolyAdd typ) PolyExpr "+") AssocLeft
-        , Infix (opParser2 (PolySub typ) PolyExpr "-") AssocLeft
+      , [ Infix (opParser2 (PolyAdd typ) PolyExpr "+")   AssocLeft
+        , Infix (opParser2 (PolySub typ) PolyExpr "-")   AssocLeft
         ]
       ]
