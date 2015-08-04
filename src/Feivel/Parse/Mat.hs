@@ -37,7 +37,7 @@ pMatLiteral typ pE = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pE
 pMatConst :: Type -> (Type -> ParseM Expr) -> ParseM MatExpr
 pMatConst typ pC = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pC
 
-pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (MatExprLeaf Expr BoolExpr IntExpr MatExpr)
+pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM MatExprLeafS
 pMatLiteralOf typ p = do
   start <- getPosition
   xss <- pBrackList (pBrackList (p typ))

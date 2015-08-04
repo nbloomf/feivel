@@ -53,7 +53,7 @@ pMon = pIdMon <|> pMonomial
       k <- option 1 (try (keyword "^") >> pNatural)
       return (x, Nat k)
 
-pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PolyExprLeaf Expr BoolExpr IntExpr PolyExpr)
+pPolyLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PolyExprLeafS
 pPolyLiteralOf typ p = do
   try $ keyword "Poly"
   keyword "("

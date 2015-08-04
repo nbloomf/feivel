@@ -35,7 +35,7 @@ pListLiteral typ pE = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pE
 pListConst :: Type -> (Type -> ParseM Expr) -> ParseM ListExpr
 pListConst typ pC = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pC
 
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (ListExprLeaf Expr BoolExpr IntExpr ListExpr)
+pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM ListExprLeafS
 pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst typ xs)

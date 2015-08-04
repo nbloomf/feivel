@@ -31,10 +31,10 @@ module Feivel.Grammar.Expr (
   RatExpr(..),   RatExprLeafS,   RatExprLeaf(..),
   ZZModExpr(..), ZZModExprLeafS, ZZModExprLeaf(..),
 
-  ListExpr(..),  ListExprLeaf(..), ListGuard(..),
-  MatExpr(..),   MatExprLeaf(..),
-  PolyExpr(..),  PolyExprLeaf(..),
-  PermExpr(..),  PermExprLeaf(..),
+  ListExpr(..),  ListExprLeafS,  ListExprLeaf(..), ListGuard(..),
+  MatExpr(..),   MatExprLeafS,   MatExprLeaf(..),
+  PolyExpr(..),  PolyExprLeafS,  PolyExprLeaf(..),
+  PermExpr(..),  PermExprLeafS,  PermExprLeaf(..),
   MacExpr(..),   MacExprLeaf(..)
 ) where
 
@@ -124,8 +124,10 @@ instance Typed ZZModExpr where
 
 {- :ListExpr -}
 
+type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr
+
 newtype ListExpr = ListExpr
-  { unListExpr :: AtLocus (ListExprLeaf Expr BoolExpr IntExpr ListExpr)
+  { unListExpr :: AtLocus ListExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus ListExpr where
@@ -137,8 +139,10 @@ instance Typed ListExpr where
 
 {- :MatExpr -}
 
+type MatExprLeafS = MatExprLeaf Expr BoolExpr IntExpr MatExpr
+
 newtype MatExpr = MatExpr
-  { unMatExpr :: AtLocus (MatExprLeaf Expr BoolExpr IntExpr MatExpr)
+  { unMatExpr :: AtLocus MatExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus MatExpr where
@@ -150,8 +154,10 @@ instance Typed MatExpr where
 
 {- :PolyExpr -}
 
+type PolyExprLeafS = PolyExprLeaf Expr BoolExpr IntExpr PolyExpr
+
 newtype PolyExpr = PolyExpr
-  { unPolyExpr :: AtLocus (PolyExprLeaf Expr BoolExpr IntExpr PolyExpr)
+  { unPolyExpr :: AtLocus PolyExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus PolyExpr where
@@ -163,8 +169,10 @@ instance Typed PolyExpr where
 
 {- :PermExpr -}
 
+type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr PermExpr
+
 newtype PermExpr = PermExpr
-  { unPermExpr :: AtLocus (PermExprLeaf Expr BoolExpr IntExpr PermExpr)
+  { unPermExpr :: AtLocus PermExprLeafS
   } deriving (Eq, Show)
 
 instance HasLocus PermExpr where

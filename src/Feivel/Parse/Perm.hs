@@ -37,7 +37,7 @@ pPermLiteral typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 pPermConst :: Type -> (Type -> ParseM Expr) -> ParseM PermExpr
 pPermConst typ pC = fmap PermExpr $ pAtLocus $ pPermLiteralOf typ pC
 
-pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (PermExprLeaf Expr BoolExpr IntExpr PermExpr)
+pPermLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM PermExprLeafS
 pPermLiteralOf typ pC = (string "id" >> return (PermConst typ idPerm)) <|> do
   start <- getPosition
   ts <- many1 pCycle
