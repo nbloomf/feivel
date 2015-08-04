@@ -37,8 +37,9 @@ pZZModConst' n = do
   return (ZZModConst (a `zzmod` n) :# (ZZMod n))
 
 pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr
-  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
-pZZModExpr pE n pBOOL pINT pLIST pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
+  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
+  -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
+pZZModExpr pE n pBOOL pINT pLIST pMAT pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
     pZZModTerm = pTerm (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
       [ pVarExpr ((:# typ) `o` ZZModVar) (ZZMod n)
@@ -52,7 +53,7 @@ pZZModExpr pE n pBOOL pINT pLIST pMOD = spaced $ buildExpressionParser zzModOpTa
       , pFun2 "AtPos" (pLIST typ) pINT ((:# typ) `oo` ZZModAtPos)
       , pFun2 "Pow"   (pMOD n)    pINT ((:# typ) `oo` ZZModPow)
 
-      , pFun3 "AtIdx" (pE $ MatOf (ZZMod n))  pINT pINT ((:# typ) `ooo` ZZModAtIdx)
+      , pFun3 "AtIdx" (pMAT (ZZMod n))  pINT pINT ((:# typ) `ooo` ZZModAtIdx)
       ]
 
     zzModOpTable =
