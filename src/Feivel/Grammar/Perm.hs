@@ -21,13 +21,13 @@ module Feivel.Grammar.Perm where
 import Feivel.Grammar.Util
 
 
-data PermExprLeaf a bool int list perm
+data PermExprLeaf a bool int list mat perm
   = PermConst (Perm a)
   | PermVar   Key
 
   | PermMacro [(Type, Key, a)] a -- Expr, MacTo (PermOf typ)
   | PermAtPos list int
-  | PermAtIdx a int int -- MatOf (PermOf typ)
+  | PermAtIdx mat  int int
 
   | PermRand list
 

@@ -31,7 +31,7 @@ instance (Glyph Expr) => Glyph PermExpr where
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr) => Eval PermExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval PermExpr where
   eval (PermExpr (m :# typ :@ loc)) = case m of
     PermConst p -> do
       q <- seqPerm $ mapPerm eval p
