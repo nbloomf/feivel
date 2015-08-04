@@ -142,14 +142,14 @@ instance Typed ListExpr where
 type MatExprLeafS = MatExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr
 
 newtype MatExpr = MatExpr
-  { unMatExpr :: AtLocus MatExprLeafS
+  { unMatExpr :: AtLocus (OfType MatExprLeafS)
   } deriving (Eq, Show)
 
 instance HasLocus MatExpr where
   locusOf = locusOf . unMatExpr
 
 instance Typed MatExpr where
-  typeOf (MatExpr (x :@ _)) = typeOf x
+  typeOf (MatExpr (_ :# typ :@ _)) = MatOf typ
 
 
 {- :PolyExpr -}

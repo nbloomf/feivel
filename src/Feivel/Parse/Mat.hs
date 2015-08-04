@@ -37,14 +37,14 @@ pMatLiteral typ pE = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pE
 pMatConst :: Type -> (Type -> ParseM Expr) -> ParseM MatExpr
 pMatConst typ pC = fmap MatExpr $ pAtLocus $ pMatLiteralOf typ pC
 
-pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM MatExprLeafS
+pMatLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (OfType MatExprLeafS)
 pMatLiteralOf typ p = do
   start <- getPosition
   xss <- pBrackList (pBrackList (p typ))
   end <- getPosition
   case mFromRowList xss of
     Left err -> reportParseErr (locus start end) err
-    Right m -> return (MatConst typ m)
+    Right m -> return (MatConst m :# typ)
 
 pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
 pMatExpr pE pBOOL pINT pLIST pMAT = pTypedMatExpr XX pE pBOOL pINT pLIST pMAT
@@ -53,48 +53,48 @@ pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntE
 pTypedMatExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
-      [ pVarExpr (MatVar typ) (MatOf typ)
+      [ pVarExpr ((:# typ) `o` MatVar) (MatOf typ)
 
-      , pFun2 "AtPos" (pLIST (MatOf typ)) pINT (MatAtPos typ)
-      , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) pINT pINT (MatAtIdx typ)
+      , pFun2 "AtPos" (pLIST (MatOf typ)) pINT ((:# typ) `oo` MatAtPos)
+      , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) pINT pINT ((:# typ) `ooo` MatAtIdx)
 
-      , pMacroExprT pE (MatMacro typ)
+      , pMacroExprT pE ((:# typ) `oo` MatMacro)
 
-      , pIfThenElseExprT pBOOL (pMAT typ) (MatIfThenElse typ) (MatOf typ)
+      , pIfThenElseExprT pBOOL (pMAT typ) ((:# typ) `ooo` MatIfThenElse) (MatOf typ)
 
-      , pFun1 "Transpose" (pMAT typ) (MatTrans typ)
+      , pFun1 "Transpose" (pMAT typ) ((:# typ) `o` MatTrans)
 
-      , pFun1 "ShuffleRows" (pMAT typ) (MatShuffleRows typ)
-      , pFun1 "ShuffleCols" (pMAT typ) (MatShuffleCols typ)
+      , pFun1 "ShuffleRows" (pMAT typ) ((:# typ) `o` MatShuffleRows)
+      , pFun1 "ShuffleCols" (pMAT typ) ((:# typ) `o` MatShuffleCols)
 
-      , pFun1 "RowFromList" (pLIST typ) (MatRowFromList typ)
-      , pFun1 "ColFromList" (pLIST typ) (MatColFromList typ)
+      , pFun1 "RowFromList" (pLIST typ) ((:# typ) `o` MatRowFromList)
+      , pFun1 "ColFromList" (pLIST typ) ((:# typ) `o` MatColFromList)
 
-      , pFun1 "Rand" (pLIST (MatOf typ)) (MatRand typ)
+      , pFun1 "Rand" (pLIST (MatOf typ)) ((:# typ) `o` MatRand)
 
-      , pFun2 "GetRow" pINT (pMAT typ) (MatGetRow typ)
-      , pFun2 "GetCol" pINT (pMAT typ) (MatGetCol typ)
+      , pFun2 "GetRow" pINT (pMAT typ) ((:# typ) `oo` MatGetRow)
+      , pFun2 "GetCol" pINT (pMAT typ) ((:# typ) `oo` MatGetCol)
 
       , pMatBuilder
 
-      , pFun2 "Id"    pType pINT MatId
-      , pFun4 "SwapE" pType pINT pINT pINT MatSwapE
-      , pFun3 "ScaleE" pINT pINT (pE typ) (MatScaleE typ)
+      , pFun1 "Id"    pINT ((:# typ) `o` MatId)
+      , pFun3 "SwapE" pINT pINT pINT ((:# typ) `ooo` MatSwapE)
+      , pFun3 "ScaleE" pINT pINT (pE typ) ((:# typ) `ooo` MatScaleE)
       , pMatAddE
 
-      , pFun2 "Pow" (pMAT typ) pINT (MatPow typ)
+      , pFun2 "Pow" (pMAT typ) pINT ((:# typ) `oo` MatPow)
 
-      , pFun3 "SwapRows" (pMAT typ) pINT pINT (MatSwapRows typ)
-      , pFun3 "SwapCols" (pMAT typ) pINT pINT (MatSwapCols typ)
-      , pFun3 "ScaleRow" (pMAT typ) (pE typ) pINT (MatScaleRow typ)
-      , pFun3 "ScaleCol" (pMAT typ) (pE typ) pINT (MatScaleCol typ)
-      , pFun4 "AddRow"   (pMAT typ) (pE typ) pINT pINT (MatAddRow typ)
-      , pFun4 "AddCol"   (pMAT typ) (pE typ) pINT pINT (MatAddCol typ)
-      , pFun2 "DelRow"   (pMAT typ) pINT (MatDelRow typ)
-      , pFun2 "DelCol"   (pMAT typ) pINT (MatDelCol typ)
+      , pFun3 "SwapRows" (pMAT typ) pINT pINT ((:# typ) `ooo` MatSwapRows)
+      , pFun3 "SwapCols" (pMAT typ) pINT pINT ((:# typ) `ooo` MatSwapCols)
+      , pFun3 "ScaleRow" (pMAT typ) (pE typ) pINT ((:# typ) `ooo` MatScaleRow)
+      , pFun3 "ScaleCol" (pMAT typ) (pE typ) pINT ((:# typ) `ooo` MatScaleCol)
+      , pFun4 "AddRow"   (pMAT typ) (pE typ) pINT pINT ((:# typ) `oooo` MatAddRow)
+      , pFun4 "AddCol"   (pMAT typ) (pE typ) pINT pINT ((:# typ) `oooo` MatAddCol)
+      , pFun2 "DelRow"   (pMAT typ) pINT ((:# typ) `oo` MatDelRow)
+      , pFun2 "DelCol"   (pMAT typ) pINT ((:# typ) `oo` MatDelCol)
 
-      , pFun1 "GJForm"   (pMAT typ) (MatGJForm typ)
-      , pFun1 "GJFactor" (pMAT typ) (MatGJFactor typ)
+      , pFun1 "GJForm"   (pMAT typ) ((:# typ) `o` MatGJForm)
+      , pFun1 "GJFactor" (pMAT typ) ((:# typ) `o` MatGJFactor)
       ]
       where
         pMatAddE = do
@@ -110,7 +110,7 @@ pTypedMatExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser matO
           keyword ";"
           e <- pE t
           keyword ")"
-          return (MatAddE t n i j e)
+          return (MatAddE n i j e :# t)
 
         pMatBuilder = do
           try $ keyword "Build"
@@ -129,16 +129,16 @@ pTypedMatExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser matO
           keyword "<-"
           lc <- pLIST tc
           keyword ")"
-          return (MatBuilder typ e kr lr kc lc)
+          return (MatBuilder e kr lr kc lc :# typ)
     
     matOpTable =
-      [ [ Prefix (opParser1 (MatNeg typ)  MatExpr "neg")
+      [ [ Prefix (opParser1 ((:# typ) `o`  MatNeg)  MatExpr "neg")
         ]
-      , [ Infix  (opParser2 (MatMul typ)  MatExpr "*")    AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` MatMul)  MatExpr "*")    AssocLeft
         ]
-      , [ Infix  (opParser2 (MatAdd typ)  MatExpr "+")    AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` MatAdd)  MatExpr "+")    AssocLeft
         ]
-      , [ Infix  (opParser2 (MatHCat typ) MatExpr "hcat") AssocLeft
-        , Infix  (opParser2 (MatVCat typ) MatExpr "vcat") AssocLeft
+      , [ Infix  (opParser2 ((:# typ) `oo` MatHCat) MatExpr "hcat") AssocLeft
+        , Infix  (opParser2 ((:# typ) `oo` MatVCat) MatExpr "vcat") AssocLeft
         ]
       ]

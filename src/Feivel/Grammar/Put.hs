@@ -121,13 +121,13 @@ instance (Put a, Typed a) => Put (Poly a) where
 
 
 instance (Put a, Typed a) => Put (Matrix a) where
-  put loc x = MatE $ MatExpr $ MatConst typ (fmap (put loc) x) :@ loc
+  put loc x = MatE $ MatExpr $ MatConst (fmap (put loc) x) :# typ :@ loc
     where
       typ = case toListM x of
               (a:_) -> typeOf a
               []    -> XX
 
-  putType typ loc x = MatE $ MatExpr $ MatConst typ (fmap (put loc) x) :@ loc
+  putType typ loc x = MatE $ MatExpr $ MatConst (fmap (put loc) x) :# typ :@ loc
 
 
 instance (Put a) => Put (Perm a) where
