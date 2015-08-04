@@ -20,8 +20,7 @@ Feature Ideas
 * General: special keys which update after every lookup? e.g. a variable which autoincrements
 * Integer: hex, binary, octal constants
 * Integer: bezout
-* List: derange
-* List: map, fold
+* List: derange, map, fold
 * List: Shuffle list by permutation
 * Matrix: determinant
 * Matrix: insert row/column
@@ -49,7 +48,6 @@ Feature Ideas
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
   3: Rename Typed class to HasType
-  5: (started; cf. ZZModExprLeaf) data Typed t = t :# Type
   7: use RankNTypes to make dispatch helper functions
   8: In Bool grammar, put type argument on LEq, GEq, etc. and refactor eval
 * CL option: --type blah (default is doc) to specify parser
