@@ -152,7 +152,7 @@ instance (Get a) => Get [a] where
       getList :: Expr -> Either GetErr [Expr]
       getList w = do
         case w of
-          ListE (ListExpr (ListConst _ xs :@ _)) -> return xs
+          ListE (ListExpr (ListConst xs :# _ :@ _)) -> return xs
           ListE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = ListOf XX, typeReceived = typeOf v }

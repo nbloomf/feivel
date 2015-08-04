@@ -35,10 +35,10 @@ pListLiteral typ pE = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pE
 pListConst :: Type -> (Type -> ParseM Expr) -> ParseM ListExpr
 pListConst typ pC = fmap ListExpr $ pAtLocus $ pListLiteralOf typ pC
 
-pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM ListExprLeafS
+pListLiteralOf :: Type -> (Type -> ParseM Expr) -> ParseM (OfType ListExprLeafS)
 pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
-    return (ListConst typ xs)
+    return (ListConst xs :# typ)
 
 pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM ListExpr
 pListExpr pE pBOOL pINT pLIST pMAT = pTypedListExpr XX pE pBOOL pINT pLIST pMAT
@@ -47,32 +47,32 @@ pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM Int
 pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
-      [ pVarExpr (ListVar typ) (ListOf typ)
+      [ pVarExpr ((:# typ) `o` ListVar) (ListOf typ)
 
-      , pMacroExprT pE (ListMacro typ)
+      , pMacroExprT pE ((:# typ) `oo` ListMacro)
 
-      , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT (ListAtPos typ)
-      , pFun3 "AtIdx" (pMAT (ListOf typ)) pINT pINT (ListAtIdx typ)
+      , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT ((:# typ) `oo` ListAtPos)
+      , pFun3 "AtIdx" (pMAT (ListOf typ)) pINT pINT ((:# typ) `ooo` ListAtIdx)
 
-      , pIfThenElseExprT pBOOL (pLIST typ) (ListIfThenElse typ) (ListOf typ)
+      , pIfThenElseExprT pBOOL (pLIST typ) ((:# typ) `ooo` ListIfThenElse) (ListOf typ)
 
-      , pFun1 "Rand" (pE $ ListOf (ListOf typ)) (ListRand typ)
+      , pFun1 "Rand" (pE $ ListOf (ListOf typ)) ((:# typ) `o` ListRand)
 
-      , pFun1 "Reverse"  (pLIST typ) (ListRev typ)
-      , pFun1 "Sort"     (pLIST typ) (ListSort typ)
-      , pFun1 "Unique"   (pLIST typ) (ListUniq typ)
-      , pFun1 "Shuffle"  (pLIST typ) (ListShuffle typ)
+      , pFun1 "Reverse"  (pLIST typ) ((:# typ) `o` ListRev)
+      , pFun1 "Sort"     (pLIST typ) ((:# typ) `o` ListSort)
+      , pFun1 "Unique"   (pLIST typ) ((:# typ) `o` ListUniq)
+      , pFun1 "Shuffle"  (pLIST typ) ((:# typ) `o` ListShuffle)
       , pListShuffles
 
-      , pFun2 "GetRow" pINT (pMAT typ) (ListMatRow typ)
-      , pFun2 "GetCol" pINT (pMAT typ) (ListMatCol typ)
+      , pFun2 "GetRow" pINT (pMAT typ) ((:# typ) `oo` ListMatRow)
+      , pFun2 "GetCol" pINT (pMAT typ) ((:# typ) `oo` ListMatCol)
 
       , pListPermsOf
 
       , pListRange
       , pListPivotColIndices typ
       , pListBuilder
-      , pFun2 "Choose" pINT (pLIST typ) (ListChoose typ)
+      , pFun2 "Choose" pINT (pLIST typ) ((:# typ) `oo` ListChoose)
       , pListChoices
       , pListFilter
       ]
@@ -86,7 +86,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
           keyword ";"
           xs <- pLIST typ
           keyword ")"
-          return (ListFilter typ k g xs)
+          return (ListFilter k g xs :# typ)
 
         pListChoices = do
           _ <- try $ keyword "Choices"
@@ -97,7 +97,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
               keyword ";"
               xs <- pLIST t
               keyword ")"
-              return (ListChoices typ n xs)
+              return (ListChoices n xs :# typ)
             _ -> error "pListChoices"
 
         pListShuffles = do
@@ -107,7 +107,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
               keyword "("
               xs <- pLIST typ
               keyword ")"
-              return (ListShuffles typ xs)
+              return (ListShuffles xs :# typ)
             _ -> error "pListShuffles"
 
         pListPermsOf = do
@@ -117,14 +117,14 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
               keyword "("
               xs <- pLIST typ
               keyword ")"
-              return (ListPermsOf typ xs)
+              return (ListPermsOf xs :# typ)
             _ -> error "pListPermsOf"
 
         pListRange = if typ == ZZ
           then do
             try $ keyword "Range"
             (a,b) <- pTuple2 pINT pINT
-            return (ListRange ZZ a b)
+            return (ListRange a b :# ZZ)
           else fail "pListRange"
 
         pListPivotColIndices ZZ = do
@@ -134,7 +134,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
           keyword ";"
           m <- pMAT t
           keyword ")"
-          return (ListPivotColIndices ZZ m)
+          return (ListPivotColIndices m :# ZZ)
         pListPivotColIndices _ = fail "pListPivotColIndices"
     
         pListBuilder = do
@@ -144,7 +144,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
           keyword ";"
           gds <- sepBy1 (pListBind <|> pListGuard) (keyword ";")
           keyword ")"
-          return (ListBuilder typ expr gds)
+          return (ListBuilder expr gds :# typ)
             where
               pListBind = do
                 w <- try pType
@@ -159,8 +159,8 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
                 return $ Guard e
     
     listOpTable =
-      [ [ Infix (opParser2 (ListCat typ) ListExpr "++") AssocLeft
+      [ [ Infix (opParser2 ((:# typ) `oo` ListCat)  ListExpr "++")   AssocLeft
         ]
-      , [ Infix (opParser2 (ListToss typ) ListExpr "\\\\") AssocLeft
+      , [ Infix (opParser2 ((:# typ) `oo` ListToss) ListExpr "\\\\") AssocLeft
         ]
       ]

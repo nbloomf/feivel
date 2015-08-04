@@ -101,13 +101,13 @@ instance Put ZZModulo where
 {-----------------}
 
 instance (Put a, Typed a) => Put [a] where
-  put loc x = ListE $ ListExpr $ ListConst typ (map (put loc) x) :@ loc
+  put loc x = ListE $ ListExpr $ ListConst (map (put loc) x) :# typ :@ loc
     where
       typ = case x of
               (a:_) -> typeOf a
               []    -> XX
 
-  putType typ loc x = ListE $ ListExpr $ ListConst typ (map (put loc) x) :@ loc
+  putType typ loc x = ListE $ ListExpr $ ListConst (map (put loc) x) :# typ :@ loc
 
 
 instance (Put a, Typed a) => Put (Poly a) where

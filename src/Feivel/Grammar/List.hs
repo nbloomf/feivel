@@ -22,73 +22,46 @@ import Feivel.Grammar.Util
 
 
 data ListExprLeaf a bool int list mat
-  = ListConst   Type [a]
-  | ListVar     Type Key
-  | ListBuilder Type a [ListGuard a list]
+  = ListConst   [a]
+  | ListVar     Key
+  | ListBuilder a [ListGuard a list]
 
-  | ListMacro      Type [(Type, Key, a)] a -- MacTo (ListOf typ)
-  | ListAtPos      Type a int -- ListOf (ListOf typ)
-  | ListAtIdx      Type mat int int
-  | ListRand       Type a -- ListOf (ListOf typ)
-  | ListIfThenElse Type bool list list
+  | ListMacro      [(Type, Key, a)] a -- MacTo (ListOf typ)
+  | ListAtPos      a int -- ListOf (ListOf typ)
+  | ListAtIdx      mat int int
+  | ListRand       a -- ListOf (ListOf typ)
+  | ListIfThenElse bool list list
 
   -- Arithmetic
-  | ListCat   Type list list
-  | ListToss  Type list list
-  | ListRev   Type list
-  | ListSort  Type list
-  | ListUniq  Type list
+  | ListCat   list list
+  | ListToss  list list
+  | ListRev   list
+  | ListSort  list
+  | ListUniq  list
 
-  | ListFilter Type Key a list -- BB
+  | ListFilter Key a list -- BB
 
   -- Integer
-  | ListRange Type int int -- ZZ, ZZ
+  | ListRange int int -- ZZ, ZZ
 
   -- Matrices
-  | ListMatRow Type int mat
-  | ListMatCol Type int mat
+  | ListMatRow int mat
+  | ListMatCol int mat
 
   -- Random
-  | ListShuffle  Type list
-  | ListChoose   Type int list
+  | ListShuffle  list
+  | ListChoose   int list
 
-  | ListShuffles Type list
-  | ListChoices  Type int list
+  | ListShuffles list
+  | ListChoices  int list
 
   -- Permutations
-  | ListPermsOf Type list
+  | ListPermsOf list
 
-  | ListPivotColIndices Type mat
+  | ListPivotColIndices mat
   deriving (Eq, Show)
 
 data ListGuard a list
   = Bind  Key list
   | Guard a -- BB
   deriving (Eq, Show)
-
-
-instance Typed (ListExprLeaf a bool int list mat) where
-  typeOf x = case x of
-    ListConst           typ _     -> ListOf typ
-    ListVar             typ _     -> ListOf typ
-    ListIfThenElse      typ _ _ _ -> ListOf typ
-    ListRand            typ _     -> ListOf typ
-    ListAtPos           typ _ _   -> ListOf typ
-    ListAtIdx           typ _ _ _ -> ListOf typ
-    ListMacro           typ _ _   -> ListOf typ
-    ListCat             typ _ _   -> ListOf typ
-    ListToss            typ _ _   -> ListOf typ
-    ListRev             typ _     -> ListOf typ
-    ListSort            typ _     -> ListOf typ
-    ListUniq            typ _     -> ListOf typ
-    ListShuffle         typ _     -> ListOf typ
-    ListFilter          typ _ _ _ -> ListOf typ
-    ListMatRow          typ _ _   -> ListOf typ
-    ListMatCol          typ _ _   -> ListOf typ
-    ListChoose          typ _ _   -> ListOf typ
-    ListShuffles        typ _     -> ListOf typ
-    ListChoices         typ _ _   -> ListOf typ
-    ListRange           typ _ _   -> ListOf typ
-    ListPermsOf         typ _     -> ListOf typ
-    ListBuilder         typ _ _   -> ListOf typ
-    ListPivotColIndices typ _     -> ListOf typ
