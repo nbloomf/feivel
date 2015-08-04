@@ -21,15 +21,15 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a bool int list str
+data StrExprLeaf a bool int list mat str
   = StrConst Text
   | StrVar   Key
 
   | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
   | StrAtPos list int
-  | StrAtIdx a int int -- MatOf SS
+  | StrAtIdx mat int int
  
-  | StrIfThenElse bool str str -- BB
+  | StrIfThenElse bool str str
 
   -- Combinators
   | Concat      str str
@@ -52,7 +52,7 @@ data StrExprLeaf a bool int list str
   | StrRand list
 
   -- Matrix
-  | StrTab a -- MatOf XX
+  | StrTab mat
 
   -- General
   | StrFormat Format a -- XX

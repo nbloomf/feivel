@@ -33,8 +33,8 @@ pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 pStrConst' :: ParseM StrExprLeafS
 pStrConst' = fmap StrConst pText
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> ParseM StrExpr -> ParseM StrExpr
-pStrExpr pE pBOOL pINT pLIST pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM StrExpr -> ParseM StrExpr
+pStrExpr pE pBOOL pINT pLIST pMAT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
@@ -43,7 +43,7 @@ pStrExpr pE pBOOL pINT pLIST pSTR = spaced $ buildExpressionParser strOpTable pS
       , pIfThenElseExprT pBOOL pSTR StrIfThenElse SS
 
       , pFun2 "AtPos" (pLIST SS) pINT StrAtPos
-      , pFun3 "AtIdx" (pE $ MatOf SS) pINT pINT StrAtIdx
+      , pFun3 "AtIdx" (pMAT SS)  pINT pINT StrAtIdx
     
       , pFun2 "Strip"   pSTR pSTR StrStrip
       , pFun1 "Reverse" pSTR Reverse
@@ -59,7 +59,7 @@ pStrExpr pE pBOOL pINT pLIST pSTR = spaced $ buildExpressionParser strOpTable pS
       , pFun1 "Roman"  pINT StrRoman
       , pFun1 "Base36" pINT StrBase36
     
-      , pFun1T "Tab" (pE . MatOf) StrTab
+      , pFun1T "Tab" pMAT StrTab
 
       , pFun2  "Decimal" (pE QQ) pINT StrDecimal
       , pFun2T "Format"  (const pFormat) pE      StrFormat
