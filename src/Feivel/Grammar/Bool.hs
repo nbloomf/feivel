@@ -21,14 +21,14 @@ module Feivel.Grammar.Bool where
 import Feivel.Grammar.Util
 
 
-data BoolExprLeaf a int bool list
+data BoolExprLeaf a int bool list mat
   = BoolConst Bool
   | BoolVar   Key
   | IsDefined Key
 
   | BoolMacro [(Type, Key, a)] a -- Expr, MacTo BB
   | BoolAtPos list int
-  | BoolAtIdx a int int -- MatOf BB, ZZ, ZZ
+  | BoolAtIdx mat int int
 
   | BoolIfThenElse bool bool bool
 
@@ -60,7 +60,7 @@ data BoolExprLeaf a int bool list
   | ListIsEmpty list
 
   -- Matrix
-  | MatIsRow    a -- MatOf XX
-  | MatIsCol    a -- MatOf XX
-  | MatIsGJForm a -- MatOf XX
+  | MatIsRow    mat
+  | MatIsCol    mat
+  | MatIsGJForm mat
   deriving (Eq, Show)

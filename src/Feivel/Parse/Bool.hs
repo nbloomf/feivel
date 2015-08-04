@@ -33,15 +33,15 @@ pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 pBoolConst' :: ParseM BoolExprLeafS
 pBoolConst' = fmap BoolConst pBool
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> ParseM BoolExpr
-pBoolExpr pE pINT pBOOL pLIST = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM BoolExpr
+pBoolExpr pE pINT pBOOL pLIST pMAT = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
     pBoolTerm = pTerm pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
       , pFun2 "AtPos" (pLIST BB) pINT BoolAtPos
-      , pFun3 "AtIdx" (pE $ MatOf BB) pINT pINT BoolAtIdx
+      , pFun3 "AtIdx" (pMAT BB)  pINT pINT BoolAtIdx
 
       , pIfThenElseExprT pBOOL pBOOL BoolIfThenElse BB
     
@@ -54,9 +54,9 @@ pBoolExpr pE pINT pBOOL pLIST = spaced $ buildExpressionParser boolOpTable pBool
       , pFun2T "Elem"    pE pLIST ListElem
       , pFun1T "IsEmpty" pLIST ListIsEmpty
 
-      , pFun1T "IsRow"    (pE . MatOf) MatIsRow
-      , pFun1T "IsCol"    (pE . MatOf) MatIsCol
-      , pFun1T "IsGJForm" (pE . MatOf) MatIsGJForm
+      , pFun1T "IsRow"    pMAT MatIsRow
+      , pFun1T "IsCol"    pMAT MatIsCol
+      , pFun1T "IsGJForm" pMAT MatIsGJForm
 
       , pFun2T "Equal"    pE pE BoolEq
       , pFun2T "NotEqual" pE pE BoolNEq
