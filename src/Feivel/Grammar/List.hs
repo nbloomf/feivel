@@ -58,6 +58,8 @@ data ListExprLeaf a bool int list mat
   -- Permutations
   | ListPermsOf list
 
+  | ListBezouts list
+
   | ListPivotColIndices mat
   deriving (Eq, Show)
 

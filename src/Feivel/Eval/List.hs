@@ -184,6 +184,14 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr) => Eval ListExpr
           putTypeVal typ loc us >>= getVal
         u -> reportErr loc $ PermutationExpected u
 
+    ListBezouts as -> do
+      case typ of
+        ZZ -> do
+          xs <- eval as >>= getVal :: EvalM [Integer]
+          ys <- tryEvalM loc $ rBezouts xs
+          putTypeVal typ loc ys >>= getVal
+        _ -> error "ListBezouts"
+
     ListPivotColIndices m -> do
       let pivotIndices x = do
             n  <- eval m >>= getVal

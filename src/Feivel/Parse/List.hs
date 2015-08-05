@@ -58,6 +58,8 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
 
       , pFun1 "Rand" (pE $ ListOf (ListOf typ)) ((:# typ) `o` ListRand)
 
+      , pFun1 "Bezout" (pLIST typ) ((:# typ) `o` ListBezouts)
+
       , pFun1 "Reverse"  (pLIST typ) ((:# typ) `o` ListRev)
       , pFun1 "Sort"     (pLIST typ) ((:# typ) `o` ListSort)
       , pFun1 "Unique"   (pLIST typ) ((:# typ) `o` ListUniq)
