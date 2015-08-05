@@ -35,10 +35,10 @@ data BoolExprLeaf a int bool list mat
   | BoolEq  a a
   | BoolNEq a a
 
-  | BoolLT  a a
-  | BoolLEq a a
-  | BoolGT  a a
-  | BoolGEq a a
+  | BoolLT  Type a a
+  | BoolLEq Type a a
+  | BoolGT  Type a a
+  | BoolGEq Type a a
 
   -- Arithmetic
   | Conj bool bool

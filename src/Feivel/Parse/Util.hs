@@ -25,9 +25,9 @@ module Feivel.Parse.Util (
 
   pTuple1, pTuple2, pTuple4,
 
-  pFun1,  pFun2, pFun3, pFun4,
-  pFun1T, pFun2T,
-  pFun1T',
+  pFun1,   pFun2, pFun3, pFun4,
+  pFun1T,  pFun2T,
+  pFun1T', pFun2T',
 
   pVarExpr, pTypeKeyExpr, pMacroExprT, pTerm, opParser2, opParser1, pIfThenElseExprT
 ) where
@@ -176,6 +176,18 @@ pFun2T fun pA pB f = do
   b <- pB t
   keyword ")"
   return (f a b)
+
+pFun2T' :: String -> (Type -> ParseM a) -> (Type -> ParseM b) -> (Type -> a -> b -> c) -> ParseM c
+pFun2T' fun pA pB f = do
+  try $ keyword fun
+  keyword "("
+  t <- pType
+  keyword ";"
+  a <- pA t
+  keyword ";"
+  b <- pB t
+  keyword ")"
+  return (f t a b)
 
 
 pFun1T' :: String -> (Type -> ParseM a) -> (Type -> a -> b) -> ParseM b

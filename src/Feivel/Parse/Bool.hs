@@ -60,10 +60,10 @@ pBoolExpr pE pINT pBOOL pLIST pMAT = spaced $ buildExpressionParser boolOpTable 
 
       , pFun2T "Equal"    pE pE BoolEq
       , pFun2T "NotEqual" pE pE BoolNEq
-      , pFun2T "LT"       pE pE BoolLT
-      , pFun2T "LEq"      pE pE BoolLEq
-      , pFun2T "GT"       pE pE BoolGT
-      , pFun2T "GEq"      pE pE BoolGEq
+      , pFun2T' "LT"      pE pE BoolLT
+      , pFun2T' "LEq"     pE pE BoolLEq
+      , pFun2T' "GT"      pE pE BoolGT
+      , pFun2T' "GEq"     pE pE BoolGEq
 
       , pFun2 "Matches" (pE SS) pText    Matches
       , pFun2 "Divides" pINT pINT IntDiv

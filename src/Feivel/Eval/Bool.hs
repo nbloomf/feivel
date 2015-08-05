@@ -57,73 +57,53 @@ instance (Eval Expr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval BoolExpr
       y <- eval b >>= getVal :: EvalM Expr
       putVal loc (x /= y) >>= getVal
 
-    BoolLT a b -> do
-      case unify (typeOf a) (typeOf b) of
-        Right ZZ -> do
-          x <- eval a >>= getVal :: EvalM Integer
-          y <- eval b >>= getVal :: EvalM Integer
-          putVal loc (x < y) >>= getVal
-        Right SS -> do
-          x <- eval a >>= getVal :: EvalM Text
-          y <- eval b >>= getVal :: EvalM Text
-          putVal loc (x < y) >>= getVal
-        Right QQ -> do
-          x <- eval a >>= getVal :: EvalM Rat
-          y <- eval b >>= getVal :: EvalM Rat
-          putVal loc (x < y) >>= getVal
-        Right u -> reportErr loc $ SortableExpected u
-        Left err -> reportErr loc err
+    BoolLT typ a b -> do
+      let checkLT z = do
+            x <- eval a >>= getVal
+            suchThat $ x `hasSameTypeAs` z
+            y <- eval b >>= getVal
+            putVal loc (x < y) >>= getVal
+      case typ of
+        ZZ -> checkLT zeroZZ
+        SS -> checkLT (Text "")
+        QQ -> checkLT zeroQQ
+        _ -> reportErr loc $ SortableExpected typ
 
-    BoolLEq a b -> do
-      case unify (typeOf a) (typeOf b) of
-        Right ZZ -> do
-          x <- eval a >>= getVal :: EvalM Integer
-          y <- eval b >>= getVal :: EvalM Integer
-          putVal loc (x <= y) >>= getVal
-        Right SS -> do
-          x <- eval a >>= getVal :: EvalM Text
-          y <- eval b >>= getVal :: EvalM Text
-          putVal loc (x <= y) >>= getVal
-        Right QQ -> do
-          x <- eval a >>= getVal :: EvalM Rat
-          y <- eval b >>= getVal :: EvalM Rat
-          putVal loc (x <= y) >>= getVal
-        Right u -> reportErr loc $ SortableExpected u
-        Left err -> reportErr loc err
+    BoolLEq typ a b -> do
+      let checkLEq z = do
+            x <- eval a >>= getVal
+            suchThat $ x `hasSameTypeAs` z
+            y <- eval b >>= getVal
+            putVal loc (x <= y) >>= getVal
+      case typ of
+        ZZ -> checkLEq zeroZZ
+        SS -> checkLEq (Text "")
+        QQ -> checkLEq zeroQQ
+        _ -> reportErr loc $ SortableExpected typ
 
-    BoolGT a b -> do
-      case unify (typeOf a) (typeOf b) of
-        Right ZZ -> do
-          x <- eval a >>= getVal :: EvalM Integer
-          y <- eval b >>= getVal :: EvalM Integer
-          putVal loc (x > y) >>= getVal
-        Right SS -> do
-          x <- eval a >>= getVal :: EvalM Text
-          y <- eval b >>= getVal :: EvalM Text
-          putVal loc (x > y) >>= getVal
-        Right QQ -> do
-          x <- eval a >>= getVal :: EvalM Rat
-          y <- eval b >>= getVal :: EvalM Rat
-          putVal loc (x > y) >>= getVal
-        Right u -> reportErr loc $ SortableExpected u
-        Left err -> reportErr loc err
+    BoolGT typ a b -> do
+      let checkGT z = do
+            x <- eval a >>= getVal
+            suchThat $ x `hasSameTypeAs` z
+            y <- eval b >>= getVal
+            putVal loc (x > y) >>= getVal
+      case typ of
+        ZZ -> checkGT zeroZZ
+        SS -> checkGT (Text "")
+        QQ -> checkGT zeroQQ
+        _ -> reportErr loc $ SortableExpected typ
 
-    BoolGEq a b -> do
-      case unify (typeOf a) (typeOf b) of
-        Right ZZ -> do
-          x <- eval a >>= getVal :: EvalM Integer
-          y <- eval b >>= getVal :: EvalM Integer
-          putVal loc (x >= y) >>= getVal
-        Right SS -> do
-          x <- eval a >>= getVal :: EvalM Text
-          y <- eval b >>= getVal :: EvalM Text
-          putVal loc (x >= y) >>= getVal
-        Right QQ -> do
-          x <- eval a >>= getVal :: EvalM Rat
-          y <- eval b >>= getVal :: EvalM Rat
-          putVal loc (x >= y) >>= getVal
-        Right u -> reportErr loc $ SortableExpected u
-        Left err -> reportErr loc err
+    BoolGEq typ a b -> do
+      let checkGEq z = do
+            x <- eval a >>= getVal
+            suchThat $ x `hasSameTypeAs` z
+            y <- eval b >>= getVal
+            putVal loc (x >= y) >>= getVal
+      case typ of
+        ZZ -> checkGEq zeroZZ
+        SS -> checkGEq (Text "")
+        QQ -> checkGEq zeroQQ
+        _ -> reportErr loc $ SortableExpected typ
 
     BoolRand ls -> do
       xs <- eval ls >>= getVal
