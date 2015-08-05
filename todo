@@ -28,7 +28,7 @@ Feature Ideas
 * Matrix: Smith normal form (uses bezout)
 * Matrix: Shuffle rows/cols by permutation
 * Matrix: Build permutation matrix
-* Polynomial: gcd, bezout
+* Polynomial: gcd
 * Permutation: Choose random permutation (of Sn? of a list?)
 * Permutation: Orbits {{t}}
 * Permutation: Shape {int}

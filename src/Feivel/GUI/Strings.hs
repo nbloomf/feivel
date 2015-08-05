@@ -24,7 +24,7 @@ ui_name_string =
 
 ui_version_string :: String
 ui_version_string =
-  "0.2.0"
+  "0.2.1"
 
 ui_license_string :: String
 ui_license_string =
