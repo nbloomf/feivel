@@ -35,7 +35,7 @@ module Feivel.Grammar.Expr (
   MatExpr(..),   MatExprLeafS,   MatExprLeaf(..),
   PolyExpr(..),  PolyExprLeafS,  PolyExprLeaf(..),
   PermExpr(..),  PermExprLeafS,  PermExprLeaf(..),
-  MacExpr(..),   MacExprLeaf(..)
+  MacExpr(..),   MacExprLeafS,   MacExprLeaf(..)
 ) where
 
 import Feivel.Grammar.Util
@@ -184,15 +184,17 @@ instance Typed PermExpr where
 
 {- :MacExpr -}
 
+type MacExprLeafS = MacExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr MacExpr
+
 newtype MacExpr = MacExpr
-  { unMacExpr :: AtLocus (MacExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr MacExpr)
+  { unMacExpr :: AtLocus (OfType MacExprLeafS)
   } deriving (Eq, Show)
 
 instance HasLocus MacExpr where
   locusOf = locusOf . unMacExpr
 
 instance Typed MacExpr where
-  typeOf (MacExpr (x :@ _)) = typeOf x
+  typeOf (MacExpr (_ :# typ :@ _)) = MacTo typ
 
 
 {- :Doc -}

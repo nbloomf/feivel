@@ -22,25 +22,14 @@ import Feivel.Grammar.Util
 
 
 data MacExprLeaf a bool int list mat mac
-  = MacConst Type [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
-  | MacVar   Type Key
+  = MacConst [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
+  | MacVar   Key
 
-  | MacMacro Type [(Type, Key, a)] a -- MacTo (MacTo typ)
-  | MacAtPos Type list int
-  | MacAtIdx Type mat  int int
+  | MacMacro [(Type, Key, a)] a -- MacTo (MacTo typ)
+  | MacAtPos list int
+  | MacAtIdx mat  int int
 
-  | MacRand Type list
+  | MacRand list
 
-  | MacIfThenElse Type bool mac mac
+  | MacIfThenElse bool mac mac
   deriving (Eq, Show)
-
-
-instance Typed (MacExprLeaf a bool int list mat mac) where
-  typeOf x = case x of
-    MacConst      typ _ _ _ -> MacTo typ
-    MacVar        typ _     -> MacTo typ
-    MacMacro      typ _ _   -> MacTo typ
-    MacAtPos      typ _ _   -> MacTo typ
-    MacAtIdx      typ _ _ _ -> MacTo typ
-    MacRand       typ _     -> MacTo typ
-    MacIfThenElse typ _ _ _ -> MacTo typ

@@ -199,7 +199,7 @@ instance (Get a) => Get (Perm a) where
 instance Get (Store Expr, Expr) where
   get expr = do
     case expr of
-      MacE (MacExpr (MacConst _ vals y (amb,_) :@ _)) -> do
+      MacE (MacExpr (MacConst vals y (amb,_) :# _ :@ _)) -> do
         st <- toStateT vals
         return (mergeState st amb, y)
       MacE _ -> Left GetUnevaluatedExpression

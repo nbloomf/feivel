@@ -38,7 +38,7 @@ pMacConst
 pMacConst typ pE pBD = fmap MacExpr $ pAtLocus $ pMacConst' typ pE pBD
 
 pMacConst'
-  :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM (MacExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr MacExpr)
+  :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM (OfType MacExprLeafS)
 pMacConst' typ pE pBD = do
   try $ keyword "Macro"
   keyword "("
@@ -49,23 +49,25 @@ pMacConst' typ pE pBD = do
   keyword ")"
   if typ /= t
     then error "pMacConst'" -- reportParseErr (locus start end) $ TypeUnificationError typ t
-    else return (MacConst t vals body (emptyStore, False))
+    else return (MacConst vals body (emptyStore, False) :# t)
 
 
-pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM MacExpr) -> ParseM MacExpr
+pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr
+  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
+  -> (Type -> ParseM MacExpr) -> ParseM MacExpr
 pTypedMacExpr typ pE pBD pBOOL pINT pLIST pMAT pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
-      [ pVarExpr (MacVar typ) (MacTo typ)
+      [ pVarExpr ((:# typ) `o` MacVar) (MacTo typ)
 
-      , pFun2 "AtPos" (pLIST (MacTo typ)) pINT (MacAtPos typ)
-      , pFun3 "AtIdx" (pMAT (MacTo typ)) pINT pINT (MacAtIdx typ)
+      , pFun2 "AtPos" (pLIST (MacTo typ)) pINT ((:# typ) `oo` MacAtPos)
+      , pFun3 "AtIdx" (pMAT (MacTo typ)) pINT pINT ((:# typ) `ooo` MacAtIdx)
 
-      , pMacroExprT pE (MacMacro typ)
+      , pMacroExprT pE ((:# typ) `oo` MacMacro)
 
-      , pFun1 "Rand" (pLIST (MacTo typ)) (MacRand typ)
+      , pFun1 "Rand" (pLIST (MacTo typ)) ((:# typ) `o` MacRand)
 
-      , pIfThenElseExprT pBOOL (pMAC typ) (MacIfThenElse typ) (MacTo typ)
+      , pIfThenElseExprT pBOOL (pMAC typ) ((:# typ) `ooo` MacIfThenElse) (MacTo typ)
       ]
 
     macOpTable = []
