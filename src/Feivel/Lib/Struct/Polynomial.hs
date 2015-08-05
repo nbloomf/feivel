@@ -426,6 +426,11 @@ instance (Ringoid a, CRingoid a, URingoid a, Canon a, Eq a) => EDoid (Poly a) wh
       else Left PolyNotUnivariate
 
 
+-- :GCDoid
+instance (Ringoid a, CRingoid a, URingoid a, Canon a, Eq a) => GCDoid (Poly a) where
+  rGCD = rEuclidGCD
+
+
 -- :BDoid
 instance (Ringoid a, CRingoid a, URingoid a, Canon a, Eq a) => BDoid (Poly a) where
   rBezout = rEuclidBezout

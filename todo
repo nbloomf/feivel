@@ -19,7 +19,6 @@ Feature Ideas
 * General: stack trace on error
 * General: special keys which update after every lookup? e.g. a variable which autoincrements
 * Integer: hex, binary, octal constants
-* Integer: bezout
 * List: derange, map, fold
 * List: Shuffle list by permutation
 * Matrix: determinant

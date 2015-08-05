@@ -185,11 +185,14 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr) => Eval ListExpr
         u -> reportErr loc $ PermutationExpected u
 
     ListBezouts as -> do
+      let findBez z = do
+            xs <- eval as >>= getVal
+            suchThat $ xs `hasSameTypeAs` [z]
+            ys <- tryEvalM loc $ rBezouts xs
+            putTypeVal typ loc ys >>= getVal
       case typ of
-        ZZ -> do
-          xs <- eval as >>= getVal :: EvalM [Integer]
-          ys <- tryEvalM loc $ rBezouts xs
-          putTypeVal typ loc ys >>= getVal
+        ZZ          -> findBez zeroZZ
+        PolyOver QQ -> findBez (constPoly zeroQQ)
         _ -> error "ListBezouts"
 
     ListPivotColIndices m -> do
