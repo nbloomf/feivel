@@ -101,9 +101,9 @@ During the evaluation step `feivel` keeps track of a **store** of key-value pair
 **Keys** are strings of alphanumeric characters prefixed with `@`. Keys are evaluated by looking up their *value* in the store. Attempting to evaluate a key which has not been defined, or to redefine a key which has already been defined, is an error. For example, try typing the following into a fresh REPL, one line at a time.
 
     > @a
-    > [define int @a := 2]
+    > define int @a := 2
     > @a
-    > [define int @a := 3]
+    > define int @a := 3
 
 **Commands** give us control over how a template is processed and are denoted by wrapping them in [square brackets]. One of the most basic commands is `shuffle`; this command takes a list of templates in [square brackets], evaluates them, randomly shuffles them, and then concatenates them. For example, try evaluating the following in the repl.
 
@@ -130,9 +130,9 @@ This gives us some ability to block-structure our templates for better readabili
 
 **Expressions** are different from ordinary text and commands; they represent structured data upon which we can perform basic computations. This is where the bulk of the complexity of `feivel` lives. Every expression has a *type*, which determines how it is interpreted and what we can do with it. One basic type is `bool`, representing boolean values. The boolean constants true and false are denoted `#t` and `#f`, respectively. Try typing the following into the repl.
 
-    > [:bool: #t :]
+    > bool: #t
 
-The repl should print `#t` back. Here we have used another command: [:square colons:] are used to denote a *naked expression* in the template; naked expressions are evaluated in place and replaced by a textual representation of their value. Here `#t` is the textual representation of the boolean true value. Naked expressions should be supplied with a *type signature*; this is the `bool:` here. Type signatures act as documentation for the template author and are required for the parser. Lots of expressions can be unambiguously parsed without a signature, but there is no fancy type inference going on and ambiguous expressions may cause `feivel` to bail. (N.B.: I would like to replace this with actual type inference, but hand-holding the parser will do for now.)
+The repl should print `#t` back. Here we have used another command: [:square colons:] are used to denote a *naked expression* in the template; naked expressions are evaluated in place and replaced by a textual representation of their value. Here `#t` is the textual representation of the boolean true value. Naked expressions should be supplied with a *type signature*; this is the `bool:` here. Type signatures act as documentation for the template author and are required for the parser.
 
 Types in `feivel` come in two flavors:
 
@@ -440,6 +440,9 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
 
     The indices of the pivot columns of a matrix with entries in `TYP`. Returns a list of integers.
 
+- `Bezout(LIST)`
+
+    Given a list `{a1;...;an}`, find elements `{b1;...;bn}` such that `a1b1 + ... + anbn` is equal to `gcd(a1;...;an)`. Works over the integers and the rational polynomials.
 
 
 `[t]`: Matrices
@@ -506,6 +509,10 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
 A polynomial is a partial map over a set of string-like expressions called monomials. Maps over numeric types have a richer arithmetic, but we can still deal with polynomials over e.g. strings. (Why? Why not?) To make parsing simpler, the syntax for defining polynomials is a little awkward. For example, the polynomial x^2 + 2x + 1 is denoted `Poly(1.x^2; 2.x; 1.1)`.
 
+- `+`, `*`, `neg`, `quo`, `rem`
+
+    Arithmetic. `quo` and `rem` work only for univariate polynomials.
+
 - `FromRoots(VAR; LIST)`
 
     Given a variable `x` and a list `{a1; a2; ...; an}` of roots, build the polynomial `(x-a1)(x-a2)...(x-an)`.
@@ -536,11 +543,11 @@ To evaluate a macro, we say `EVAL(TYP; MAC; TYP KEY := EXPR; ...)`. The first `T
 
 For example, try typing the following into a fresh REPL.
 
-    > [define >int @m := Macro(int; @i + 2; int @i := 5)]
+    > define >int @m := Macro(int; @i + 2; int @i := 5)
 
 This defines a macro which takes an integer and adds two to it. By default the integer added is 5 which we can see by evaluating this macro with no parameters.
 
-    > [:int: Eval(int; @m) :]
+    > int: Eval(int; @m)
 
 By the way, we can get the same result by simply saying `@m` in text mode.
 
@@ -548,7 +555,7 @@ By the way, we can get the same result by simply saying `@m` in text mode.
 
 We can change the value of `@i` in the body of this macro by supplying a parameter as follows.
 
-    > [:int: Eval(int; @m; int @i := 11) :]
+    > int: Eval(int; @m; int @i := 11)
 
 Macros can have any number of parameters, any number of which can be redefined (in any order) when we use `Eval`.
 
@@ -556,7 +563,7 @@ Macros are kind of like very clunky subroutines where all parameters are named a
 
 One last thing: it is important to note that macro bodies are evaluated afresh at *invocation time*, that is, at every call to `Eval`. For example, define the following in a fresh REPL.
 
-    > [define >int @f := Macro(int; Uniform(1;10))]
+    > define >int @f := Macro(int; Uniform(1;10))
 
 Now evaluate this macro with several `@f`s.
 
@@ -564,12 +571,12 @@ Now evaluate this macro with several `@f`s.
 
 You should see (in general) different numbers. This is because every time `@f` is evaluated, its body is evaluated, meaning we observe a different number from `Uniform` each time. Contrast this with the following similar command.
 
-    > [define int @i := Uniform(1;10)]
+    > define int @i := Uniform(1;10)
     > @i @i @i @i
 
 This time we see the same number repeated. This is because `@i` was only evaluated *once*, at *define time*. Of course we can get a similar effect, fixing the value of `@f` using `Eval` like so.
 
-    > [define int @j := Eval(int; @f)]
+    > define int @j := Eval(int; @f)
     > @j @j @j @j
 
 The difference between evaluating at definition time and invocation time may allow some interesting uses, such as the "die roll" example here -- `@f` is effectively a d10.
