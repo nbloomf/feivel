@@ -31,17 +31,3 @@ module Feivel.Eval (
 import Feivel.Eval.EvalM
 import Feivel.Eval.Eval
 import Feivel.Eval.Expr
-
-{-
-dispatchMatrixRingType
-  :: Locus -> Type -> (forall a. (Ringoid a, URingoid a, Inject (Matrix a) MatExpr) => a -> EvalM MatExpr) -> EvalM MatExpr
-dispatchMatrixRingType loc u fun = case u of
-  ZZ          -> fun zeroZZ
-  QQ          -> fun zeroQQ
-  BB          -> fun zeroBB
-  ZZMod n     -> fun (zeroMod n)
-  PolyOver ZZ -> fun (constP zeroZZ)
-  PolyOver QQ -> fun (constP zeroQQ)
-  PolyOver BB -> fun (constP zeroBB)
-  _           -> reportErr loc $ NumericTypeExpected u
--}

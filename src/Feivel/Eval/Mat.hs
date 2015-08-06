@@ -24,6 +24,30 @@ module Feivel.Eval.Mat () where
 import Feivel.Eval.Util
 
 
+{-
+-- This works with RankNTypes or Rank2Types enabled.
+-- But is it safe? What is the downside?
+
+dispatchMatrixRingType
+  :: Locus
+     -> Type
+     -> (forall a.
+          (Ringoid a, CRingoid a, URingoid a, Typed a, Put a)
+            => a -> EvalM MatExpr)
+     -> EvalM MatExpr
+dispatchMatrixRingType loc u fun = case u of
+  ZZ          -> fun zeroZZ
+  QQ          -> fun zeroQQ
+  BB          -> fun zeroBB
+  ZZMod n     -> fun (zeroMod n)
+  PolyOver ZZ -> fun (constPoly zeroZZ)
+  PolyOver QQ -> fun (constPoly zeroQQ)
+  PolyOver BB -> fun (constPoly zeroBB)
+  _           -> reportErr loc $ NumericTypeExpected u
+-}
+
+
+
 instance (Glyph Expr) => Glyph MatExpr where
   toGlyph (MatExpr (MatConst m :# _ :@ _)) = do
     n <- mSeq $ fmap toGlyph m
