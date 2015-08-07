@@ -16,16 +16,19 @@
 {- along with Feivel. If not, see <http://www.gnu.org/licenses/>.    -}
 {---------------------------------------------------------------------}
 
-module Feivel.Lib.Data (
-  module Feivel.Lib.Data.Rat,
-  module Feivel.Lib.Data.ZZMod,
-  module Feivel.Lib.Data.Natural,
-  module Feivel.Lib.Data.Monomial,
-  module Feivel.Lib.Data.QuadRat
-) where
+module Feivel.Lib.Data.QuadRat where
 
 import Feivel.Lib.Data.Rat
-import Feivel.Lib.Data.ZZMod
-import Feivel.Lib.Data.Natural
-import Feivel.Lib.Data.Monomial
-import Feivel.Lib.Data.QuadRat
+import Feivel.Lib.Canon
+
+data QuadRat = QuadRat
+  { ratPart :: Rat
+  , irrPart :: Rat
+  , discrim :: Integer
+  }
+
+makeQuadRat :: Rat -> Rat -> Integer -> QuadRat
+makeQuadRat = undefined
+
+instance Canon QuadRat where
+  canon = undefined

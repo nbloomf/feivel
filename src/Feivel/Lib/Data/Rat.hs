@@ -21,6 +21,8 @@
 module Feivel.Lib.Data.Rat (
   Rat(..), toRat, makeRat, digits, ratRed, toDouble, canon,
 
+  (%+), (%*),
+
   ratFlr, ratNum, ratDen,
 
   ratFlrSqt, ratSqt,
