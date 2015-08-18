@@ -5,10 +5,7 @@ Feature Ideas
 * Doc: ``for'' for matrices?
 * Doc: for: explicit integer index key (from 1)? [for str @s in LIST index @i say [BLAH] endfor]
 * Doc: for: "sepby" for stuff between items
-* Format: awk
-* Format: gnu recutils
-* Format: JSON
-* Format: RFC822
+* Formats: awk, gnu recutils, JSON, RFC822
 * General: ability to see random seed and set seed at CL
 * General: implicit "control fields" for record number etc.
 * General: make special chars []#@ redefinable
