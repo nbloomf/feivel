@@ -691,15 +691,18 @@ instance UFDoid Integer where
                 EQ -> True
                 LT -> foo (k+1)
 
+  rIsSqFree 0 = return False
   rIsSqFree n = do
     k <- rSqPart n
     return (k == 1)
 
+  rSqPart 0 = return 0
   rSqPart n
     | n < 0  = rSqPart (-n)
     | n == 0 = Right 0
     | otherwise = Right $ last $ filter (\k -> n`rem`k == 0) $ takeWhile (<= n) $ map (^(2::Integer)) [1..n]
 
+  rSqFreePart 0 = return 1
   rSqFreePart n = do
     d <- rSqPart n
     return (div n d)
