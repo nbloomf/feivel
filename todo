@@ -39,8 +39,9 @@ Feature Ideas
 * Type: trees (constructor)
 * Type: Quadratic numbers
 * Type: Dihedral words
-* Arch: type synonyms
+* Arch: type synonyms (big change?)
 * Lib/Write: LaTeX (display option), Unicode instances. Use Unicode instead of Show.
+  * Unicode vs ascii
 * Refactor: General
   1: Move Error up the hierarchy of dependencies
   3: Rename Typed class to HasType
