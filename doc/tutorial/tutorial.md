@@ -132,12 +132,12 @@ This gives us some ability to block-structure our templates for better readabili
 
     > bool: #t
 
-The repl should print `#t` back. Here we have used another command: [:square colons:] are used to denote a *naked expression* in the template; naked expressions are evaluated in place and replaced by a textual representation of their value. Here `#t` is the textual representation of the boolean true value. Naked expressions should be supplied with a *type signature*; this is the `bool:` here. Type signatures act as documentation for the template author and are required for the parser.
+The repl should print `#t` back. In a template, this would be written as `[:bool: #t :]`. Here we have used another command: [:square colons:] are used to denote a *naked expression* in the template; naked expressions are evaluated in place and replaced by a textual representation of their value. Here `#t` is the textual representation of the boolean true value. Naked expressions should be supplied with a *type signature*; this is the `bool:` here. Type signatures act as documentation for the template author and are required for the parser.
 
 Types in `feivel` come in two flavors:
 
-1. *atomic* types, which represent concrete data. As of 0.2.1 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N), and `$int` (permutations of integers).
-2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.2.1 there are 4 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), and `>typ` (macros of `typ`).
+1. *atomic* types, which represent concrete data. As of 0.2.1 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N).
+2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.2.1 there are 5 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), `$typ` (permutations of constants of `typ`), and `>typ` (macros of `typ`).
 
 Constructors can be nested, so that (for instance) `[{int}]` represents the set of matrices whose entries are lists of integers. Macros are the strangest of these; they are like functions (but not quite) and allow us to wrap a complicated expression with parameters into a single value. An expression of type `>int` can be *evaluated* to *yield* a value of type `int`. Macros can also be nested, as we'll see later, so for instance an expression of type `>>int` is a macro that yields a macro that yields an integer, and an expression of type `[>rat]` is a matrix of macros that yield rationals. In that sense macros are "first-class" values. Why? Why not? :)
 
