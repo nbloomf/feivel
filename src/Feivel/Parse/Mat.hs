@@ -24,7 +24,7 @@ import Feivel.Store (locus)
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Lib (mFromRowList)
+import Carl.Struct.Matrix (mFromRowList)
 
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 import Text.ParserCombinators.Parsec hiding (try)

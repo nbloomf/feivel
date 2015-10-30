@@ -25,7 +25,8 @@ import Feivel.Eval.EvalM
 import Feivel.Grammar
 import Feivel.Store
 import Feivel.Error
-import Feivel.Lib
+import Carl.String
+import Carl.Data.Rat
 
 class Eval t where
   eval :: t -> EvalM t

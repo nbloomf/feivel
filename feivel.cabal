@@ -1,7 +1,7 @@
 Name:           feivel
 Version:        0.2.1
 Cabal-Version:  >= 1.2
-License:        GPL
+License:        GPL-3
 Copyright:      (c) 2015 Nathan Bloomfield
 Author:         Nathan Bloomfield
 Synopsis:       A simple template processor.
@@ -15,11 +15,4 @@ Executable feivel
   build-depends:  base, parsec, containers, regex-posix,
                   random-fu, rvar, random-extras,
                   transformers, mtl, random, directory,
-                  monadlist, primes, gtk, tostring
-
-Test-Suite feivel-test
-  type:           exitcode-stdio-1.0
-  main-is:        Tests/Main.hs
-  hs-source-dirs: test/, src/
-  ghc-options:    -main-is Tests.Main -fforce-recomp
-  build-depends:  base, QuickCheck, tasty, tasty-quickcheck
+                  monadlist, primes, gtk, tostring, carl

@@ -23,7 +23,7 @@ module Feivel.Parse.ZZMod (
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Lib (zzmod)
+import Carl.Data.ZZMod (zzmod)
 
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 

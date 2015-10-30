@@ -25,7 +25,7 @@ module Feivel.Grammar.Get (
 
 import Feivel.Grammar.Expr
 import Feivel.Grammar.Util
-import Feivel.Lib
+import Carl
 
 
 class Get a where

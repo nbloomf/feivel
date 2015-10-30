@@ -22,6 +22,7 @@
 module Feivel.Eval.ZZMod () where
 
 import Feivel.Eval.Util
+import Carl.List
 
 
 instance (Glyph Expr) => Glyph ZZModExpr where

@@ -22,6 +22,7 @@
 module Feivel.Eval.Mat () where
 
 import Feivel.Eval.Util
+import Carl.List
 
 
 {-

@@ -24,7 +24,7 @@ import Feivel.Store (AtLocus(..), Locus(..))
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Lib (Text(..))
+import Carl.String (Text(..))
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)

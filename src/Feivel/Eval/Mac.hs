@@ -22,6 +22,7 @@
 module Feivel.Eval.Mac () where
 
 import Feivel.Eval.Util
+import Carl.List
 
 
 instance (Glyph Expr, Eval Expr) => Glyph MacExpr where

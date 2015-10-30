@@ -21,7 +21,7 @@
 module Feivel.Eval.Util (
   module Feivel.Eval.EvalM,
   module Feivel.Eval.Eval,
-  module Feivel.Lib,
+  module Carl,
   module Feivel.Grammar,
   module Feivel.Error,
   module Feivel.Store,
@@ -41,7 +41,7 @@ import Feivel.Eval.Eval
 import Feivel.Store
 import Feivel.Error
 import Feivel.Grammar
-import Feivel.Lib
+import Carl
 import Feivel.Parse (pInteger, pRat)
 
 

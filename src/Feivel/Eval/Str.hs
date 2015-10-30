@@ -22,6 +22,9 @@
 module Feivel.Eval.Str where
 
 import Feivel.Eval.Util
+import Carl.List
+import Carl.String
+import Carl.Write.LaTeX
 
 
 instance (Glyph Expr) => Glyph StrExpr where

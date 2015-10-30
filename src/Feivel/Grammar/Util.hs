@@ -24,4 +24,9 @@ module Feivel.Grammar.Util (
 
 import Feivel.Grammar.Type
 import Feivel.Store
-import Feivel.Lib (Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format)
+import Carl.String (Text(..), Format)
+import Carl.Struct.Permutation (Perm)
+import Carl.Data.Rat (Rat(..))
+import Carl.Data.ZZMod (ZZModulo)
+import Carl.Struct.Polynomial (Poly, Variable)
+import Carl.Struct.Matrix (Matrix)

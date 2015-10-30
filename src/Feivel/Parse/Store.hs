@@ -20,7 +20,7 @@ module Feivel.Parse.Store (
   pRecords
 ) where
 
-import Feivel.Lib (Text(..))
+import Carl.String (Text(..))
 import Feivel.Store
 import Feivel.Grammar
 

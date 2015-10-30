@@ -22,6 +22,8 @@
 module Feivel.Eval.Int () where
 
 import Feivel.Eval.Util
+import Carl.List
+import Carl.String
 
 
 instance Glyph IntExpr where

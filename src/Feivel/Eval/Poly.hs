@@ -22,6 +22,7 @@
 module Feivel.Eval.Poly () where
 
 import Feivel.Eval.Util
+import Carl.List
 
 
 instance (Glyph Expr) => Glyph PolyExpr where

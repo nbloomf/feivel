@@ -23,7 +23,12 @@ module Feivel.Grammar.Type (
   Type(..), TypeErr(..), unify, unifyAll, Typed, typeOf, OfType(..)
 ) where
 
-import Feivel.Lib
+import Carl.String
+import Carl.Data.ZZMod
+import Carl.Data.Rat
+import Carl.Struct.Polynomial
+import Carl.Struct.Matrix
+import Carl.Struct.Permutation
 
 import Control.Monad (foldM)
 import Control.Monad.Instances ()

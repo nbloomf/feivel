@@ -32,7 +32,9 @@ module Feivel.Parse.ParseM (
 
 import Feivel.Error
 import Feivel.Store
-import Feivel.Lib (Rat((:/:)), Variable(..), Format(..), Text(..))
+import Carl.String (Format(..), Text(..))
+import Carl.Data.Rat (Rat((:/:)))
+import Carl.Struct.Polynomial (Variable(..))
 
 import Text.Parsec.Prim
   (ParsecT, runParserT, try, (<|>), (<?>), many, getPosition)

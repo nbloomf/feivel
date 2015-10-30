@@ -22,6 +22,8 @@
 module Feivel.Eval.List () where
 
 import Feivel.Eval.Util
+import Carl.List
+import Carl.String
 
 import Data.List (intersperse, (\\), sort, nub, permutations)
 import Control.Monad (filterM)

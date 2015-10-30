@@ -22,6 +22,7 @@
 module Feivel.Eval.Perm () where
 
 import Feivel.Eval.Util
+import Carl.List
 
 
 instance (Glyph Expr) => Glyph PermExpr where

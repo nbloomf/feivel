@@ -22,6 +22,9 @@
 module Feivel.Eval.Bool () where
 
 import Feivel.Eval.Util
+import Carl.Bool
+import Carl.String
+import Carl.List
 
 
 instance Glyph BoolExpr where

@@ -25,10 +25,10 @@ module Feivel.Error (
 
 
 import Feivel.Store (StateErr(), Locus(..), locus, shortReport)
-import Feivel.Lib.AlgErr (AlgErr())
-import Feivel.Lib.String (StrErr())
-import Feivel.Lib.List (ListErr())
-import Feivel.Lib.Bool (BoolErr())
+import Carl.AlgErr (AlgErr())
+import Carl.String (StrErr())
+import Carl.List (ListErr())
+import Carl.Bool (BoolErr())
 import Feivel.Grammar (ExprErr(), GetErr(), TypeErr())
 
 import Text.Parsec.Error (ParseError(), errorPos)

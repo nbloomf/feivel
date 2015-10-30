@@ -23,7 +23,7 @@ module Feivel.Parse.Poly (
 import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
-import Feivel.Lib
+import Carl
 
 import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
 import Text.ParserCombinators.Parsec hiding (try)

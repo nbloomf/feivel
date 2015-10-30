@@ -25,7 +25,10 @@ module Feivel.Grammar.Put (
 
 import Feivel.Grammar.Expr
 import Feivel.Grammar.Util
-import Feivel.Lib
+import Carl.Struct.Polynomial (mapCoef, getCoefficients)
+import Carl.Struct.Matrix (toListM)
+import Carl.Struct.Permutation (mapPerm)
+import Carl.Data.ZZMod (ZZModulo(..))
 
 {-----------}
 {- :Inject -}
