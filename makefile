@@ -1,8 +1,7 @@
 feivel: FORCE
 	@echo "Compiling"
-	cabal configure --user --enable-tests
+	cabal configure --user
 	cabal build
-	cabal test
 	cabal install
 
 everything: feivel golden tutorial vis
