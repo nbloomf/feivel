@@ -44,5 +44,6 @@ data PolyExprLeaf a bool int list mat poly
   | PolySum list
 
   | PolyFromRoots Variable list
+  | PolyFromCoefs Variable list
   | PolyEvalPoly  poly [(Variable, poly)]
   deriving (Eq, Show)

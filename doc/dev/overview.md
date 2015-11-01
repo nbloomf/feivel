@@ -1,9 +1,8 @@
 Overview
 --------
 
-The code of feivel is organized into five layers:
+The code of feivel is organized into four layers:
 
-* The library layer, where the actual data structures and computations are defined,
 * The Grammar layer, where the AST of the feivel language is defined,
 * The Parsing layer, where (surprise!) the parser for the feivel language is defined,
 * The Evaluation layer, where the code for reducing ASTs is defined, and

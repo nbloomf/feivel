@@ -32,7 +32,10 @@ instance (Glyph Expr) => Glyph PolyExpr where
   toGlyph x = error $ "toGlyph: PolyExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval PolyExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
+  Eval ListExpr, Eval MatExpr)
+  => Eval PolyExpr where
+
   eval (PolyExpr (zappa :# typ :@ loc)) = case zappa of
     PolyConst p -> do
       q <- polySeq $ mapCoef eval p
@@ -132,6 +135,20 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) =
         BB      -> powPoly zeroBB
         ZZMod n -> powPoly (zeroMod n)
         _ -> reportErr loc $ NumericPolynomialExpected typ
+
+    PolyFromCoefs x as -> do
+      let coefPoly z = do
+            bs <- eval as >>= getVal
+            suchThat $ bs `hasSameTypeAs` [z]
+            p <- tryEvalM loc $ fromCoefficients (variable x) bs
+            let q = mapCoef (put loc) p
+            putTypeVal typ loc q >>= getVal
+      case typ of
+        ZZ      -> coefPoly zeroZZ
+        QQ      -> coefPoly zeroQQ
+        BB      -> coefPoly zeroBB
+        ZZMod n -> coefPoly (zeroMod n)
+        _       -> reportErr loc $ NumericPolynomialExpected typ
 
     PolyFromRoots x cs -> do
       let rootPoly z = do

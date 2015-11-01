@@ -93,6 +93,7 @@ pTypedPolyExpr typ pC pE pBOOL pINT pLIST pMAT pPOLY = spaced $ buildExpressionP
       , pPolyNull
 
       , pFun2 "FromRoots" pVar (pLIST typ) ((:# typ) `oo` PolyFromRoots)
+      , pFun2 "FromCoefs" pVar (pLIST typ) ((:# typ) `oo` PolyFromCoefs)
 
       , pPolyEvalPoly
       , pPoly
