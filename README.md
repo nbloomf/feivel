@@ -43,8 +43,7 @@ Feivel is written in Haskell and licensed under the GNU GPLv3. Currently the onl
   - You may need to add src/ and test/ to the GHCi path; this is done by keeping the hidden file .ghci (which is in the repo) in the project root.
 
 - **To run the tests:**
-  - There are two test suites: an algebraic property test suite which is run at every build and a suite of "golden tests" of the syntax.
-  - To run the golden tests, say "make golden" in the project root directory. (Warning, there are a lot of them.)
+  - There is a suite of "golden tests" of the syntax. To run the golden tests, say "make golden" in the project root directory. (Warning, there are a lot of them. It takes about 8 seconds on my cruddy machine.)
   - You will need a recent version of [shelltestrunner](joyful.org/shelltestrunner/).
 
 

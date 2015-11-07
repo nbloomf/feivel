@@ -36,7 +36,7 @@ This command processes the file `ex01.fvl` as a (`-t`) template. When this line 
 
     > You rolled a 5!
 
-Try processing this template several times; you should see different numbers. There are several commands and expression types available; here is another example.
+Try processing this template several times; you should see different numbers with each run. There are several commands and expression types available; here is another example.
 
     >>> ex002.fvl
     [define [int] @a := [[1;2];[3;4]]]#
@@ -96,7 +96,7 @@ During the evaluation step `feivel` keeps track of a **store** of key-value pair
 
 `feivel` subscribes to the "fail early, often, and loudly" philosophy, and as such is extremely picky about which templates it will accept. Any errors either in syntax or during evaluation will result in *no output* (with a hopefully useful error message) rather than *incorrect output*. This is because it is assumed that `feivel` will be part of a larger pipeline processing data into documents, likely without human intervention, and in applications where it is preferable to force the template author to write more carefully than to distribute documents with garbage. This can be frustrating while debugging a template, but does inspire some confidence that a working template actually does something close to what you want.
 
-**Text** is any string of characters not including `[`, `]`, `#`, or `@`. (These characters have a special meaning which will be explained shortly.) To include these characters verbatim in your template simply escape them with #. For instance, try typing `##`, `#@`, `#[`, and `#]` in the REPL. Text evaluates to itself.
+**Text** is any string of characters not including unescaped `[`, `]`, `#`, or `@` characters. (These characters have a special meaning which will be explained shortly.) To include these characters verbatim in your template, escape them with #. Text evaluates to itself.
 
 **Keys** are strings of alphanumeric characters prefixed with `@`. Keys are evaluated by looking up their *value* in the store. Attempting to evaluate a key which has not been defined, or to redefine a key which has already been defined, is an error. For example, try typing the following into a fresh REPL, one line at a time.
 
@@ -105,7 +105,7 @@ During the evaluation step `feivel` keeps track of a **store** of key-value pair
     > @a
     > define int @a := 3
 
-**Commands** give us control over how a template is processed and are denoted by wrapping them in [square brackets]. One of the most basic commands is `shuffle`; this command takes a list of templates in [square brackets], evaluates them, randomly shuffles them, and then concatenates them. For example, try evaluating the following in the repl.
+**Commands** give us control over how a template is processed and are denoted by wrapping them in [square brackets]. One of the most basic commands is `shuffle`; this command takes a list of templates in [square brackets], evaluates them, randomly shuffles them, and then concatenates them. For example, try evaluating the following.
 
     > [shuffle [a] [b] [c] [d] [e] endshuffle]
 
@@ -304,7 +304,7 @@ These expressions can be used over any type.
 `int`: Integers
 ---------------
 
-- Integer constants are specified in decimal with an optional negative sign; e.g. `27` or `-31`.
+- Integer constants are specified in decimal with an optional negative sign; e.g. `27` or `-31`. Explicit positive signs are not allowed (e.g., say "5" instead of "+5".)
 
 - `+`, `-`, `*`, `^`
 
@@ -316,7 +316,7 @@ These expressions can be used over any type.
 
 - `str(STR)`
 
-    Cast a string to an integer.
+    Cast a string (as a sequence of decimal digits) to an integer. Not very sophisticated.
 
 - `MatrixRank(TYP; MAT)`
 

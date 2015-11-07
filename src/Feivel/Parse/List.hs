@@ -105,21 +105,21 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
         pListShuffles = do
           _ <- try $ keyword "Shuffles"
           case typ of
-            ListOf _ -> do
+            ListOf t -> do
               keyword "("
-              xs <- pLIST typ
+              xs <- pLIST t
               keyword ")"
-              return (ListShuffles xs :# typ)
+              return (ListShuffles xs :# (ListOf t))
             _ -> error "pListShuffles"
 
         pListPermsOf = do
           _ <- try $ keyword "PermutationsOf"
           case typ of
-            PermOf _ -> do
+            PermOf t -> do
               keyword "("
-              xs <- pLIST typ
+              xs <- pLIST t
               keyword ")"
-              return (ListPermsOf xs :# typ)
+              return (ListPermsOf xs :# (PermOf t))
             _ -> error "pListPermsOf"
 
         pListRange = if typ == ZZ
