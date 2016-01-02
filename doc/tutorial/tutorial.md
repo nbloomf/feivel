@@ -306,9 +306,9 @@ These expressions can be used over any type.
 
 - Integer constants are specified in decimal with an optional negative sign; e.g. `27` or `-31`. Explicit positive signs are not allowed (e.g., say "5" instead of "+5".)
 
-- `+`, `-`, `*`, `^`
+- `+`, `-`, `*`, `^`, `neg`
 
-    Infix arithmetic as usual. Trying to evaluate a power with a negative exponent is an error.
+    Infix arithmetic as usual. Trying to evaluate a power with a negative exponent is an error. `neg` is prefix negation.
 
 - `min`, `max`, `gcd`, `lcm`, `choose`
 
@@ -342,11 +342,11 @@ These expressions can be used over any type.
 
 - `Decimal(RAT; INT)`
 
-    The decimal form (in ascii) of RAT with INT digits after the radix point.
+    The decimal form (in ascii) of RAT with INT digits after the radix point. Decimal digits are zero-padded, so that e.g. `Decimal(1/2; 2)` becomes `0.50`.
 
 - `Rot13(STR)`
 
-    Maps "a" to "m", "b" to "n", and so on.
+    Maps "a" to "m", "b" to "n", and so on, strictly in 7-bit ASCII characters (no fancy unicode mappings).
 
 - `Roman(INT)`
 
@@ -422,7 +422,7 @@ Lists consist of 0 or more expressions, all of the same type, in a fixed order.
 
 - `PermutationsOf(LIST)`
 
-    Return a list of all permutations of `LIST`; has type `{$t}`
+    Return a list of all permutations of `LIST`; has type `{$t}`. Fails if `LIST` has repeated elements.
 
 - `Filter(KEY; BOOL; LIST)`
 
@@ -486,7 +486,7 @@ A matrix is a rectangular array. Arrays of numeric types have a richer arithmeti
 
     The identity matrix of a given dimension.
 
-- `SwapE(TYP; INT, INT, INT)
+- `SwapE(TYP; INT, INT, INT)`
 
     `SwapE(typ;n;h;k)` is the elementary matrix with entries of type `typ`, dimension `n`, which swaps row/col `h` and `k`.
 
