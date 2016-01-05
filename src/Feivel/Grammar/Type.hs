@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -30,6 +30,7 @@ import Carl.Struct.Polynomial
 import Carl.Struct.Matrix
 import Carl.Struct.Permutation
 
+import Data.List (intersperse)
 import Control.Monad (foldM)
 import Control.Monad.Instances ()
 
@@ -64,6 +65,8 @@ data Type
   | MatOf    Type -- Matrix
   | PolyOver Type -- Polynomial
 
+  | Tuple [Type] -- Tuples
+
   | MacTo  Type -- Macro
   deriving Eq
 
@@ -96,6 +99,8 @@ instance Show Type where
   show (MatOf    t) = "[" ++ show t ++ "]"
   show (PolyOver t) = "^" ++ show t
   show (PermOf   t) = "$" ++ show t
+
+  show (Tuple ts) = "(" ++ (concat $ intersperse "," $ map show ts) ++ ")"
 
   show (MacTo    t) = ">" ++ show t
 
