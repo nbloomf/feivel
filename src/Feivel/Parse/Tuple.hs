@@ -82,11 +82,14 @@ pTypedTupleExpr typs pE pBOOL pINT pLIST pMAT pTUPLE
             ((:# (TupleOf typs)) `oo` TupleMacro)
 
         , pFun2 "AtPos"
-            (pE $ ListOf (TupleOf typs)) pINT
+            (pE $ ListOf (TupleOf typs))
+            pINT
             ((:# (TupleOf typs)) `oo` TupleAtPos)
 
         , pFun3 "AtIdx"
-            (pMAT (TupleOf typs)) pINT pINT
+            (pMAT (TupleOf typs))
+            pINT
+            pINT
             ((:# (TupleOf typs)) `ooo` TupleAtIdx)
 
         , pIfThenElseExprT
@@ -94,6 +97,10 @@ pTypedTupleExpr typs pE pBOOL pINT pLIST pMAT pTUPLE
             (pTUPLE typs)
             ((:# (TupleOf typs)) `ooo` TupleIfThenElse)
             (TupleOf typs)
+
+        , pFun1 "Rand"
+           (pE $ ListOf (TupleOf typs))
+           ((:# (TupleOf typs)) `o` TupleRand)
         ]
 
       tupleOpTable = []

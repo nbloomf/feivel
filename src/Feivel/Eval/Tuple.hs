@@ -23,10 +23,8 @@ module Feivel.Eval.Tuple () where
 
 import Feivel.Eval.Util
 import Carl.List
-import Carl.String
 
-import Data.List (intersperse, (\\), sort, nub, permutations)
-import Control.Monad (filterM)
+import Data.List (intersperse)
 
 
 instance (Glyph Expr) => Glyph TupleExpr where
@@ -49,4 +47,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr) => Eval TupleExp
     TupleIfThenElse b t f -> eIfThenElse b t f
 
     TupleAtPos a t -> lift2 loc a t (foo)
-      where foo = listAtPos :: [ListExpr] -> Integer -> Either ListErr ListExpr
+      where foo = listAtPos :: [TupleExpr] -> Integer -> Either ListErr TupleExpr
+
+    TupleRand ls -> do
+      xs <- eval ls >>= getVal :: EvalM [Expr]
+      randomElementEvalM xs >>= getVal
