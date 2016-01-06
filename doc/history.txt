@@ -1,5 +1,11 @@
 feivel: version history
 
+Next
+====
+* New types
+  * constructor: tuple
+* New functions: FromCoefs
+
 0.2.1
 =====
 * Significant refactor: not visible to users, but
