@@ -36,6 +36,7 @@ import Feivel.Eval.Int   ()
 import Feivel.Eval.Mac   ()
 import Feivel.Eval.List  ()
 import Feivel.Eval.Str   ()
+import Feivel.Eval.Tuple ()
 import Feivel.Eval.Doc   (evalToGlyph)
 
 
@@ -51,6 +52,7 @@ instance Eval Expr where
   eval (PolyE  x) = fmap toExpr $ eval x
   eval (PermE  x) = fmap toExpr $ eval x
   eval (ZZModE x) = fmap toExpr $ eval x
+  eval (TupleE x) = fmap toExpr $ eval x
 
 
 instance Glyph Expr where
@@ -66,8 +68,4 @@ instance Glyph Expr where
     PermE  x -> toGlyph x
     ZZModE x -> toGlyph x
     MacE   x -> toGlyph x
-
-
-
-
-
+    TupleE x -> toGlyph x

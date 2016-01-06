@@ -29,6 +29,7 @@ import Carl.Data.Rat
 import Carl.Struct.Polynomial
 import Carl.Struct.Matrix
 import Carl.Struct.Permutation
+import Carl.Struct.Tuple
 
 import Data.List (intersperse)
 import Control.Monad (foldM)
@@ -65,7 +66,7 @@ data Type
   | MatOf    Type -- Matrix
   | PolyOver Type -- Polynomial
 
-  | Tuple [Type] -- Tuples
+  | TupleOf [Type] -- Tuples
 
   | MacTo  Type -- Macro
   deriving Eq
@@ -100,7 +101,7 @@ instance Show Type where
   show (PolyOver t) = "^" ++ show t
   show (PermOf   t) = "$" ++ show t
 
-  show (Tuple ts) = "(" ++ (concat $ intersperse "," $ map show ts) ++ ")"
+  show (TupleOf ts) = "(" ++ (concat $ intersperse "," $ map show ts) ++ ")"
 
   show (MacTo    t) = ">" ++ show t
 

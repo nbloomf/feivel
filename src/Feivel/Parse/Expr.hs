@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -19,9 +19,12 @@
 module Feivel.Parse.Expr (
   pDoc, pREPL,
 
+  pTypedExpr,
+
   pTypedConst,
     pStrConst, pIntConst, pBoolConst, pRatConst, pZZModConst,
     pListLiteral, pMatLiteral, pPolyLiteral, pPermLiteral,
+    pTupleLiteral,
 
   pDOC
 ) where
@@ -43,6 +46,7 @@ import Feivel.Parse.Mat
 import Feivel.Parse.List
 import Feivel.Parse.Doc
 import Feivel.Parse.Mac
+import Feivel.Parse.Tuple
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
@@ -72,6 +76,9 @@ pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pLIST pMAT pMOD
 
 pLIST :: Type -> ParseM ListExpr
 pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST pMAT
+
+pTUPLE :: [Type] -> ParseM TupleExpr
+pTUPLE typs = pTypedTupleExpr typs pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pMAT :: Type -> ParseM MatExpr
 pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pLIST pMAT
@@ -106,6 +113,7 @@ pTypedExpr (MatOf    t) = fmap MatE   (pMAT  t)
 pTypedExpr (MacTo    t) = fmap MacE   (pMAC  t)
 pTypedExpr (PermOf   t) = fmap PermE  (pPERM t)
 pTypedExpr (PolyOver t) = fmap PolyE  (pPOLY t)
+pTypedExpr (TupleOf ts) = fmap TupleE (pTUPLE ts)
 
 pTypedExpr XX = choice
   [ pTypedExpr ZZ
@@ -125,11 +133,12 @@ pTypedConst ZZ           = fmap IntE   pIntConst
 pTypedConst BB           = fmap BoolE  pBoolConst
 pTypedConst QQ           = fmap RatE   pRatConst
 pTypedConst (ZZMod    n) = fmap ZZModE (pZZModConst n)
-pTypedConst (ListOf   t) = fmap ListE  (pListConst  t pTypedConst)
-pTypedConst (MatOf    t) = fmap MatE   (pMatConst   t pTypedConst)
-pTypedConst (PolyOver t) = fmap PolyE  (pPolyConst  t pTypedConst)
-pTypedConst (PermOf   t) = fmap PermE  (pPermConst  t pTypedConst)
-pTypedConst (MacTo    t) = fmap MacE   (pMacConst   t pTypedConst (pBrackDocE pDOC))
+pTypedConst (ListOf   t) = fmap ListE  (pListConst  t  pTypedConst)
+pTypedConst (MatOf    t) = fmap MatE   (pMatConst   t  pTypedConst)
+pTypedConst (PolyOver t) = fmap PolyE  (pPolyConst  t  pTypedConst)
+pTypedConst (PermOf   t) = fmap PermE  (pPermConst  t  pTypedConst)
+pTypedConst (MacTo    t) = fmap MacE   (pMacConst   t  pTypedConst (pBrackDocE pDOC))
+pTypedConst (TupleOf ts) = fmap TupleE (pTupleConst ts pTypedConst)
 pTypedConst _ = error "pTypedConst"
 
 

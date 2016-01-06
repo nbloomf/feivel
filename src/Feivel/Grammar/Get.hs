@@ -78,6 +78,11 @@ instance Get ListExpr where
   get v = Left $ GetTypeMismatch
     { typeExpected = ListOf XX, typeReceived = typeOf v }
 
+instance Get TupleExpr where
+  get (TupleE y) = return y
+  get v = Left $ GetTypeMismatch
+    { typeExpected = TupleOf [XX], typeReceived = typeOf v }
+
 instance Get MatExpr where
   get (MatE m) = return m
   get v = Left $ GetTypeMismatch

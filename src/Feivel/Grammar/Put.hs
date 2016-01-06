@@ -28,6 +28,7 @@ import Feivel.Grammar.Util
 import Carl.Struct.Polynomial (mapCoef, getCoefficients)
 import Carl.Struct.Matrix (toListM)
 import Carl.Struct.Permutation (mapPerm)
+import Carl.Struct.Tuple
 import Carl.Data.ZZMod (ZZModulo(..))
 
 {-----------}
@@ -57,6 +58,12 @@ instance Put PermExpr where
 
 instance Put ListExpr where
   put loc (ListExpr (x :@ _)) = ListE $ ListExpr (x :@ loc)
+
+instance Put TupleExpr where
+  put loc (TupleExpr (x :@ _)) = TupleE $ TupleExpr (x :@ loc)
+
+  putType typ loc (TupleExpr (x :# _ :@ _))
+    = TupleE $ TupleExpr (x :# typ :@ loc)
 
 instance Put PolyExpr where
   put loc (PolyExpr (x :@ _)) = PolyE $ PolyExpr (x :@ loc)
@@ -111,6 +118,12 @@ instance (Put a, Typed a) => Put [a] where
               []    -> XX
 
   putType typ loc x = ListE $ ListExpr $ ListConst (map (put loc) x) :# typ :@ loc
+
+
+instance (Put a, Typed a) => Put (Tuple a) where
+  put loc (Tuple xs) = TupleE $ TupleExpr $ TupleConst (Tuple $ map (put loc) xs) :# typ :@ loc
+    where
+      typ = TupleOf $ map typeOf xs
 
 
 instance (Put a, Typed a) => Put (Poly a) where

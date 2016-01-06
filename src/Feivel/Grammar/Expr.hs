@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -35,7 +35,8 @@ module Feivel.Grammar.Expr (
   MatExpr(..),   MatExprLeafS,   MatExprLeaf(..),
   PolyExpr(..),  PolyExprLeafS,  PolyExprLeaf(..),
   PermExpr(..),  PermExprLeafS,  PermExprLeaf(..),
-  MacExpr(..),   MacExprLeafS,   MacExprLeaf(..)
+  MacExpr(..),   MacExprLeafS,   MacExprLeaf(..),
+  TupleExpr(..), TupleExprLeafS, TupleExprLeaf(..)
 ) where
 
 import Feivel.Grammar.Util
@@ -50,6 +51,7 @@ import Feivel.Grammar.Str
 import Feivel.Grammar.Bool
 import Feivel.Grammar.List
 import Feivel.Grammar.Int
+import Feivel.Grammar.Tuple
 
 {- :IntExpr -}
 
@@ -196,6 +198,20 @@ instance HasLocus MacExpr where
 instance Typed MacExpr where
   typeOf (MacExpr (_ :# typ :@ _)) = MacTo typ
 
+{- :ListExpr -}
+
+type TupleExprLeafS = TupleExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
+
+newtype TupleExpr = TupleExpr
+  { unTupleExpr :: AtLocus (OfType TupleExprLeafS)
+  } deriving (Eq, Show)
+
+instance HasLocus TupleExpr where
+  locusOf = locusOf . unTupleExpr
+
+instance Typed TupleExpr where
+  typeOf (TupleExpr (_ :# typ :@ _)) = typ
+
 
 {- :Doc -}
 
@@ -222,6 +238,7 @@ data Expr
   | PolyE  PolyExpr
   | PermE  PermExpr
   | MacE   MacExpr
+  | TupleE TupleExpr
   deriving (Eq, Show)
 
 instance HasLocus Expr where
@@ -236,6 +253,7 @@ instance HasLocus Expr where
   locusOf (PolyE  x) = locusOf x
   locusOf (PermE  x) = locusOf x
   locusOf (MacE   x) = locusOf x
+  locusOf (TupleE x) = locusOf x
 
 {- ToExpr -}
 
@@ -254,6 +272,7 @@ instance ToExpr MatExpr   where toExpr = MatE
 instance ToExpr PolyExpr  where toExpr = PolyE
 instance ToExpr PermExpr  where toExpr = PermE
 instance ToExpr MacExpr   where toExpr = MacE
+instance ToExpr TupleExpr where toExpr = TupleE
 
 -- NB: Not a fan of "no locus" here
 -- NB: Is this even needed? Can we use put instead?
@@ -271,6 +290,7 @@ instance Typed Expr where
   typeOf (PolyE  x) = typeOf x
   typeOf (PermE  x) = typeOf x
   typeOf (ZZModE x) = typeOf x
+  typeOf (TupleE x) = typeOf x
 
 instance HasLocus Text where
   locusOf _ = NullLocus
