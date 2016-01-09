@@ -35,7 +35,6 @@ Feature Ideas
 * String: words/lines/splitat
 * Tests: Golden tests for boolean polynomials
 * Type: cyclotomic numbers
-* Type: tuples? (constructor)
 * Type: trees (constructor)
 * Type: Quadratic numbers
 * Type: Dihedral words

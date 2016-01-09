@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -200,6 +200,19 @@ instance (Get a) => Get (Perm a) where
           PermE _ -> Left GetUnevaluatedExpression
           v -> Left $ GetTypeMismatch
                  { typeExpected = PermOf XX, typeReceived = typeOf v }
+
+instance (Get a) => Get (Tuple a) where
+  get expr = do
+    Tuple xs <- getTuple expr
+    fmap Tuple $ sequence $ fmap get xs
+    where
+      getTuple :: Expr -> Either GetErr (Tuple Expr)
+      getTuple w = do
+        case w of
+          TupleE (TupleExpr (TupleConst m :# _ :@ _)) -> return m
+          TupleE _ -> Left GetUnevaluatedExpression
+          v -> Left $ GetTypeMismatch
+                 { typeExpected = TupleOf [XX], typeReceived = typeOf v }
 
 instance Get (Store Expr, Expr) where
   get expr = do

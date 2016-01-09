@@ -29,7 +29,8 @@ module Feivel.Parse.Util (
   pFun1T,  pFun2T,
   pFun1T', pFun2T',
 
-  pVarExpr, pTypeKeyExpr, pMacroExprT, pTerm, opParser2, opParser1, pIfThenElseExprT
+  pVarExpr, pTypeKeyExpr, pMacroExprT, pTerm, opParser2,
+  opParser1, pIfThenElseExprT, pAtSlot
 ) where
 
 
@@ -248,6 +249,18 @@ pIfThenElseExprT pBOOL p h _ = do
   keyword "else"
   fa <- p
   return (h b tr fa)
+
+pAtSlot :: String -> ([Type] -> ParseM a) -> ParseM b -> (a -> b -> c) -> ParseM c
+pAtSlot fun pA pB f = do
+  try $ keyword fun
+  keyword "("
+  TupleOf t <- pType
+  keyword ";"
+  a <- pA t
+  keyword ";"
+  b <- pB
+  keyword ")"
+  return (f a b)
 
 pMacroExprT :: (Type -> ParseM Expr) -> ([(Type, Key, Expr)] -> Expr -> a) -> ParseM a
 pMacroExprT pE f = do

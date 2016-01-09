@@ -55,7 +55,7 @@ import Feivel.Grammar.Tuple
 
 {- :IntExpr -}
 
-type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr
+type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
 
 newtype IntExpr = IntExpr
   { unIntExpr :: AtLocus IntExprLeafS
@@ -198,7 +198,8 @@ instance HasLocus MacExpr where
 instance Typed MacExpr where
   typeOf (MacExpr (_ :# typ :@ _)) = MacTo typ
 
-{- :ListExpr -}
+
+{- :TupleExpr -}
 
 type TupleExprLeafS = TupleExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
 

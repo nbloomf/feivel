@@ -1,12 +1,12 @@
-# Feivel
+# Read Me!
 
-Feivel is a simple templating language aimed at math teachers which can also be used as an interactive calculator. It is released as free software under the GNU General Public License version 3.
+This is the source repository of Feivel, a simple templating language aimed at math teachers. Feivel is released as free software under the GNU General Public License version 3.
 
-The goal of Feivel is to make it possible to write math homework problems using "random" data but whose difficulty we can precisely control. To this end it has built-in support for manipulating algebraic doodads like matrices and polynomials. In this usage Feivel syntax will probably be layered on top of e.g. LaTeX, but this is not required.
+The goal of Feivel is to allow users to easily write math homework problems (or other documents) using "random" data but whose difficulty we can precisely control. Think mailmerge plus spreadsheet formulas plus types plus immutable state. Feivel is intended to be used as part of a pipeline processing plain text and makes no assumptions about .
 
-As an example, here is a Feivel-flavored Fizz Buzz...
+As a boring example, here is a Feivel-flavored Fizz Buzz...
 
-    [for int @i in Range(1;100) say [[cond
+    [for int @i in Range(1;20) say [[cond
       case (Divides(15; @i)) [fizz-buzz]
       case (Divides(3;  @i)) [fizz]
       case (Divides(5;  @i)) [buzz]
@@ -15,9 +15,9 @@ As an example, here is a Feivel-flavored Fizz Buzz...
 
 ...which produces the following output:
 
-    1 2 fizz 4 buzz fizz 7 8 fizz buzz 11 fizz 13 14 fizz-buzz 16 17 fizz 19 buzz fizz 22 23 fizz buzz 26 fizz 28 29 fizz-buzz 31 32 fizz 34 buzz fizz 37 38 fizz buzz 41 fizz 43 44 fizz-buzz 46 47 fizz 49 buzz fizz 52 53 fizz buzz 56 fizz 58 59 fizz-buzz 61 62 fizz 64 buzz fizz 67 68 fizz buzz 71 fizz 73 74 fizz-buzz 76 77 fizz 79 buzz fizz 82 83 fizz buzz 86 fizz 88 89 fizz-buzz 91 92 fizz 94 buzz fizz 97 98 fizz buzz 
+    1 2 fizz 4 buzz fizz 7 8 fizz buzz 11 fizz 13 14 fizz-buzz 16 17 fizz 19 buzz
 
-Feivel is in an extremely experimental state. It is missing many basic features, poorly documented, subject to breaking changes, unoptimized, and amateurishly written. Under no circumstances should it be used by anyone. That said, the few features it does have seem to work OK and are unlikely to destroy your machine, and I (Nathan) use it frequently in my own classes. So be careful and have fun.
+**This project is in an extremely experimental state.** It is missing many basic features, poorly documented, subject to breaking changes, unoptimized, and amateurishly written. Under no circumstances should it be used by anyone, and the author disclaims responsibility for any Unspeakable Badness that may result from its use. **That said,** the few features it does have seem to work OK and are unlikely to destroy your machine, and I (the author) use it frequently with no problems. So be careful and have fun.
 
 
 
@@ -64,3 +64,9 @@ Feivel is written in Haskell and licensed under the GNU GPLv3. Currently the onl
 ## Authors
 
 Feivel is written and maintained by Nathan Bloomfield (nbloomf at gmail dot com).
+
+
+
+## Why?
+
+This project was originally inspired by (1) disappointment with a similar feature of a proprietary math-centric online course delivery system (which will remain nameless) and (2) curiosity. After evolving for about a year as a side project it is thoroughly integrated in my own workflow as a teacher, serves its intended purpose, and remains fun to tinker on from time to time. So I consider it a success.

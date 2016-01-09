@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,14 +21,15 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a bool int list mat
+data IntExprLeaf a bool int list mat tup
   = IntConst Integer
   | IntVar   Key
 
-  | IntMacro [(Type, Key, a)] a -- MacTo ZZ
-  | IntAtPos list int
-  | IntAtIdx mat int int
- 
+  | IntMacro  [(Type, Key, a)] a -- MacTo ZZ
+  | IntAtPos  list int
+  | IntAtIdx  mat  int int
+  | IntAtSlot tup  int
+
   | IntIfThenElse bool int int
 
   -- Arithmetic

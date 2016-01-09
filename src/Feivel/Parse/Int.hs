@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -33,15 +33,16 @@ pIntConstLeaf = fmap IntConst pInteger
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM IntExpr
-pIntExpr pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM IntExpr
+pIntExpr pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pIntTerm = pTerm pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
 
-      , pFun2 "AtPos" (pLIST ZZ) pINT IntAtPos
-      , pFun3 "AtIdx" (pMAT ZZ) pINT pINT IntAtIdx
+      , pFun2   "AtPos"  (pLIST ZZ) pINT      IntAtPos
+      , pFun3   "AtIdx"  (pMAT  ZZ) pINT pINT IntAtIdx
+      , pAtSlot "AtSlot" pTUPLE     pINT      IntAtSlot
     
       , pIfThenElseExprT pBOOL pINT IntIfThenElse ZZ
 
