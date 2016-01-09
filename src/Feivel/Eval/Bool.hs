@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -33,7 +33,7 @@ instance Glyph BoolExpr where
   toGlyph x = error $ "toGlyph: BoolExpr: " ++ show x
 
 
-instance (Eval Expr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval BoolExpr where
+instance (Eval Expr, Eval IntExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr) => Eval BoolExpr where
   eval (BoolExpr (zappa :@ loc)) = case zappa of
     BoolConst b -> return (BoolExpr $ BoolConst b :@ loc)
 
@@ -45,6 +45,12 @@ instance (Eval Expr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval BoolExpr
 
     BoolAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [BoolExpr] -> Integer -> Either ListErr BoolExpr
+
+    BoolAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     IsDefined key -> do
       p <- isKeyDefined key

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -33,15 +33,16 @@ pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 pBoolConst' :: ParseM BoolExprLeafS
 pBoolConst' = fmap BoolConst pBool
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM BoolExpr
-pBoolExpr pE pINT pBOOL pLIST pMAT = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM BoolExpr
+pBoolExpr pE pINT pBOOL pLIST pMAT pTUPLE = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
     pBoolTerm = pTerm pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro
 
-      , pFun2 "AtPos" (pLIST BB) pINT BoolAtPos
-      , pFun3 "AtIdx" (pMAT BB)  pINT pINT BoolAtIdx
+      , pFun2   "AtPos"  (pLIST BB) pINT      BoolAtPos
+      , pFun3   "AtIdx"  (pMAT BB)  pINT pINT BoolAtIdx
+      , pAtSlot "AtSlot" pTUPLE     pINT      BoolAtSlot
 
       , pIfThenElseExprT pBOOL pBOOL BoolIfThenElse BB
     

@@ -66,7 +66,7 @@ pSTR :: ParseM StrExpr
 pSTR = pStrExpr pTypedExpr pBOOL pINT pLIST pMAT pSTR
 
 pBOOL :: ParseM BoolExpr
-pBOOL = pBoolExpr pTypedExpr pINT pBOOL pLIST pMAT
+pBOOL = pBoolExpr pTypedExpr pINT pBOOL pLIST pMAT pTUPLE
 
 pRAT :: ParseM RatExpr
 pRAT = pRatExpr pTypedExpr pBOOL pINT pLIST pMAT pRAT

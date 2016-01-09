@@ -83,7 +83,7 @@ instance Typed StrExpr where typeOf _ = SS
 
 {- :BoolExpr -}
 
-type BoolExprLeafS = BoolExprLeaf Expr IntExpr BoolExpr ListExpr MatExpr
+type BoolExprLeafS = BoolExprLeaf Expr IntExpr BoolExpr ListExpr MatExpr TupleExpr
 
 newtype BoolExpr = BoolExpr
   { unBoolExpr :: AtLocus BoolExprLeafS

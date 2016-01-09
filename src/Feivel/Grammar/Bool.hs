@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,14 +21,15 @@ module Feivel.Grammar.Bool where
 import Feivel.Grammar.Util
 
 
-data BoolExprLeaf a int bool list mat
+data BoolExprLeaf a int bool list mat tup
   = BoolConst Bool
   | BoolVar   Key
   | IsDefined Key
 
   | BoolMacro [(Type, Key, a)] a -- Expr, MacTo BB
-  | BoolAtPos list int
-  | BoolAtIdx mat int int
+  | BoolAtPos  list int
+  | BoolAtIdx  mat  int int
+  | BoolAtSlot tup  int
 
   | BoolIfThenElse bool bool bool
 
