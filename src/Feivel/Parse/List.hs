@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -40,11 +40,11 @@ pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst xs :# typ)
 
-pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM ListExpr
-pListExpr pE pBOOL pINT pLIST pMAT = pTypedListExpr XX pE pBOOL pINT pLIST pMAT
+pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ListExpr
+pListExpr pE pBOOL pINT pLIST pMAT pTUPLE = pTypedListExpr XX pE pBOOL pINT pLIST pMAT pTUPLE
 
-pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM ListExpr
-pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser listOpTable pListTerm
+pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ListExpr
+pTypedListExpr typ pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser listOpTable pListTerm
   where
     pListTerm = pTerm (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr ((:# typ) `o` ListVar) (ListOf typ)
@@ -53,6 +53,7 @@ pTypedListExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser lis
 
       , pFun2 "AtPos" (pE $ ListOf (ListOf typ)) pINT ((:# typ) `oo` ListAtPos)
       , pFun3 "AtIdx" (pMAT (ListOf typ)) pINT pINT ((:# typ) `ooo` ListAtIdx)
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` ListAtSlot)
 
       , pIfThenElseExprT pBOOL (pLIST typ) ((:# typ) `ooo` ListIfThenElse) (ListOf typ)
 

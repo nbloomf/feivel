@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,14 +21,16 @@ module Feivel.Grammar.List where
 import Feivel.Grammar.Util
 
 
-data ListExprLeaf a bool int list mat
+data ListExprLeaf a bool int list mat tup
   = ListConst   [a]
   | ListVar     Key
   | ListBuilder a [ListGuard a list]
 
-  | ListMacro      [(Type, Key, a)] a -- MacTo (ListOf typ)
-  | ListAtPos      a int -- ListOf (ListOf typ)
-  | ListAtIdx      mat int int
+  | ListMacro  [(Type, Key, a)] a -- MacTo (ListOf typ)
+  | ListAtPos  a   int -- ListOf (ListOf typ)
+  | ListAtIdx  mat int int
+  | ListAtSlot tup int
+
   | ListRand       a -- ListOf (ListOf typ)
   | ListIfThenElse bool list list
 

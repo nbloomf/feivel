@@ -69,7 +69,7 @@ instance Typed IntExpr where typeOf _ = ZZ
 
 {- :StrExpr -}
 
-type StrExprLeafS = StrExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr StrExpr
+type StrExprLeafS = StrExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr StrExpr TupleExpr
 
 newtype StrExpr = StrExpr
   { unStrExpr :: AtLocus StrExprLeafS
@@ -97,7 +97,7 @@ instance Typed BoolExpr where typeOf _ = BB
 
 {- :RatExpr -}
 
-type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr RatExpr
+type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr RatExpr TupleExpr
 
 newtype RatExpr = RatExpr
   { unRatExpr :: AtLocus RatExprLeafS
@@ -126,7 +126,7 @@ instance Typed ZZModExpr where
 
 {- :ListExpr -}
 
-type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr
+type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
 
 newtype ListExpr = ListExpr
   { unListExpr :: AtLocus (OfType ListExprLeafS)

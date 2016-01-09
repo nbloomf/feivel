@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -33,8 +33,8 @@ pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 pStrConst' :: ParseM StrExprLeafS
 pStrConst' = fmap StrConst pText
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM StrExpr -> ParseM StrExpr
-pStrExpr pE pBOOL pINT pLIST pMAT pSTR = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM StrExpr -> ([Type] -> ParseM TupleExpr) -> ParseM StrExpr
+pStrExpr pE pBOOL pINT pLIST pMAT pSTR pTUPLE = spaced $ buildExpressionParser strOpTable pStrTerm
   where
     pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
@@ -42,9 +42,10 @@ pStrExpr pE pBOOL pINT pLIST pMAT pSTR = spaced $ buildExpressionParser strOpTab
 
       , pIfThenElseExprT pBOOL pSTR StrIfThenElse SS
 
-      , pFun2 "AtPos" (pLIST SS) pINT StrAtPos
-      , pFun3 "AtIdx" (pMAT SS)  pINT pINT StrAtIdx
-    
+      , pFun2   "AtPos"  (pLIST SS) pINT      StrAtPos
+      , pFun3   "AtIdx"  (pMAT SS)  pINT pINT StrAtIdx
+      , pAtSlot "AtSlot" pTUPLE     pINT      StrAtSlot
+
       , pFun2 "Strip"   pSTR pSTR StrStrip
       , pFun1 "Reverse" pSTR Reverse
       , pFun1 "ToUpper" pSTR ToUpper

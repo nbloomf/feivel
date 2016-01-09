@@ -1,0 +1,6 @@
+feivel
+<<<
+[:rat: AtSlot((str,rat,bool); ("hello",5/3,#t); 2) :]
+>>>
+5/3
+>>>= 0

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -31,7 +31,7 @@ instance Glyph RatExpr where
   toGlyph x = error $ "toGlyph: RatExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval RatExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr) => Eval RatExpr where
   eval (RatExpr (zappa :@ loc)) = case zappa of
     RatConst p -> return $ RatExpr $ RatConst p :@ loc
 
@@ -43,6 +43,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) =
 
     RatAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [RatExpr] -> Integer -> Either ListErr RatExpr
+
+    RatAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     RatCast expr -> do
       n <- eval expr >>= getVal :: EvalM Integer

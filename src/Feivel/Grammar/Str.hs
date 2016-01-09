@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,13 +21,14 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a bool int list mat str
+data StrExprLeaf a bool int list mat str tup
   = StrConst Text
   | StrVar   Key
 
   | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
-  | StrAtPos list int
-  | StrAtIdx mat int int
+  | StrAtPos  list int
+  | StrAtIdx  mat  int int
+  | StrAtSlot tup  int
  
   | StrIfThenElse bool str str
 

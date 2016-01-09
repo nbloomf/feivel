@@ -1,0 +1,6 @@
+feivel
+<<<
+[:{str}: AtSlot((str,{str},bool); ("hello",{"foo"},#t); 2) :]
+>>>
+{foo}
+>>>= 0

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -32,7 +32,7 @@ instance (Glyph Expr) => Glyph StrExpr where
   toGlyph x = error $ "toGlyph: StrExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, Glyph Expr) => Eval StrExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr, Glyph Expr) => Eval StrExpr where
   eval (StrExpr (zappa :@ loc)) = case zappa of
     StrConst s -> return (StrExpr $ StrConst s :@ loc)
 
@@ -44,6 +44,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, G
 
     StrAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [StrExpr] -> Integer -> Either ListErr StrExpr
+
+    StrAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     Concat   a b -> lift2 loc a b (strCat)
     StrStrip a b -> lift2 loc a b (strStrip)

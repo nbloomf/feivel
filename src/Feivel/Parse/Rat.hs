@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -34,15 +34,16 @@ pRatConst = fmap RatExpr $ pAtLocus pRatConst'
 pRatConst' :: ParseM RatExprLeafS
 pRatConst' = fmap RatConst pRat
 
-pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM RatExpr -> ParseM RatExpr
-pRatExpr pE pBOOL pINT pLIST pMAT pRAT = spaced $ buildExpressionParser ratOpTable pRatTerm
+pRatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM RatExpr -> ([Type] -> ParseM TupleExpr) -> ParseM RatExpr
+pRatExpr pE pBOOL pINT pLIST pMAT pRAT pTUPLE = spaced $ buildExpressionParser ratOpTable pRatTerm
   where
     pRatTerm = pTerm pRatConst' RatExpr pRAT "rational expression"
       [ pVarExpr RatVar QQ
       , pMacroExprT pE RatMacro
 
-      , pFun2 "AtPos" (pLIST QQ) pINT RatAtPos
-      , pFun3 "AtIdx" (pMAT QQ)  pINT pINT RatAtIdx
+      , pFun2   "AtPos"  (pLIST QQ) pINT      RatAtPos
+      , pFun3   "AtIdx"  (pMAT QQ)  pINT pINT RatAtIdx
+      , pAtSlot "AtSlot" pTUPLE     pINT      RatAtSlot
 
       , pIfThenElseExprT pBOOL pRAT RatIfThenElse QQ
 

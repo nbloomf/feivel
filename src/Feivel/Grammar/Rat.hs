@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,14 +21,15 @@ module Feivel.Grammar.Rat where
 import Feivel.Grammar.Util
 
 
-data RatExprLeaf a bool int list mat rat
+data RatExprLeaf a bool int list mat rat tup
   = RatConst Rat
   | RatVar   Key
   | RatCast  a -- ZZ
 
   | RatMacro [(Type, Key, a)] a -- Expr, MacTo QQ
-  | RatAtPos list int
-  | RatAtIdx mat  int int
+  | RatAtPos  list int
+  | RatAtIdx  mat  int int
+  | RatAtSlot tup  int
 
   | RatIfThenElse bool rat rat -- BB
  

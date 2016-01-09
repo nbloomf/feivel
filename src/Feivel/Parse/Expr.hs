@@ -63,19 +63,19 @@ pINT :: ParseM IntExpr
 pINT = pIntExpr pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pSTR :: ParseM StrExpr
-pSTR = pStrExpr pTypedExpr pBOOL pINT pLIST pMAT pSTR
+pSTR = pStrExpr pTypedExpr pBOOL pINT pLIST pMAT pSTR pTUPLE
 
 pBOOL :: ParseM BoolExpr
 pBOOL = pBoolExpr pTypedExpr pINT pBOOL pLIST pMAT pTUPLE
 
 pRAT :: ParseM RatExpr
-pRAT = pRatExpr pTypedExpr pBOOL pINT pLIST pMAT pRAT
+pRAT = pRatExpr pTypedExpr pBOOL pINT pLIST pMAT pRAT pTUPLE
 
 pMOD :: Integer -> ParseM ZZModExpr
 pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pLIST pMAT pMOD
 
 pLIST :: Type -> ParseM ListExpr
-pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST pMAT
+pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pTUPLE :: [Type] -> ParseM TupleExpr
 pTUPLE typs = pTypedTupleExpr typs pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
@@ -120,7 +120,7 @@ pTypedExpr XX = choice
   , pTypedExpr QQ
   , pTypedExpr BB
   , pTypedExpr SS
-  , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST pMAT)
+  , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST pMAT pTUPLE)
   , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pLIST pMAT)
   , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY)
   ]
