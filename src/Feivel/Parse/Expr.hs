@@ -81,7 +81,7 @@ pTUPLE :: [Type] -> ParseM TupleExpr
 pTUPLE typs = pTypedTupleExpr typs pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pMAT :: Type -> ParseM MatExpr
-pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pLIST pMAT
+pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pPOLY :: Type -> ParseM PolyExpr
 pPOLY typ = pTypedPolyExpr typ pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY
@@ -121,7 +121,7 @@ pTypedExpr XX = choice
   , pTypedExpr BB
   , pTypedExpr SS
   , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST pMAT pTUPLE)
-  , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pLIST pMAT)
+  , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pLIST pMAT pTUPLE)
   , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY)
   ]
 

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -46,17 +46,18 @@ pMatLiteralOf typ p = do
     Left err -> reportParseErr (locus start end) err
     Right m -> return (MatConst m :# typ)
 
-pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pMatExpr pE pBOOL pINT pLIST pMAT = pTypedMatExpr XX pE pBOOL pINT pLIST pMAT
+pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MatExpr
+pMatExpr pE pBOOL pINT pLIST pMAT pTUPLE = pTypedMatExpr XX pE pBOOL pINT pLIST pMAT pTUPLE
 
-pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM MatExpr
-pTypedMatExpr typ pE pBOOL pINT pLIST pMAT = spaced $ buildExpressionParser matOpTable pMatTerm
+pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MatExpr
+pTypedMatExpr typ pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser matOpTable pMatTerm
   where
     pMatTerm = pTerm (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr ((:# typ) `o` MatVar) (MatOf typ)
 
       , pFun2 "AtPos" (pLIST (MatOf typ)) pINT ((:# typ) `oo` MatAtPos)
       , pFun3 "AtIdx" (pE $ MatOf (MatOf typ)) pINT pINT ((:# typ) `ooo` MatAtIdx)
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` MatAtSlot)
 
       , pMacroExprT pE ((:# typ) `oo` MatMacro)
 

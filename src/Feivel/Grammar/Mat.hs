@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,13 +21,14 @@ module Feivel.Grammar.Mat where
 import Feivel.Grammar.Util
 
 
-data MatExprLeaf a bool int list mat
+data MatExprLeaf a bool int list mat tup
   = MatConst (Matrix a)
   | MatVar   Key
 
   | MatMacro [(Type, Key, a)] a -- Expr, MacTo (MatOf typ)
-  | MatAtPos list int
-  | MatAtIdx a int int -- MatOf (MatOf typ)
+  | MatAtPos  list int
+  | MatAtIdx  a    int int -- MatOf (MatOf typ)
+  | MatAtSlot tup  int
 
   | MatIfThenElse bool mat mat
 
