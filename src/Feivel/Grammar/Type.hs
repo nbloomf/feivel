@@ -28,8 +28,6 @@ import Carl.Data.ZZMod
 import Carl.Data.Rat
 import Carl.Struct.Polynomial
 import Carl.Struct.Matrix
-import Carl.Struct.Permutation
-import Carl.Struct.Tuple
 
 import Data.List (intersperse)
 import Control.Monad (foldM)
@@ -52,23 +50,24 @@ class Typed t where
 
 data Type
   = XX -- Type Variable
+
+  -- Atomic types
   | DD -- Doc
+  | ZZ -- Integers
+  | SS -- Strings
+  | BB -- Booleans
+  | QQ -- Rationals
 
-  | ZZ -- Integer
-  | SS -- String
-  | BB -- Boolean
-  | QQ -- Rational
+  -- Parameterized types
+  | ZZMod  Integer -- Modular Integers
+  | PermOf Type    -- Permutations
 
-  | ZZMod  Integer -- Modular Integer
-  | PermOf Type    -- Permutation
-
-  | ListOf   Type -- List
-  | MatOf    Type -- Matrix
-  | PolyOver Type -- Polynomial
-
-  | TupleOf [Type] -- Tuples
-
-  | MacTo  Type -- Macro
+  -- Constructed types
+  | ListOf   Type   -- Lists
+  | MatOf    Type   -- Matrices
+  | PolyOver Type   -- Polynomials
+  | TupleOf  [Type] -- Tuples
+  | MacTo    Type   -- Macros
   deriving Eq
 
 

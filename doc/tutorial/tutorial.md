@@ -532,6 +532,15 @@ A permutation of a list is a rearrangement of the items in it; specifically, a o
 
 
 
+`(t1,...,tn)`: Tuples
+---------------------
+
+A tuple is a list of items of different types. Most operations which make sense for lists (rearranging, decomposing, enumerating over) don't really make sense for tuples, which are better thought of as a mechanism for aggregating data. In a world where typing is strict and every "function" returns only one thing, one universal construction stands to allow multiple return values.
+
+Moreso than lists or matrices, tuples are (for a grammar as unsophisticated as Feivel's) a dumb container. All we can really do is construct them using `(-,-)` notation and extract items with `AtSlot`. For instance, `(1,5/3)` has type `(int,rat)`.
+
+
+
 `>t`: Macros
 ------------
 
