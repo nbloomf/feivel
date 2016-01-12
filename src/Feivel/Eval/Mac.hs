@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -34,7 +34,9 @@ instance (Glyph Expr, Eval Expr) => Glyph MacExpr where
   toGlyph _ = error "toGlyph: MacExpr"
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval MacExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
+  Eval ListExpr, Eval MatExpr, Eval TupleExpr
+  ) => Eval MacExpr where
   eval (MacExpr (zappa :# typ :@ loc)) = case zappa of
     MacConst vals expr (amb,p) -> do
       if p == True
@@ -48,6 +50,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) =
     MacIfThenElse b t f -> eIfThenElse b t f
     MacAtIdx m h k -> eAtIdx m h k loc
     MacMacro vals mac -> eMacro vals mac loc
+
+    MacAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     MacAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [MacExpr] -> Integer -> Either ListErr MacExpr

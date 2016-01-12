@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,13 +21,14 @@ module Feivel.Grammar.Poly where
 import Feivel.Grammar.Util
 
 
-data PolyExprLeaf a bool int list mat poly
+data PolyExprLeaf a bool int list mat poly tup
   = PolyConst (Poly a)
   | PolyVar   Key
 
   | PolyMacro [(Type, Key, a)] a -- MacTo (PolyOver typ)
-  | PolyAtPos list int
-  | PolyAtIdx mat  int int
+  | PolyAtPos  list int
+  | PolyAtIdx  mat  int int
+  | PolyAtSlot tup  int
 
   | PolyRand list
 

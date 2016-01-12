@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,13 +21,14 @@ module Feivel.Grammar.Mac where
 import Feivel.Grammar.Util
 
 
-data MacExprLeaf a bool int list mat mac
+data MacExprLeaf a bool int list mat mac tup
   = MacConst [(Type, Key, a)] a (Store a, Bool) -- XX, typ, Expr
   | MacVar   Key
 
-  | MacMacro [(Type, Key, a)] a -- MacTo (MacTo typ)
-  | MacAtPos list int
-  | MacAtIdx mat  int int
+  | MacMacro  [(Type, Key, a)] a -- MacTo (MacTo typ)
+  | MacAtPos  list int
+  | MacAtIdx  mat  int int
+  | MacAtSlot tup  int
 
   | MacRand list
 

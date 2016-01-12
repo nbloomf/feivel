@@ -1,0 +1,6 @@
+feivel
+<<<
+[:mod7: AtSlot((str,mod7,bool); ("hello",5,#t); 2) :]
+>>>
+5 mod 7
+>>>= 0

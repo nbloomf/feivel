@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -32,7 +32,7 @@ instance (Glyph Expr) => Glyph PermExpr where
   toGlyph x = error $ "toGlyph: PermExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval PermExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr) => Eval PermExpr where
   eval (PermExpr (m :# typ :@ loc)) = case m of
     PermConst p -> do
       q <- seqPerm $ mapPerm eval p
@@ -46,6 +46,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) =
     PermAtIdx      m h k    -> eAtIdx m h k loc
     PermMacro      vals mac -> eMacro vals mac loc
     PermIfThenElse b t f    -> eIfThenElse b t f
+
+    PermAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     PermRand ls -> do
       xs <- eval ls >>= getVal :: EvalM [Expr]

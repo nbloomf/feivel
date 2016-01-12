@@ -92,6 +92,11 @@ pTypedTupleExpr typs pE pBOOL pINT pLIST pMAT pTUPLE
             pINT
             ((:# (TupleOf typs)) `ooo` TupleAtIdx)
 
+        , pAtSlot "AtSlot"
+            pTUPLE
+            pINT
+            ((:# (TupleOf typs)) `oo` TupleAtSlot)
+
         , pIfThenElseExprT
             pBOOL
             (pTUPLE typs)

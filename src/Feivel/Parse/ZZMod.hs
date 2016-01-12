@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -38,8 +38,8 @@ pZZModConst' n = do
 
 pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr
   -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
-  -> (Integer -> ParseM ZZModExpr) -> ParseM ZZModExpr
-pZZModExpr pE n pBOOL pINT pLIST pMAT pMOD = spaced $ buildExpressionParser zzModOpTable pZZModTerm
+  -> (Integer -> ParseM ZZModExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ZZModExpr
+pZZModExpr pE n pBOOL pINT pLIST pMAT pMOD pTUPLE = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
     pZZModTerm = pTerm (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
       [ pVarExpr ((:# typ) `o` ZZModVar) (ZZMod n)
@@ -54,6 +54,8 @@ pZZModExpr pE n pBOOL pINT pLIST pMAT pMOD = spaced $ buildExpressionParser zzMo
       , pFun2 "Pow"   (pMOD n)    pINT ((:# typ) `oo` ZZModPow)
 
       , pFun3 "AtIdx" (pMAT (ZZMod n))  pINT pINT ((:# typ) `ooo` ZZModAtIdx)
+
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` ZZModAtSlot)
       ]
 
     zzModOpTable =

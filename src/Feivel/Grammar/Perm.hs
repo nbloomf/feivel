@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,13 +21,14 @@ module Feivel.Grammar.Perm where
 import Feivel.Grammar.Util
 
 
-data PermExprLeaf a bool int list mat perm
+data PermExprLeaf a bool int list mat perm tup
   = PermConst (Perm a)
   | PermVar   Key
 
-  | PermMacro [(Type, Key, a)] a -- Expr, MacTo (PermOf typ)
-  | PermAtPos list int
-  | PermAtIdx mat  int int
+  | PermMacro  [(Type, Key, a)] a -- Expr, MacTo (PermOf typ)
+  | PermAtPos  list int
+  | PermAtIdx  mat  int int
+  | PermAtSlot tup  int
 
   | PermRand list
 

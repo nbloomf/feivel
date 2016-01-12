@@ -1,0 +1,6 @@
+feivel
+<<<
+[:$int: AtSlot((str,$int,bool); ("hello",(1 2),#t); 2) :]
+>>>
+(1 2)
+>>>= 0

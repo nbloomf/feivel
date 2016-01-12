@@ -26,9 +26,11 @@ data TupleExprLeaf a bool int list mat tup
   = TupleConst   (Tuple a)
   | TupleVar     Key
 
-  | TupleMacro      [(Type, Key, a)] a -- MacTo (TupleOf typ)
-  | TupleAtPos      a int -- ListOf (TupleOf typ)
-  | TupleAtIdx      mat int int
+  | TupleMacro  [(Type, Key, a)] a -- MacTo (TupleOf typ)
+  | TupleAtPos  a   int -- ListOf (TupleOf typ)
+  | TupleAtIdx  mat int int
+  | TupleAtSlot tup int
+
   | TupleRand       a -- ListOf (TupleOf typ)
   | TupleIfThenElse bool tup tup
   deriving (Eq, Show)

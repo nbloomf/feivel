@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -30,7 +30,9 @@ instance (Glyph Expr) => Glyph ZZModExpr where
   toGlyph x = error $ "toGlyph: ZZModExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) => Eval ZZModExpr where
+instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
+  Eval ListExpr, Eval MatExpr, Eval TupleExpr
+  ) => Eval ZZModExpr where
   eval (ZZModExpr (zappa :# (ZZMod n) :@ loc)) = case zappa of
     ZZModConst a -> return $ ZZModExpr $ ZZModConst a :# (ZZMod n) :@ loc
 
@@ -42,6 +44,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr) =
 
     ZZModAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [ZZModExpr] -> Integer -> Either ListErr ZZModExpr
+
+    ZZModAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
 
     ZZModCast a -> do
       res <- eval a >>= getVal :: EvalM Integer

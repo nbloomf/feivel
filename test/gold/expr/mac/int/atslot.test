@@ -1,0 +1,6 @@
+feivel
+<<<
+[:>int: AtSlot((str,>int,bool); ("hello",Macro(int; @x; int @x := 1),#t); 2) :]
+>>>
+1
+>>>= 0

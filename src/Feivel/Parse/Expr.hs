@@ -72,7 +72,7 @@ pRAT :: ParseM RatExpr
 pRAT = pRatExpr pTypedExpr pBOOL pINT pLIST pMAT pRAT pTUPLE
 
 pMOD :: Integer -> ParseM ZZModExpr
-pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pLIST pMAT pMOD
+pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pLIST pMAT pMOD pTUPLE
 
 pLIST :: Type -> ParseM ListExpr
 pLIST typ = pTypedListExpr typ pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
@@ -84,13 +84,13 @@ pMAT :: Type -> ParseM MatExpr
 pMAT typ = pTypedMatExpr typ pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
 
 pPOLY :: Type -> ParseM PolyExpr
-pPOLY typ = pTypedPolyExpr typ pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY
+pPOLY typ = pTypedPolyExpr typ pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY pTUPLE
 
 pPERM :: Type -> ParseM PermExpr
-pPERM typ = pTypedPermExpr typ pTypedExpr pBOOL pINT pLIST pMAT pPERM
+pPERM typ = pTypedPermExpr typ pTypedExpr pBOOL pINT pLIST pMAT pPERM pTUPLE
 
 pMAC :: Type -> ParseM MacExpr
-pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAT pMAC
+pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAT pMAC pTUPLE
 
 pDOC :: ParseM Doc
 pDOC = pDoc pTypedExpr pDOC
@@ -122,7 +122,7 @@ pTypedExpr XX = choice
   , pTypedExpr SS
   , fmap ListE (pListExpr pTypedExpr pBOOL pINT pLIST pMAT pTUPLE)
   , fmap MatE  (pMatExpr  pTypedExpr pBOOL pINT pLIST pMAT pTUPLE)
-  , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY)
+  , fmap PolyE (pPolyExpr pTypedConst pTypedExpr pBOOL pINT pLIST pMAT pPOLY pTUPLE)
   ]
 
 

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -52,14 +52,15 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst idPerm :# typ)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PermExpr) -> ParseM PermExpr
-pTypedPermExpr typ pE pBOOL pINT pLIST pMAT pPERM = spaced $ buildExpressionParser permOpTable pPermTerm
+pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PermExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM PermExpr
+pTypedPermExpr typ pE pBOOL pINT pLIST pMAT pPERM pTUPLE = spaced $ buildExpressionParser permOpTable pPermTerm
   where
     pPermTerm = pTerm (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr ((:# typ) `o` PermVar) (PermOf typ)
 
       , pFun2 "AtPos" (pLIST (PermOf typ)) pINT ((:# typ) `oo` PermAtPos)
       , pFun3 "AtIdx" (pMAT  (PermOf typ)) pINT pINT ((:# typ) `ooo` PermAtIdx)
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` PermAtSlot)
 
       , pMacroExprT pE ((:# typ) `oo` PermMacro)
 

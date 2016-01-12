@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -33,7 +33,7 @@ instance (Glyph Expr) => Glyph PolyExpr where
 
 
 instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
-  Eval ListExpr, Eval MatExpr)
+  Eval ListExpr, Eval MatExpr, Eval TupleExpr)
   => Eval PolyExpr where
 
   eval (PolyExpr (zappa :# typ :@ loc)) = case zappa of
@@ -46,6 +46,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
     PolyAtIdx      m h k    -> eAtIdx m h k loc
     PolyMacro      vals mac -> eMacro vals mac loc
     PolyIfThenElse b t f    -> eIfThenElse b t f
+
+    PolyAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
   
     PolyAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [PolyExpr] -> Integer -> Either ListErr PolyExpr

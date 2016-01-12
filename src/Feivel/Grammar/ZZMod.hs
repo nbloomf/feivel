@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,14 +21,15 @@ module Feivel.Grammar.ZZMod where
 import Feivel.Grammar.Util
 
 
-data ZZModExprLeaf a bool int list mat zzmod
+data ZZModExprLeaf a bool int list mat zzmod tup
   = ZZModConst ZZModulo
   | ZZModVar   Key
   | ZZModCast  a
 
-  | ZZModMacro [(Type, Key, a)] a -- Expr, MacTo ZZModulo
-  | ZZModAtPos list int
-  | ZZModAtIdx mat  int int
+  | ZZModMacro  [(Type, Key, a)] a -- Expr, MacTo ZZModulo
+  | ZZModAtPos  list int
+  | ZZModAtIdx  mat  int int
+  | ZZModAtSlot tup  int
 
   | ZZModIfThenElse bool zzmod zzmod
 

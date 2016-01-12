@@ -46,6 +46,12 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr) => Eval TupleExp
     TupleMacro vals mac -> eMacro vals mac loc
     TupleIfThenElse b t f -> eIfThenElse b t f
 
+    TupleAtSlot t i -> do
+      x <- eval t >>= getVal :: EvalM (Tuple Expr)
+      n <- eval i >>= getVal :: EvalM Integer
+      k <- tryEvalM loc $ project x n
+      putVal loc k >>= getVal
+
     TupleAtPos a t -> lift2 loc a t (foo)
       where foo = listAtPos :: [TupleExpr] -> Integer -> Either ListErr TupleExpr
 

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -69,17 +69,18 @@ pPolyLiteralOf typ p = do
     
 
 
-pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pPolyExpr pC pE pBOOL pINT pLIST pMAT pPOLY = pTypedPolyExpr XX pC pE pBOOL pINT pLIST pMAT pPOLY
+pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM PolyExpr
+pPolyExpr pC pE pBOOL pINT pLIST pMAT pPOLY pTUPLE = pTypedPolyExpr XX pC pE pBOOL pINT pLIST pMAT pPOLY pTUPLE
 
-pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ParseM PolyExpr
-pTypedPolyExpr typ pC pE pBOOL pINT pLIST pMAT pPOLY = spaced $ buildExpressionParser polyOpTable pPolyTerm
+pTypedPolyExpr :: Type -> (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PolyExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM PolyExpr
+pTypedPolyExpr typ pC pE pBOOL pINT pLIST pMAT pPOLY pTUPLE = spaced $ buildExpressionParser polyOpTable pPolyTerm
   where
     pPolyTerm = pTerm (pPolyLiteralOf typ pE) PolyExpr (pPOLY typ) "polynomial expression"
       [ pVarExpr ((:# typ) `o` PolyVar) (PolyOver typ)
 
       , pFun2 "AtPos" (pLIST (PolyOver typ)) pINT ((:# typ) `oo` PolyAtPos)
       , pFun3 "AtIdx" (pMAT (PolyOver typ))  pINT pINT ((:# typ) `ooo` PolyAtIdx)
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` PolyAtSlot)
 
       , pMacroExprT pE ((:# typ) `oo` PolyMacro)
 

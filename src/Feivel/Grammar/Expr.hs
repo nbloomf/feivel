@@ -111,7 +111,7 @@ instance Typed RatExpr where typeOf _ = QQ
 
 {- :ZZModExpr -}
 
-type ZZModExprLeafS = ZZModExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr ZZModExpr
+type ZZModExprLeafS = ZZModExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr ZZModExpr TupleExpr
 
 newtype ZZModExpr = ZZModExpr
   { unZZModExpr :: AtLocus (OfType ZZModExprLeafS)
@@ -156,7 +156,7 @@ instance Typed MatExpr where
 
 {- :PolyExpr -}
 
-type PolyExprLeafS = PolyExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr PolyExpr
+type PolyExprLeafS = PolyExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr PolyExpr TupleExpr
 
 newtype PolyExpr = PolyExpr
   { unPolyExpr :: AtLocus (OfType PolyExprLeafS)
@@ -171,7 +171,7 @@ instance Typed PolyExpr where
 
 {- :PermExpr -}
 
-type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr PermExpr
+type PermExprLeafS = PermExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr PermExpr TupleExpr
 
 newtype PermExpr = PermExpr
   { unPermExpr :: AtLocus (OfType PermExprLeafS)
@@ -186,7 +186,7 @@ instance Typed PermExpr where
 
 {- :MacExpr -}
 
-type MacExprLeafS = MacExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr MacExpr
+type MacExprLeafS = MacExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr MacExpr TupleExpr
 
 newtype MacExpr = MacExpr
   { unMacExpr :: AtLocus (OfType MacExprLeafS)
@@ -256,7 +256,7 @@ instance HasLocus Expr where
   locusOf (MacE   x) = locusOf x
   locusOf (TupleE x) = locusOf x
 
-{- ToExpr -}
+{- :ToExpr -}
 
 class ToExpr t where
   toExpr :: t -> Expr

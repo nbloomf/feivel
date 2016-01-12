@@ -1,0 +1,6 @@
+feivel
+<<<
+[:^rat: AtSlot((str,^rat,bool); ("hello",Poly(1.x),#t); 2) :]
+>>>
+Poly(1.x)
+>>>= 0

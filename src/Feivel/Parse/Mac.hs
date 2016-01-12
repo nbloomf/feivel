@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -54,14 +54,15 @@ pMacConst' typ pE pBD = do
 
 pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr
   -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
-  -> (Type -> ParseM MacExpr) -> ParseM MacExpr
-pTypedMacExpr typ pE pBD pBOOL pINT pLIST pMAT pMAC = spaced $ buildExpressionParser macOpTable pMacTerm
+  -> (Type -> ParseM MacExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MacExpr
+pTypedMacExpr typ pE pBD pBOOL pINT pLIST pMAT pMAC pTUPLE = spaced $ buildExpressionParser macOpTable pMacTerm
   where
     pMacTerm = pTerm (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
       [ pVarExpr ((:# typ) `o` MacVar) (MacTo typ)
 
       , pFun2 "AtPos" (pLIST (MacTo typ)) pINT ((:# typ) `oo` MacAtPos)
       , pFun3 "AtIdx" (pMAT (MacTo typ)) pINT pINT ((:# typ) `ooo` MacAtIdx)
+      , pAtSlot "AtSlot" pTUPLE     pINT      ((:# typ) `oo` MacAtSlot)
 
       , pMacroExprT pE ((:# typ) `oo` MacMacro)
 
