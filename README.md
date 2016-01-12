@@ -1,8 +1,8 @@
-# Read Me!
+# Feivel
 
-This is the source repository of Feivel, a simple templating language aimed at math teachers. Feivel is released as free software under the GNU General Public License version 3.
+This is the source repository of Feivel, a simple text-oriented templating language aimed at math teachers. Feivel is released as free software under the GNU General Public License version 3.
 
-The goal of Feivel is to allow users to easily write math homework problems (or other documents) using "random" data but whose difficulty we can precisely control. Think mailmerge plus spreadsheet formulas plus types plus immutable state. Feivel is intended to be used as part of a pipeline processing plain text and makes no assumptions about .
+Feivel allows us to easily write documents with state -- author-defined variables -- with which we can perform basic operations that affect the document itself after a processing step. Think mailmerge plus spreadsheet formulas plus types plus immutable state. Feivel is intended to be used as part of a pipeline processing plain text and makes no assumptions about whatever markup it is (or isn't) layered on top of. The on-label use of Feivel is to produce math problems using "random" data whose difficulty we can precisely control. As such, it has (basic!) built in support for some mathy data types like polynomials and matrices.
 
 As a boring example, here is a Feivel-flavored Fizz Buzz...
 
@@ -17,7 +17,7 @@ As a boring example, here is a Feivel-flavored Fizz Buzz...
 
     1 2 fizz 4 buzz fizz 7 8 fizz buzz 11 fizz 13 14 fizz-buzz 16 17 fizz 19 buzz
 
-**This project is in an extremely experimental state.** It is missing many basic features, poorly documented, subject to breaking changes, unoptimized, and amateurishly written. Under no circumstances should it be used by anyone, and the author disclaims responsibility for any Unspeakable Badness that may result from its use. **That said,** the few features it does have seem to work OK and are unlikely to destroy your machine, and I (the author) use it frequently with no problems. So be careful and have fun.
+**This project is in an extremely experimental state.** It is missing many basic features, poorly documented, subject to breaking changes, unoptimized, and amateurishly written. Under no circumstances should it be used by anyone, and the author disclaims responsibility for any Unspeakable Badness that may result from its use. **That said,** the few features it does have seem to work OK and are unlikely to destroy your machine, and I (Nathan) use it frequently with no problems. So be careful and have fun.
 
 
 
@@ -67,6 +67,9 @@ Feivel is written and maintained by Nathan Bloomfield (nbloomf at gmail dot com)
 
 
 
-## Why?
+## Project Goals
 
-This project was originally inspired by (1) disappointment with a similar feature of a proprietary math-centric online course delivery system (which will remain nameless) and (2) curiosity. After evolving for about a year as a side project it is thoroughly integrated in my own workflow as a teacher, serves its intended purpose, and remains fun to tinker on from time to time. So I consider it a success.
+* Make my job easier, or at least more interesting
+* Be fun to tinker with
+* Be useful
+* Suck less
