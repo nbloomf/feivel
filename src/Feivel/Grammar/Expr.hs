@@ -52,14 +52,19 @@ import Feivel.Grammar.Bool
 import Feivel.Grammar.List
 import Feivel.Grammar.Int
 import Feivel.Grammar.Tuple
+import Feivel.Grammar.GrammarClass
 
+{------------}
 {- :IntExpr -}
+{------------}
 
-type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr RatExpr
+type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr RatExpr StrExpr PolyExpr
 
 newtype IntExpr = IntExpr
   { unIntExpr :: AtLocus IntExprLeafS
   } deriving (Eq, Show)
+
+instance IntExprLike IntExpr
 
 instance HasLocus IntExpr where
   locusOf = locusOf . unIntExpr
@@ -67,7 +72,9 @@ instance HasLocus IntExpr where
 instance Typed IntExpr where typeOf _ = ZZ
 
 
+{------------}
 {- :StrExpr -}
+{------------}
 
 type StrExprLeafS = StrExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr StrExpr TupleExpr
 
@@ -75,19 +82,25 @@ newtype StrExpr = StrExpr
   { unStrExpr :: AtLocus StrExprLeafS
   } deriving (Eq, Show)
 
+instance StrExprLike StrExpr
+
 instance HasLocus StrExpr where
   locusOf = locusOf . unStrExpr
 
 instance Typed StrExpr where typeOf _ = SS
 
 
+{-------------}
 {- :BoolExpr -}
+{-------------}
 
 type BoolExprLeafS = BoolExprLeaf Expr IntExpr BoolExpr ListExpr MatExpr TupleExpr
 
 newtype BoolExpr = BoolExpr
   { unBoolExpr :: AtLocus BoolExprLeafS
   } deriving (Eq, Show)
+
+instance BoolExprLike BoolExpr
 
 instance HasLocus BoolExpr where
   locusOf = locusOf . unBoolExpr

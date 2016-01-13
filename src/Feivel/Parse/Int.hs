@@ -41,6 +41,8 @@ pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
     pRAT   = parseRAT   dict
     pLIST  = parseLIST  dict
     pMAT   = parseMAT   dict
+    pSTR   = parseSTR   dict
+    pPOLY  = parsePOLY  dict
     pTUPLE = parseTUPLE dict
 
     pIntTerm = pTerm pIntConstLeaf IntExpr pINT "integer expression"
@@ -70,20 +72,20 @@ pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "Denominator" pRAT RatDenom
       , pFun1 "Floor"       pRAT RatFloor
     
-      , pFun1 "StrLen" (pE SS)  StrLength
+      , pFun1 "StrLen" pSTR  StrLength
 
-      , pFun1T "NumRows"    pMAT MatNumRows
-      , pFun1T "NumCols"    pMAT MatNumCols
-      , pFun1T "MatrixRank" pMAT MatRank
-      , pFun1T' "Degree"    (pE . PolyOver) PolyDegree
+      , pFun1T "NumRows"    pMAT  MatNumRows
+      , pFun1T "NumCols"    pMAT  MatNumCols
+      , pFun1T "MatrixRank" pMAT  MatRank
+      , pFun1T' "Degree"    pPOLY PolyDegree
 
-      , pFun1 "PolyContent" (pE (PolyOver ZZ)) IntContent
+      , pFun1 "PolyContent" (pPOLY ZZ) IntContent
     
       , pFun2 "Uniform"  pINT pINT IntObserveUniform
       , pFun2 "Binomial" pINT pRAT IntObserveBinomial
       , pFun1 "Poisson"  pRAT      IntObservePoisson
 
-      , pFun1 "str" (pE SS) IntCastStr
+      , pFun1 "str" pSTR IntCastStr
       ]
 
     intOpTable =

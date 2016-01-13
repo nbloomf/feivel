@@ -21,7 +21,7 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a bool int list mat tup rat
+data IntExprLeaf a bool int list mat tup rat str poly
   = IntConst Integer
   | IntVar   Key
 
@@ -52,7 +52,7 @@ data IntExprLeaf a bool int list mat tup rat
   | IntSqFreePart int
 
   -- String
-  | StrLength a -- SS
+  | StrLength str
 
   -- Rational
   | RatNumer rat
@@ -75,8 +75,8 @@ data IntExprLeaf a bool int list mat tup rat
   | MatRank    mat
 
   -- Polynomial
-  | IntContent a -- PolyOver ZZ
-  | PolyDegree Type a -- PolyOver typ
+  | IntContent poly
+  | PolyDegree Type poly
 
   -- Stats
   | IntObserveUniform  int int
@@ -84,5 +84,5 @@ data IntExprLeaf a bool int list mat tup rat
   | IntObservePoisson  rat
 
   -- Casts
-  | IntCastStr a -- SS
+  | IntCastStr str
   deriving (Eq, Show)
