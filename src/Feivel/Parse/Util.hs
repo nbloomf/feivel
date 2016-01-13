@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -18,6 +18,7 @@
 
 module Feivel.Parse.Util (
   module Feivel.Parse.Type,
+  module Feivel.Parse.ParserDict,
 
   o, oo, ooo, oooo,
 
@@ -38,6 +39,7 @@ import Feivel.Store
 import Feivel.Grammar
 
 import Feivel.Parse.Type
+import Feivel.Parse.ParserDict
 
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)

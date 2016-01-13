@@ -60,16 +60,16 @@ import Text.Parsec.Prim (try)
 {---------------}
 
 pINT :: ParseM IntExpr
-pINT = pIntExpr pTypedExpr pBOOL pINT pLIST pMAT pTUPLE
+pINT = pIntExpr pTypedExpr parserDict
 
 pSTR :: ParseM StrExpr
-pSTR = pStrExpr pTypedExpr pBOOL pINT pLIST pMAT pSTR pTUPLE
+pSTR = pStrExpr pTypedExpr parserDict
 
 pBOOL :: ParseM BoolExpr
 pBOOL = pBoolExpr pTypedExpr pINT pBOOL pLIST pMAT pTUPLE
 
 pRAT :: ParseM RatExpr
-pRAT = pRatExpr pTypedExpr pBOOL pINT pLIST pMAT pRAT pTUPLE
+pRAT = pRatExpr pTypedExpr parserDict
 
 pMOD :: Integer -> ParseM ZZModExpr
 pMOD n = pZZModExpr pTypedExpr n pBOOL pINT pLIST pMAT pMOD pTUPLE
@@ -94,6 +94,21 @@ pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) pBOOL pINT pLIST pMAT 
 
 pDOC :: ParseM Doc
 pDOC = pDoc pTypedExpr pDOC
+
+parserDict :: ParserDict
+parserDict = ParserDict
+  { parseINT   = pINT
+  , parseRAT   = pRAT
+  , parseBOOL  = pBOOL
+  , parseSTR   = pSTR
+  , parseZZMOD = pMOD
+  , parseLIST  = pLIST
+  , parseMAT   = pMAT
+  , parseMAC   = pMAC
+  , parsePOLY  = pPOLY
+  , parsePERM  = pPERM
+  , parseTUPLE = pTUPLE
+  }
 
 
 

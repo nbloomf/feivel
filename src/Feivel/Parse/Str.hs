@@ -33,9 +33,16 @@ pStrConst = fmap StrExpr $ pAtLocus pStrConst'
 pStrConst' :: ParseM StrExprLeafS
 pStrConst' = fmap StrConst pText
 
-pStrExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ParseM StrExpr -> ([Type] -> ParseM TupleExpr) -> ParseM StrExpr
-pStrExpr pE pBOOL pINT pLIST pMAT pSTR pTUPLE = spaced $ buildExpressionParser strOpTable pStrTerm
+pStrExpr :: (Type -> ParseM Expr) -> ParserDict -> ParseM StrExpr
+pStrExpr pE dict = spaced $ buildExpressionParser strOpTable pStrTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pSTR   = parseSTR   dict
+    pTUPLE = parseTUPLE dict
+
     pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
       [ pVarExpr StrVar SS
       , pMacroExprT pE StrMacro

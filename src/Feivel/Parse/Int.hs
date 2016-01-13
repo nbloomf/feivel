@@ -33,9 +33,15 @@ pIntConstLeaf = fmap IntConst pInteger
 pIntConst :: ParseM IntExpr
 pIntConst = fmap IntExpr $ pAtLocus pIntConstLeaf
 
-pIntExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM IntExpr
-pIntExpr pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser intOpTable pIntTerm
+pIntExpr :: (Type -> ParseM Expr) -> ParserDict -> ParseM IntExpr
+pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pTUPLE = parseTUPLE dict
+
     pIntTerm = pTerm pIntConstLeaf IntExpr pINT "integer expression"
       [ pVarExpr IntVar ZZ
       , pMacroExprT pE IntMacro
