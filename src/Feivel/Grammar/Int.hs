@@ -21,11 +21,14 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a bool int list mat tup rat str poly
+data IntExprLeaf
+      int  str bool rat  mod
+      list mat tup  poly mac
+      a
   = IntConst Integer
   | IntVar   Key
 
-  | IntMacro  [(Type, Key, a)] a -- MacTo ZZ
+  | IntMacro  [(Type, Key, a)] a -- Expr, MacTo ZZ
   | IntAtPos  list int
   | IntAtIdx  mat  int int
   | IntAtSlot tup  int

@@ -21,11 +21,14 @@ module Feivel.Grammar.Str where
 import Feivel.Grammar.Util
 
 
-data StrExprLeaf a bool int list mat str tup
+data StrExprLeaf
+      int  str bool rat  mod
+      list mat tup  poly mac
+      a
   = StrConst Text
   | StrVar   Key
 
-  | StrMacro [(Type, Key, a)] a -- Expr, MacTo SS
+  | StrMacro  [(Type, Key, a)] a -- Expr, MacTo SS
   | StrAtPos  list int
   | StrAtIdx  mat  int int
   | StrAtSlot tup  int
@@ -33,21 +36,21 @@ data StrExprLeaf a bool int list mat str tup
   | StrIfThenElse bool str str
 
   -- Combinators
-  | Concat      str str
-  | StrStrip    str str
+  | Concat   str str
+  | StrStrip str str
  
-  | Reverse     str
-  | ToUpper     str
-  | ToLower     str
-  | Rot13       str
+  | Reverse str
+  | ToUpper str
+  | ToLower str
+  | Rot13   str
 
   -- Integer
-  | StrHex      int
-  | StrRoman    int
-  | StrBase36   int
+  | StrHex    int
+  | StrRoman  int
+  | StrBase36 int
 
   -- Rational
-  | StrDecimal a int -- QQ
+  | StrDecimal rat int
 
   -- List
   | StrRand list
@@ -60,5 +63,5 @@ data StrExprLeaf a bool int list mat str tup
   | StrTypeOf a -- XX
 
   -- Casting
-  | StrIntCast a -- ZZ
+  | StrIntCast int
   deriving (Eq, Show)

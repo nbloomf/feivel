@@ -41,6 +41,7 @@ pStrExpr pE dict = spaced $ buildExpressionParser strOpTable pStrTerm
     pLIST  = parseLIST  dict
     pMAT   = parseMAT   dict
     pSTR   = parseSTR   dict
+    pRAT   = parseRAT   dict
     pTUPLE = parseTUPLE dict
 
     pStrTerm = pTerm pStrConst' StrExpr pSTR "string expression"
@@ -50,7 +51,7 @@ pStrExpr pE dict = spaced $ buildExpressionParser strOpTable pStrTerm
       , pIfThenElseExprT pBOOL pSTR StrIfThenElse SS
 
       , pFun2   "AtPos"  (pLIST SS) pINT      StrAtPos
-      , pFun3   "AtIdx"  (pMAT SS)  pINT pINT StrAtIdx
+      , pFun3   "AtIdx"  (pMAT  SS) pINT pINT StrAtIdx
       , pAtSlot "AtSlot" pTUPLE     pINT      StrAtSlot
 
       , pFun2 "Strip"   pSTR pSTR StrStrip
@@ -61,7 +62,7 @@ pStrExpr pE dict = spaced $ buildExpressionParser strOpTable pStrTerm
 
       , pFun1 "Rand"    (pLIST SS) StrRand
 
-      , pFun1 "int" (pE ZZ) StrIntCast
+      , pFun1 "int" pINT StrIntCast
     
       , pFun1 "Hex"    pINT StrHex
       , pFun1 "Roman"  pINT StrRoman
@@ -69,7 +70,7 @@ pStrExpr pE dict = spaced $ buildExpressionParser strOpTable pStrTerm
     
       , pFun1T "Tab" pMAT StrTab
 
-      , pFun2  "Decimal" (pE QQ) pINT StrDecimal
+      , pFun2  "Decimal" pRAT pINT StrDecimal
       , pFun2T "Format"  (const pFormat) pE      StrFormat
       ]
 

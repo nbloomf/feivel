@@ -52,19 +52,19 @@ import Feivel.Grammar.Bool
 import Feivel.Grammar.List
 import Feivel.Grammar.Int
 import Feivel.Grammar.Tuple
-import Feivel.Grammar.GrammarClass
 
 {------------}
 {- :IntExpr -}
 {------------}
 
-type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr RatExpr StrExpr PolyExpr
+type IntExprLeafS = IntExprLeaf
+  IntExpr  StrExpr BoolExpr  RatExpr  ZZModExpr
+  ListExpr MatExpr TupleExpr PolyExpr MacExpr
+  Expr
 
 newtype IntExpr = IntExpr
   { unIntExpr :: AtLocus IntExprLeafS
   } deriving (Eq, Show)
-
-instance IntExprLike IntExpr
 
 instance HasLocus IntExpr where
   locusOf = locusOf . unIntExpr
@@ -76,13 +76,14 @@ instance Typed IntExpr where typeOf _ = ZZ
 {- :StrExpr -}
 {------------}
 
-type StrExprLeafS = StrExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr StrExpr TupleExpr
+type StrExprLeafS = StrExprLeaf
+  IntExpr  StrExpr BoolExpr  RatExpr  ZZModExpr
+  ListExpr MatExpr TupleExpr PolyExpr MacExpr
+  Expr
 
 newtype StrExpr = StrExpr
   { unStrExpr :: AtLocus StrExprLeafS
   } deriving (Eq, Show)
-
-instance StrExprLike StrExpr
 
 instance HasLocus StrExpr where
   locusOf = locusOf . unStrExpr
@@ -100,15 +101,15 @@ newtype BoolExpr = BoolExpr
   { unBoolExpr :: AtLocus BoolExprLeafS
   } deriving (Eq, Show)
 
-instance BoolExprLike BoolExpr
-
 instance HasLocus BoolExpr where
   locusOf = locusOf . unBoolExpr
 
 instance Typed BoolExpr where typeOf _ = BB
 
 
+{------------}
 {- :RatExpr -}
+{------------}
 
 type RatExprLeafS = RatExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr RatExpr TupleExpr
 
@@ -122,7 +123,9 @@ instance HasLocus RatExpr where
 instance Typed RatExpr where typeOf _ = QQ
 
 
+{--------------}
 {- :ZZModExpr -}
+{--------------}
 
 type ZZModExprLeafS = ZZModExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr ZZModExpr TupleExpr
 
@@ -137,7 +140,9 @@ instance Typed ZZModExpr where
   typeOf (ZZModExpr (_ :# typ :@ _)) = typ
 
 
+{-------------}
 {- :ListExpr -}
+{-------------}
 
 type ListExprLeafS = ListExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
 
