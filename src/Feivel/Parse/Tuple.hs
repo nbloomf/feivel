@@ -26,8 +26,8 @@ import Feivel.Grammar
 import Feivel.Parse.Util
 import Feivel.Parse.ParseM
 
-import Data.List (intersperse)
-import Text.Parsec.Expr (buildExpressionParser, Operator(..), Assoc(..))
+--import Data.List (intersperse)
+import Text.Parsec.Expr (buildExpressionParser)
 import Text.ParserCombinators.Parsec hiding (try)
 import Text.Parsec.Prim (try)
 
@@ -57,22 +57,19 @@ pTupleLiteralOf typs pE = do
     return (TupleConst (Tuple xs) :# (TupleOf typs))
 
 pTupleExpr ::
-  (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr
-    -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr)
-    -> ParseM TupleExpr
-pTupleExpr pE pBOOL pINT pLIST pMAT pTUPLE = pTypedTupleExpr [XX] pE pBOOL pINT pLIST pMAT pTUPLE
+  (Type -> ParseM Expr) -> ParserDict -> ParseM TupleExpr
+pTupleExpr pE dict = pTypedTupleExpr [XX] pE dict
 
-pTypedTupleExpr :: [Type]
-  -> (Type -> ParseM Expr)
-  -> ParseM BoolExpr
-  -> ParseM IntExpr
-  -> (Type -> ParseM ListExpr)
-  -> (Type -> ParseM MatExpr)
-  -> ([Type] -> ParseM TupleExpr)
-  -> ParseM TupleExpr
-pTypedTupleExpr typs pE pBOOL pINT pLIST pMAT pTUPLE
+pTypedTupleExpr :: [Type] -> (Type -> ParseM Expr) -> ParserDict -> ParseM TupleExpr
+pTypedTupleExpr typs pE dict 
   = spaced $ buildExpressionParser tupleOpTable pTupleTerm
     where
+      pBOOL  = parseBOOL  dict
+      pINT   = parseINT   dict
+      pLIST  = parseLIST  dict
+      pMAT   = parseMAT   dict
+      pTUPLE = parseTUPLE dict
+
       pTupleTerm = pTerm (pTupleLiteralOf typs pE) TupleExpr (pTUPLE typs) "tuple expression"
         [ pVarExpr
             ((:# (TupleOf typs)) `o` TupleVar)

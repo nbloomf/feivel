@@ -36,11 +36,16 @@ pZZModConst' n = do
   a <- pInteger
   return (ZZModConst (a `zzmod` n) :# (ZZMod n))
 
-pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParseM BoolExpr
-  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
-  -> (Integer -> ParseM ZZModExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ZZModExpr
-pZZModExpr pE n pBOOL pINT pLIST pMAT pMOD pTUPLE = spaced $ buildExpressionParser zzModOpTable pZZModTerm
+pZZModExpr :: (Type -> ParseM Expr) -> Integer -> ParserDict -> ParseM ZZModExpr
+pZZModExpr pE n dict = spaced $ buildExpressionParser zzModOpTable pZZModTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pMOD   = parseZZMOD dict
+    pTUPLE = parseTUPLE dict
+
     pZZModTerm = pTerm (pZZModConst' n) ZZModExpr (pMOD n) "integer expression"
       [ pVarExpr ((:# typ) `o` ZZModVar) (ZZMod n)
       , pMacroExprT pE ((:# typ) `oo` ZZModMacro)

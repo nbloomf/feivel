@@ -40,12 +40,18 @@ pListLiteralOf typ pE = do
     xs <- pBraceList (pE typ)
     return (ListConst xs :# typ)
 
-pListExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ListExpr
-pListExpr pE pBOOL pINT pLIST pMAT pTUPLE = pTypedListExpr XX pE pBOOL pINT pLIST pMAT pTUPLE
+pListExpr :: (Type -> ParseM Expr) -> ParserDict -> ParseM ListExpr
+pListExpr pE dict = pTypedListExpr XX pE dict
 
-pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM ListExpr
-pTypedListExpr typ pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser listOpTable pListTerm
+pTypedListExpr :: Type -> (Type -> ParseM Expr) -> ParserDict -> ParseM ListExpr
+pTypedListExpr typ pE dict = spaced $ buildExpressionParser listOpTable pListTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pTUPLE = parseTUPLE dict
+
     pListTerm = pTerm (pListLiteralOf typ pE) ListExpr (pLIST typ) "list expression"
       [ pVarExpr ((:# typ) `o` ListVar) (ListOf typ)
 

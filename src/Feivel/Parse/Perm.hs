@@ -52,9 +52,16 @@ pPermLiteralOf typ pC = (string "id" >> return (PermConst idPerm :# typ)) <|> do
         _ <- char ')'
         return xs
 
-pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> (Type -> ParseM PermExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM PermExpr
-pTypedPermExpr typ pE pBOOL pINT pLIST pMAT pPERM pTUPLE = spaced $ buildExpressionParser permOpTable pPermTerm
+pTypedPermExpr :: Type -> (Type -> ParseM Expr) -> ParserDict -> ParseM PermExpr
+pTypedPermExpr typ pE dict = spaced $ buildExpressionParser permOpTable pPermTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pPERM  = parsePERM  dict
+    pTUPLE = parseTUPLE dict
+
     pPermTerm = pTerm (pPermLiteralOf typ pE) PermExpr (pPERM typ) "permutation expression"
       [ pVarExpr ((:# typ) `o` PermVar) (PermOf typ)
 

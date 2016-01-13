@@ -46,12 +46,18 @@ pMatLiteralOf typ p = do
     Left err -> reportParseErr (locus start end) err
     Right m -> return (MatConst m :# typ)
 
-pMatExpr :: (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MatExpr
-pMatExpr pE pBOOL pINT pLIST pMAT pTUPLE = pTypedMatExpr XX pE pBOOL pINT pLIST pMAT pTUPLE
+pMatExpr :: (Type -> ParseM Expr) -> ParserDict -> ParseM MatExpr
+pMatExpr pE dict = pTypedMatExpr XX pE dict
 
-pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParseM BoolExpr -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MatExpr
-pTypedMatExpr typ pE pBOOL pINT pLIST pMAT pTUPLE = spaced $ buildExpressionParser matOpTable pMatTerm
+pTypedMatExpr :: Type -> (Type -> ParseM Expr) -> ParserDict -> ParseM MatExpr
+pTypedMatExpr typ pE dict = spaced $ buildExpressionParser matOpTable pMatTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pTUPLE = parseTUPLE dict
+
     pMatTerm = pTerm (pMatLiteralOf typ pE) MatExpr (pMAT typ) "matrix expression"
       [ pVarExpr ((:# typ) `o` MatVar) (MatOf typ)
 

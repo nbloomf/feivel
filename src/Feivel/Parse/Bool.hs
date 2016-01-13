@@ -33,9 +33,15 @@ pBoolConst = fmap BoolExpr $ pAtLocus pBoolConst'
 pBoolConst' :: ParseM BoolExprLeafS
 pBoolConst' = fmap BoolConst pBool
 
-pBoolExpr :: (Type -> ParseM Expr) -> ParseM IntExpr -> ParseM BoolExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM BoolExpr
-pBoolExpr pE pINT pBOOL pLIST pMAT pTUPLE = spaced $ buildExpressionParser boolOpTable pBoolTerm
+pBoolExpr :: (Type -> ParseM Expr) -> ParserDict -> ParseM BoolExpr
+pBoolExpr pE dict = spaced $ buildExpressionParser boolOpTable pBoolTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pTUPLE = parseTUPLE dict
+
     pBoolTerm = pTerm pBoolConst' BoolExpr pBOOL "boolean expression"
       [ pVarExpr BoolVar BB
       , pMacroExprT pE BoolMacro

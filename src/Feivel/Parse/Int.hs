@@ -38,6 +38,7 @@ pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
   where
     pBOOL  = parseBOOL  dict
     pINT   = parseINT   dict
+    pRAT   = parseRAT   dict
     pLIST  = parseLIST  dict
     pMAT   = parseMAT   dict
     pTUPLE = parseTUPLE dict
@@ -65,9 +66,9 @@ pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "GCD"    (pLIST ZZ) IntGCDiv
       , pFun1 "LCM"    (pLIST ZZ) IntLCMul
     
-      , pFun1 "Numerator"   (pE QQ)  RatNumer
-      , pFun1 "Denominator" (pE QQ)  RatDenom
-      , pFun1 "Floor"       (pE QQ)  RatFloor
+      , pFun1 "Numerator"   pRAT RatNumer
+      , pFun1 "Denominator" pRAT RatDenom
+      , pFun1 "Floor"       pRAT RatFloor
     
       , pFun1 "StrLen" (pE SS)  StrLength
 
@@ -79,8 +80,8 @@ pIntExpr pE dict = spaced $ buildExpressionParser intOpTable pIntTerm
       , pFun1 "PolyContent" (pE (PolyOver ZZ)) IntContent
     
       , pFun2 "Uniform"  pINT pINT IntObserveUniform
-      , pFun2 "Binomial" pINT (pE QQ) IntObserveBinomial
-      , pFun1 "Poisson"  (pE QQ) IntObservePoisson
+      , pFun2 "Binomial" pINT pRAT IntObserveBinomial
+      , pFun1 "Poisson"  pRAT      IntObservePoisson
 
       , pFun1 "str" (pE SS) IntCastStr
       ]

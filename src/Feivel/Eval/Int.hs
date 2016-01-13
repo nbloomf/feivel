@@ -31,7 +31,7 @@ instance Glyph IntExpr where
   toGlyph x = error $ "toGlyph: IntExpr: " ++ show x
 
 
-instance (Eval Expr, Eval BoolExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr) => Eval IntExpr where
+instance (Eval Expr, Eval BoolExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr, Eval RatExpr) => Eval IntExpr where
   eval (IntExpr (zappa :@ loc)) = case zappa of
     IntConst n -> return (IntExpr (IntConst n :@ loc))
 

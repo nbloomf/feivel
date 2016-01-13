@@ -21,7 +21,7 @@ module Feivel.Grammar.Int where
 import Feivel.Grammar.Util
 
 
-data IntExprLeaf a bool int list mat tup
+data IntExprLeaf a bool int list mat tup rat
   = IntConst Integer
   | IntVar   Key
 
@@ -55,9 +55,9 @@ data IntExprLeaf a bool int list mat tup
   | StrLength a -- SS
 
   -- Rational
-  | RatNumer a -- QQ
-  | RatDenom a -- QQ
-  | RatFloor a -- QQ
+  | RatNumer rat
+  | RatDenom rat
+  | RatFloor rat
 
   -- List
   | ListLen  list
@@ -80,8 +80,8 @@ data IntExprLeaf a bool int list mat tup
 
   -- Stats
   | IntObserveUniform  int int
-  | IntObserveBinomial int a    -- QQ
-  | IntObservePoisson  a            -- QQ
+  | IntObserveBinomial int rat
+  | IntObservePoisson  rat
 
   -- Casts
   | IntCastStr a -- SS

@@ -52,11 +52,16 @@ pMacConst' typ pE pBD = do
     else return (MacConst vals body (emptyStore, False) :# t)
 
 
-pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParseM BoolExpr
-  -> ParseM IntExpr -> (Type -> ParseM ListExpr) -> (Type -> ParseM MatExpr)
-  -> (Type -> ParseM MacExpr) -> ([Type] -> ParseM TupleExpr) -> ParseM MacExpr
-pTypedMacExpr typ pE pBD pBOOL pINT pLIST pMAT pMAC pTUPLE = spaced $ buildExpressionParser macOpTable pMacTerm
+pTypedMacExpr :: Type -> (Type -> ParseM Expr) -> ParseM Expr -> ParserDict -> ParseM MacExpr
+pTypedMacExpr typ pE pBD dict = spaced $ buildExpressionParser macOpTable pMacTerm
   where
+    pBOOL  = parseBOOL  dict
+    pINT   = parseINT   dict
+    pLIST  = parseLIST  dict
+    pMAT   = parseMAT   dict
+    pMAC   = parseMAC   dict
+    pTUPLE = parseTUPLE dict
+
     pMacTerm = pTerm (pMacConst' typ pE pBD) MacExpr (pMAC typ) "macro expression"
       [ pVarExpr ((:# typ) `o` MacVar) (MacTo typ)
 

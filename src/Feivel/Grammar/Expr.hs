@@ -55,7 +55,7 @@ import Feivel.Grammar.Tuple
 
 {- :IntExpr -}
 
-type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr
+type IntExprLeafS = IntExprLeaf Expr BoolExpr IntExpr ListExpr MatExpr TupleExpr RatExpr
 
 newtype IntExpr = IntExpr
   { unIntExpr :: AtLocus IntExprLeafS
