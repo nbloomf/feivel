@@ -25,10 +25,12 @@ As a boring example, here is a Feivel-flavored Fizz Buzz...
 
 Currently the only way to install Feivel is by building it from source. This section includes just the commands needed to install and use Feivel; see the [Development](#development) section for more info.
 
-* Required Requirements: GHC >7.6.3, cabal >1.20
+* Required Requirements: GHC >7.6.3, cabal >1.20 (Both come with the [Haskell Platform](https://www.haskell.org/platform/).)
 * Optional Requirements: git, pandoc, shelltestrunner, graphmod
 
-### Install Commands
+### POSIX-y OSs
+
+(This should work, but I haven't tested it yet!)
 
     # Get dependencies
     cabal update
@@ -73,7 +75,7 @@ There are a few resources for learning how to use Feivel.
 
 ## Development
 
-Feivel is written in Haskell and licensed under the GNU GPLv3. Currently the only way to install Feivel is to build it from source.
+Feivel is written in Haskell and licensed under the GNU GPLv3.
 
 - **To obtain the source code:** The public repo is at [GitHub](https://github.com/nbloomf/feivel).
 
@@ -84,7 +86,7 @@ Feivel is written in Haskell and licensed under the GNU GPLv3. Currently the onl
   - Compilation has been successfully tested on Fedora 21 and Ubuntu 15.04. If you build Feivel on another OS, or have problems doing so, I'd like to hear about it.
 
 - **To load Feivel into GHCi:** (for typechecking, repl-ing, and debugging)
-  - Load `Feivel.Debug` from the project root directory. This module has some useful functions for testing the larger moving parts of Feivel (the parser and the evaluator).
+  - Load `Feivel.Debug` into ghci from the project root directory. This module has some useful functions for testing the larger moving parts of Feivel (the parser and the evaluator).
   - You may need to add src/ and test/ to the GHCi path; this can be done by keeping the hidden file .ghci (which is in the repo) in the project root.
 
 - **To run the tests:**
