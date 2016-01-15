@@ -23,7 +23,39 @@ As a boring example, here is a Feivel-flavored Fizz Buzz...
 
 ## Installation
 
-Currently the only way to install Feivel is by building it from source. See the [Development](#development) section for info.
+Currently the only way to install Feivel is by building it from source. This section includes just the commands needed to install and use Feivel; see the [Development](#development) section for more info.
+
+* Required Requirements: GHC >7.6.3, cabal >1.20
+* Optional Requirements: git, pandoc, shelltestrunner, graphmod
+
+### Install Commands
+
+    # Get dependencies
+    cabal update
+    cabal install parsec containers regex-posix random-fu
+    cabal install rvar random-extras transformers mtl random
+    cabal install directory monadlist primes gtk tostring
+
+    git clone https://github.com/nbloomf/carl.git
+    cd carl
+    make
+    cd ..
+
+    # Compile and install feivel
+    git clone https://github.com/nbloomf/feivel.git
+    cd feivel
+    make
+
+    # Run tests (shelltestrunner required)
+    make golden
+
+If these commands finish with no errors, you can try out feivel's gui with
+
+    feivel --repl &
+
+and test feivel from the command line with something like
+
+    echo "[:int: Rand({1;2;3}) :]" | feivel
 
 
 

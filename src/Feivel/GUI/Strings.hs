@@ -33,7 +33,7 @@ ui_license_string =
 ui_about_comment :: String
 ui_about_comment =
   "A simple templating language and interactive calculator.\n\n"
-    ++ "Copyright 2014--2015 Nathan Bloomfield"
+    ++ "Copyright 2014--2016 Nathan Bloomfield"
 
 ui_authors :: [String]
 ui_authors =
