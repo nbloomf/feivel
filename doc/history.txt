@@ -5,6 +5,7 @@ Next
 * New types
   * constructor: tuple
 * New functions: FromCoefs
+* Changed behavior of SquarePart
 
 0.2.1
 =====

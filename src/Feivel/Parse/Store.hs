@@ -75,7 +75,7 @@ pTypeKeyValFile = do
         e <- pTypedConst t
         _ <- char ';'
         end <- getPosition
-        _ <- many $ char ' '
+        _ <- many ((char ' ' >> return ()) <|> (try $ string "|\n" >> return ()))
         return (Key k, e, locus start end)
 
 
