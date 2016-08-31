@@ -1,0 +1,12 @@
+feivel
+<<<
+[shell seq "1" "5" endshell]
+>>>
+1
+2
+3
+4
+5
+
+>>>= 0
+

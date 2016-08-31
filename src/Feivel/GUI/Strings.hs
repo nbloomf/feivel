@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -24,7 +24,7 @@ ui_name_string =
 
 ui_version_string :: String
 ui_version_string =
-  "0.2.1"
+  "0.2.2"
 
 ui_license_string :: String
 ui_license_string =

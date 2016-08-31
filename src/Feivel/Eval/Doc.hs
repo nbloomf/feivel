@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -25,6 +25,9 @@ module Feivel.Eval.Doc (evalToGlyph) where
 import Feivel.Eval.Util
 
 import Data.List (intersperse)
+import System.Process (readProcessWithExitCode)
+import Control.Monad.IO.Class (liftIO)
+import System.Exit (ExitCode(ExitSuccess))
 
 
 evalToGlyph :: (Eval Expr, Glyph Expr, ToExpr a) => a -> EvalM String
@@ -160,3 +163,21 @@ instance (Eval Expr, Glyph Expr) => Eval Doc where
     xs <- eval ls >>= getVal
     x  <- randomElementEvalM xs
     eval $ Doc $ LetIn k x body :@ loc
+
+
+  eval (Doc (Shell c as Nothing :@ loc)) = do
+    args <- sequence $ map evalToGlyph as
+    (code,stdout,stderr) <- liftIO $ readProcessWithExitCode c args ""
+    if code == ExitSuccess
+      then return (Doc $ DocText (Text stdout) :@ loc)
+      else reportErr loc $ ExitFail code stdout stderr
+
+  eval (Doc (Shell c as (Just x) :@ loc)) = do
+    args <- sequence $ map evalToGlyph as
+    st <- getState
+    stdin <- evalToGlyph x
+    putState st
+    (code,stdout,stderr) <- liftIO $ readProcessWithExitCode c args stdin
+    if code == ExitSuccess
+      then return (Doc $ DocText (Text stdout) :@ loc)
+      else reportErr loc $ ExitFail code stdout stderr

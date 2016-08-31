@@ -136,8 +136,8 @@ The repl should print `#t` back. In a template, this would be written as `[:bool
 
 Types in `feivel` come in two flavors:
 
-1. *atomic* types, which represent concrete data. As of 0.2.1 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N).
-2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.2.1 there are 5 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), `$typ` (permutations of constants of `typ`), and `>typ` (macros of `typ`).
+1. *atomic* types, which represent concrete data. As of 0.2.2 there are 5 atomic types: `bool` (booleans), `str` (strings of text), `int` (arbitrary precision integers), `rat` (arbitrary precision rationals), `modN` (integers modulo N, for some fixed N).
+2. *constructor* types, which take a concrete type and construct a new concrete type. As of 0.2.2 there are 6 type constructors: `{typ}` (lists of `typ`), `[typ]` (matrices of `typ`), `^typ` (polynomials over `typ`), `$typ` (permutations of constants of `typ`), `(typ1,...,typn)` (tuples), and `>typ` (macros of `typ`).
 
 Constructors can be nested, so that (for instance) `[{int}]` represents the set of matrices whose entries are lists of integers. Macros are the strangest of these; they are like functions (but not quite) and allow us to wrap a complicated expression with parameters into a single value. An expression of type `>int` can be *evaluated* to *yield* a value of type `int`. Macros can also be nested, as we'll see later, so for instance an expression of type `>>int` is a macro that yields a macro that yields an integer, and an expression of type `[>rat]` is a matrix of macros that yield rationals. In that sense macros are "first-class" values. Why? Why not? :)
 
@@ -224,6 +224,16 @@ Usage: `[eval MAC (TYP KEY := EXPR; ...) endeval]`
 Usage: `[import (PATH)]`
 
 `import` is used to bring keys defined in a separate template (at PATH) into the current template. By default, `feivel` looks for PATH under fvl.lib/ in the user's home directory in unix-like environments. Alternative locations can be specified with the `--library` command line option.
+
+
+`shell`
+-------
+
+Usage: `[shell PATH ARG1 ... ARGn stdin [TEMP] endshell]`
+
+New as of 0.2.2; I can't decide if this command is awesome or terrible (maybe both). Runs the command PATH in a shell with the supplied arguments and with TEMP as stdin. As long as the resulting exit code is 0, evaluates to stdout. If the exit code is not 0, bails with an error. Note that currently the `shell` command blocks while waiting for the shelled out program to complete (but it "should" be "easy" to make this nonblocking later if needed). Note that this does not support anything fancy like pipes or redirection -- so put that stuff in a shell script.
+
+Note that the ARGs are string expressions and TEMP is a document template. Both the ARGs and TEMP are evaluated, then passed to the command at PATH, then stdout is spliced in, and the state immediately after the shell command is the same as the state immediately before (there is an implicit new scope in TEMP).
 
 
 

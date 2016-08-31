@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -124,13 +124,16 @@ pString = do
   _ <- char '"'
   return t
 
+pShellArg :: ParseM String
+pShellArg = many1 $ noneOf [' ','\t','\n',')']
+
 pPath :: ParseM FilePath
 pPath = many1 $ oneOf allowed
   where
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++
       "ABCDEFGHIJKLMNOPQRSTUVWXYZ" ++
-      "_[]+-.0123456789/<>=:;@#$%^&"
+      "_+-.0123456789/<>=:;@#$%^&"
 
 pPaths :: ParseM [FilePath]
 pPaths = sepBy1 pPath spaces

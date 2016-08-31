@@ -1,0 +1,7 @@
+feivel
+<<<
+[shell cat stdin [woo] endshell]
+>>>
+woo
+>>>= 0
+

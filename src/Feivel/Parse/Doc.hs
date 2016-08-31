@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -52,8 +52,8 @@ pTypedNakedExpr pE = do
   keyword ":"
   pE t
 
-pDoc :: (Type -> ParseM Expr) -> ParseM Doc -> ParseM Doc
-pDoc pE pDOC = choice $ map (fmap Doc . pAtLocus)
+pDoc :: (Type -> ParseM Expr) -> ParseM StrExpr -> ParseM Doc -> ParseM Doc
+pDoc pE pSTR pDOC = choice $ map (fmap Doc . pAtLocus)
   [ eof >> return Empty
   , lookAhead (char ']') >> return Empty
   , do
@@ -76,6 +76,7 @@ pDoc pE pDOC = choice $ map (fmap Doc . pAtLocus)
       , pBail
       , pLetIn
       , pSelect
+      , pShell
       , pNote
       ]
     return (Cat xs)
@@ -207,6 +208,16 @@ pDoc pE pDOC = choice $ map (fmap Doc . pAtLocus)
       option () (try (keyword "endselect"))
       _ <- whitespace >> char ']'
       return (Select k r t)
+
+    pShell = do
+      try (char '[' >> keyword "shell")
+      c <- pPath
+      spaces
+      as <- sepBy pSTR spaces
+      x <- option Nothing (try (keyword "stdin") >> (fmap Just (pBrackDoc pDOC)))
+      option () (try (keyword "endshell"))
+      _ <- whitespace >> char ']'
+      return (Shell c as x)
 
     pNote = do
       try (char '[' >> keyword "%")

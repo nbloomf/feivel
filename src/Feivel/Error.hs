@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -19,7 +19,7 @@
 {-# OPTIONS_GHC -XTypeSynonymInstances #-}
 
 module Feivel.Error (
-  Err(..), PromoteError, promote, RandErr(..),
+  Err(..), PromoteError, promote, RandErr(..), SysErr(..),
   Goof(..), reportErr, parseGoof
 ) where
 
@@ -33,6 +33,7 @@ import Feivel.Grammar (ExprErr(), GetErr(), TypeErr())
 
 import Text.Parsec.Error (ParseError(), errorPos)
 import Control.Monad.Trans.Error
+import System.Exit (ExitCode())
 
 {------------}
 {- Contents -}
@@ -57,6 +58,7 @@ data Err
   | ErrRand  RandErr
   | ErrAlg   AlgErr
   | ErrGet   GetErr
+  | ErrSys   SysErr
 
 instance Show Err where
   show Success      = "Success!"
@@ -71,6 +73,7 @@ instance Show Err where
   show (ErrFile  x) = show x
   show (ErrParse x) = show x
   show (ErrState x) = show x
+  show (ErrSys   x) = show x
 
   -- Misc Errors
   show (ErrExpr  x) = show x
@@ -94,9 +97,15 @@ instance PromoteError ParseError where promote = ErrParse
 instance PromoteError TypeErr    where promote = ErrType
 instance PromoteError RandErr    where promote = ErrRand
 instance PromoteError GetErr     where promote = ErrGet
+instance PromoteError SysErr     where promote = ErrSys
 
 
+data SysErr
+  = ExitFail ExitCode String String
 
+instance Show SysErr where
+  show (ExitFail code stdout stderr) = 
+    concat [show code, stdout, stderr]
 
 
 {------------}

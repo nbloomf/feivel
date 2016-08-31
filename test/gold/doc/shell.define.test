@@ -1,0 +1,9 @@
+feivel
+<<<
+[define str @a := "foo"]#
+[shell echo (@a ++ "bar")]
+>>>
+foobar
+
+>>>= 0
+

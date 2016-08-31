@@ -1,11 +1,12 @@
 feivel: version history
 
-Next
-====
+0.2.2
+=====
 * New types
   * constructor: tuple
-* New functions: FromCoefs
-* Changed behavior of SquarePart
+* New functions: FromCoefs, shell
+* Misc
+  * Changed behavior of SquarePart
 
 0.2.1
 =====

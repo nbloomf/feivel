@@ -1,0 +1,40 @@
+In this example we will examine the terrible powers afforded by the shell command.
+
+Shell runs an external program and then splices its output into the current document.
+
+Here is a silly example:
+
+[shell echo "foo"]
+
+This calls the external command "echo" with one argument, "foo". We can pass as many arguments as we like.
+
+[shell echo "foo" "bar" "baz"]
+
+Note that these arguments are all in "quotes". This is a little awkward -- we don't typically put quotes around command line arguments all the time like this. Here it is necessary, because those arguments are actually *string expressions*. So we can do things like this:
+
+[shell echo (Roman(47))]
+
+Or even this:
+
+[define str @wut := "hallo"]
+[shell echo @wut "werlt"]
+
+This gives us a way to pass information to the outside world while evaluating a template. These examples all use echo as the command, but we can use literally anything, as long as it can be invoked with a single command (no pipelines, so you may need to put complicated commands in an external shell script).
+
+Many commands also operate on the so-called "standard input" -- a stream of data passed in by the shell. We can specify this in the shell command.
+
+[shell cat stdin [yay for unix]]
+
+The stuff inside the brackets after "stdin" is the stdin. Well, almost. The stuff inside the brackets is first evaluated as a template and *then* passed in as the stdin.
+
+[shell tr "5" "6" stdin [
+  [define int @a := 5] @a
+] endshell]
+
+Note that the stdin template implicitly starts a new scope.
+
+[define int @a := 7] @a
+
+Shell is just another document command, so it can go in macros, shuffle arguments, conditionals, or whatever. The intended purpose of shell is to allow us to farm out more complicated computations to external tools. It came about during a fit of nostalgia for the acme text editor, which takes a similar (but much more powerful) approach to extendableness.
+
+Shell is RIDICULOUSLY dangerous, because it can be used to run any command on your system for which you have appropriate privileges. You could run "rm" and delete files. You could run feivel recursively and blow up your machine. You could download arbitrary stuff with curl and run a shell script that launches the missiles. So you should probably never, ever use shell in your templates unless you *reeeally* want to. :)

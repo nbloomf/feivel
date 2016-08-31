@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -21,7 +21,7 @@ module Feivel.Grammar.Doc where
 import Feivel.Grammar.Util
 
 
-data DocLeaf a doc
+data DocLeaf a doc str
  -- Primitives
  = Empty
  | DocText   Text
@@ -51,6 +51,9 @@ data DocLeaf a doc
  -- Selection and Repetition
  | ForSay Key a doc (Maybe doc) -- ListOf XX
  | Select Key a doc             -- ListOf XX
+
+ -- Shell Command
+ | Shell String [str] (Maybe doc)
 
  -- Debugging
  | Bail      a -- SS

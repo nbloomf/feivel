@@ -235,7 +235,7 @@ instance Typed TupleExpr where
 {- :Doc -}
 
 newtype Doc = Doc
-  { unDoc :: AtLocus (DocLeaf Expr Doc)
+  { unDoc :: AtLocus (DocLeaf Expr Doc StrExpr)
   } deriving (Eq, Show)
 
 instance HasLocus Doc where

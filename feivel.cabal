@@ -1,8 +1,8 @@
 Name:           feivel
-Version:        0.2.1
+Version:        0.2.2
 Cabal-Version:  >= 1.2
 License:        GPL-3
-Copyright:      (c) 2015 Nathan Bloomfield
+Copyright:      (c) 2015, 2016 Nathan Bloomfield
 Author:         Nathan Bloomfield
 Synopsis:       A simple template processor.
 Stability:      Experimental
@@ -15,4 +15,5 @@ Executable feivel
   build-depends:  base, parsec, containers, regex-posix,
                   random-fu, rvar, random-extras,
                   transformers, mtl, random, directory,
-                  monadlist, primes, gtk, tostring, carl
+                  monadlist, primes, gtk, tostring, carl,
+                  process

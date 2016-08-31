@@ -93,7 +93,7 @@ pMAC :: Type -> ParseM MacExpr
 pMAC typ = pTypedMacExpr typ pTypedExpr (pBrackDocE pDOC) parserDict
 
 pDOC :: ParseM Doc
-pDOC = pDoc pTypedExpr pDOC
+pDOC = pDoc pTypedExpr pSTR pDOC
 
 parserDict :: ParserDict
 parserDict = ParserDict
