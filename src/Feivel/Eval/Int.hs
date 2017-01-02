@@ -138,7 +138,7 @@ instance (Eval Expr, Eval BoolExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr,
     PolyDegree u p -> do
       let polyDeg z = do
             q <- eval p >>= getVal
-            suchThat $ q `hasSameTypeAs` (constPoly z)
+            suchThat $ q `hasSameTypeAs` (typeFixPoly (VarString "") z)
             Nat n <- tryEvalM loc $ leadingDegreeBy mGLex q
             putVal loc n >>= getVal
       case u of
@@ -149,6 +149,6 @@ instance (Eval Expr, Eval BoolExpr, Eval ListExpr, Eval MatExpr, Eval TupleExpr,
         _ -> reportErr loc $ NumericTypeExpected u
 
     IntContent p -> do
-      q <- eval p >>= getVal :: EvalM (Poly Integer)
+      q <- eval p >>= getVal :: EvalM (Poly VarString Integer)
       c <- tryEvalM loc $ contentPoly q
       putVal loc c >>= getVal

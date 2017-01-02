@@ -36,18 +36,18 @@ pPolyLiteral typ pE = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pE
 pPolyConst :: Type -> (Type -> ParseM Expr) -> ParseM PolyExpr
 pPolyConst typ pC = fmap PolyExpr $ pAtLocus $ pPolyLiteralOf typ pC
 
-pMon :: ParseM (Monomial Variable)
+pMon :: ParseM (Monomial (Variable VarString))
 pMon = pIdMon <|> pMonomial
   where
-    pIdMon :: ParseM (Monomial Variable)
+    pIdMon :: ParseM (Monomial (Variable VarString))
     pIdMon = (try $ char '1') >> return identity
 
-    pMonomial :: ParseM (Monomial Variable)
+    pMonomial :: ParseM (Monomial (Variable VarString))
     pMonomial = do
       ps <- sepBy1 pPower (try $ keyword ".")
       return $ makeMonomial ps
     
-    pPower :: ParseM (Variable, Natural)
+    pPower :: ParseM (Variable VarString, Natural)
     pPower = do
       x <- pVar
       k <- option 1 (try (keyword "^") >> pNatural)
@@ -61,12 +61,12 @@ pPolyLiteralOf typ p = do
   keyword ")"
   return (PolyConst (fromTerms ts) :# typ)
   where
-    pPolyTerm :: ParseM a -> ParseM (a, Monomial Variable)
+    pPolyTerm :: ParseM a -> ParseM (a, Monomial (Variable VarString))
     pPolyTerm q = do
       c <- q
       x <- option identity $ try (keyword ".") >> pMon
       return (c,x)
-    
+
 
 
 pPolyExpr :: (Type -> ParseM Expr) -> (Type -> ParseM Expr) -> ParserDict -> ParseM PolyExpr

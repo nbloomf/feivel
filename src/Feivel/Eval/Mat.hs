@@ -101,8 +101,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> makeIdMat zeroQQ
         BB          -> makeIdMat zeroBB
         ZZMod d     -> makeIdMat (zeroMod d)
-        PolyOver ZZ -> makeIdMat (constPoly zeroZZ)
-        PolyOver QQ -> makeIdMat (constPoly zeroQQ)
+        PolyOver ZZ -> makeIdMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> makeIdMat (typeFixPoly (VarString "") zeroQQ)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatSwapE n h k -> do
@@ -112,8 +112,8 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> makeSwapMat zeroQQ
         BB          -> makeSwapMat zeroBB
         ZZMod d     -> makeSwapMat (zeroMod d)
-        PolyOver ZZ -> makeSwapMat (constPoly zeroZZ)
-        PolyOver QQ -> makeSwapMat (constPoly zeroQQ)
+        PolyOver ZZ -> makeSwapMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> makeSwapMat (typeFixPoly (VarString "") zeroQQ)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatScaleE n h r -> do
@@ -123,9 +123,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> makeScaleMat zeroQQ
         BB          -> makeScaleMat zeroBB
         ZZMod d     -> makeScaleMat (zeroMod d)
-        PolyOver ZZ -> makeScaleMat (constPoly zeroZZ)
-        PolyOver QQ -> makeScaleMat (constPoly zeroQQ)
-        PolyOver BB -> makeScaleMat (constPoly zeroBB)
+        PolyOver ZZ -> makeScaleMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> makeScaleMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> makeScaleMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatAddE n h k r -> do
@@ -135,9 +135,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> makeAddMat zeroQQ
         BB          -> makeAddMat zeroBB
         ZZMod d     -> makeAddMat (zeroMod d)
-        PolyOver ZZ -> makeAddMat (constPoly zeroZZ)
-        PolyOver QQ -> makeAddMat (constPoly zeroQQ)
-        PolyOver BB -> makeAddMat (constPoly zeroBB)
+        PolyOver ZZ -> makeAddMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> makeAddMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> makeAddMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatShuffleRows m -> do
@@ -173,9 +173,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> addMat zeroQQ
         BB          -> addMat zeroBB
         ZZMod n     -> addMat (zeroMod n)
-        PolyOver ZZ -> addMat (constPoly zeroZZ)
-        PolyOver QQ -> addMat (constPoly zeroQQ)
-        PolyOver BB -> addMat (constPoly zeroBB)
+        PolyOver ZZ -> addMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> addMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> addMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatNeg a -> do
@@ -185,9 +185,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> negMat zeroQQ
         BB          -> negMat zeroBB
         ZZMod n     -> negMat (zeroMod n)
-        PolyOver ZZ -> negMat (constPoly zeroZZ)
-        PolyOver QQ -> negMat (constPoly zeroQQ)
-        PolyOver BB -> negMat (constPoly zeroBB)
+        PolyOver ZZ -> negMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> negMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> negMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatTrans a -> do
@@ -202,9 +202,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> mulMat zeroQQ
         BB          -> mulMat zeroBB
         (ZZMod n)   -> mulMat (zeroMod n)
-        PolyOver ZZ -> mulMat (constPoly zeroZZ)
-        PolyOver QQ -> mulMat (constPoly zeroQQ)
-        PolyOver BB -> mulMat (constPoly zeroBB)
+        PolyOver ZZ -> mulMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> mulMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> mulMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatPow m n -> do
@@ -214,9 +214,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> powMat zeroQQ
         BB          -> powMat zeroBB
         (ZZMod k)   -> powMat (zeroMod k)
-        PolyOver ZZ -> powMat (constPoly zeroZZ)
-        PolyOver QQ -> powMat (constPoly zeroQQ)
-        PolyOver BB -> powMat (constPoly zeroBB)
+        PolyOver ZZ -> powMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> powMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> powMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatSwapRows m a b -> do
@@ -240,9 +240,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> scaleRowMat zeroQQ
         BB          -> scaleRowMat zeroBB
         (ZZMod n)   -> scaleRowMat (zeroMod n)
-        PolyOver ZZ -> scaleRowMat (constPoly zeroZZ)
-        PolyOver QQ -> scaleRowMat (constPoly zeroQQ)
-        PolyOver BB -> scaleRowMat (constPoly zeroBB)
+        PolyOver ZZ -> scaleRowMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> scaleRowMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> scaleRowMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatScaleCol m a h -> do
@@ -252,9 +252,9 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval TupleExpr)
         QQ          -> scaleColMat zeroQQ
         BB          -> scaleColMat zeroBB
         (ZZMod n)   -> scaleColMat (zeroMod n)
-        PolyOver ZZ -> scaleColMat (constPoly zeroZZ)
-        PolyOver QQ -> scaleColMat (constPoly zeroQQ)
-        PolyOver BB -> scaleColMat (constPoly zeroBB)
+        PolyOver ZZ -> scaleColMat (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> scaleColMat (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> scaleColMat (typeFixPoly (VarString "") zeroBB)
         _           -> reportErr loc $ NumericTypeExpected typ
 
     MatAddRow m a h k -> do

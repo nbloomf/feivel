@@ -34,7 +34,7 @@ import Feivel.Error
 import Feivel.Store
 import Carl.String (Format(..), Text(..))
 import Carl.Data.Rat (Rat((:/:)))
-import Carl.Struct.Polynomial (Variable(..))
+import Carl.Struct.Polynomial (Variable(..), VarString(..))
 
 import Text.Parsec.Prim
   (ParsecT, runParserT, try, (<|>), (<?>), many, getPosition)
@@ -138,8 +138,8 @@ pPath = many1 $ oneOf allowed
 pPaths :: ParseM [FilePath]
 pPaths = sepBy1 pPath spaces
 
-pVar :: ParseM Variable
-pVar = fmap Var $ many1 $ oneOf allowed
+pVar :: ParseM (Variable VarString)
+pVar = fmap (Var . VarString) $ many1 $ oneOf allowed
   where
     allowed =
       "abcdefghijklmnopqrstuvwxyz" ++

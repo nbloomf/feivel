@@ -250,7 +250,7 @@ instance Typed Bool     where typeOf _              = BB
 instance Typed Rat      where typeOf _              = QQ
 instance Typed ZZModulo where typeOf (ZZModulo _ n) = ZZMod n
 
-instance (Typed a) => Typed (Poly a) where
+instance (Typed a) => Typed (Poly VarString a) where
   typeOf x = case getCoefficients x of
     (c:_) -> PolyOver (typeOf c)
     []    -> PolyOver XX

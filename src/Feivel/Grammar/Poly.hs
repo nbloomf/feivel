@@ -22,7 +22,7 @@ import Feivel.Grammar.Util
 
 
 data PolyExprLeaf a bool int list mat poly tup
-  = PolyConst (Poly a)
+  = PolyConst (Poly VarString a)
   | PolyVar   Key
 
   | PolyMacro [(Type, Key, a)] a -- MacTo (PolyOver typ)
@@ -44,7 +44,7 @@ data PolyExprLeaf a bool int list mat poly tup
 
   | PolySum list
 
-  | PolyFromRoots Variable list
-  | PolyFromCoefs Variable list
-  | PolyEvalPoly  poly [(Variable, poly)]
+  | PolyFromRoots (Variable VarString) list
+  | PolyFromCoefs (Variable VarString) list
+  | PolyEvalPoly  poly [(Variable VarString, poly)]
   deriving (Eq, Show)

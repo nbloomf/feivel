@@ -200,7 +200,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval MatExpr, Eval TupleExpr) 
             putTypeVal typ loc ys >>= getVal
       case typ of
         ZZ          -> findBez zeroZZ
-        PolyOver QQ -> findBez (constPoly zeroQQ)
+        PolyOver QQ -> findBez (typeFixPoly (VarString "") zeroQQ)
         _ -> error "ListBezouts"
 
     ListPivotColIndices m -> do

@@ -1,5 +1,5 @@
 {---------------------------------------------------------------------}
-{- Copyright 2015 Nathan Bloomfield                                  -}
+{- Copyright 2015, 2016 Nathan Bloomfield                            -}
 {-                                                                   -}
 {- This file is part of Feivel.                                      -}
 {-                                                                   -}
@@ -19,7 +19,7 @@
 module Feivel.Grammar.Util (
   module Feivel.Grammar.Type,
   module Feivel.Store,
-  Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format
+  Text(..), Perm, Rat(..), ZZModulo, Poly, Variable, Matrix, Format, VarString
 ) where
 
 import Feivel.Grammar.Type
@@ -28,5 +28,5 @@ import Carl.String (Text(..), Format)
 import Carl.Struct.Permutation (Perm)
 import Carl.Data.Rat (Rat(..))
 import Carl.Data.ZZMod (ZZModulo)
-import Carl.Struct.Polynomial (Poly, Variable)
+import Carl.Struct.Polynomial (Poly, Variable, VarString)
 import Carl.Struct.Matrix (Matrix)

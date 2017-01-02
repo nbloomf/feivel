@@ -175,12 +175,12 @@ instance (Get a) => Get (Matrix a) where
           v -> Left $ GetTypeMismatch
                  { typeExpected = MatOf XX, typeReceived = typeOf v }
 
-instance (Get a) => Get (Poly a) where
+instance (Get a) => Get (Poly VarString a) where
   get expr = do
     x <- getPoly expr
     polySeq $ mapCoef get x
     where
-      getPoly :: Expr -> Either GetErr (Poly Expr)
+      getPoly :: Expr -> Either GetErr (Poly VarString Expr)
       getPoly w = do
         case w of
           PolyE (PolyExpr (PolyConst m :# _ :@ _)) -> return m

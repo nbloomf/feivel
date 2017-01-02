@@ -126,7 +126,7 @@ instance (Put a, Typed a) => Put (Tuple a) where
       typ = TupleOf $ map typeOf xs
 
 
-instance (Put a, Typed a) => Put (Poly a) where
+instance (Put a, Typed a) => Put (Poly VarString a) where
   put loc x = PolyE $ PolyExpr $ PolyConst (mapCoef (put loc) x) :# typ :@ loc
     where
       typ = case getCoefficients x of

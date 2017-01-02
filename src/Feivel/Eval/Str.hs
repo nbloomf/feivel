@@ -95,10 +95,10 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr, Eval ListExpr, Eval MatExpr, E
           x <- eval e >>= getVal :: EvalM (Matrix Rat)
           putVal loc (Text $ latex x) >>= getVal
         PolyOver ZZ -> do
-          x <- eval e >>= getVal :: EvalM (Poly Integer)
+          x <- eval e >>= getVal :: EvalM (Poly VarString Integer)
           putVal loc (Text $ latex x) >>= getVal
         PolyOver QQ -> do
-          x <- eval e >>= getVal :: EvalM (Poly Rat)
+          x <- eval e >>= getVal :: EvalM (Poly VarString Rat)
           putVal loc (Text $ latex x) >>= getVal
         _ -> error "StrFormat LaTeX"
 

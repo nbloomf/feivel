@@ -62,43 +62,43 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
       putTypeVal typ loc r >>= getVal
   
     PolyAdd a b -> do
-      let addPoly x = lift2 loc a b (rAddT (constPoly x))
+      let addPoly x = lift2 loc a b (rAddT (typeFixPoly (VarString "") x))
       case typ of
         ZZ          -> addPoly zeroZZ
         QQ          -> addPoly zeroQQ
         BB          -> addPoly zeroBB
         (ZZMod n)   -> addPoly (zeroMod n)
-        PolyOver ZZ -> addPoly (constPoly zeroZZ)
-        PolyOver QQ -> addPoly (constPoly zeroQQ)
-        PolyOver BB -> addPoly (constPoly zeroBB)
+        PolyOver ZZ -> addPoly (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> addPoly (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> addPoly (typeFixPoly (VarString "") zeroBB)
         _ -> reportErr loc $ NumericTypeExpected typ
   
     PolySub a b -> do
-      let subPoly x = lift2 loc a b (rSubT (constPoly x))
+      let subPoly x = lift2 loc a b (rSubT (typeFixPoly (VarString "") x))
       case typ of
         ZZ          -> subPoly zeroZZ
         QQ          -> subPoly zeroQQ
         BB          -> subPoly zeroBB
         (ZZMod n)   -> subPoly (zeroMod n)
-        PolyOver ZZ -> subPoly (constPoly zeroZZ)
-        PolyOver QQ -> subPoly (constPoly zeroQQ)
-        PolyOver BB -> subPoly (constPoly zeroBB)
+        PolyOver ZZ -> subPoly (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> subPoly (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> subPoly (typeFixPoly (VarString "") zeroBB)
         _ -> reportErr loc $ NumericTypeExpected typ
   
     PolyMul a b -> do
-      let mulPoly x = lift2 loc a b (rMulT (constPoly x))
+      let mulPoly x = lift2 loc a b (rMulT (typeFixPoly (VarString "") x))
       case typ of
         ZZ          -> mulPoly zeroZZ
         QQ          -> mulPoly zeroQQ
         BB          -> mulPoly zeroBB
         (ZZMod n)   -> mulPoly (zeroMod n)
-        PolyOver ZZ -> mulPoly (constPoly zeroZZ)
-        PolyOver QQ -> mulPoly (constPoly zeroQQ)
-        PolyOver BB -> mulPoly (constPoly zeroBB)
+        PolyOver ZZ -> mulPoly (typeFixPoly (VarString "") zeroZZ)
+        PolyOver QQ -> mulPoly (typeFixPoly (VarString "") zeroQQ)
+        PolyOver BB -> mulPoly (typeFixPoly (VarString "") zeroBB)
         _ -> reportErr loc $ NumericTypeExpected typ
 
     PolyQuo a b -> do
-      let quoPoly x = lift2 loc a b (rQuoT (constPoly x))
+      let quoPoly x = lift2 loc a b (rQuoT (typeFixPoly (VarString "") x))
       case typ of
         ZZ      -> quoPoly zeroZZ
         QQ      -> quoPoly zeroQQ
@@ -107,7 +107,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
         _ -> reportErr loc $ NumericTypeExpected typ
   
     PolyRem a b -> do
-      let remPoly x = lift2 loc a b (rRemT (constPoly x))
+      let remPoly x = lift2 loc a b (rRemT (typeFixPoly (VarString "") x))
       case typ of
         ZZ      -> remPoly zeroZZ
         QQ      -> remPoly zeroQQ
@@ -116,7 +116,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
         _ -> reportErr loc $ NumericTypeExpected typ
 
     PolySum ps -> do
-      let sumPolys x = lift1 loc ps (rSumT (constPoly x))
+      let sumPolys x = lift1 loc ps (rSumT (typeFixPoly (VarString "") x))
       case typ of
         ZZ      -> sumPolys zeroZZ
         QQ      -> sumPolys zeroQQ
@@ -125,7 +125,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
         _ -> reportErr loc $ NumericTypeExpected typ
   
     PolyNeg a -> do
-      let negPoly x = lift1 loc a (rNegT (constPoly x))
+      let negPoly x = lift1 loc a (rNegT (typeFixPoly (VarString "") x))
       case typ of
         ZZ      -> negPoly zeroZZ
         QQ      -> negPoly zeroQQ
@@ -134,7 +134,7 @@ instance (Eval Expr, Eval BoolExpr, Eval IntExpr,
         _ -> reportErr loc $ NumericPolynomialExpected typ
   
     PolyPow a b -> do
-      let powPoly x = lift2 loc a b (rPowT (constPoly x))
+      let powPoly x = lift2 loc a b (rPowT (typeFixPoly (VarString "") x))
       case typ of
         ZZ      -> powPoly zeroZZ
         QQ      -> powPoly zeroQQ
